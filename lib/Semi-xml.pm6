@@ -6,6 +6,8 @@ class Semi-xml:ver<0.1.0> {
 
   method parse ( :$content ) {
 
+    say "P: ", ::{'$layout'}, ', ', self.^attributes.join(';');
+
     my Semi-xml::Actions $actions .= new();
     Semi-xml::Grammar.parse( $content, :actions($actions));
 #    Semi-xml::Grammar.subparse( $content, :actions($actions));

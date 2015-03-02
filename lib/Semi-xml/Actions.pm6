@@ -1,21 +1,21 @@
 use v6;
 
 class Semi-xml::Actions {
-  has Str $tag;
+  my Str $tag;
 #  has Int $.table-count = 0;
 
   method tag ( $match ) {
-    $tag = 'xml';
-    my $x = '$tag';
-    say "X: ", ::{$x};
-    say MY::{~$match}, ::{~$match};
+
+#    my $html = 'html-2';
+#    say "X: ", ::{~$match}, ', ';
     print ~$match;
 
     $tag = Str;
-    if MY::{~$match} {
-      $tag = MY::{~$match};
+    if ::{~$match} {
+      $tag = ::{~$match};
     }
-    
+
+#`{{    
     elsif CALLER::{~$match} {
       $tag = CALLER::{~$match};
     }
@@ -27,12 +27,21 @@ class Semi-xml::Actions {
     elsif DYNAMIC::{~$match} {
       $tag = DYNAMIC::{~$match};
     }
-    
+}}
+
     else {
       $tag = ~$match;
       $tag ~~ s/\$//;
     }
 
     say " -> $tag";
+  }
+
+  method attr-key ( $match ) {
+    say "attr key $match";
+  }
+
+  method attr-value ( $match ) {
+    say "attr value $match";
   }
 }
