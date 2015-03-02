@@ -23,7 +23,7 @@ I'm a lazy bum, so writing xml is too exhousting. instead of writing;
 ```
 (9 lines, 23 words, 194 characters)
 
-I want to do the following
+I want to do something like the following
 
 ```
 $html [
@@ -38,8 +38,8 @@ $html [
 ```
 (9 lines, 29 words, 161 characters)
 
-This second look much more airy and more easy to read. There are also some other
-advantages using it this way.
+This second form looks much more airy and better to read. There are also some
+other advantages using it this way.
 
 * You don't need to write the endtag. Less characters typed and still indenting.
 * By using the $ on the tag name the parser code can try to lookup a scalar
@@ -48,3 +48,13 @@ advantages using it this way.
   * Callable - Call a method/sub to return data to be placed on that spot.
 * Nesting is easy using the brackets.
 * Attribute values do not need quoting when there are no spaces in the value.
+* The parser calls methods from the action object to handle all tags and
+  attributes. Hooks can be inserted to handle special items e.g.
+  * Html needs stylesheets in another format than xml. These can be introduced
+    by using a hash.
+  * Some html tags need other processing than the default handling and must
+    be configured before parsing. E.g.
+    * script tags must always have a start and ending tag
+    * the content of a pre tag must be left as-is.
+
+
