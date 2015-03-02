@@ -36,25 +36,42 @@ $html [
   ]
 ]
 ```
-(9 lines, 29 words, 161 characters)
+(9 lines, 29 words, 161 characters. Less characters typed and still indenting.)
 
 This second form looks much more airy and better to read. There are also some
 other advantages using it this way.
 
-* You don't need to write the endtag. Less characters typed and still indenting.
+* You don't need to write the endtag.
+* Nesting is easy using the brackets.
+* Attribute values do not need quoting when there are no spaces in the value.
 * By using the $ on the tag name the parser code can try to lookup a scalar
   variable. When it exists it can do something with it depending on the type.
   * Str - Substitute the strings value
   * Callable - Call a method/sub to return data to be placed on that spot.
-* Nesting is easy using the brackets.
-* Attribute values do not need quoting when there are no spaces in the value.
 * The parser calls methods from the action object to handle all tags and
   attributes. Hooks can be inserted to handle special items e.g.
   * Html needs stylesheets in another format than xml. These can be introduced
     by using a hash.
   * Some html tags need other processing than the default handling and must
     be configured before parsing. E.g.
-    * script tags must always have a start and ending tag
+    * script tags must always have a start and end tag
     * the content of a pre tag must be left as-is.
+
+## Bugs
+
+Still at omega state, bugs come and go(hopefully).
+
+## Changes
+
+* 0.1.0
+  * Start thinking. Always do that before doing.
+
+## Aurhor
+
+Marcel.Timmerman
+
+## License
+
+Released under [Artistic License 2.0](http://www.perlfoundation.org/artistic_license_2_0).
 
 
