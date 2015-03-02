@@ -57,6 +57,11 @@ other advantages using it this way.
     * script tags must always have a start and end tag
     * the content of a pre tag must be left as-is.
 
+## Ideas
+
+* Parser will be a class. Styles can be templated and added in the form of a
+  role.
+
 ## Bugs
 
 Still at omega state, bugs come and go(hopefully).
