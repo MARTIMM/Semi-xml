@@ -4,11 +4,13 @@ use Semi-xml::Actions;
 
 class Semi-xml:ver<0.1.0> {
 
+  has Semi-xml::Actions $actions = Semi-xml::Actions.new();
+    
   method parse ( :$content ) {
 
     my Hash $styles;
     my Hash $configuration;
-    
+
     # Get user introduced attribute information
     #
     for self.^attributes -> $class-attr {
@@ -26,8 +28,12 @@ class Semi-xml:ver<0.1.0> {
 
 #say "P: ", $styles, ', ', $configuration;
 
-    my Semi-xml::Actions $actions .= new();
+#    my Semi-xml::Actions $actions .= new();
     Semi-xml::Grammar.parse( $content, :actions($actions));
 #    Semi-xml::Grammar.subparse( $content, :actions($actions));
+  }
+
+  method Str () {
+    return ~$actions.xml-document;
   }
 }

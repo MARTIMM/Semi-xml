@@ -5,10 +5,13 @@ use Test;
 use Semi-xml;
 
 #-------------------------------------------------------------------------------
+# Setup
 #
 my Semi-xml $x .= new;
 isa_ok $x, 'Semi-xml', $x.^name;
 
+# Def=vise a role to add
+#
 my $html = 'xml-1';
 role pink {
   has Hash $!styles = { '.green' => { color => '#00aa0f' }};
@@ -21,11 +24,13 @@ role pink {
                              };
 }
 
+# Add the role to the parser
+#
 $x does pink;
-isa_ok $x, 'Semi-xml', $x.^name;
+is $x.^name, 'Semi-xml+{pink}', $x.^name;
 
-say "M: \$x: ", $x.^methods;
-
+# Setup the text to parse
+#
 my Str $sx-text = q:to/EOSX/;
 $html [
   $head [
@@ -39,32 +44,20 @@ $html [
 ]
 EOSX
 
+# And parse it
+#
 $x.parse(content => $sx-text);
 
+# See the result
+#
+my $xml-text = $x.Str;
+ok $xml-text ~~ /\<html\>/, 'Top level html found';
+ok $xml-text ~~ /\<head\>/, 'Head found';
+ok $xml-text ~~ /\<body\>/, 'Body found';
+ok $xml-text ~~ /\<br\/\>/, 'Empty tag br found';
 
 
-
-
-
-
-
-
-
-my Str $sx-text1 = q:to/EOSX/;
-$html [
-  $head [
-    $title [ Title of page ]
-  ]
-  $body [
-    $h1 [ Introduction ]
-    $p class=green [ Piece of text. See $a href=google.com [google]]
-  ]
-]
-EOSX
-
-
-
-
+say $xml-text;
 
 
 

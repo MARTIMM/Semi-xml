@@ -1,25 +1,31 @@
 use v6;
+use XML;
 
 class Semi-xml::Actions {
+  has XML::Document $.xml-document;
+  my Array $element-stack;
+  my Int $current-element-idx;
+
   my Str $tag;
   my Str $attr-txt;
-#  my Hash $attrs;
+  my Hash $attrs;
   my Str $attr-key;
 
   method tag-name ( $match ) {
 
-say "||$match||";
-#!!!!!!!!!!! Variables must stored per level of nesting!!!!!!!!!!!!!!!!
+    # Initialize on start of a new tag. Everything of any previous tag is
+    # handled and stored.
+    #
     $tag = Str;
     $attr-txt = Str;
     $attr-key = Str;
+    $attrs = {};
 
-#    $attrs = {};
     if ::{~$match} {
       $tag = ::{~$match};
     }
 
-#`{{    
+#`{{
     elsif CALLER::{~$match} {
       $tag = CALLER::{~$match};
     }
@@ -37,41 +43,67 @@ say "||$match||";
       $tag = ~$match;
       $tag ~~ s/\$//;
     }
-
 #say " -> $tag";
   }
 
   method attr-key ( $match ) {
-say "attr key $match";
     $attr-key = ~$match;
   }
 
   method attr-value ( $match ) {
-say "attr value $match";
-#    $attrs = {$attr => ~$match};
-
-    $attr-txt ~= "$attr-key='$match' ";
+    $attrs = {$attr-key => ~$match};
   }
 
-  method body-contents ( $match ) {
-    my Str $tag-txt = '';
-    my $tagname = $tag;
-    $tagname ~~ s/\s.*$$//;
+  # Before the body starts, save the tag name and create the element with
+  # its attributes.
+  #
+  method body-start ( $match ) {
+    my $tag-name = $tag;
+    $tag-name ~~ s/\s.*$$//;
 
-    $tag-txt = $tagname;
+    # Test if index is defined.
+    #
+    if $current-element-idx.defined {
+      my $child-element = XML::Element.new( :name($tag-name),
+                                            :attribs($attrs)
+                                          );
+      $element-stack[$current-element-idx].append($child-element);
+      $element-stack[$current-element-idx + 1] = $child-element;
 
-    if ?$attr-txt {
-      $attr-txt ~~ s/\s+$$//;
-      $tag-txt ~= " $attr-txt";
+      # Point to the next level in case there is another tag found in the 
+      # current body. This element must become the child element of the
+      # current one.
+      #
+      $current-element-idx++;
     }
 
-say "\n-----\nBody:\n$match\n-----";
-    if ~$match ~~ m/^^\s*$$/ {
-say "<$tag-txt />";
-    }
+    else
+    {
+      # First element is a root element
+      #
+      $current-element-idx = 0;
+      $element-stack[$current-element-idx] = 
+          XML::Element.new( :name($tag-name),
+                            :attribs($attrs)
+                          );
 
-    else {
-say "<$tag-txt>$match\</$tagname>";
+      $!xml-document .= new($element-stack[$current-element-idx]);
     }
+  }
+
+  method body-end ( $match ) {
+    # Go back one level .New child tags will overwrite the previous child
+    # on the stack as those are needed anymore.
+    #
+    $current-element-idx--;
+  }
+
+  method body-text ( $match ) {
+    # Only add textual items. Empty lines are skipped.
+    # Must be tested when there are tags for which content must be kept
+    # exactly as is.
+    #
+    $element-stack[$current-element-idx].append(XML::Text.new(:text(~$match)))
+        unless ~$match ~~ m/^^\s*$$/;
   }
 }
