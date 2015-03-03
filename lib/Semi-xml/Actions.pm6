@@ -2,15 +2,19 @@ use v6;
 
 class Semi-xml::Actions {
   my Str $tag;
-#  has Int $.table-count = 0;
+  my Str $attr-txt;
+#  my Hash $attrs;
+  my Str $attr-key;
 
-  method tag ( $match ) {
+  method tag-name ( $match ) {
 
-#    my $html = 'html-2';
-#    say "X: ", ::{~$match}, ', ';
-    print ~$match;
-
+say "||$match||";
+#!!!!!!!!!!! Variables must stored per level of nesting!!!!!!!!!!!!!!!!
     $tag = Str;
+    $attr-txt = Str;
+    $attr-key = Str;
+
+#    $attrs = {};
     if ::{~$match} {
       $tag = ::{~$match};
     }
@@ -34,14 +38,40 @@ class Semi-xml::Actions {
       $tag ~~ s/\$//;
     }
 
-    say " -> $tag";
+#say " -> $tag";
   }
 
   method attr-key ( $match ) {
-    say "attr key $match";
+say "attr key $match";
+    $attr-key = ~$match;
   }
 
   method attr-value ( $match ) {
-    say "attr value $match";
+say "attr value $match";
+#    $attrs = {$attr => ~$match};
+
+    $attr-txt ~= "$attr-key='$match' ";
+  }
+
+  method body-contents ( $match ) {
+    my Str $tag-txt = '';
+    my $tagname = $tag;
+    $tagname ~~ s/\s.*$$//;
+
+    $tag-txt = $tagname;
+
+    if ?$attr-txt {
+      $attr-txt ~~ s/\s+$$//;
+      $tag-txt ~= " $attr-txt";
+    }
+
+say "\n-----\nBody:\n$match\n-----";
+    if ~$match ~~ m/^^\s*$$/ {
+say "<$tag-txt />";
+    }
+
+    else {
+say "<$tag-txt>$match\</$tagname>";
+    }
   }
 }

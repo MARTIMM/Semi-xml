@@ -11,8 +11,14 @@ isa_ok $x, 'Semi-xml', $x.^name;
 
 my $html = 'xml-1';
 role pink {
-  has Hash $layout = { '$html' => 'xml' };
-  has Hash $layout2 = { '$html' => 'xml' };
+  has Hash $!styles = { '.green' => { color => '#00aa0f' }};
+  has Hash $!configuration = { doctype =>
+                               { doc-element => 'html',
+                                 system-location => '',
+                                 public-location => '', # one of the locations
+                                 internal-subset => []
+                               }
+                             };
 }
 
 $x does pink;
@@ -28,6 +34,7 @@ $html [
   $body [
     $h1 [ Introduction ]
     $p class=green [ Piece of text. See $a href=google.com [google]]
+    $br[]
   ]
 ]
 EOSX
