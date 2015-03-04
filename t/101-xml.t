@@ -21,8 +21,6 @@ $html [
 ]
 EOSX
 
-
-
 # Parse
 #
 my Semi-xml $x .= new;
@@ -34,6 +32,8 @@ ok $xml-text !~~ m/\<head\>/, 'Head not found';
 ok $xml-text ~~ ms/Data from file/, 'Section text found';
 
 say $xml-text;
+
+unlink $filename;
 
 #-------------------------------------------------------------------------------
 # Cleanup
