@@ -48,9 +48,12 @@ other advantages using it this way.
   being a scalar variable and handled as such replacing the tagname with some
   other text depending on the type of that variable.
   When it exists it can do something with it depending on the type.
-  * Undefined: Remove the $.
-  * Str: Substitute the strings value.
+  * Undefined: Remove the $, e.g.```$html -> html```
+  * Str: Substitute the strings value., e.g. if ```my Str $xtbl = 'table';```
+    then ```$xtbl -> table```.
   * Callable: Call a method/sub to return data to be placed on that spot.
+    The attributes will become the arguments to the function. The function must
+    return a name for the tag and new attributes if any.
 * The parser calls methods from the action object to handle all tags and
   attributes. Hooks can be inserted to handle special items e.g.
   * Html needs stylesheets in another format than xml. These can be introduced
@@ -76,6 +79,7 @@ Still at omega state, bugs come and go(hopefully).
   * Add prefix:<~>
   * Add comments and escape
   * Semi-xml now does Semi-xml::Actions. Brings data closer to Core class.
+  * Optionally generate xml prelude and/or doctype
 * 0.3.1 Handle escape characters
 * 0.3.0 Generate XML
 * 0.2.0 Grammar installed

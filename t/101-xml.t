@@ -37,9 +37,7 @@ unlink $filename;
 
 # Write xml out to file
 #
-say "F: $filename";
 $filename ~~ s/\.sxml/.xml/;
-say "F: $filename";
 $x.save(:$filename);
 ok $filename.IO ~~ :e, "File written";
 

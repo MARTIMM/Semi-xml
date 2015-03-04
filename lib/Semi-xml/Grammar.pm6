@@ -18,7 +18,8 @@ grammar Semi-xml::Grammar {
   token body-text { ( <-[\$\]\\]> || <body-esc> )+ }
   token body-esc { '\$' || '\[' || '\]' || '\\' }
 
-  token attribute { \s+ <attr-key> '=' <attr-value> }
+  token attribute { \s+ <attr-key> '=' <attr-value-spec> }
   token attr-key { <[A..Za..z\_]>  <[A..Za..z0..9\_\-]>* }
-  token attr-value { \' <-[\']>+ \' || \" <-[\"]>+ \" || <-[\s]>+ }
+  token attr-value-spec { \' <attr-value> \' || \" <attr-value> \" || <attr-value> }
+  token attr-value { <-[\s]>+ }
 }

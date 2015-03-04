@@ -13,13 +13,21 @@ isa_ok $x, 'Semi-xml', $x.^name;
 my $html = 'xml-1';
 role pink {
   has Hash $!styles = { '.green' => { color => '#00aa0f' }};
-  has Hash $!configuration = { doctype =>
-                               { doc-element => 'html',
-                                 system-location => '',
-                                 public-location => '', # one of the locations
-                                 internal-subset => []
-                               }
-                             };
+  has Hash $!configuration = {
+             options => {
+               doctype => {
+  #               doc-definition => '',
+  #               doc-elements => []
+                 show => 1,
+               },
+               xml-prelude => {
+                 show => 1,
+                 version => '1.0',
+                 encoding => 'UTF-8'
+               },
+               
+             }
+           };
 }
 
 # Add the role to the parser
@@ -49,6 +57,8 @@ $x.parse(content => $sx-text);
 # See the result
 #
 my Str $xml-text = ~$x;
+ok $xml-text ~~ ms/\<\?xml version\=\"1\.0\" encoding\=\"UTF\-8\"\?\>/;
+ok $xml-text ~~ ms/\<\!DOCTYPE html\>/;
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text ~~ m/\<head\>/, 'Head found';
 ok $xml-text ~~ m/\<body\>/, 'Body found';
