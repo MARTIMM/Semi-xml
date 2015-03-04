@@ -48,7 +48,7 @@ $x.parse(content => $sx-text);
 
 # See the result
 #
-my $xml-text = $x.Str;
+my Str $xml-text = ~$x;
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text ~~ m/\<head\>/, 'Head found';
 ok $xml-text ~~ m/\<body\>/, 'Body found';

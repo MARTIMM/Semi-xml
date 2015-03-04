@@ -2,6 +2,8 @@ use v6;
 use Semi-xml::Grammar;
 use Semi-xml::Actions;
 
+#our $actions = Semi-xml::Actions.new();
+
 class Semi-xml:ver<0.4.0> {
 
   has Semi-xml::Actions $actions = Semi-xml::Actions.new();
@@ -43,4 +45,9 @@ class Semi-xml:ver<0.4.0> {
   method Str () {
     return ~$actions.xml-document;
   }
+
+}
+
+multi sub prefix:<~>(Semi-xml $x) {
+  return ~$x.actions.xml-document;
 }

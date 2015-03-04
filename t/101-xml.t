@@ -26,7 +26,7 @@ EOSX
 my Semi-xml $x .= new;
 $x.parse-file(:file($filename));
 
-my $xml-text = $x.Str;
+my Str $xml-text = ~$x;
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text !~~ m/\<head\>/, 'Head not found';
 ok $xml-text ~~ ms/Data from file/, 'Section text found';

@@ -71,7 +71,9 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
-* 0.4.0 Parse file
+* 0.4.0
+  * Parse file
+  * Add prefix:<~>
 * 0.3.1 Handle escape characters
 * 0.3.0 Generate XML
 * 0.2.0 Grammar installed
