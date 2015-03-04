@@ -4,17 +4,23 @@ use Semi-xml::Actions;
 
 #our $actions = Semi-xml::Actions.new();
 
+#---------------------------------------------------------------------------
+#
 class Semi-xml:ver<0.4.0> {
 
   has Semi-xml::Actions $actions = Semi-xml::Actions.new();
 
-  method parse-file ( :$file ) {
-    if $file.IO ~~ :r {
-      my $text = slurp($file);
+  #-------------------------------------------------------------------------
+  #
+  method parse-file ( Str :$filename ) {
+    if $filename.IO ~~ :r {
+      my $text = slurp($filename);
       return self.parse( :content($text) );
     }
   }
 
+  #-------------------------------------------------------------------------
+  #
   method parse ( :$content ) {
 
     my Hash $styles;
@@ -42,12 +48,22 @@ class Semi-xml:ver<0.4.0> {
 #    Semi-xml::Grammar.subparse( $content, :actions($actions));
   }
 
-  method Str () {
+  #-------------------------------------------------------------------------
+  #
+  method Str ( --> Str ) {
     return ~$actions.xml-document;
   }
 
+  #-------------------------------------------------------------------------
+  #
+  method save ( Str :$filename ) {
+    $actions.xml-document.save($filename);
+  }
 }
 
-multi sub prefix:<~>(Semi-xml $x) {
+#---------------------------------------------------------------------------
+#
+multi sub prefix:<~>( Semi-xml $x --> Str ) {
   return ~$x.actions.xml-document;
 }
+

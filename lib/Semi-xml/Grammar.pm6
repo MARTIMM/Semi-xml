@@ -2,13 +2,15 @@ use v6;
 #use Grammar::Tracer;
 
 grammar Semi-xml::Grammar {
+#  token TOP { <ws> <document> <ws> }
+#  token document { <ws> <tag> <ws> <tag-body> <ws> }
   rule TOP { <document> }
   rule document { <tag> <tag-body> }
 
   token tag { <tag-name> <attribute>* }
   token tag-name { '$' <ident> }
 
-  token tag-body { <body-start> ~ <body-end> <body-contents> }
+  rule tag-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
   token body-end { ']' }
 
