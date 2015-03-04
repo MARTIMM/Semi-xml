@@ -2,7 +2,7 @@ use v6;
 use Semi-xml::Grammar;
 use Semi-xml::Actions;
 
-class Semi-xml:ver<0.1.0> {
+class Semi-xml:ver<0.3.1> {
 
   has Semi-xml::Actions $actions = Semi-xml::Actions.new();
     

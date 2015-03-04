@@ -1,0 +1,15 @@
+{
+    "author": "Marcel Timmerman",
+    "depends": [
+        "XML"
+    ],
+    "description": "Lazy Bum Xml",
+    "name": "Semi-xml",
+    "provides": {
+        "Semi-xml": "lib/Semi-xml.pm6",
+        "Semi-xml::Grammar": "lib/Semi-xml/Grammar.pm6",
+        "Semi-xml::Actions": "lib/Semi-xml/Actions.pm6",
+    },
+    "source-url": "git://github.com/MARTIMM/Semi-xml.git",
+    "version": "0.3.1"
+}

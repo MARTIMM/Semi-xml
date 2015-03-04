@@ -68,8 +68,10 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
-* 0.1.0
-  * Start thinking. Always do that before doing.
+* 0.3.1 Handle escape characters
+* 0.3.0 Generate XML
+* 0.2.0 Grammar installed
+* 0.1.0 Start thinking. Always do that before doing.
 
 ## Aurhor
 
