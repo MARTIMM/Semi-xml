@@ -1,7 +1,7 @@
 use v6;
 use XML;
 
-class Semi-xml::Actions {
+role Semi-xml::Actions {
   has XML::Document $.xml-document;
   my Array $element-stack;
   my Int $current-element-idx;

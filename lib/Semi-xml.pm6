@@ -2,13 +2,9 @@ use v6;
 use Semi-xml::Grammar;
 use Semi-xml::Actions;
 
-#our $actions = Semi-xml::Actions.new();
-
 #---------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.4.0> {
-
-  has Semi-xml::Actions $actions = Semi-xml::Actions.new();
+class Semi-xml:ver<0.4.0> does Semi-xml::Actions {
 
   #-------------------------------------------------------------------------
   #
@@ -46,27 +42,25 @@ class Semi-xml:ver<0.4.0> {
 
 #say "P: ", $styles, ', ', $configuration;
 
-#    my Semi-xml::Actions $actions .= new();
-    Semi-xml::Grammar.parse( $content, :actions($actions));
-#    Semi-xml::Grammar.subparse( $content, :actions($actions));
+    Semi-xml::Grammar.parse( $content, :actions(self));
   }
 
   #-------------------------------------------------------------------------
   #
   method Str ( --> Str ) {
-    return ~$actions.xml-document;
+    return ~$!xml-document;
   }
 
   #-------------------------------------------------------------------------
   #
   method save ( Str :$filename ) {
-    $actions.xml-document.save($filename);
+    $!xml-document.save($filename);
   }
 }
 
 #---------------------------------------------------------------------------
 #
 multi sub prefix:<~>( Semi-xml $x --> Str ) {
-  return ~$x.actions.xml-document;
+  return ~$x.xml-document;
 }
 
