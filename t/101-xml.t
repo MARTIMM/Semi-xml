@@ -10,19 +10,14 @@ my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
 $html [
   $body [                                       # Body
-    $h1 [ Data from file # h1 ]                 # outside h1
+    $h1 [ Data from file \# h1 ]                # outside h1
     $table [ data                               # table
       $tr [ trrr                                # trrr
-        $th[header # th ]                       # outside th
-        $td[data # td ]                         # outside td
+        $th[header \# th ]                      # outside th
+        $td[data \# td ]                        # outside td
       ]
     ]
   ]
-  
-  $t [ ghf
-  ]
-  
-  $t [ ghf ]
 ]
 EOSX
 
@@ -38,7 +33,7 @@ ok $xml-text ~~ ms/Data from file/, 'Section text found';
 
 say $xml-text;
 
-#unlink $filename;
+unlink $filename;
 
 # Write xml out to file
 #
@@ -48,7 +43,7 @@ say "F: $filename";
 $x.save(:$filename);
 ok $filename.IO ~~ :e, "File written";
 
-#unlink $filename;
+unlink $filename;
 
 #-------------------------------------------------------------------------------
 # Cleanup

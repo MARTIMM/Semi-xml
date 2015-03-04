@@ -21,10 +21,14 @@ class Semi-xml:ver<0.4.0> {
 
   #-------------------------------------------------------------------------
   #
-  method parse ( :$content ) {
+  method parse ( :$content is copy ) {
 
     my Hash $styles;
     my Hash $configuration;
+
+    # Remove comments
+    #
+    $content ~~ s:g/<-[\\]>\#.*?$$//;
 
     # Get user introduced attribute information
     #
@@ -38,7 +42,6 @@ class Semi-xml:ver<0.4.0> {
           $configuration = $class-attr.get_value(self);
         }
       }
-#say $class-attr.name, ', ', $class-attr.get_value(self).^name;
     }
 
 #say "P: ", $styles, ', ', $configuration;
