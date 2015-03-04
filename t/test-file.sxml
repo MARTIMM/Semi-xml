@@ -1,0 +1,11 @@
+$html [
+  $body [
+    $h1 [ Data from file ]
+    $table [
+      $tr [
+        $th[header]
+        $td[data]
+      ]
+    ]
+  ]
+]

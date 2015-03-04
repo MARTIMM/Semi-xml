@@ -1,5 +1,3 @@
-#!/usr/bin/env perl6
-#
 use v6;
 use Test;
 use Semi-xml;
@@ -51,10 +49,10 @@ $x.parse(content => $sx-text);
 # See the result
 #
 my $xml-text = $x.Str;
-ok $xml-text ~~ /\<html\>/, 'Top level html found';
-ok $xml-text ~~ /\<head\>/, 'Head found';
-ok $xml-text ~~ /\<body\>/, 'Body found';
-ok $xml-text ~~ /\<br\/\>/, 'Empty tag br found';
+ok $xml-text ~~ m/\<html\>/, 'Top level html found';
+ok $xml-text ~~ m/\<head\>/, 'Head found';
+ok $xml-text ~~ m/\<body\>/, 'Body found';
+ok $xml-text ~~ m/\<br\/\>/, 'Empty tag br found';
 
 
 say $xml-text;

@@ -2,10 +2,17 @@ use v6;
 use Semi-xml::Grammar;
 use Semi-xml::Actions;
 
-class Semi-xml:ver<0.3.1> {
+class Semi-xml:ver<0.4.0> {
 
   has Semi-xml::Actions $actions = Semi-xml::Actions.new();
-    
+
+  method parse-file ( :$file ) {
+    if $file.IO ~~ :r {
+      my $text = slurp($file);
+      return self.parse( :content($text) );
+    }
+  }
+
   method parse ( :$content ) {
 
     my Hash $styles;
