@@ -44,10 +44,13 @@ other advantages using it this way.
 * You don't need to write the endtag.
 * Nesting is easy using the brackets.
 * Attribute values do not need quoting when there are no spaces in the value.
-* By using the $ on the tag name the parser code can try to lookup a scalar
-  variable. When it exists it can do something with it depending on the type.
-  * Str - Substitute the strings value
-  * Callable - Call a method/sub to return data to be placed on that spot.
+* By using the $ as a start of the tag it can also be interpreted as 
+  being a scalar variable and handled as such replacing the tagname with some
+  other text depending on the type of that variable.
+  When it exists it can do something with it depending on the type.
+  * Undefined: Remove the $.
+  * Str: Substitute the strings value.
+  * Callable: Call a method/sub to return data to be placed on that spot.
 * The parser calls methods from the action object to handle all tags and
   attributes. Hooks can be inserted to handle special items e.g.
   * Html needs stylesheets in another format than xml. These can be introduced
