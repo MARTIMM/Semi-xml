@@ -3,7 +3,7 @@ use v6;
 
 grammar Semi-xml::Grammar {
   rule TOP { <document> }
-  token document { \s* <tag> \s* <tag-body> \s* }
+  rule document { <tag> <tag-body> }
 
   token tag { <tag-name> <attribute>* }
   token tag-name { '$' <ident> }
@@ -13,7 +13,8 @@ grammar Semi-xml::Grammar {
   token body-end { ']' }
 
   token body-contents { ( <body-text> || <document> )* }
-  token body-text { <-[\$\]]>+ }
+  token body-text { ( <-[\$\]\\]> || <body-esc> )+ }
+  token body-esc { '\$' || '\[' || '\]' || '\\' }
 
   token attribute { \s+ <attr-key> '=' <attr-value> }
   token attr-key { <[A..Za..z\_]>  <[A..Za..z0..9\_\-]>* }

@@ -34,11 +34,11 @@ is $x.^name, 'Semi-xml+{pink}', $x.^name;
 my Str $sx-text = q:to/EOSX/;
 $html [
   $head [
-    $title [ Title of page ]
+    $title [ Title of page \$ is used here ]
   ]
   $body [
     $h1 [ Introduction ]
-    $p class=green [ Piece of text. See $a href=google.com [google]]
+    $p class=green [ Piece of \[text\]. See $a href=google.com [google]]
     $br[]
   ]
 ]

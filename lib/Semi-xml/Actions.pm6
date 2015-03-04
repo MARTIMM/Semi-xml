@@ -103,7 +103,15 @@ class Semi-xml::Actions {
     # Must be tested when there are tags for which content must be kept
     # exactly as is.
     #
-    $element-stack[$current-element-idx].append(XML::Text.new(:text(~$match)))
-        unless ~$match ~~ m/^^\s*$$/;
+    unless ~$match ~~ m/^^\s*$$/ {
+      my $esc-text = ~$match;
+      $esc-text ~~ s:g/\\//;
+      my $xml = XML::Text.new(:text($esc-text));
+      $element-stack[$current-element-idx].append($xml);
+    }
   }
 }
+
+
+
+
