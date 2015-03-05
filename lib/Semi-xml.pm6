@@ -44,7 +44,7 @@ class Semi-xml:ver<0.5.0> does Semi-xml::Actions {
   #
   method parse ( :$content is copy ) {
 
-say "D: $defaults<output><filename>";
+#say "D: $defaults<output><filename>";
 
     # Remove comments
     #
@@ -80,7 +80,18 @@ say "D: $defaults<output><filename>";
 
   #-----------------------------------------------------------------------------
   #
-  method save ( Str :$filename ) {
+  method save ( Str :$filename is copy ) {
+    if !$filename.defined {
+      my $o = $!config<output>:exists ?? $!config<output>
+                                      !! $configuration<output>
+                                      ;
+      my $do = $defaults<output>;
+      $filename = $o<filename>:exists ?? $o<filename> !! $do<filename>;
+      my $fileext = $o<fileext>:exists ?? $o<fileext> !! $do<fileext>;
+
+      $filename ~= ".$fileext";
+    }
+    
     my $document = self.get-xml-text;
     spurt( $filename, $document);
   }

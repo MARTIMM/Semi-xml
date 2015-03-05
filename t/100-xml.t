@@ -16,7 +16,6 @@ isa_ok $x, 'Semi-xml', $x.^name;
 
 # Def=vise a role to add
 #
-my $html = 'xml-1';
 role pink {
   has Hash $!configuration = {
              options => {

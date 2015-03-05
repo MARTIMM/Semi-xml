@@ -19,7 +19,7 @@ options/xml-prelude/show:               1;              # Default 0
 options/xml-prelude/version:            1.1;            # Default 1.0
 options/xml-prelude/encoding:           UTF-8;          # Default UTF-8
 
-output/filename:                        ../some-file    # Default current file
+output/filename:                        t/some-file;    # Default current file
 output/fileext:                         html;           # Default xml
 ---
 $html [
@@ -46,17 +46,44 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
 
-say $xml-text;
+#say $xml-text;
 
 unlink $filename;
 
-# Write xml out to file
+# Write xml out to file. Filename explicitly set.
 #
 $filename ~~ s/\.sxml/.xml/;
 $x.save(:$filename);
-ok $filename.IO ~~ :e, "File written";
+ok $filename.IO ~~ :e, "File $filename written";
 
 unlink $filename;
+
+$filename = 't/some-file.html';
+$x.save;
+ok $filename.IO ~~ :e, "File $filename written";
+
+unlink $filename;
+
+role pink {
+  has Hash $!configuration = {
+    output => {
+      filename => 't/another',
+      fileext => 'html'
+    }
+  };
+}
+
+$x does pink;
+
+$filename = 't/another.html';
+$x.save;
+ok $filename.IO ~~ :!e, "File $filename not written";
+
+$filename = 't/some-file.html';
+ok $filename.IO ~~ :e, "File $filename written instead";
+
+unlink $filename;
+
 
 #-------------------------------------------------------------------------------
 # Cleanup
