@@ -48,7 +48,7 @@ $html [
     $title [ Title of page \$ is used here ]
   ]
   $body [
-    $h1 [ Introduction ]
+    $h1 class=green id=h1001 [ Introduction ]
     $p class=green [ Piece of \[text\]. See $a href=google.com [google]]
     $br[]
   ]

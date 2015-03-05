@@ -4,14 +4,16 @@ use Semi-xml;
 
 #-------------------------------------------------------------------------------
 # Setup
-# Write file
+# Write file with config prelude
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
+#!bin/sxml2xml.pl6
+#
 -p-
 options/doctype/show:                   1;
 options/xml-prelude/show:               1;
-options/xml-prelude/version:            1.0;
+options/xml-prelude/version:            1.1;
 options/xml-prelude/encoding:           UTF-8;
 ---
 $html [
