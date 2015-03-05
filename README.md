@@ -68,9 +68,7 @@ other advantages using it this way.
 * Parser will be a class. Styles can be templated and added in the form of a
   role.
 * What must the file extention be.
-* Control info with the document. Then it is possible to generate xml by
-  running the document. Then it is also possible to have the document be used
-  like a serverside script. Must generate a content header!
+* Generate a content header!
 
 ## Bugs
 
@@ -78,6 +76,14 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.5.0
+  * Bugfix attribute handling
+  * Program to convert sxml to xml.
+  * Prelude grammar and actions
+    * Unix startup #! on first line possible
+    * Control info with the document. Then it is possible to generate xml by
+      running the document. Then it is also possible to have the document be used
+      like a serverside script. Must generate a content header!
 * 0.4.0
   * Parse file
   * Add prefix:<~>
