@@ -4,11 +4,15 @@ use v6;
 grammar Semi-xml::Grammar {
 #  token TOP { <ws> <document> <ws> }
 #  token document { <ws> <tag> <ws> <tag-body> <ws> }
-  rule TOP { <document> }
+  rule TOP { ("-p-\n" <prelude> "---\n" ) ** 0..1 <document> }
+  rule prelude { ( <config-key> ':' <config-value> ';' )* }
+  rule config-key { <identifier> ( '/' <identifier> )* }
+  rule config-value { <-[;]>+ }
+  
   rule document { <tag> <tag-body> }
 
   token tag { <tag-name> <attribute>* }
-  token tag-name { '$' <ident> }
+  token tag-name { '$' <identifier> }
 
   rule tag-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
@@ -22,4 +26,8 @@ grammar Semi-xml::Grammar {
   token attr-key { <[A..Za..z\_]>  <[A..Za..z0..9\_\-]>* }
   token attr-value-spec { \' <attr-value> \' || \" <attr-value> \" || <attr-value> }
   token attr-value { <-[\s]>+ }
+
+  # See STD.pm6 of perl6. A tenee bit simplefied
+  #
+  token identifier { <.ident> [ '-' <.ident> ]* }
 }
