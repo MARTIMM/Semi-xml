@@ -3,8 +3,8 @@
 ## Description
 
 Package to generate xml from an easier readable and writable description plus,
-because it is written in perl 6, the possibility to insert xml from other source
-such as files, text, code , variables etc.
+because it is written in perl 6, the possibility to insert xml from other
+sources such as files, text, code , variables etc.
 
 ## Introduction
 
@@ -63,10 +63,14 @@ other advantages using it this way.
     * script tags must always have a start and end tag
     * the content of a pre tag must be left as-is.
 
-## Ideas
+## Ideas and Todo
 
 * Parser will be a class. Styles can be templated and added in the form of a
   role.
+* What must the file extention be.
+* Control info with the document. Then it is possible to generate xml by
+  running the document. Then it is also possible to have the document be used
+  like a serverside script. Must generate a content header!
 
 ## Bugs
 
