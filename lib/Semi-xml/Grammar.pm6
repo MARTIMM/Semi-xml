@@ -4,9 +4,11 @@ use v6;
 grammar Semi-xml::Grammar {
 #  token TOP { <ws> <document> <ws> }
 #  token document { <ws> <tag> <ws> <tag-body> <ws> }
-  rule TOP { ("-p-\n" <prelude> "---\n" ) ** 0..1 <document> }
-  rule prelude { ( <config-key> ':' <config-value> ';' )* }
-  rule config-key { <identifier> ( '/' <identifier> )* }
+  rule TOP { ( "-p-" <prelude> "---" ) ** 0..1 <document> }
+  rule prelude { <config-entry>* }
+  rule config-entry { <config-keypath> ':' <config-value> ';' }
+  token config-keypath { <config-key> ( '/' <config-key> )* }
+  token config-key { <identifier> }
   rule config-value { <-[;]>+ }
   
   rule document { <tag> <tag-body> }

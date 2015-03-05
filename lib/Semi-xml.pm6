@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #---------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.4.0> does Semi-xml::Actions {
+class Semi-xml:ver<0.5.0> does Semi-xml::Actions {
 
   my Hash $styles;
   my Hash $configuration;
@@ -25,6 +25,9 @@ class Semi-xml:ver<0.4.0> does Semi-xml::Actions {
     # Remove comments
     #
     $content ~~ s:g/<-[\\]>\#.*?$$//;
+    $content ~~ s/^\#.*?$$\n//;
+    $content ~~ s/^\s+//;
+    $content ~~ s/\s+$//;
 
     # Get user introduced attribute information
     #
@@ -55,7 +58,6 @@ class Semi-xml:ver<0.4.0> does Semi-xml::Actions {
   #
   method save ( Str :$filename ) {
     my $document = self.get-xml-text;
-say $filename;
     spurt( $filename, $document);
   }
 
@@ -63,11 +65,14 @@ say $filename;
   #
   method get-xml-text ( ) {
     my Str $document = '';
-    my $o = $configuration<options>;
+    my $o = $!config<options>:exists ?? $!config<options>
+                                     !! $configuration<options>
+                                     ;
     my $root-element = $!xml-document.root.name;
     
     if ?$root-element {
       if $o<xml-prelude><show> {
+        $o<xml-prelude><version> //= '1.0';
         $document = [~] '<?xml version="', $o<xml-prelude><version>, '"';
         if ?$o<xml-prelude><encoding> {
           $document = [~] $document,
