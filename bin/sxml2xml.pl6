@@ -11,7 +11,6 @@ use Semi-xml;
 #-------------------------------------------------------------------------------
 #
 role MARTIM-GITHUB-IO {
-
   has Hash $!configuration = {
              options => {
                doctype => { show => 1},

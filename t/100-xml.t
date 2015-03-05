@@ -21,8 +21,8 @@ role pink {
   has Hash $!configuration = {
              options => {
                doctype => {
-  #               doc-definition => '',
-  #               doc-elements => []
+#                 definition => '',
+#                 entities => []
                  show => 1,
                },
                xml-prelude => {
@@ -30,7 +30,6 @@ role pink {
                  version => '1.0',
                  encoding => 'UTF-8'
                },
-               
              }
            };
 }
@@ -70,7 +69,7 @@ ok $xml-text ~~ m/\<body\>/, 'Body found';
 ok $xml-text ~~ m/\<br\/\>/, 'Empty tag br found';
 
 
-say $xml-text;
+#say $xml-text;
 
 
 

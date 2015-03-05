@@ -69,6 +69,11 @@ other advantages using it this way.
   role.
 * What must the file extention be.
 * Generate a content header!
+* Xml Namespaces
+* Comments <!-- ... --> Not needed!
+* Processing Instructions <?PI ...?>
+* Cdata <[CDATA[...]]>
+
 
 ## Bugs
 
@@ -77,13 +82,15 @@ Still at omega state, bugs come and go(hopefully).
 ## Changes
 
 * 0.5.0
-  * Bugfix attribute handling
   * Program to convert sxml to xml.
   * Prelude grammar and actions
     * Unix startup #! on first line possible
     * Control info with the document. Then it is possible to generate xml by
       running the document. Then it is also possible to have the document be used
       like a serverside script. Must generate a content header!
+  * Use of defaults from internal structure if config from user role or from
+    file prelude is not available.
+*.0.4.1 * Bugfix attribute handling
 * 0.4.0
   * Parse file
   * Add prefix:<~>
