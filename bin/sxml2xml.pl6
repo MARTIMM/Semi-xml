@@ -11,12 +11,7 @@ use Semi-xml;
 #-------------------------------------------------------------------------------
 #
 role MARTIM-GITHUB-IO {
-  has Hash $!configuration = {
-             options => {
-               doctype => { show => 1},
-               xml-prelude => { show => 0 },
-             }
-           };
+  has Hash $!configuration = {};
 }
 
 my Semi-xml $x .= new;
@@ -27,11 +22,8 @@ $x does MARTIM-GITHUB-IO;
 sub MAIN( $filename ) {
 
   if $filename.IO ~~ :r {
-    my $result-filename = $filename;
-    $result-filename ~~ s/\.<-[\.]>+$$/.html/;
-
     $x.parse-file(:$filename);
-    $x.save(:filename($result-filename));
+    $x.save;
   }
 
   else {
