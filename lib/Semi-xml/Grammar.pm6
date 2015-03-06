@@ -16,9 +16,15 @@ grammar Semi-xml::Grammar {
   token tag { <tag-name> <attribute>* }
   token tag-name { '$' <identifier> }
 
-  rule tag-body { <body-start> ~ <body-end> <body-contents> }
+  rule tag-body { <keep-body> | <normal-body> }
+
+  rule normal-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
   token body-end { ']' }
+
+  rule keep-body { <lit-body-start> ~ <lit-body-end> <body-contents> }
+  token lit-body-start { '|[' }
+  token lit-body-end { ']|' }
 
   token body-contents { ( <body-text> || <document> )* }
   token body-text { ( <-[\$\]\\]> || <body-esc> )+ }

@@ -4,7 +4,7 @@ use Semi-xml;
 
 #-------------------------------------------------------------------------------
 # Testing;
-#   Write file with config prelude
+#   Write file using default filename from program
 #-------------------------------------------------------------------------------
 # Setup
 #
@@ -19,12 +19,21 @@ options/xml-prelude/show:               1;              # Default 0
 options/xml-prelude/version:            1.1;            # Default 1.0
 options/xml-prelude/encoding:           UTF-8;          # Default UTF-8
 
-output/filename:                        t/some-file;    # Default current file
+#output/filename:                        t/some-file;    # Default current file
 output/fileext:                         html;           # Default xml
 ---
 $html [
+  $head [
+    $style type=text/css |[
+      .green {
+        color: \#0f0;
+        background-color: \#f0f;
+      }
+    ]|
+  ]
+
   $body [
-    $h1 [ Data from file ]
+    $h1 class=green [ Data from file ]
     $table [
       $tr [
         $th[ header ]
@@ -45,44 +54,13 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
-
 #say $xml-text;
 
 unlink $filename;
 
-# Write xml out to file. Filename explicitly set.
-#
-$filename ~~ s/\.sxml/.xml/;
-$x.save(:$filename);
-ok $filename.IO ~~ :e, "File $filename written";
-
-unlink $filename;
-
-# Write xml out to file. Filename named in prelude
-#
-$filename = 't/some-file.html';
+$filename = 't/103-xml.html';
 $x.save;
 ok $filename.IO ~~ :e, "File $filename written";
-
-unlink $filename;
-
-role pink {
-  has Hash $!configuration = {
-    output => {
-      filename => 't/another',
-      fileext => 'html'
-    }
-  };
-}
-
-$x does pink;
-
-$filename = 't/another.html';
-$x.save;
-ok $filename.IO ~~ :!e, "File $filename not written";
-
-$filename = 't/some-file.html';
-ok $filename.IO ~~ :e, "File $filename written instead";
 
 unlink $filename;
 

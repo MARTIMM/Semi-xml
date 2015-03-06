@@ -79,7 +79,11 @@ other advantages using it this way.
 
 Still at omega state, bugs come and go(hopefully).
 
+* ```$tag attr=val |[ content ]|``` doesn't work properly because the text from
+  the XML comes back wrong. Serializing all by my self is not (yet) desirable.
+
 ## Changes
+
 
 * 0.5.0
   * Program to convert sxml to xml.

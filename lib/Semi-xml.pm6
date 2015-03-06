@@ -26,10 +26,15 @@ class Semi-xml:ver<0.5.0> does Semi-xml::Actions {
     output => {
       # Filename of program is saved without extension
       #
-      filename => ($*PROGRAM ~~ m/(.*?)\.<{$*PROGRAM.IO.extension}>$/[0]),
+      filename => '',
       fileext => 'xml',
     }
   };
+
+  # Calculate default filename
+  #
+  $*PROGRAM ~~ m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
+  $defaults<output><filename> = ~$/[0];
 
   #-----------------------------------------------------------------------------
   #
@@ -44,14 +49,14 @@ class Semi-xml:ver<0.5.0> does Semi-xml::Actions {
   #
   method parse ( :$content is copy ) {
 
-#say "D: $defaults<output><filename>";
-
     # Remove comments
     #
     $content ~~ s:g/<-[\\]>\#.*?$$//;
     $content ~~ s/^\#.*?$$\n//;
     $content ~~ s/^\s+//;
     $content ~~ s/\s+$//;
+
+#say "C: $content";
 
     # Get user introduced attribute information
     #

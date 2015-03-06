@@ -18,6 +18,8 @@ role Semi-xml::Actions {
   
   my Hash $attrs;
   my Str $attr-key;
+  
+  my Bool $keep-literal = False;
 
   method config-entry ( $match ) {
     if $config-path.defined and $config-value.defined {
@@ -84,7 +86,7 @@ role Semi-xml::Actions {
   # its attributes.
   #
   method body-start ( $match ) {
-#    my $tag-name = $tag;
+    $keep-literal = False;
     $tag-name ~~ s/\s.*$$//;
 
     # Test if index is defined.
@@ -124,13 +126,18 @@ role Semi-xml::Actions {
     $current-element-idx--;
   }
 
+  method lit-body-start ( $match ) {
+    $keep-literal = True;
+  }
+
   method body-text ( $match ) {
-    # Only add textual items. Empty lines are skipped.
+    # Add textual items after cleanup of spaces.
     # Must be tested when there are tags for which content must be kept
     # exactly as is.
     #
     my $txt = ~$match;
-    $txt ~~ s/\s+/ /;
+
+    $txt ~~ s:g/\s+/ / unless $keep-literal;
 
     my $esc-text = ~$match;
     $esc-text ~~ s:g/\\//;
