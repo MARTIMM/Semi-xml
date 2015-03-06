@@ -1,6 +1,12 @@
 use v6;
 use XML;
 
+class Semi-xml::Text is XML::Text {
+  method Str {
+    return $.text;
+  }
+}
+
 role Semi-xml::Actions {
   has XML::Document $.xml-document;
 
@@ -141,7 +147,7 @@ role Semi-xml::Actions {
 
     my $esc-text = ~$match;
     $esc-text ~~ s:g/\\//;
-    my $xml = XML::Text.new(:text($esc-text));
+    my $xml = Semi-xml::Text.new(:text($esc-text));
     $element-stack[$current-element-idx].append($xml);
   }
 }

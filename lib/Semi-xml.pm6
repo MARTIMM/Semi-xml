@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.5.0> does Semi-xml::Actions {
+class Semi-xml:ver<0.5.1> does Semi-xml::Actions {
 
   my Hash $styles;
   my Hash $configuration;
@@ -146,6 +146,33 @@ class Semi-xml:ver<0.5.0> does Semi-xml::Actions {
                    ~ "{$o<doctype><definition>}>\n"
                    ;
       }
+
+if 0 {
+      if ! $!xml-document.root.can('mt-string') {
+        my $how = $!xml-document.root.HOW;
+        $how.add_method(
+          $!xml-document.root,
+          'mt-string',
+          method ( ) {
+            return self.Str();
+          }
+        );
+      }
+
+      $document ~= $!xml-document.root.mt-string();
+}
+
+if 0 {
+      if 1 { #! XML::Text.^find_method('Str') {
+say 'Change it';
+        XML::Text.^add_method(
+          'Str',
+          method ( ) {
+            return self.text;
+          }
+        );
+      }
+}
 
       $document ~= $!xml-document.root;
     }

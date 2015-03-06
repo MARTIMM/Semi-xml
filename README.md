@@ -84,6 +84,25 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.5.1
+  * ```$tag attr=val |[ content ]|``` doesn't work properly because the text
+    from the XML comes back wrong. Serializing all by my self is not (yet)
+    desirable. This is now fixed by creating a class with the 'proper' method in
+    it.
+    ```
+    class Semi-xml::Text is XML::Text {
+      method Str {
+        return $.text;
+      }
+    }
+    ```
+    And later use the new class like so
+    ```
+    my $xml = Semi-xml::Text.new(:text($esc-text));
+    $element-stack[$current-element-idx].append($xml);
+    ```
+    Later when the text is requested it will use the Str() method from the new
+    class and I am happy.
 
 * 0.5.0
   * Program to convert sxml to xml.
