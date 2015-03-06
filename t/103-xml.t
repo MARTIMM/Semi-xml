@@ -5,6 +5,7 @@ use Semi-xml;
 #-------------------------------------------------------------------------------
 # Testing;
 #   Write file using default filename from program
+#   Test |[ ]| contents
 #-------------------------------------------------------------------------------
 # Setup
 #
@@ -54,7 +55,14 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
-#say $xml-text;
+ok $xml-text ~~ m/
+      '.green {
+        color: #0f0;
+        background-color: #f0f;
+      }'
+      /, 'Check for literal text in css';
+
+say $xml-text;
 
 unlink $filename;
 

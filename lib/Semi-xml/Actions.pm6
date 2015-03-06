@@ -6,7 +6,7 @@ role Semi-xml::Actions {
 
   my Hash $config-key = {};
   has Hash $.config;
-  my Str $parent-key;
+#  my Str $parent-key;
 
   my Str $config-path;
   my Str $config-value;
