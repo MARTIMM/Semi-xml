@@ -6,8 +6,8 @@ use Semi-xml::Actions;
 #
 class Semi-xml:ver<0.5.1> does Semi-xml::Actions {
 
-  my Hash $styles;
-  my Hash $configuration;
+  has Hash $.styles;
+  has Hash $.configuration;
   my Hash $defaults = {
     options => {
       doctype => {
@@ -63,16 +63,16 @@ class Semi-xml:ver<0.5.1> does Semi-xml::Actions {
     for self.^attributes -> $class-attr {
       given $class-attr.name {
         when '$!styles' {
-          $styles = $class-attr.get_value(self);
+          $!styles = $class-attr.get_value(self);
         }
 
         when '$!configuration' {
-          $configuration = $class-attr.get_value(self);
+          $!configuration = $class-attr.get_value(self);
         }
       }
     }
 
-#say "P: ", $styles, ', ', $configuration;
+#say "P: ", $!styles, ', ', $!configuration;
 
     Semi-xml::Grammar.parse( $content, :actions(self));
   }
@@ -86,19 +86,32 @@ class Semi-xml:ver<0.5.1> does Semi-xml::Actions {
   #-----------------------------------------------------------------------------
   #
   method save ( Str :$filename is copy ) {
+    my Array $cfgs = [ $!config<output>,
+                       $!configuration<output>,
+                       $defaults<output>
+                     ];
+
     if !$filename.defined {
-      my $o = $!config<output>:exists ?? $!config<output>
-                                      !! $configuration<output>
-                                      ;
-      my $do = $defaults<output>;
-      $filename = $o<filename>:exists ?? $o<filename> !! $do<filename>;
-      my $fileext = $o<fileext>:exists ?? $o<fileext> !! $do<fileext>;
+      $filename = self.get-option( $cfgs, 'filename');
+      my $fileext = self.get-option( $cfgs, 'fileext');
 
       $filename ~= ".$fileext";
     }
     
     my $document = self.get-xml-text;
     spurt( $filename, $document);
+  }
+
+  #-----------------------------------------------------------------------------
+  #
+  method get-option ( Array $hashes, Str $option --> Any ) {
+    for $hashes.list -> $h {
+      if $h{$option}:exists {
+        return $h{$option}
+      }
+    }
+    
+    return Any;
   }
 
   #-----------------------------------------------------------------------------
@@ -117,7 +130,7 @@ class Semi-xml:ver<0.5.1> does Semi-xml::Actions {
       # Pick the config from the user role or that from the files prelude
       #
       my $o = $!config<options>:exists ?? $!config<options>
-                                       !! $configuration<options>
+                                       !! $!configuration<options>
                                        ;
       my $do = $defaults<options>;
 
