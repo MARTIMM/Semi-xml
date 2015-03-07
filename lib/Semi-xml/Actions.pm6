@@ -21,10 +21,10 @@ role Semi-xml::Actions {
   my Int $current-element-idx;
 
   my Str $tag-name;
-  
+
   my Hash $attrs;
   my Str $attr-key;
-  
+
   my Bool $keep-literal = False;
 
   method config-entry ( $match ) {
@@ -63,11 +63,11 @@ role Semi-xml::Actions {
     elsif CALLER::{~$match} {
       $tag = CALLER::{~$match};
     }
-    
+
     elsif OUTER::{~$match} {
       $tag = OUTER::{~$match};
     }
-    
+
     elsif DYNAMIC::{~$match} {
       $tag = DYNAMIC::{~$match};
     }
@@ -141,13 +141,17 @@ role Semi-xml::Actions {
     # Must be tested when there are tags for which content must be kept
     # exactly as is.
     #
-    my $txt = ~$match;
-
-    $txt ~~ s:g/\s+/ / unless $keep-literal;
-
+    my $xml;
     my $esc-text = ~$match;
     $esc-text ~~ s:g/\\//;
-    my $xml = Semi-xml::Text.new(:text($esc-text));
+    if $keep-literal {
+      $xml = Semi-xml::Text.new(:text($esc-text));
+    }
+
+    else {
+      $xml = XML::Text.new(:text($esc-text));
+    }
+
     $element-stack[$current-element-idx].append($xml);
   }
 }
