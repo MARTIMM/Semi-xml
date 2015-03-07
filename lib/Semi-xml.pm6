@@ -104,93 +104,58 @@ class Semi-xml:ver<0.5.1> does Semi-xml::Actions {
 
   #-----------------------------------------------------------------------------
   #
+  method get-xml-text ( ) {
+    # Get the top element name
+    #
+    my $root-element = $!xml-document.root.name;
+
+    my Str $document = '';
+
+    # If there is one, try to generate the xml
+    #
+    if ?$root-element {
+      # Check if xml prelude must be shown
+      #
+      my Array $cfgs = [ $!config<options><xml-prelude>,
+                         $!configuration<options><xml-prelude>,
+                         $defaults<options><xml-prelude>
+                       ];
+      if self.get-option( $cfgs, 'show') {
+        my $version = self.get-option( $cfgs, 'version');
+        my $encoding = self.get-option( $cfgs, 'encoding');
+
+        $document = "<?xml version=\"$version\"";
+        $document ~= " encoding=\"$encoding\"?>\n";
+      }
+
+      # Check if doctype must be shown
+      #
+      $cfgs = [ $!config<options><doctype>,
+                $!configuration<options><doctype>,
+                $defaults<options><doctype>
+              ];
+      if self.get-option( $cfgs, 'show') {
+        my $definition = self.get-option( $cfgs, 'definition');
+        my $ws = $definition ?? ' ' !! '';
+        $document ~= "<!DOCTYPE $root-element$ws$definition>\n";
+      }
+
+      $document ~= $!xml-document.root;
+    }
+    
+    return $document;
+  }
+
+  #-----------------------------------------------------------------------------
+  #
   method get-option ( Array $hashes, Str $option --> Any ) {
     for $hashes.list -> $h {
       if $h{$option}:exists {
         return $h{$option}
       }
     }
-    
+
     return Any;
-  }
-
-  #-----------------------------------------------------------------------------
-  #
-  method get-xml-text ( ) {
-    my Str $document = '';
-    
-    # Get the top element name
-    #
-    my $root-element = $!xml-document.root.name;
-    
-    # If there is one, try to generate the xml
-    #
-    if ?$root-element {
-      
-      # Pick the config from the user role or that from the files prelude
-      #
-      my $o = $!config<options>:exists ?? $!config<options>
-                                       !! $!configuration<options>
-                                       ;
-      my $do = $defaults<options>;
-
-      # Check if xml prelude must be shown
-      #
-      my $okey = $o<xml-prelude><show>:exists ?? $o<xml-prelude><show>
-                                              !! $do<xml-prelude><show>
-                                              ;
-      if $okey {
-        $o<xml-prelude><version> //= $do<xml-prelude><version>;
-        $document = "<?xml version=\"{$o<xml-prelude><version>}\"";
-
-        ?$o<xml-prelude><encoding> //= $do<xml-prelude><encoding>;
-        $document ~= " encoding=\"{$o<xml-prelude><encoding>}\"?>\n";
-      }
-
-      # Check if doctype must be shown
-      #
-      $okey = $o<doctype><show>:exists ?? $o<doctype><show>
-                                       !! $do<doctype><show>
-                                       ;
-      if $okey {
-        $o<doctype><definition> //= $do<doctype><definition>;
-        my $ws = $o<doctype><definition> ?? ' ' !! '';
-        $document ~= "<!DOCTYPE $root-element$ws"
-                   ~ "{$o<doctype><definition>}>\n"
-                   ;
-      }
-
-if 0 {
-      if ! $!xml-document.root.can('mt-string') {
-        my $how = $!xml-document.root.HOW;
-        $how.add_method(
-          $!xml-document.root,
-          'mt-string',
-          method ( ) {
-            return self.Str();
-          }
-        );
-      }
-
-      $document ~= $!xml-document.root.mt-string();
-}
-
-if 0 {
-      if 1 { #! XML::Text.^find_method('Str') {
-say 'Change it';
-        XML::Text.^add_method(
-          'Str',
-          method ( ) {
-            return self.text;
-          }
-        );
-      }
-}
-
-      $document ~= $!xml-document.root;
-    }
-    
-    return $document;
   }
 }
 

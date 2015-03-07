@@ -60,15 +60,15 @@ $x.parse(content => $sx-text);
 # See the result
 #
 my Str $xml-text = ~$x;
-ok $xml-text ~~ ms/\<\?xml version\=\"1\.0\" encoding\=\"UTF\-8\"\?\>/;
-ok $xml-text ~~ ms/\<\!DOCTYPE html\>/;
+ok $xml-text ~~ ms/\<\?xml version\=\"1\.0\" encoding\=\"UTF\-8\"\?\>/, 'Xml prelude found';
+ok $xml-text ~~ ms/\<\!DOCTYPE html\>/, 'Doctype found';
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text ~~ m/\<head\>/, 'Head found';
 ok $xml-text ~~ m/\<body\>/, 'Body found';
 ok $xml-text ~~ m/\<br\/\>/, 'Empty tag br found';
 
 
-#say $xml-text;
+say $xml-text;
 
 
 
