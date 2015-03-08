@@ -5,7 +5,7 @@ use Semi-xml;
 #-------------------------------------------------------------------------------
 # Testing;
 #   Write file using default filename from program
-#   Test |[ ]| contents
+#   Test |[ ]| contents to keep content as-is
 #-------------------------------------------------------------------------------
 # Setup
 #

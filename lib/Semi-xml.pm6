@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.5.1> does Semi-xml::Actions {
+class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
 
   has Hash $.styles;
   has Hash $.configuration;

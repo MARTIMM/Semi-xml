@@ -10,10 +10,11 @@ class Semi-xml::Text is XML::Text {
 role Semi-xml::Actions {
   has XML::Document $.xml-document;
 
-  my Hash $config-key = {};
+  has Hash $.symbols;
   has Hash $.config;
 #  my Str $parent-key;
 
+  my Hash $config-key = {};
   my Str $config-path;
   my Str $config-value;
 
@@ -44,6 +45,28 @@ role Semi-xml::Actions {
     $config-value = ~$match;
   }
 
+  method prelude ( $match ) {
+    if $!config<module>:exists {
+      for $!config<module>.kv -> $key, $value {
+        my $code = qq:to/EOCODE/;
+          use $value;
+          $value.new;
+        EOCODE
+#say "C:\n$code\n";
+
+        my $obj = EVAL($code);
+#say "O: {$obj.^name}, {$obj.^attributes}";
+
+        say $! if $!;
+
+        for $obj.symbols.kv -> $k, $v {
+          $!symbols{$k} = $v;
+#say "KV: $k, $v";
+        }
+      }
+    }
+  }
+
   method tag-name ( $match ) {
 
     # Initialize on start of a new tag. Everything of any previous tag is
@@ -55,8 +78,13 @@ role Semi-xml::Actions {
     $attrs = {};
 
 #print "$match";
-    if ::{~$match} {
-      $tag-name = ::{~$match};
+
+    $tag-name = ~$match;
+    $tag-name ~~ s/\$//;
+    if $!symbols{$tag-name} {
+      my $s = $!symbols{$tag-name};
+      $tag-name = $s<tag-name>;
+      $attrs = $s<attributes> if $s<attributes>:exists;
     }
 
 #`{{
@@ -73,10 +101,10 @@ role Semi-xml::Actions {
     }
 }}
 
-    else {
-      $tag-name = ~$match;
-      $tag-name ~~ s/\$//;
-    }
+#    else {
+#      $tag-name = ~$match;
+#      $tag-name ~~ s/\$//;
+#    }
 #say " -> $tag-name";
   }
 

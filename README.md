@@ -67,23 +67,28 @@ other advantages using it this way.
 
 * Parser will be a class. Styles can be templated and added in the form of a
   role.
-* What must the file extention be.
+* What must the file extension be. sxml?
 * Generate a content header!
 * Xml Namespaces
 * Comments <!-- ... --> Not needed!
 * Processing Instructions <?PI ...?>
 * Cdata <[CDATA[...]]>
-
+* External modules
+  * Need library paths to find modules
+  * Introduced via source prelude
+  * Introdused via role
+  * tag name substitution and attribute additions
+  * insertion or substitution of tag and body using that as arguments to
+    subs/methods
 
 ## Bugs
 
 Still at omega state, bugs come and go(hopefully).
 
-* ```$tag attr=val |[ content ]|``` doesn't work properly because the text from
-  the XML comes back wrong. Serializing all by my self is not (yet) desirable.
-
 ## Changes
 
+* 0.6.0 Added tagname substitution and addition of attributes from external
+        modules.
 * 0.5.1
   * ```$tag attr=val |[ content ]|``` doesn't work properly because the text
     from the XML comes back wrong. Serializing all by my self is not (yet)
