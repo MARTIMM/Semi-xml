@@ -30,12 +30,15 @@ $html [
 
   $body [
     $h1 class=green [ Data from file ]
-    $special-table [
+    $.special-table data-x=tst [
       $tr [
         $th[ header ]
         $td[ data ]
       ]
     ]
+    
+    $!statistics data-weather=set1 []
+    $p [ bla ]
   ]
 ]
 EOSX
@@ -45,6 +48,7 @@ EOSX
 #
 ok mkdir('t/M'), 'Directory M created';
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
+use XML;
 
 class t::M::m1 {
   has Hash $.symbols = {
@@ -54,6 +58,50 @@ class t::M::m1 {
         class => 'big-table',
         id => 'new-table'
       }
+    }
+  };
+
+  has Hash $.methods = {
+    statistics => method ( Hash $attrs ) {
+      my $table = XML::Element.new(
+                    :name('table'),
+                    :attribs( { class => 'red', id => 'stat-id'})
+                  );
+say "Self {self.perl}, {self.^name}";
+#      my XML::Document $doc .= new(:root($table));
+
+say "table {$table.perl}";
+
+#say "doc {$doc.perl}";
+      my $tr;
+      my $td;
+      for ^4 {
+        $tr = XML::Element.new(:name('tr'));
+say "\ntr: {$tr.perl}";
+        $table.append($tr);
+#        $tr.remove;
+#say "removed";
+#        $tr.parent = $table;
+#say "parented";
+#        $table.nodes.push($tr);
+#say "pushed";
+        $td = XML::Element.new(:name('td'));
+        $tr.append($td);
+        $td.append(XML::Text.new(:text('data 1')));
+
+        $td = XML::Element.new(:name('td'));
+        $tr.append($td);
+        $td.append(XML::Text.new(:text('data 2')));
+
+        $td = XML::Element.new(:name('td'));
+        $tr.append($td);
+        $td.append(XML::Text.new(:text('data 3')));
+#`{{
+}}
+      }
+say "returning";
+say "Root";
+      return $table;
     }
   };
 }

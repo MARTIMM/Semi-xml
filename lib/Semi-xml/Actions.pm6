@@ -2,7 +2,7 @@ use v6;
 use XML;
 
 class Semi-xml::Text is XML::Text {
-  method Str {
+  method Str ( ) {
     return $.text;
   }
 }
@@ -10,7 +10,9 @@ class Semi-xml::Text is XML::Text {
 role Semi-xml::Actions {
   has XML::Document $.xml-document;
 
-  has Hash $.symbols;
+#  has Hash $.symbols;
+#  has Hash $.methods;
+  has Hash $.objects;
   has Hash $.config;
 #  my Str $parent-key;
 
@@ -48,27 +50,47 @@ role Semi-xml::Actions {
   method prelude ( $match ) {
     if $!config<module>:exists {
       for $!config<module>.kv -> $key, $value {
-        my $code = qq:to/EOCODE/;
-          use $value;
-          $value.new;
-        EOCODE
-#say "C:\n$code\n";
+        if $!objects<$key>:exists {
+          say "'module/$key:  $value;' found before, ignored";
+        }
+        
+        else {
+          my $code = qq:to/EOCODE/;
+            use $value;
+            $value.new;
+          EOCODE
+  #say "C:\n$code\n";
 
-        my $obj = EVAL($code);
-#say "O: {$obj.^name}, {$obj.^attributes}";
+          my $obj = EVAL($code);
+          if $! {
+            say "Eval error:\n$!\n";
+          }
+          
+          else {
+            $!objects<$key> = $obj;
+          }
 
-        say $! if $!;
+#`{{
+  #say "O: {$obj.^name}, {$obj.^attributes}";
 
-        for $obj.symbols.kv -> $k, $v {
-          $!symbols{$k} = $v;
-#say "KV: $k, $v";
+          say $! if $!;
+
+          for $obj.symbols.kv -> $k, $v {
+            $!symbols{$k} = $v;
+  #say "KV: $k, $v";
+          }
+
+          for $obj.methods.kv -> $k, $v {
+            $!methods{$k} = $v;
+  #say "KV: $k, $v";
+          }
+}}
         }
       }
     }
   }
 
   method tag-name ( $match ) {
-
     # Initialize on start of a new tag. Everything of any previous tag is
     # handled and stored.
     #
@@ -77,48 +99,7 @@ role Semi-xml::Actions {
     $attr-key = Str;
     $attrs = {};
 
-#print "$match";
-
     $tag-name = ~$match;
-#    $tag-name ~~ s/^\$//;
-    $tag-name ~~ s/^( '..' || '$' )//;
-    my $tag-type = $/[0];
-say "TT: $tag-name, $tag-type";
-    if $tag-type eq '..' {
-      # NOOP, all is fine
-    }
-    
-    elsif $tag-type eq '$' { 
-      if $!symbols{$tag-name} {
-        my $s = $!symbols{$tag-name};
-        $tag-name = $s<tag-name>;
-        $attrs = $s<attributes> if $s<attributes>:exists;
-      }
-      
-      else {
-        say "Tag type '\$' of tag $tag-name is not found, ignored";
-      }
-    }
-
-#`{{
-    elsif CALLER::{~$match} {
-      $tag = CALLER::{~$match};
-    }
-
-    elsif OUTER::{~$match} {
-      $tag = OUTER::{~$match};
-    }
-
-    elsif DYNAMIC::{~$match} {
-      $tag = DYNAMIC::{~$match};
-    }
-}}
-
-#    else {
-#      $tag-name = ~$match;
-#      $tag-name ~~ s/\$//;
-#    }
-#say " -> $tag-name";
   }
 
   method attr-key ( $match ) {
@@ -129,10 +110,13 @@ say "TT: $tag-name, $tag-type";
     $attrs{$attr-key} = ~$match;
   }
 
-#  method identifier ( $match ) {
-#    say "Id: $match";
-#  }
+#`{{
+  method identifier ( $match ) {
+    say "Id: $match";
+  }
+}}
 
+#`{{
   method style-sets ( $match ) {
     say "Style-set: $match";
     my $ss = ~$match;
@@ -150,6 +134,7 @@ say "TT: $tag-name, $tag-type";
     $keep-literal = True;
     self.body-start-process($ss);
   }
+}}
 
   # Before the body starts, save the tag name and create the element with
   # its attributes.
@@ -165,14 +150,71 @@ say "TT: $tag-name, $tag-type";
   }
   
   method body-start-process ( $match ) {
-    $tag-name ~~ s/\s.*$$//;
+
+    my XML::Element $created-in-object;
+    
+    $tag-name ~~ s/^( \$\! || \$\. || \$ )//;
+    my $tag-type = $/[0];
+
+    if $tag-type eq '$' {
+      # NOOP, all is fine
+    }
+
+    elsif $tag-type eq '$.' {
+      for $!objects.keys -> $ok {
+        if $!objects{$ok}.symbols{$tag-name} {
+          my $s = $!objects{$ok}.symbols{$tag-name};
+          $tag-name = $s<tag-name>;
+          for $s<attributes>.kv -> $k,$v { $attrs{$k} = $v; }
+          
+          last;
+        }
+#
+#        else {
+#          say "Tag type '\$' of tag $tag-name is not found, ignored";
+#        }
+      }
+    }
+
+    elsif $tag-type eq '$!' {
+say "T: $tag-name, $tag-type";
+      for $!objects.keys -> $ok {
+say "Test $ok";
+        if $!objects{$ok}.methods{$tag-name} {
+          my $m = $!objects{$ok}.methods{$tag-name};
+say "M: {$m.perl}";
+          $created-in-object = $m( $!objects{$ok}, $attrs);
+#say "R: {$created-in-object.perl}";
+
+          last;
+        }
+#
+#        else {
+#          say "Tag type '\$!' of tag $tag-name is not found, ignored";
+#        }
+      }
+    }
+
+#    $tag-name ~~ s/^\s.*//;
+#    $tag-name ~~ s/\s.*$//;
+
+    my $child-element;
+    if $created-in-object.defined
+       and ( $created-in-object.isa(XML::Element)
+           or $created-in-object.isa(XML::Text)
+           ) {
+     
+      $child-element = $created-in-object;
+    }
+    
+    else {
+      $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
+    }
+#say "CE: {$created-in-object.perl} {$child-element.perl}";
 
     # Test if index is defined.
     #
     if $current-element-idx.defined {
-      my $child-element = XML::Element.new( :name($tag-name),
-                                            :attribs($attrs)
-                                          );
       $element-stack[$current-element-idx].append($child-element);
       $element-stack[$current-element-idx + 1] = $child-element;
 
@@ -188,10 +230,7 @@ say "TT: $tag-name, $tag-type";
       # First element is a root element
       #
       $current-element-idx = 0;
-      $element-stack[$current-element-idx] = 
-          XML::Element.new( :name($tag-name),
-                            :attribs($attrs)
-                          );
+      $element-stack[$current-element-idx] = $child-element;
 
       $!xml-document .= new($element-stack[$current-element-idx]);
     }

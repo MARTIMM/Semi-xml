@@ -14,7 +14,7 @@ grammar Semi-xml::Grammar {
   rule document { <tag> <tag-body> }
 
   rule tag { <tag-name> ( <attribute> )* }
-  token tag-name { ( '$' ) <identifier> }
+  token tag-name { ( '$.' || '$!' || '$' ) <identifier> }
 
   token attribute { <attr-key> '=' <attr-value-spec> }
   token attr-key { <[A..Za..z\_]>  <[A..Za..z0..9\_\-]>* }
