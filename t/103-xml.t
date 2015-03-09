@@ -36,10 +36,10 @@ $html [
   $body [
     $h1 class=green [ Data from file ]
     $table [
-      $tr [
+      $tr |[
         $th[ header ]
         $td[ data ]
-      ]
+      ]|
     ]
   ]
 ]
@@ -61,6 +61,7 @@ ok $xml-text ~~ m/
         background-color: #f0f;
       }'
       /, 'Check for literal text in css';
+ok $xml-text ~~ ms/ '<tr>' '<th>' /, 'Th after tr found';
 
 say $xml-text;
 

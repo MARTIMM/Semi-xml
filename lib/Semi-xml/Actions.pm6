@@ -80,11 +80,24 @@ role Semi-xml::Actions {
 #print "$match";
 
     $tag-name = ~$match;
-    $tag-name ~~ s/\$//;
-    if $!symbols{$tag-name} {
-      my $s = $!symbols{$tag-name};
-      $tag-name = $s<tag-name>;
-      $attrs = $s<attributes> if $s<attributes>:exists;
+#    $tag-name ~~ s/^\$//;
+    $tag-name ~~ s/^( '..' || '$' )//;
+    my $tag-type = $/[0];
+say "TT: $tag-name, $tag-type";
+    if $tag-type eq '..' {
+      # NOOP, all is fine
+    }
+    
+    elsif $tag-type eq '$' { 
+      if $!symbols{$tag-name} {
+        my $s = $!symbols{$tag-name};
+        $tag-name = $s<tag-name>;
+        $attrs = $s<attributes> if $s<attributes>:exists;
+      }
+      
+      else {
+        say "Tag type '\$' of tag $tag-name is not found, ignored";
+      }
     }
 
 #`{{
@@ -116,11 +129,42 @@ role Semi-xml::Actions {
     $attrs{$attr-key} = ~$match;
   }
 
+#  method identifier ( $match ) {
+#    say "Id: $match";
+#  }
+
+  method style-sets ( $match ) {
+    say "Style-set: $match";
+    my $ss = ~$match;
+    $ss ~~ ss/ ^ '[' //;
+    $ss ~~ ss/ '[' $ //;
+    $keep-literal = False;
+    self.body-start-process($ss);
+  }
+
+  method lit-style-sets ( $match ) {
+    say "Style-set: $match";
+    my $ss = ~$match;
+    $ss ~~ ss/ ^ '[' //;
+    $ss ~~ ss/ '[' $ //;
+    $keep-literal = True;
+    self.body-start-process($ss);
+  }
+
   # Before the body starts, save the tag name and create the element with
   # its attributes.
   #
+  method lit-body-start ( $match ) {
+    $keep-literal = True;
+    self.body-start-process($match);
+  }
+  
   method body-start ( $match ) {
     $keep-literal = False;
+    self.body-start-process($match);
+  }
+  
+  method body-start-process ( $match ) {
     $tag-name ~~ s/\s.*$$//;
 
     # Test if index is defined.
@@ -153,15 +197,13 @@ role Semi-xml::Actions {
     }
   }
 
+  method lit-body-end ( $match ) { self.body-end($match) }
+  
   method body-end ( $match ) {
     # Go back one level .New child tags will overwrite the previous child
     # on the stack as those are needed anymore.
     #
     $current-element-idx--;
-  }
-
-  method lit-body-start ( $match ) {
-    $keep-literal = True;
   }
 
   method body-text ( $match ) {

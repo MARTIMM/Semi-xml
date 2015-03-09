@@ -26,13 +26,13 @@ I'm a lazy bum, so writing xml is too exhousting. instead of writing;
 I want to do something like the following
 
 ```
-$html [
-  $head [
-    $title [ Title of page ]
+..html [
+  ..head [
+    ..title [ Title of page ]
   ]
-  $body [
-    $h1 [ Introduction ]
-    $p class=green [ Piece of text. See $a href=google.com [google]]
+  ..body [
+    ..h1 [ Introduction ]
+    ..p class=green [ Piece of text. See ..a href=google.com [google]]
   ]
 ]
 ```
@@ -87,6 +87,11 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.6.1 
+  * Trying out several formats for tags. $tag and ..tag. Then use $html for some
+    other purpose like substitution etc. and ..tag for normal cases. It happens
+    that the '..' is not the best choice.
+  * Bugfix: tags with body |[ ...]| were not saved.
 * 0.6.0 Added tagname substitution and addition of attributes from external
         modules.
 * 0.5.1

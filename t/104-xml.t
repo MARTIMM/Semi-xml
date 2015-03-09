@@ -20,12 +20,12 @@ module/m1:                              t::M::m1;
 ---
 $html [
   $head [
-    $style type=text/css [
-      .green {
-        color: \#0f0;
-        background-color: \#f0f;
-      }
-    ]
+    $style type=text/css |[
+        .green {
+          color: \#0f0;
+          background-color: \#f0f;
+        }
+    ]|
   ]
 
   $body [
@@ -67,7 +67,7 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 ok $xml-text ~~ m/\<table/, 'Check table name change';
 ok $xml-text ~~ m/class\=\"big\-table\"/, 'Check class attribute';

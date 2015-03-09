@@ -13,27 +13,33 @@ grammar Semi-xml::Grammar {
   
   rule document { <tag> <tag-body> }
 
-  token tag { <tag-name> <attribute>* }
-  token tag-name { '$' <identifier> }
+  rule tag { <tag-name> ( <attribute> )* }
+  token tag-name { ( '$' ) <identifier> }
 
-  rule tag-body { <keep-body> | <normal-body> }
+  token attribute { <attr-key> '=' <attr-value-spec> }
+  token attr-key { <[A..Za..z\_]>  <[A..Za..z0..9\_\-]>* }
+  token attr-value-spec { \' <attr-value> \' || \" <attr-value> \" || <attr-value> }
+  token attr-value { <-[\s]>+ }
+
+  rule tag-body { <normal-body> || <lit-body> }
 
   rule normal-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
   token body-end { ']' }
 
-  rule keep-body { <lit-body-start> ~ <lit-body-end> <body-contents> }
+  rule lit-body { <lit-body-start> ~ <lit-body-end> <body-contents> }
   token lit-body-start { '|[' }
   token lit-body-end { ']|' }
 
+#  token body-contents { <style-def>? ( <body-text> || <document> )* }
   token body-contents { ( <body-text> || <document> )* }
   token body-text { ( <-[\$\]\\]> || <body-esc> )+ }
   token body-esc { '\$' || '\[' || '\]' || '\\' }
 
-  token attribute { \s+ <attr-key> '=' <attr-value-spec> }
-  token attr-key { <[A..Za..z\_]>  <[A..Za..z0..9\_\-]>* }
-  token attr-value-spec { \' <attr-value> \' || \" <attr-value> \" || <attr-value> }
-  token attr-value { <-[\s]>+ }
+#  rule style-def { 'style' <style-body> }
+#  rule style-body { <style-sets> || <lit-style-sets> }
+#  rule style-sets { '[' ~ ']' ( <-[\s\]]>+ )* }
+#  rule lit-style-sets { '|[' ~ ']|' ( <-[\s\]]>+ )* }
 
   # See STD.pm6 of perl6. A tenee bit simplefied
   #
