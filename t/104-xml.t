@@ -17,7 +17,7 @@ spurt( $filename, q:to/EOSX/);
 output/fileext:                         html;
 
 library/m1:                             t;
-module/m1:                              t::M::m1;
+module/m1:                              M::m1;
 ---
 $html [
   $head [
@@ -51,7 +51,7 @@ ok mkdir('t/M'), 'Directory M created';
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
 use XML;
 
-class t::M::m1 {
+class M::m1 {
   has Hash $.symbols = {
     special-table => {
       tag-name => 'table',
@@ -99,11 +99,15 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
-ok $xml-text ~~ m/\<table/, 'Check table name change';
-ok $xml-text ~~ m/class\=\"big\-table\"/, 'Check class attribute';
-ok $xml-text ~~ m/id\=\"new\-table\"/, 'Check id attribute';
+ok $xml-text ~~ m/('<table'.*)**2/, 'Check subst and gen of $.special-table and $!statistics';
+ok $xml-text ~~ m/class\=\"big\-table\"/, 'Check inserted class attribute';
+ok $xml-text ~~ m/id\=\"new\-table\"/, 'Check inserted id attribute';
+
+ok $xml-text ~~ m/'class="red"'/, 'Check generated class = red';
+ok $xml-text ~~ m/'id="stat-id"'/, 'Check generated id = stat-id';
+ok $xml-text ~~ m/('<td>data 1</td>'.*)**4/, "Check 4 inserted 'data 1' td";
 
 unlink $filename;
 

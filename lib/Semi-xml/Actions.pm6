@@ -47,16 +47,21 @@ role Semi-xml::Actions {
   method prelude ( $match ) {
     if $!config<module>:exists {
       for $!config<module>.kv -> $key, $value {
-        if $!objects<$key>:exists {
+        if $!objects{$key}:exists {
           say "'module/$key:  $value;' found before, ignored";
         }
         
         else {
+          my $use-lib = '';
+          if $!config<library>{$key}:exists {
+            $use-lib = "use lib '$!config<library>{$key}';";
+          }
+          
           my $code = qq:to/EOCODE/;
+            $use-lib
             use $value;
             $value.new;
           EOCODE
-
           my $obj = EVAL($code);
           if $! {
             say "Eval error:\n$!\n";
