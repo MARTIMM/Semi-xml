@@ -26,20 +26,21 @@ I'm a lazy bum, so writing xml is too exhousting. instead of writing;
 I want to do something like the following
 
 ```
-..html [
-  ..head [
-    ..title [ Title of page ]
+$html [
+  $head [
+    $title [ Title of page ]
   ]
-  ..body [
-    ..h1 [ Introduction ]
-    ..p class=green [ Piece of text. See ..a href=google.com [google]]
+  $body [
+    $h1 [ Introduction ]
+    $p class=green [ Piece of text. See $a href=google.com [google]]
   ]
 ]
 ```
 (9 lines, 29 words, 161 characters. Less characters typed and still indenting.)
 
 This second form looks much more airy and better to read. There are also some
-other advantages using it this way.
+other advantages using it this way. It will be even better to read when language
+highlights are programmed in your favorite editor.
 
 * You don't need to write the endtag.
 * Nesting is easy using the brackets.
@@ -65,22 +66,34 @@ other advantages using it this way.
 
 ## Ideas and Todo
 
-* Parser will be a class. Styles can be templated and added in the form of a
-  role.
-* What must the file extension be. sxml?
-* Generate a content header!
-* Xml Namespaces
-* Comments <!-- ... --> Not needed!
-* Processing Instructions <?PI ...?>
-* Cdata <[CDATA[...]]>
+* [x] Parser is class. Styles can be templated and added in the form of a role.
+      The same information can be supplied in the prelude of the source. Of all
+      settings, defaults are provided when possible.
+* [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the
+      sxml2xml program will not bother (yet).
+* [ ] Generate a content header!
+* [ ] Xml Namespaces
+* [ ] Comments <!-- ... --> Not needed!
+* [ ] Processing Instructions <?PI ...?>
+* [ ] Cdata <[CDATA[...]]>
 * External modules
-  * Need library paths to find modules
-  * Introduced via source prelude
-  * Introdused via role
-  * tag name substitution and attribute additions
-  * insertion or substitution of tag and body using that as arguments to
-    subs/methods
-* Documentation
+  * [x] Need library paths to find modules
+  * [x] Introduced via source prelude
+  * [ ] Introdused via role
+  * [x] tag name substitution and attribute additions. Format is ```$.tagname
+        <attrs> [<body>]```.
+  * [x] insertion of tags and body using attributes as arguments to
+        subs/methods. Format ```$!tagname <attrs> [<body>]```
+* [ ] Documentation.
+* [ ] Tutorials.
+* [ ] Better error messages when parser fails.
+* Now modules can be inserted, the following might come in handy
+  * [ ] File and link handling.
+    * [ ] include other documents
+    * [ ] link to page or image checking and generating
+    * [ ] avatar linking
+  * [ ] Generating tables
+  * [ ] generating graphics, statistics, svg etc
 
 ## Bugs
 
