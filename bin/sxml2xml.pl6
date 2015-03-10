@@ -26,7 +26,7 @@ $x does MARTIM-GITHUB-IO;
 sub MAIN( $filename ) {
   $filename ~~ m/(.*?)\.<{$filename.IO.extension}>$/;
   $x.configuration<output><filename> = ~$/[0];
-say "PF: {$x.configuration<output><filename>}";
+#say "PF: {$x.configuration<output><filename>}";
 
   if $filename.IO ~~ :r {
     $x.parse-file(:$filename);

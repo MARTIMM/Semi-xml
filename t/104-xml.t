@@ -37,7 +37,7 @@ $html [
         $td[ data ]
       ]
     ]
-    
+
     $!statistics data-weather=set1 []
     $p [ bla ]
   ]
