@@ -80,6 +80,7 @@ other advantages using it this way.
   * tag name substitution and attribute additions
   * insertion or substitution of tag and body using that as arguments to
     subs/methods
+* Documentation
 
 ## Bugs
 
@@ -87,7 +88,10 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
-* 0.6.1 
+* 0.7.0
+  * Tagnames: $.name = substitute name and add attributes, $!name call function
+
+* 0.6.1
   * Trying out several formats for tags. $tag and ..tag. Then use $html for some
     other purpose like substitution etc. and ..tag for normal cases. It happens
     that the '..' is not the best choice.

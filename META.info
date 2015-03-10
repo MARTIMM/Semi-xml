@@ -11,5 +11,5 @@
         "Semi-xml::Actions": "lib/Semi-xml/Actions.pm6",
     },
     "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-    "version": "0.6.1"
+    "version": "0.7.0"
 }

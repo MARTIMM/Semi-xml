@@ -16,6 +16,7 @@ spurt( $filename, q:to/EOSX/);
 ---
 output/fileext:                         html;
 
+library/m1:                             t;
 module/m1:                              t::M::m1;
 ---
 $html [
@@ -67,25 +68,11 @@ class t::M::m1 {
                     :name('table'),
                     :attribs( { class => 'red', id => 'stat-id'})
                   );
-say "Self {self.perl}, {self.^name}";
-#      my XML::Document $doc .= new(:root($table));
 
-say "table {$table.perl}";
-
-#say "doc {$doc.perl}";
-      my $tr;
-      my $td;
       for ^4 {
-        $tr = XML::Element.new(:name('tr'));
-say "\ntr: {$tr.perl}";
+        my $tr = XML::Element.new(:name('tr'));
         $table.append($tr);
-#        $tr.remove;
-#say "removed";
-#        $tr.parent = $table;
-#say "parented";
-#        $table.nodes.push($tr);
-#say "pushed";
-        $td = XML::Element.new(:name('td'));
+        my $td = XML::Element.new(:name('td'));
         $tr.append($td);
         $td.append(XML::Text.new(:text('data 1')));
 
@@ -96,11 +83,8 @@ say "\ntr: {$tr.perl}";
         $td = XML::Element.new(:name('td'));
         $tr.append($td);
         $td.append(XML::Text.new(:text('data 3')));
-#`{{
-}}
       }
-say "returning";
-say "Root";
+
       return $table;
     }
   };

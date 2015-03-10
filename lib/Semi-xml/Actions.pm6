@@ -10,11 +10,8 @@ class Semi-xml::Text is XML::Text {
 role Semi-xml::Actions {
   has XML::Document $.xml-document;
 
-#  has Hash $.symbols;
-#  has Hash $.methods;
   has Hash $.objects;
   has Hash $.config;
-#  my Str $parent-key;
 
   my Hash $config-key = {};
   my Str $config-path;
@@ -59,7 +56,6 @@ role Semi-xml::Actions {
             use $value;
             $value.new;
           EOCODE
-  #say "C:\n$code\n";
 
           my $obj = EVAL($code);
           if $! {
@@ -69,22 +65,6 @@ role Semi-xml::Actions {
           else {
             $!objects<$key> = $obj;
           }
-
-#`{{
-  #say "O: {$obj.^name}, {$obj.^attributes}";
-
-          say $! if $!;
-
-          for $obj.symbols.kv -> $k, $v {
-            $!symbols{$k} = $v;
-  #say "KV: $k, $v";
-          }
-
-          for $obj.methods.kv -> $k, $v {
-            $!methods{$k} = $v;
-  #say "KV: $k, $v";
-          }
-}}
         }
       }
     }
@@ -109,32 +89,6 @@ role Semi-xml::Actions {
   method attr-value ( $match ) {
     $attrs{$attr-key} = ~$match;
   }
-
-#`{{
-  method identifier ( $match ) {
-    say "Id: $match";
-  }
-}}
-
-#`{{
-  method style-sets ( $match ) {
-    say "Style-set: $match";
-    my $ss = ~$match;
-    $ss ~~ ss/ ^ '[' //;
-    $ss ~~ ss/ '[' $ //;
-    $keep-literal = False;
-    self.body-start-process($ss);
-  }
-
-  method lit-style-sets ( $match ) {
-    say "Style-set: $match";
-    my $ss = ~$match;
-    $ss ~~ ss/ ^ '[' //;
-    $ss ~~ ss/ '[' $ //;
-    $keep-literal = True;
-    self.body-start-process($ss);
-  }
-}}
 
   # Before the body starts, save the tag name and create the element with
   # its attributes.
@@ -169,29 +123,17 @@ role Semi-xml::Actions {
           
           last;
         }
-#
-#        else {
-#          say "Tag type '\$' of tag $tag-name is not found, ignored";
-#        }
       }
     }
 
     elsif $tag-type eq '$!' {
-say "T: $tag-name, $tag-type";
       for $!objects.keys -> $ok {
-say "Test $ok";
         if $!objects{$ok}.methods{$tag-name} {
           my $m = $!objects{$ok}.methods{$tag-name};
-say "M: {$m.perl}";
           $created-in-object = $m( $!objects{$ok}, $attrs);
-#say "R: {$created-in-object.perl}";
 
           last;
         }
-#
-#        else {
-#          say "Tag type '\$!' of tag $tag-name is not found, ignored";
-#        }
       }
     }
 
@@ -210,7 +152,6 @@ say "M: {$m.perl}";
     else {
       $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
     }
-#say "CE: {$created-in-object.perl} {$child-element.perl}";
 
     # Test if index is defined.
     #
