@@ -69,9 +69,6 @@ highlights are programmed in your favorite editor.
 * [x] Parser is class. Styles can be templated and added in the form of a role.
       The same information can be supplied in the prelude of the source. Of all
       settings, defaults are provided when possible.
-* [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the
-      sxml2xml program will not bother (yet).
-* [ ] Generate a content header!
 * [ ] Xml Namespaces
 * [ ] Comments <!-- ... --> Not needed!
 * [ ] Processing Instructions <?PI ...?>
@@ -94,6 +91,11 @@ highlights are programmed in your favorite editor.
     * [ ] avatar linking
   * [ ] Generating tables
   * [ ] generating graphics, statistics, svg etc
+* Items needed in program sxml2xml
+  * [ ] Exporting generated xml to other programs instead of file
+  * [ ] Generate a content header!
+  * [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the
+        sxml2xml program will not bother (yet).
 
 ## Bugs
 

@@ -5,7 +5,7 @@ use Semi-xml;
 #-------------------------------------------------------------------------------
 # Testing;
 #   Substitution of element names from symbol tables defined in
-#   external modules.
+#   external modules and generating new tags and content.
 #-------------------------------------------------------------------------------
 # Setup
 #
