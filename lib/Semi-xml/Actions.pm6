@@ -7,11 +7,11 @@ class Semi-xml::Text is XML::Text {
   }
 }
 
-role Semi-xml::Actions {
+class Semi-xml::Actions {
   has XML::Document $.xml-document;
 
-  has Hash $.objects;
-  has Hash $.config;
+  has Hash $.objects = {};
+  has Hash $.config = {};
 
   my Hash $config-key = {};
   my Str $config-path;
@@ -25,7 +25,11 @@ role Semi-xml::Actions {
   my Hash $attrs;
   my Str $attr-key;
 
-  my Bool $keep-literal = False;
+  my Bool $keep-literal;
+
+#  submethod BUILD ( ) {
+#    $keep-literal = False;
+#  }
 
   method config-entry ( $match ) {
     if $config-path.defined and $config-value.defined {
@@ -54,21 +58,24 @@ role Semi-xml::Actions {
         else {
           my $use-lib = '';
           if $!config<library>{$key}:exists {
-            $use-lib = "use lib '$!config<library>{$key}';";
+            $use-lib = "\nuse lib '$!config<library>{$key}';";
           }
-          
+
+          my $obj;
           my $code = qq:to/EOCODE/;
-            $use-lib
+            use v6;$use-lib
             use $value;
-            $value.new;
-          EOCODE
-          my $obj = EVAL($code);
+            \$obj = $value.new;
+
+            EOCODE
+#say "Code:\n$code\n";
+          EVAL($code);
           if $! {
             say "Eval error:\n$!\n";
           }
-          
+
           else {
-            $!objects<$key> = $obj;
+            $!objects{$key} = $obj;
           }
         }
       }
@@ -135,7 +142,7 @@ role Semi-xml::Actions {
       for $!objects.keys -> $ok {
         if $!objects{$ok}.methods{$tag-name} {
           my $m = $!objects{$ok}.methods{$tag-name};
-          $created-in-object = $m( $!objects{$ok}, $attrs);
+          $!objects{$ok}.$m( $element-stack[$current-element-idx], $attrs);
 
           last;
         }
@@ -177,12 +184,11 @@ role Semi-xml::Actions {
       #
       $current-element-idx = 0;
       $element-stack[$current-element-idx] = $child-element;
-
       $!xml-document .= new($element-stack[$current-element-idx]);
     }
   }
 
-  method lit-body-end ( $match ) { self.body-end($match) }
+  method lit-body-end ( $match ) { self.body-end($match); }
   
   method body-end ( $match ) {
     # Go back one level .New child tags will overwrite the previous child

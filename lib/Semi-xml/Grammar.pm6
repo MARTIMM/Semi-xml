@@ -4,6 +4,8 @@ use v6;
 grammar Semi-xml::Grammar {
 #  token TOP { <ws> <document> <ws> }
 #  token document { <ws> <tag> <ws> <tag-body> <ws> }
+  say "Actions ", $*ACTIONS.^name;
+
   rule TOP { ( "---" <prelude> "---" ) ** 0..1 <document> }
   rule prelude { <config-entry>* }
   rule config-entry { <config-keypath> ':' <config-value> ';' }

@@ -4,10 +4,12 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
+class Semi-xml:ver<0.8.0> {
 
+  my Semi-xml::Actions $actions;
   has Hash $.styles;
   has Hash $.configuration;
+
   my Hash $defaults = {
     options => {
       doctype => {
@@ -56,8 +58,6 @@ class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
     $content ~~ s/^\s+//;
     $content ~~ s/\s+$//;
 
-#say "C: $content";
-
     # Get user introduced attribute information
     #
     for self.^attributes -> $class-attr {
@@ -72,9 +72,25 @@ class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
       }
     }
 
-#say "P: ", $!styles, ', ', $!configuration;
+    my $sts;
+    my $sub-actions;
+    if $actions.defined {
+      $sub-actions = Semi-xml::Actions.new();
+      $sts = Semi-xml::Grammar.parse( $content, :actions($sub-actions));
+    }
 
-    Semi-xml::Grammar.parse( $content, :actions(self));
+    else {
+      $actions = Semi-xml::Actions.new();
+      $sts = Semi-xml::Grammar.parse( $content, :actions($actions));
+    }
+    
+    die "Failure parsing the content" unless $sts;
+  }
+
+  #-----------------------------------------------------------------------------
+  #
+  method root-element ( --> XML::Element ) {
+    return $actions.xml-document.root;
   }
 
   #-----------------------------------------------------------------------------
@@ -86,7 +102,7 @@ class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
   #-----------------------------------------------------------------------------
   #
   method save ( Str :$filename is copy ) {
-    my Array $cfgs = [ $!config<output>,
+    my Array $cfgs = [ $actions.config<output>,
                        $!configuration<output>,
                        $defaults<output>
                      ];
@@ -107,7 +123,7 @@ class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
   method get-xml-text ( ) {
     # Get the top element name
     #
-    my $root-element = $!xml-document.root.name;
+    my $root-element = $actions.xml-document.root.name;
 
     my Str $document = '';
 
@@ -116,7 +132,7 @@ class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
     if ?$root-element {
       # Check if xml prelude must be shown
       #
-      my Array $cfgs = [ $!config<options><xml-prelude>,
+      my Array $cfgs = [ $actions.config<options><xml-prelude>,
                          $!configuration<options><xml-prelude>,
                          $defaults<options><xml-prelude>
                        ];
@@ -130,7 +146,7 @@ class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
 
       # Check if doctype must be shown
       #
-      $cfgs = [ $!config<options><doctype>,
+      $cfgs = [ $actions.config<options><doctype>,
                 $!configuration<options><doctype>,
                 $defaults<options><doctype>
               ];
@@ -140,7 +156,7 @@ class Semi-xml:ver<0.6.0> does Semi-xml::Actions {
         $document ~= "<!DOCTYPE $root-element$ws$definition>\n";
       }
 
-      $document ~= $!xml-document.root;
+      $document ~= $actions.xml-document.root;
     }
     
     return $document;

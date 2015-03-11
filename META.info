@@ -9,7 +9,9 @@
         "Semi-xml": "lib/Semi-xml.pm6",
         "Semi-xml::Grammar": "lib/Semi-xml/Grammar.pm6",
         "Semi-xml::Actions": "lib/Semi-xml/Actions.pm6",
+        
+        "Sxml::Lib::File": "lib/Sxml/Lib/File.pm6",
     },
     "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-    "version": "0.7.0"
+    "version": "0.8.0"
 }

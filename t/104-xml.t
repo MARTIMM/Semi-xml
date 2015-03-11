@@ -63,7 +63,7 @@ class M::m1 {
   };
 
   has Hash $.methods = {
-    statistics => method ( Hash $attrs ) {
+    statistics => method ( XML::Element $parent, Hash $attrs ) {
       my $table = XML::Element.new(
                     :name('table'),
                     :attribs( { class => 'red', id => 'stat-id'})
@@ -85,7 +85,7 @@ class M::m1 {
         $td.append(XML::Text.new(:text('data 3')));
       }
 
-      return $table;
+      $parent.append($table);
     }
   };
 }
