@@ -62,32 +62,30 @@ class M::m1 {
     }
   };
 
-  has Hash $.methods = {
-    statistics => method ( XML::Element $parent, Hash $attrs ) {
-      my $table = XML::Element.new(
-                    :name('table'),
-                    :attribs( { class => 'red', id => 'stat-id'})
-                  );
+  method statistics ( XML::Element $parent, Hash $attrs ) {
+    my $table = XML::Element.new(
+                  :name('table'),
+                  :attribs( { class => 'red', id => 'stat-id'})
+                );
 
-      for ^4 {
-        my $tr = XML::Element.new(:name('tr'));
-        $table.append($tr);
-        my $td = XML::Element.new(:name('td'));
-        $tr.append($td);
-        $td.append(XML::Text.new(:text('data 1')));
+    for ^4 {
+      my $tr = XML::Element.new(:name('tr'));
+      $table.append($tr);
+      my $td = XML::Element.new(:name('td'));
+      $tr.append($td);
+      $td.append(XML::Text.new(:text('data 1')));
 
-        $td = XML::Element.new(:name('td'));
-        $tr.append($td);
-        $td.append(XML::Text.new(:text('data 2')));
+      $td = XML::Element.new(:name('td'));
+      $tr.append($td);
+      $td.append(XML::Text.new(:text('data 2')));
 
-        $td = XML::Element.new(:name('td'));
-        $tr.append($td);
-        $td.append(XML::Text.new(:text('data 3')));
-      }
-
-      $parent.append($table);
+      $td = XML::Element.new(:name('td'));
+      $tr.append($td);
+      $td.append(XML::Text.new(:text('data 3')));
     }
-  };
+
+    $parent.append($table);
+  }
 }
 
 EOMOD

@@ -14,7 +14,7 @@ spurt( $filename, q:to/EOSX/);
 output/fileext:                         html;
 
 #library/file:                           .;
-module/file:                            Sxml::Lib::File;
+module/file:                            SxmlLib::File;
 ---
 $html [
   $body [

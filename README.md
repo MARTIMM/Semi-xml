@@ -42,27 +42,14 @@ This second form looks much more airy and better to read. There are also some
 other advantages using it this way. It will be even better to read when language
 highlights are programmed in your favorite editor.
 
-* You don't need to write the endtag.
-* Nesting is easy using the brackets.
+* You don't need to write the xml endtags because of nesting.
 * Attribute values do not need quoting when there are no spaces in the value.
-* By using the $ as a start of the tag it can also be interpreted as 
-  being a scalar variable and handled as such replacing the tagname with some
-  other text depending on the type of that variable.
-  When it exists it can do something with it depending on the type.
-  * Undefined: Remove the $, e.g.```$html -> html```
-  * Str: Substitute the strings value., e.g. if ```my Str $xtbl = 'table';```
-    then ```$xtbl -> table```.
-  * Callable: Call a method/sub to return data to be placed on that spot.
-    The attributes will become the arguments to the function. The function must
-    return a name for the tag and new attributes if any.
-* The parser calls methods from the action object to handle all tags and
-  attributes. Hooks can be inserted to handle special items e.g.
-  * Html needs stylesheets in another format than xml. These can be introduced
-    by using a hash.
-  * Some html tags need other processing than the default handling and must
-    be configured before parsing. E.g.
-    * script tags must always have a start and end tag
-    * the content of a pre tag must be left as-is.
+* A tag is introduced by the '$'. Normally this translates just to the tagname.
+  Special handling can be done by adding a character after the '$'. At the
+  moment these are a '.' to provide simple substitution and adding extra
+  attributes. The character '!' is used to call a method from an external module
+  to insert new content or change it. When the rules for substitution or the
+  methods are not found then the tag will be as if no '.' or '!' is used.
 
 ## Ideas and Todo
 
@@ -89,7 +76,7 @@ highlights are programmed in your favorite editor.
 * Replacing anonymous methods in an external module from the hash to class
   methods.
 * Now modules can be used from sxml, the following libs might come in handy
-  * Semi-xml::Lib::File.pm6 - File and link handling.
+  * SxmlLib::File - File and link handling.
     * [x] include other documents
     * [ ] link to page or image checking and generating
     * [ ] avatar linking
@@ -99,6 +86,8 @@ highlights are programmed in your favorite editor.
     * [ ] Comments <!-- ... --> Not needed!. Perhaps ```$!Comment []```.
     * [ ] Processing Instructions <?PI ...?>. Perhaps ```$!PI target=php []```.
     * [ ] Cdata <[CDATA[...]]> Perhaps ```$!CData []```.
+    
+    * [ ] Date and time. ```$!Date []``` and ```$!DateTime```.
 * Items needed in program sxml2xml
   * [ ] Exporting generated xml to other programs instead of file
   * [ ] Generate a content header!
@@ -117,6 +106,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.8,1 * Replacing anonymous methods in an external module from the hash to
+          class methods.
 * 0.8.0 * Include another doc from sxml with Sxml::Lib::File.
 * 0.7.0 * Tagnames: $.name = substitute name and add attributes, $!name call
           function.

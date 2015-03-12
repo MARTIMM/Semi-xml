@@ -31,6 +31,10 @@ class Semi-xml::Actions {
 #    $keep-literal = False;
 #  }
 
+  # All config entries are like: '/a/b/c: v;' This must be evauluated as
+  # "$!config<$config-path>='$config-value'" so it becomes a key value pair
+  # in the config.
+  #
   method config-entry ( $match ) {
     if $config-path.defined and $config-value.defined {
       $config-path ~~ s:g/ \/ /\>\</;
@@ -48,13 +52,20 @@ class Semi-xml::Actions {
     $config-value = ~$match;
   }
 
+  # After all of the prelude is stored, check if the 'module' keyword is used.
+  # If so, evaluate the module and save the created object in $!objects. E.g.
+  # suppose a config 'module/file: Sxml::Lib::File;' is used then the object
+  # created from that module call '$obj = Sxml::Lib::File.new();' and is stored
+  # like '$!objects<file> = $obj;'. A library path is used when config key
+  # 'library/file: path/to/mod' is used in previous example.
+  #
   method prelude ( $match ) {
     if $!config<module>:exists {
       for $!config<module>.kv -> $key, $value {
         if $!objects{$key}:exists {
           say "'module/$key:  $value;' found before, ignored";
         }
-        
+
         else {
           my $use-lib = '';
           if $!config<library>{$key}:exists {
@@ -132,20 +143,25 @@ class Semi-xml::Actions {
           my $s = $!objects{$ok}.symbols{$tag-name};
           $tag-name = $s<tag-name>;
           for $s<attributes>.kv -> $k,$v { $attrs{$k} = $v; }
-          
+
           last;
         }
       }
     }
 
     elsif $tag-type eq '$!' {
-      for $!objects.keys -> $ok {
-        if $!objects{$ok}.methods{$tag-name} {
-          my $m = $!objects{$ok}.methods{$tag-name};
-          $!objects{$ok}.$m( $element-stack[$current-element-idx], $attrs);
 
+    for $!objects.keys -> $ok {
+      if $!objects{$ok}.can($tag-name) {
+        $!objects{$ok}."$tag-name"( $element-stack[$current-element-idx],
+                                    $attrs
+                                  );
+#        if $!objects{$ok}.methods{$tag-name} {
+#          my $m = $!objects{$ok}.methods{$tag-name};
+#          $!objects{$ok}.$m( $element-stack[$current-element-idx], $attrs);
+#
           last;
-        }
+       }
       }
     }
 
