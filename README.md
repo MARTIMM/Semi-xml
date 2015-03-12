@@ -70,9 +70,6 @@ highlights are programmed in your favorite editor.
       The same information can be supplied in the prelude of the source. Of all
       settings, defaults are provided when possible.
 * [ ] Xml Namespaces
-* [ ] Comments <!-- ... --> Not needed!
-* [ ] Processing Instructions <?PI ...?>
-* [ ] Cdata <[CDATA[...]]>
 * [ ] '#' commenting should be improved using grammar instead of overall removal
 * [ ] Dependencies on other files
 * External modules
@@ -86,13 +83,22 @@ highlights are programmed in your favorite editor.
 * [ ] Documentation.
 * [ ] Tutorials.
 * [ ] Better error messages when parser fails.
-* Now modules can be inserted, the following might come in handy
+* [ ] Add another set of brackets which will not allow child elements. This
+      is handy to write javascript and or stylesheets whithout the need to
+      escape every other character like the $ and #. [( )] perhaps?
+* Replacing anonymous methods in an external module from the hash to class
+  methods.
+* Now modules can be used from sxml, the following libs might come in handy
   * Semi-xml::Lib::File.pm6 - File and link handling.
     * [x] include other documents
     * [ ] link to page or image checking and generating
     * [ ] avatar linking
   * [ ] Generating tables
   * [ ] generating graphics, statistics, svg etc
+  * A by default included library to handle special items like
+    * [ ] Comments <!-- ... --> Not needed!. Perhaps ```$!Comment []```.
+    * [ ] Processing Instructions <?PI ...?>. Perhaps ```$!PI target=php []```.
+    * [ ] Cdata <[CDATA[...]]> Perhaps ```$!CData []```.
 * Items needed in program sxml2xml
   * [ ] Exporting generated xml to other programs instead of file
   * [ ] Generate a content header!
@@ -102,12 +108,18 @@ highlights are programmed in your favorite editor.
 ## Bugs
 
 Still at omega state, bugs come and go(hopefully).
+* If dir and file is ```X/abc.sxml``` and there is a prelude used with
+  ```output/filename: index;```, then running the file the result file come at
+  the right spot. Depending on the default, the result will come in dir X. Using
+  ```output/filename: ../index;``` the result will come in the directory below
+  the users directory. Need to think about this what is best. Maybe add a config
+  item, something like filepath.
 
 ## Changes
 
 * 0.8.0 * Include another doc from sxml with Sxml::Lib::File.
 * 0.7.0 * Tagnames: $.name = substitute name and add attributes, $!name call
-          function
+          function.
 * 0.6.1
   * Trying out several formats for tags. $tag and ..tag. Then use $html for some
     other purpose like substitution etc. and ..tag for normal cases. It happens
