@@ -11,6 +11,7 @@
         "Semi-xml::Actions": "lib/Semi-xml/Actions.pm6",
         
         "SxmlLib::File": "lib/SxmlLib/File.pm6",
+        "SxmlLib::Html::List": "lib/SxmlLib/Html/List.pm6",
     },
     "source-url": "git://github.com/MARTIMM/Semi-xml.git",
     "version": "0.8.2"
