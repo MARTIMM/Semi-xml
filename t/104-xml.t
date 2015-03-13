@@ -21,12 +21,12 @@ module/m1:                              M::m1;
 ---
 $html [
   $head [
-    $style type=text/css |[
+    $style type=text/css [=
         .green {
           color: \#0f0;
           background-color: \#f0f;
         }
-    ]|
+    ]
   ]
 
   $body [

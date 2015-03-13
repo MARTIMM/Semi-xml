@@ -86,7 +86,6 @@ highlights are programmed in your favorite editor.
     * [ ] Comments <!-- ... --> Not needed!. Perhaps ```$!Comment []```.
     * [ ] Processing Instructions <?PI ...?>. Perhaps ```$!PI target=php []```.
     * [ ] Cdata <[CDATA[...]]> Perhaps ```$!CData []```.
-    
     * [ ] Date and time. ```$!Date []``` and ```$!DateTime```.
 * Items needed in program sxml2xml
   * [ ] Exporting generated xml to other programs instead of file

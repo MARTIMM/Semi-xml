@@ -27,10 +27,6 @@ class Semi-xml::Actions {
 
   my Bool $keep-literal;
 
-#  submethod BUILD ( ) {
-#    $keep-literal = False;
-#  }
-
   # All config entries are like: '/a/b/c: v;' This must be evauluated as
   # "$!config<$config-path>='$config-value'" so it becomes a key value pair
   # in the config.
@@ -116,16 +112,25 @@ class Semi-xml::Actions {
   # Before the body starts, save the tag name and create the element with
   # its attributes.
   #
-  method lit-body-start ( $match ) {
-    $keep-literal = True;
+#  method lit-body-start ( $match ) {
+#    $keep-literal = True;
+#    self.body-start-process($match);
+#  }
+  
+  method no-elements-start ( $match ) {
+#    $keep-literal = True;
     self.body-start-process($match);
   }
   
   method body-start ( $match ) {
-    $keep-literal = False;
+#    $keep-literal = False;
     self.body-start-process($match);
   }
-  
+
+  method keep-literal ( $match ) {
+    $keep-literal = (~$match eq '=' ?? True !! False);
+  }
+
   method body-start-process ( $match ) {
 
     my XML::Element $created-in-object;
@@ -150,12 +155,11 @@ class Semi-xml::Actions {
     }
 
     elsif $tag-type eq '$!' {
-
-    for $!objects.keys -> $ok {
-      if $!objects{$ok}.can($tag-name) {
-        $!objects{$ok}."$tag-name"( $element-stack[$current-element-idx],
-                                    $attrs
-                                  );
+      for $!objects.keys -> $ok {
+        if $!objects{$ok}.can($tag-name) {
+          $!objects{$ok}."$tag-name"( $element-stack[$current-element-idx],
+                                      $attrs
+                                    );
 #        if $!objects{$ok}.methods{$tag-name} {
 #          my $m = $!objects{$ok}.methods{$tag-name};
 #          $!objects{$ok}.$m( $element-stack[$current-element-idx], $attrs);
@@ -204,8 +208,8 @@ class Semi-xml::Actions {
     }
   }
 
-  method lit-body-end ( $match ) { self.body-end($match); }
-  
+#  method lit-body-end ( $match ) { self.body-end($match); }
+
   method body-end ( $match ) {
     # Go back one level .New child tags will overwrite the previous child
     # on the stack as those are needed anymore.
@@ -213,19 +217,25 @@ class Semi-xml::Actions {
     $current-element-idx--;
   }
 
+  method no-elements-text ( $match ) { return self.body-text($match); }
+
   method body-text ( $match ) {
     # Add textual items after cleanup of spaces.
-    # Must be tested when there are tags for which content must be kept
-    # exactly as is.
     #
     my $xml;
     my $esc-text = ~$match;
     $esc-text ~~ s:g/\\//;
+
+    # Test if body starts with '[='.for which content must be kept
+    # exactly as is.
+    #
     if $keep-literal {
       $xml = Semi-xml::Text.new(:text($esc-text));
     }
 
     else {
+      $esc-text ~~ s/^\s+//;
+      $esc-text ~~ s/\s+$//;
       $xml = XML::Text.new(:text($esc-text));
     }
 

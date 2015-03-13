@@ -25,21 +25,24 @@ output/fileext:                         html;           # Default xml
 ---
 $html [
   $head [
-    $style type=text/css |[
+    $style type=text/css [=
       .green {
         color: \#0f0;
         background-color: \#f0f;
       }
-    ]|
+    ]
+    $script ([
+      var a_tags = $('a');
+    ])
   ]
 
   $body [
     $h1 class=green [ Data from file ]
     $table [
-      $tr |[
+      $tr [
         $th[ header ]
         $td[ data ]
-      ]|
+      ]
     ]
   ]
 ]
@@ -62,6 +65,8 @@ ok $xml-text ~~ m/
       }'
       /, 'Check for literal text in css';
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, 'Th after tr found';
+
+ok $xml-text ~~ ms/var a_tags '=' "\$('a');"/, 'Check piece of javascript';
 
 say $xml-text;
 

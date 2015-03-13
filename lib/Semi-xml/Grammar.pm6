@@ -42,28 +42,47 @@ grammar Semi-xml::Grammar {
   # 
   token attribute { <attr-key> '=' <attr-value-spec> }
   token attr-key { <identifier> }
-  token attr-value-spec { \' <attr-value> \' || \" <attr-value> \" || <attr-value> }
+  token attr-value-spec { \' <attr-value> \'
+                          || \" <attr-value> \"
+                          || <attr-value>
+                        }
   token attr-value { <-[\s]>+ }
 
-  # The tag body is anything enclosed in [...] or |[...]|. The first situation
-  # is the normal one of which all spaces will be reduced to one space and
-  # leading and trailing spaces are removed. The second form is used to save
-  # spacing as is.
+  # The tag body is anything enclosed in [...], [=...] or ([...]). The first
+  # situation is the normal one of which all spaces will be reduced to one
+  # space and leading and trailing spaces are removed. The second form is
+  # used to save spacing as is. The third will not accept any child elements
+  # so the $ sign is free to use without escaping it. Useful to insert
+  # javascript code. ] and # still needs to be escaped when needed.
   #
-  rule tag-body { <normal-body> || <lit-body> }
+#  rule tag-body { <normal-body> || <lit-body> || <no-elements-body> }
+  rule tag-body { <normal-body> || <no-elements-body> }
 
   rule normal-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
   token body-end { ']' }
 
-  rule lit-body { <lit-body-start> ~ <lit-body-end> <body-contents> }
-  token lit-body-start { '|[' }
-  token lit-body-end { ']|' }
+#  rule lit-body { <lit-body-start> ~ <lit-body-end> <body-contents> }
+#  token lit-body-start { '|[' }
+#  token lit-body-end { ']|' }
+
+#  rule no-elements-body { <no-elements-start> ~ <no-elements-end> <body-contents> }
+  rule no-elements-body { <no-elements-start> ~ <no-elements-end>
+                          <no-elements-contents>
+                        }
+  token no-elements-start { '([' }
+  token no-elements-end { '])' }
+
+  rule no-elements-contents { ( <no-elements-text> )* }
+  token no-elements-text { ( <-[\]\\]> || <body-esc> )+ }
 
   # The content can be anything and new document tags. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
-  token body-contents { ( <body-text> || <document> )* }
+#  rule body-contents { ( <keep-literal> || <no-elements> )? ( <body-text> || <document> )* }
+  rule body-contents { ( <keep-literal> || <no-elements> )? ( <body-text> || <document> )* }
+  token keep-literal { '=' }
+  token no-elements { '-' }
   token body-text { ( <-[\$\]\\]> || <body-esc> )+ }
   token body-esc { '\$' || '\[' || '\]' || '\\' }
 
