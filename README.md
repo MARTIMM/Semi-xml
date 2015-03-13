@@ -70,9 +70,9 @@ highlights are programmed in your favorite editor.
 * [ ] Documentation.
 * [ ] Tutorials.
 * [ ] Better error messages when parser fails.
-* [ ] Add another set of brackets which will not allow child elements. This
+* [x] Add another set of brackets which will not allow child elements. This
       is handy to write javascript and or stylesheets whithout the need to
-      escape every other character like the $ and #. [( )] perhaps?
+      escape every other character like the $ and #. [-...] perhaps?
 * Replacing anonymous methods in an external module from the hash to class
   methods.
 * Now modules can be used from sxml, the following libs might come in handy
@@ -83,7 +83,7 @@ highlights are programmed in your favorite editor.
   * [ ] Generating tables
   * [ ] generating graphics, statistics, svg etc
   * A by default included library to handle special items like
-    * [ ] Comments <!-- ... --> Not needed!. Perhaps ```$!Comment []```.
+    * [ ] Comments <!-- ... --> Not needed?. Perhaps ```$!Comment []```.
     * [ ] Processing Instructions <?PI ...?>. Perhaps ```$!PI target=php []```.
     * [ ] Cdata <[CDATA[...]]> Perhaps ```$!CData []```.
     * [ ] Date and time. ```$!Date []``` and ```$!DateTime```.
@@ -104,6 +104,13 @@ Still at omega state, bugs come and go(hopefully).
   item, something like filepath.
 
 ## Changes
+
+* 0.8.2
+  * Syntax modifications and additions
+    [...]               Normal processing. May have nested tags.
+    |[...]| -> [=...]   Keep contant as is written
+    [-...]              Only text content and no neted tags.
+    [+...]              Same as above but keep cotent as written.
 
 * 0.8,1 * Replacing anonymous methods in an external module from the hash to
           class methods.

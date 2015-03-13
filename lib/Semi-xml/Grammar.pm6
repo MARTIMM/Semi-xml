@@ -48,47 +48,34 @@ grammar Semi-xml::Grammar {
                         }
   token attr-value { <-[\s]>+ }
 
-  # The tag body is anything enclosed in [...], [=...] or ([...]). The first
+  # The tag body is anything enclosed in [...], [=...] or [-...]. The first
   # situation is the normal one of which all spaces will be reduced to one
   # space and leading and trailing spaces are removed. The second form is
   # used to save spacing as is. The third will not accept any child elements
   # so the $ sign is free to use without escaping it. Useful to insert
-  # javascript code. ] and # still needs to be escaped when needed.
+  # javascript code. ] and # still needs to be escaped when needed. To keep the
+  # content of [- ...] also as is written write [+ ...].
   #
-#  rule tag-body { <normal-body> || <lit-body> || <no-elements-body> }
-#  rule tag-body { <normal-body> || <no-elements-body> }
   rule tag-body { <normal-body> }
 
   rule normal-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
   token body-end { ']' }
 
-#  rule lit-body { <lit-body-start> ~ <lit-body-end> <body-contents> }
-#  token lit-body-start { '|[' }
-#  token lit-body-end { ']|' }
-
-#  rule no-elements-body { <no-elements-start> ~ <no-elements-end> <body-contents> }
-#  rule no-elements-body { <no-elements-start> ~ <no-elements-end>
-#                          <no-elements-contents>
-#                        }
-#  token no-elements-start { '([' }
-#  token no-elements-end { '])' }
-
-#  rule no-elements-contents { ( <no-elements-text> )* }
-  token no-elements-text { ( <-[\]\\]> || <body-esc> )+ }
-
-  # The content can be anything and new document tags. To use the brackets and
+  # The content can be anything mixed with document tags except following the
+  # no-elements character. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
-#  rule body-contents { ( <keep-literal> || <no-elements> )? ( <body-text> || <document> )* }
-  rule body-contents { ( <no-elements> || <no-elements-literal> ) ( <no-elements-text> )*
+  rule body-contents {    ( <no-elements> || <no-elements-literal> )
+                          ( <no-elements-text> )*
                        || <keep-literal>? ( <body-text> || <document> )*
                      }
-#  rule body-contents { ( <keep-literal> || <no-elements> )? ( <body-text> || <document> )* }
+
   token keep-literal { '=' }
   token no-elements { '-' }
   token no-elements-literal { '+' }
   token body-text { ( <-[\$\]\\]> || <body-esc> )+ }
+  token no-elements-text { ( <-[\]\\]> || <body-esc> )+ }
   token body-esc { '\$' || '\[' || '\]' || '\\' }
 
   # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
