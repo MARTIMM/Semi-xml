@@ -31,9 +31,9 @@ $html [
         background-color: \#f0f;
       }
     ]
-    $script ([
+    $script [+
       var a_tags = $('a');
-    ])
+    ]
   ]
 
   $body [

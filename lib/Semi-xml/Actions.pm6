@@ -117,14 +117,18 @@ class Semi-xml::Actions {
 #    self.body-start-process($match);
 #  }
   
-  method no-elements-start ( $match ) {
+#  method no-elements-start ( $match ) {
 #    $keep-literal = True;
-    self.body-start-process($match);
-  }
+#    self.body-start-process($match);
+#  }
   
   method body-start ( $match ) {
 #    $keep-literal = False;
     self.body-start-process($match);
+  }
+
+  method no-elements-literal ( $match ) {
+    $keep-literal = (~$match eq '+' ?? True !! False);
   }
 
   method keep-literal ( $match ) {

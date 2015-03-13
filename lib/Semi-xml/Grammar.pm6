@@ -56,7 +56,8 @@ grammar Semi-xml::Grammar {
   # javascript code. ] and # still needs to be escaped when needed.
   #
 #  rule tag-body { <normal-body> || <lit-body> || <no-elements-body> }
-  rule tag-body { <normal-body> || <no-elements-body> }
+#  rule tag-body { <normal-body> || <no-elements-body> }
+  rule tag-body { <normal-body> }
 
   rule normal-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
@@ -67,22 +68,26 @@ grammar Semi-xml::Grammar {
 #  token lit-body-end { ']|' }
 
 #  rule no-elements-body { <no-elements-start> ~ <no-elements-end> <body-contents> }
-  rule no-elements-body { <no-elements-start> ~ <no-elements-end>
-                          <no-elements-contents>
-                        }
-  token no-elements-start { '([' }
-  token no-elements-end { '])' }
+#  rule no-elements-body { <no-elements-start> ~ <no-elements-end>
+#                          <no-elements-contents>
+#                        }
+#  token no-elements-start { '([' }
+#  token no-elements-end { '])' }
 
-  rule no-elements-contents { ( <no-elements-text> )* }
+#  rule no-elements-contents { ( <no-elements-text> )* }
   token no-elements-text { ( <-[\]\\]> || <body-esc> )+ }
 
   # The content can be anything and new document tags. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
 #  rule body-contents { ( <keep-literal> || <no-elements> )? ( <body-text> || <document> )* }
-  rule body-contents { ( <keep-literal> || <no-elements> )? ( <body-text> || <document> )* }
+  rule body-contents { ( <no-elements> || <no-elements-literal> ) ( <no-elements-text> )*
+                       || <keep-literal>? ( <body-text> || <document> )*
+                     }
+#  rule body-contents { ( <keep-literal> || <no-elements> )? ( <body-text> || <document> )* }
   token keep-literal { '=' }
   token no-elements { '-' }
+  token no-elements-literal { '+' }
   token body-text { ( <-[\$\]\\]> || <body-esc> )+ }
   token body-esc { '\$' || '\[' || '\]' || '\\' }
 
