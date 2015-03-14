@@ -58,7 +58,12 @@ grammar Semi-xml::Grammar {
   #
   rule tag-body { <normal-body> }
 
-  rule normal-body { <body-start> ~ <body-end> <body-contents> }
+  # Changed from rule into token because of body character '[' followed up with
+  # optional '+', '-' and '=' may not be separated by a space. Then content
+  # starting with a those characters doesn't have to be escaped when they are
+  # used. Just use a space in front. Can happen in tables showing numbers.
+  #
+  token normal-body { <body-start> ~ <body-end> <body-contents> }
   token body-start { '[' }
   token body-end { ']' }
 
