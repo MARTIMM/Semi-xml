@@ -34,7 +34,13 @@ grammar Semi-xml::Grammar {
   # $table class=bussiness id=sect1 
   #
   rule tag { <tag-name> ( <attribute> )* }
-  token tag-name { ( '$.' || '$!' || '$' ) <identifier> }
+#  token tag-name { ( '$.' || '$!' || '$' ) <identifier> }
+  token tag-name { <tag-type> <identifier> }
+  token tag-type {   '$.'
+                  || ('$!' <identifier> '.' )
+                  || '$'
+                 }
+                  
 
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in

@@ -21,6 +21,7 @@ class Semi-xml::Actions {
   my Int $current-element-idx;
 
   my Str $tag-name;
+  my Str $tag-type;
 
   my Hash $attrs;
   my Str $attr-key;
@@ -89,12 +90,14 @@ class Semi-xml::Actions {
     }
   }
 
+  method tag-type ( $match ) {
+    $tag-type = ~$match;
+  }
+
   method tag-name ( $match ) {
     # Initialize on start of a new tag. Everything of any previous tag is
     # handled and stored.
     #
-    $tag-name = Str;
-
     $attr-key = Str;
     $attrs = {};
 
@@ -139,9 +142,7 @@ class Semi-xml::Actions {
 
     my XML::Element $created-in-object;
     
-    $tag-name ~~ s/^( \$\! || \$\. || \$ )//;
-    my $tag-type = $/[0];
-
+    $tag-name ~~ s/^$tag-type//;
     if $tag-type eq '$' {
       # NOOP, all is fine
     }
@@ -158,19 +159,14 @@ class Semi-xml::Actions {
       }
     }
 
-    elsif $tag-type eq '$!' {
-      for $!objects.keys -> $ok {
-        if $!objects{$ok}.can($tag-name) {
-          $!objects{$ok}."$tag-name"( $element-stack[$current-element-idx],
-                                      $attrs
-                                    );
-#        if $!objects{$ok}.methods{$tag-name} {
-#          my $m = $!objects{$ok}.methods{$tag-name};
-#          $!objects{$ok}.$m( $element-stack[$current-element-idx], $attrs);
-#
-          last;
+    elsif $tag-type ~~ m/^'$!'/ {
+      $tag-type ~~ m/\$\!(<-[\.]>+)/;
+      my $module = $/[0].Str;
+        if $!objects{$module}.can($tag-name) {
+          $!objects{$module}."$tag-name"( $element-stack[$current-element-idx],
+                                          $attrs
+                                        );
        }
-      }
     }
 
 #    $tag-name ~~ s/^\s.*//;

@@ -105,6 +105,16 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.8.3
+  * Again syntax change for using module methods. The ```$!method ...``` is
+    extended to be ```$!module.method ...``` when method can be found in a
+    module set in the config. E.g.
+    ```
+    ---
+    module/file: SxmlLib::File;
+    ---
+    $!file.dir-list dir=. []
+    ```
 * 0.8.2
   * Syntax modifications and additions
     [...]               Normal processing. May have nested tags.

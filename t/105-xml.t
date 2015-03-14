@@ -18,7 +18,7 @@ module/file:                            SxmlLib::File;
 ---
 $html [
   $body [
-    $!include type=include reference=t/D/d1.sxml []
+    $!file.include type=include reference=t/D/d1.sxml []
   ]
 ]
 EOSX
@@ -26,7 +26,7 @@ EOSX
 #-------------------------------------------------------------------------------
 # Prepare directory and module to load
 #
-ok mkdir('t/D'), 'Directory D created';
+mkdir('t/D');
 spurt( 't/D/d1.sxml', q:to/EOSXML/);
 $h1 [ Intro ]
 $p [

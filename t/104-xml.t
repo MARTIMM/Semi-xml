@@ -38,7 +38,7 @@ $html [
       ]
     ]
 
-    $!statistics data-weather=set1 []
+    $!m1.statistics data-weather=set1 []
     $p [ bla ]
   ]
 ]
@@ -47,7 +47,7 @@ EOSX
 #-------------------------------------------------------------------------------
 # Prepare directory and module to load
 #
-ok mkdir('t/M'), 'Directory M created';
+mkdir('t/M');
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
 use XML;
 
