@@ -10,7 +10,7 @@ use XML;
 # Package cannot be placed in Semi-xml/Lib and named File.pm6. Evaluation seems
 # to fail not finding the symbol &File when doing so.
 #
-package SxmlLib {
+package SxmlLib:auth<https://github.com/MARTIMM> {
 
   class File {
     has Hash $.symbols = {};
