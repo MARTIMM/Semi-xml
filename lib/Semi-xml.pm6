@@ -5,7 +5,7 @@ use Semi-xml::Actions;
 #-------------------------------------------------------------------------------
 #
 class Semi-xml:ver<0.8.2>:auth<https://github.com/MARTIMM> {
-
+list
   my Semi-xml::Actions $actions;
   has Hash $.styles;
   has Hash $.configuration;
@@ -83,7 +83,7 @@ class Semi-xml:ver<0.8.2>:auth<https://github.com/MARTIMM> {
       $actions = Semi-xml::Actions.new();
       $sts = Semi-xml::Grammar.parse( $content, :actions($actions));
     }
-    
+
     die "Failure parsing the content" unless $sts;
   }
 
@@ -113,7 +113,7 @@ class Semi-xml:ver<0.8.2>:auth<https://github.com/MARTIMM> {
 
       $filename ~= ".$fileext";
     }
-    
+
     my $document = self.get-xml-text;
     spurt( $filename, $document);
   }
@@ -158,7 +158,7 @@ class Semi-xml:ver<0.8.2>:auth<https://github.com/MARTIMM> {
 
       $document ~= $actions.xml-document.root;
     }
-    
+
     return $document;
   }
 
