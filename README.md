@@ -63,6 +63,7 @@ highlights are programmed in your favorite editor.
   * [x] Need library paths to find modules
   * [x] Introduced via source prelude
   * [ ] Introdused via role
+  * [ ] Introdused via defaults
   * [x] tag name substitution and attribute additions. Format is ```$.tagname
         <attrs> [<body>]```.
   * [x] insertion of tags and body using attributes as arguments to
@@ -86,7 +87,7 @@ highlights are programmed in your favorite editor.
     * [ ] Comments <!-- ... --> Not needed?. Perhaps ```$!Comment []```.
     * [ ] Processing Instructions <?PI ...?>. Perhaps ```$!PI target=php []```.
     * [ ] Cdata <[CDATA[...]]> Perhaps ```$!CData []```.
-    * [ ] Date and time. ```$!Date []``` and ```$!DateTime```.
+    * [x] Date and time. ```$!SxmlCore.date []``` and ```$!SxmlCore.date-time```.
 * Items needed in program sxml2xml
   * [ ] Exporting generated xml to other programs instead of file
   * [ ] Generate a content header!
@@ -105,6 +106,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.9.0
+  * Add core sxml core methods, $!SxmlCore.date and $!SxmlCore.date-time
 * 0.8.4
   * Done the same for the ```$.tag```. It has become ```$.module.tag```.
   * Bugfix in quoted attributes.

@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.8.4>:auth<https://github.com/MARTIMM> {
+class Semi-xml:ver<0.9.0>:auth<https://github.com/MARTIMM> {
 list
   my Semi-xml::Actions $actions;
   has Hash $.styles;

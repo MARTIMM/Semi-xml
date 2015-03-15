@@ -7,10 +7,31 @@ class Semi-xml::Text is XML::Text {
   }
 }
 
+# Core module with common used methods
+#
+class Semi-xml::SxmlCore {
+
+  has Hash $.symbols = {};
+
+  # $SxmlCore.date []
+  #
+  method date ( XML::Element $parent, Hash $attrs ) {
+    $parent.append(XML::Text.new(:text(Date.today().Str)));
+  }
+
+  # $SxmlCore.date-time []
+  #
+  method date-time ( XML::Element $parent, Hash $attrs ) {
+    $parent.append(XML::Text.new(:text(DateTime.now().Str)));
+  }
+}
+
 class Semi-xml::Actions {
   has XML::Document $.xml-document;
 
-  has Hash $.objects = {};
+  # Objects hash with one predefined object for core methods
+  #
+  has Hash $.objects = { SxmlCore => Semi-xml::SxmlCore.new()};
   has Hash $.config = {};
 
   my Hash $config-key = {};
