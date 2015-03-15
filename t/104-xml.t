@@ -31,9 +31,11 @@ $html [
 
   $body [
     $h1 class=green [ Data from file ]
-    $.special-table data-x=tst [
+    $.m1.special-table data-x=tst [
       $tr [
         $th[ header ]
+      ]
+      $tr [
         $td[ data ]
       ]
     ]
@@ -97,7 +99,7 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 ok $xml-text ~~ m/('<table'.*)**2/, 'Check subst and gen of $.special-table and $!statistics';
 ok $xml-text ~~ m/class\=\"big\-table\"/, 'Check inserted class attribute';

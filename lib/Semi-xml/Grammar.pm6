@@ -36,7 +36,7 @@ grammar Semi-xml::Grammar {
   rule tag { <tag-name> ( <attribute> )* }
 #  token tag-name { ( '$.' || '$!' || '$' ) <identifier> }
   token tag-name { <tag-type> <identifier> }
-  token tag-type {   '$.'
+  token tag-type {   ('$.' <identifier> '.' )
                   || ('$!' <identifier> '.' )
                   || '$'
                  }

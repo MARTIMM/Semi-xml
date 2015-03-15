@@ -115,21 +115,6 @@ class Semi-xml::Actions {
   # Before the body starts, save the tag name and create the element with
   # its attributes.
   #
-#  method lit-body-start ( $match ) {
-#    $keep-literal = True;
-#    self.body-start-process($match);
-#  }
-  
-#  method no-elements-start ( $match ) {
-#    $keep-literal = True;
-#    self.body-start-process($match);
-#  }
-  
-  method body-start ( $match ) {
-#    $keep-literal = False;
-    self.body-start-process($match);
-  }
-
   method no-elements-literal ( $match ) {
     $keep-literal = (~$match eq '+' ?? True !! False);
   }
@@ -138,55 +123,46 @@ class Semi-xml::Actions {
     $keep-literal = (~$match eq '=' ?? True !! False);
   }
 
-  method body-start-process ( $match ) {
-
-    my XML::Element $created-in-object;
-    
+  method body-start ( $match ) {
     $tag-name ~~ s/^$tag-type//;
-    if $tag-type eq '$' {
-      # NOOP, all is fine
-    }
 
-    elsif $tag-type eq '$.' {
-      for $!objects.keys -> $ok {
-        if $!objects{$ok}.symbols{$tag-name} {
-          my $s = $!objects{$ok}.symbols{$tag-name};
+    if $tag-type ~~ m/^'$.'/ {
+      $tag-type ~~ m/\$\.(<-[\.]>+)/;
+      my $module = $/[0].Str;
+      if $!objects{$module}.symbols{$tag-name}:exists {
+          my $s = $!objects{$module}.symbols{$tag-name};
           $tag-name = $s<tag-name>;
           for $s<attributes>.kv -> $k,$v { $attrs{$k} = $v; }
 
-          last;
-        }
+          self!register-element( $tag-name, $attrs);
       }
     }
 
     elsif $tag-type ~~ m/^'$!'/ {
       $tag-type ~~ m/\$\!(<-[\.]>+)/;
       my $module = $/[0].Str;
-        if $!objects{$module}.can($tag-name) {
-          $!objects{$module}."$tag-name"( $element-stack[$current-element-idx],
-                                          $attrs
-                                        );
-       }
+      if $!objects{$module}.can($tag-name) {
+        $!objects{$module}."$tag-name"( $element-stack[$current-element-idx],
+                                        $attrs
+                                      );
+      }
+
+      $current-element-idx++;
     }
 
-#    $tag-name ~~ s/^\s.*//;
-#    $tag-name ~~ s/\s.*$//;
-
-    my $child-element;
-    if $created-in-object.defined
-       and ( $created-in-object.isa(XML::Element)
-           or $created-in-object.isa(XML::Text)
-           ) {
-     
-      $child-element = $created-in-object;
+    elsif $tag-type eq '$' {
+      self!register-element( $tag-name, $attrs);
     }
     
     else {
-      $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
+    
     }
+  }
 
+  method !register-element ( Str $tag-name, Hash $attrs ) {
     # Test if index is defined.
     #
+    my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
     if $current-element-idx.defined {
       $element-stack[$current-element-idx].append($child-element);
       $element-stack[$current-element-idx + 1] = $child-element;
@@ -207,8 +183,6 @@ class Semi-xml::Actions {
       $!xml-document .= new($element-stack[$current-element-idx]);
     }
   }
-
-#  method lit-body-end ( $match ) { self.body-end($match); }
 
   method body-end ( $match ) {
     # Go back one level .New child tags will overwrite the previous child
