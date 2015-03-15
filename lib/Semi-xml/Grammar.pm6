@@ -48,11 +48,13 @@ grammar Semi-xml::Grammar {
   # 
   token attribute { <attr-key> '=' <attr-value-spec> }
   token attr-key { <identifier> }
-  token attr-value-spec { \' <attr-value> \'
-                          || \" <attr-value> \"
-                          || <attr-value>
+  token attr-value-spec {    (\' <attr-q-value> \')
+                          || (\" <attr-qq-value> \")
+                          || <attr-s-value>
                         }
-  token attr-value { <-[\s]>+ }
+  token attr-q-value { <-[\']>+ }
+  token attr-qq-value { <-[\"]>+ }
+  token attr-s-value { <-[\s]>+ }
 
   # The tag body is anything enclosed in [...], [=...] or [-...]. The first
   # situation is the normal one of which all spaces will be reduced to one

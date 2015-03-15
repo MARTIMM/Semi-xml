@@ -107,6 +107,7 @@ Still at omega state, bugs come and go(hopefully).
 
 * 0.8.4
   * Done the same for the ```$.tag```. It has become ```$.module.tag```.
+  * Bugfix in quoted attributes.
 * 0.8.3
   * Again syntax change for using module methods. The ```$!method ...``` is
     extended to be ```$!module.method ...``` when method can be found in a

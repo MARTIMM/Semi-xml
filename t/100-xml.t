@@ -8,6 +8,7 @@ use Semi-xml;
 #   Translation of smi-xml text
 #   Control of output via role
 #   Result to text
+#   test attributes
 #-------------------------------------------------------------------------------
 # Setup
 #
@@ -48,6 +49,9 @@ $html [
   $body [
     $h1 class=green id=h1001 [ Introduction ]
     $p class=green [ Piece of \[text\]. See $a href=google.com [google]]
+    $x class='green blue' [ empty but not ]
+    $y data_1='quoted"test"' [ empty but not ]
+    $z data_2="double 'quoted' tests" [ empty but not ]
     $br[]
   ]
 ]
@@ -60,15 +64,21 @@ $x.parse(content => $sx-text);
 # See the result
 #
 my Str $xml-text = ~$x;
-ok $xml-text ~~ ms/\<\?xml version\=\"1\.0\" encoding\=\"UTF\-8\"\?\>/, 'Xml prelude found';
+ok $xml-text ~~ ms/'<?xml' 'version="1.0"' 'encoding="UTF-8"?>'/,
+   'Xml prelude found';
 ok $xml-text ~~ ms/\<\!DOCTYPE html\>/, 'Doctype found';
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text ~~ m/\<head\>/, 'Head found';
 ok $xml-text ~~ m/\<body\>/, 'Body found';
 ok $xml-text ~~ m/\<br\/\>/, 'Empty tag br found';
 
+ok $xml-text ~~ m/'<p class="green">'/, 'Class test 1';
+ok $xml-text ~~ m/'<x class="green blue">'/, 'Class test 2';
+ok $xml-text ~~ m/'<y data_1="quoted&quot;test&quot;">'/, 'Class test 3';
+ok $xml-text ~~ m/'<z data_2="double \'quoted\' tests">'/, 'Class test 4';
 
-say $xml-text;
+
+#say $xml-text;
 
 
 

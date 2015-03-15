@@ -108,8 +108,21 @@ class Semi-xml::Actions {
     $attr-key = ~$match;
   }
 
-  method attr-value ( $match ) {
-    $attrs{$attr-key} = ~$match;
+  method attr-s-value ( $match ) {
+    self!attr-value(~$match);
+  }
+
+  method attr-q-value ( $match ) {
+    self!attr-value(~$match);
+  }
+
+  method attr-qq-value ( $match ) {
+    self!attr-value(~$match);
+  }
+
+  method !attr-value ( $m is copy ) {
+    $m ~~ s:g/\"/\&quot;/;
+    $attrs{$attr-key} = $m;
   }
 
   # Before the body starts, save the tag name and create the element with
