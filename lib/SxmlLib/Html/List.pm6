@@ -10,49 +10,61 @@ use XML;
 # Package cannot be placed in Semi-xml/Lib and named File.pm6. Evaluation seems
 # to fail not finding the symbol &File when doing so.
 #
-package SxmlLib {
+package SxmlLib:auth<https://github.com/MARTIMM> {
 
   class Html::List {
     has Hash $.symbols = {};
-    
-    method dir-list ( XML::Element $parent, Hash $attrs ) {
-      my Str $directory = $attrs<directory> // '.';
-      my Bool $recursive = $attrs<recursive>.defined;
-      
+    has Str $!directory;
+    has Int @!header;
+    my Int $level = 0;
+    constant $max_level = 6;
+    my Bool $first_level = True;
+    my Hash $top-level-attrs;
 
+    method dir-list ( XML::Element $parent, Hash $attrs is copy ) {
+      $!directory = $attrs<directory>:delete // '.';
 
-      my $ul = XML::Element.new(:name('ul'));
-      $parent.append($ul);
-      $ul.append(XML::Element.new(:name($directory)));
+      # Set the numbers into the array and fill it up using the last number
+      # to the maximum length of $max_level
+      #
+      @!header = EVAL($attrs<header>:delete) // 1;
+      @!header.push( @!header[@!header.end] xx ($max_level - +@!header) );
 
-      my @files = ($directory);
-      my @files-to-process = @files;                # Copy to rw-able array.
-      self!create-list( $ul, @($directory));
+      $top-level-attrs = $attrs;
+      self!create-list( $parent, @($!directory));
     }
-    
+
     method !create-list ( XML::Element $parent, @files-to-process ) {
 
       while @files-to-process.shift() -> $file {
 
-say "F: $file, {$file.IO.absolute()}";
+#say "F: $file, {$file.IO.absolute()}";
 
         # Process directories
         #
-        
         if $file.IO ~~ :d {
+          if !$first_level {
+            $level++;
+          }
+          
+          else {
+            $first_level = False;
+          }
+          
+
+#say "L 0: $level";
           my $dir := $file;                   # Alias to proper name
 
-#          if $recursive {
-          my $ul = XML::Element.new(:name('ul'));
-          $parent.append($ul);
+          my $ul = self!make-dir-entry( $parent, $dir);
+
           my @new-files = dir( $dir, :Str);
           self!create-list( $ul, @(sort @new-files));
-#          }
 
-#          else {
-#            say "Skip directory $directory";
-#          }
-
+          $level--;
+          if $level < 0 {
+            $level = 0;
+            $first_level = True;
+          }
         }
 
         # Process plain files
@@ -69,14 +81,34 @@ say "F: $file, {$file.IO.absolute()}";
       }
     }
 
+    method !make-dir-entry ( XML::Element $parent, Str $dir-label is copy
+                             --> XML::Element
+                           ) {
+      my $ul = XML::Element.new( :name('ul'), :attribs($top-level-attrs));
+      $top-level-attrs = %();
 
-    method !make-entry ( XML::Element $parent, Str $a-label ) {
+      $parent.append($ul);
+      my $li = XML::Element.new(:name('li'));
+      $ul.append($li);
+#say "L 1: $level";
+      my $hdr = XML::Element.new(:name('h' ~ @!header[$level]));
+      $li.append($hdr);
+
+      $dir-label ~~ s:g/<-[\/]>+\///;
+      $hdr.append(XML::Text.new(:text($dir-label)));
+      
+      return $ul;
+    }
+
+    method !make-entry ( XML::Element $parent, Str $a-label is copy ) {
       my $li = XML::Element.new(:name('li'));
       $parent.append($li);
       
       my $a = XML::Element.new(:name('a'));
       $li.append($a);
       
+      $a-label ~~ s:g/<-[\/]>+\///;
+      $a-label ~~ s/\.<-[\.]>*$//;
       $a.append(XML::Text.new(:text($a-label)));
     }
   }

@@ -13,11 +13,11 @@ spurt( $filename, q:to/EOSX/);
 ---
 output/fileext:                         html;
 
-module/file:                            SxmlLib::Html::List;
+module/list:                            SxmlLib::Html::List;
 ---
 $html [
   $body [
-    $!dir-list directory=t recursive=1 []
+    $!list.dir-list header=2,3 directory=t id=ldir0001 []
   ]
 ]
 EOSX
@@ -25,17 +25,30 @@ EOSX
 #-------------------------------------------------------------------------------
 # Parse
 #
+mkdir('t/Grammars');
+spurt( 't/Grammars/Debugging grammar rules.html', q:to/EOSXML/);
+<html/>
+EOSXML
+
+spurt( 't/Grammars/Error messages.html', q:to/EOSXML/);
+<html/>
+EOSXML
+
 my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
-ok $xml-text ~~ m/'<h1>'/, 'Check h1 included';
-ok $xml-text ~~ m/'<p>'/, 'Check p included';
-ok $xml-text ~~ m/'How \'bout this!'/, 'Check p content';
+ok $xml-text ~~ m/'<ul id="ldir0001">'/, 'Id attribute on ul';
+ok $xml-text ~~ m/'<li><h2>t</h2></li>'/, 'Top level h2';
+ok $xml-text ~~ m/'<h3>Grammars</h3>'/, 'Second level Grammars';
 
 unlink $filename;
+
+unlink 't/Grammars/Debugging grammar rules.html';
+unlink 't/Grammars/Error messages.html';
+rmdir 't/Grammars';
 
 #-------------------------------------------------------------------------------
 # Cleanup
