@@ -106,6 +106,10 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.9.1
+  * $!file.dir-list header=1,2,3
+    Attribute header can be a list of numbers meaning h1,h2,h3 in this case. Max
+    is for 6 levels and missing levels become the same as the last level.
 * 0.9.0
   * Add core sxml core methods, $!SxmlCore.date and $!SxmlCore.date-time
 * 0.8.4
