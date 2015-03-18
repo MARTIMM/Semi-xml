@@ -14,8 +14,11 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
   class Html::List {
     has Hash $.symbols = {};
+
     has Str $!directory;
     has Int @!header;
+    has Str $!ref-attr;
+
     my Int $level = 0;
     constant $max_level = 6;
     my Bool $first_level = True;
@@ -23,6 +26,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
     method dir-list ( XML::Element $parent, Hash $attrs is copy ) {
       $!directory = $attrs<directory>:delete // '.';
+      $!ref-attr = $attrs<ref-attr>:delete // 'href';
 
       # Set the numbers into the array and fill it up using the last number
       # to the maximum length of $max_level
@@ -46,11 +50,10 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
           if !$first_level {
             $level++;
           }
-          
+
           else {
             $first_level = False;
           }
-          
 
 #say "L 0: $level";
           my $dir := $file;                   # Alias to proper name
@@ -96,17 +99,28 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
       $dir-label ~~ s:g/<-[\/]>+\///;
       $hdr.append(XML::Text.new(:text($dir-label)));
-      
+
       return $ul;
     }
 
-    method !make-entry ( XML::Element $parent, Str $a-label is copy ) {
+    method !make-entry ( XML::Element $parent, Str $reference ) {
       my $li = XML::Element.new(:name('li'));
       $parent.append($li);
-      
-      my $a = XML::Element.new(:name('a'));
+
+      my Hash $attrs = {};
+      if $!ref-attr ne 'href' {
+        $attrs<href> = '';
+        $attrs{$!ref-attr} = $reference;
+      }
+
+      else {
+        $attrs<href> = $reference;
+      }
+
+      my $a = XML::Element.new( :name('a'), :attribs($attrs));
       $li.append($a);
-      
+
+      my $a-label = $reference;
       $a-label ~~ s:g/<-[\/]>+\///;
       $a-label ~~ s/\.<-[\.]>*$//;
       $a.append(XML::Text.new(:text($a-label)));

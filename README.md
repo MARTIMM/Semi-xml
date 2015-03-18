@@ -106,6 +106,9 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.9.2
+  * $!file.dir-list ref-attr=data_href
+    Option to set another attrbute for the reference instead of the default href.
 * 0.9.1
   * $!file.dir-list header=1,2,3
     Attribute header can be a list of numbers meaning h1,h2,h3 in this case. Max
