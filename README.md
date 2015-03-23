@@ -108,6 +108,7 @@ Still at omega state, bugs come and go(hopefully).
 
 * 0.9.4
   * Bugfix of introduced spacing caused by empty strings.
+  * Bugfix finding options after parsing with multi method get-option()
 * 0.9.3
   * When using [= or [+ the modules will try to reduce the white space in the
     same way as perl 6 does with q:to//.

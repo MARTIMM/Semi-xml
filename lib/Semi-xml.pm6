@@ -204,8 +204,9 @@ say "F 1: $filepath";
                           ) {
     my Array $hashes;
     for ( $actions.config, $!configuration, $defaults) -> $h {
-      if $actions.config{$section}:exists {
-        my $e = $actions.config{$section};
+      if $h{$section}:exists {
+        my $e = $h{$section};
+
         if $e{$sub-section}:exists {
           $hashes.push($e{$sub-section});
         }

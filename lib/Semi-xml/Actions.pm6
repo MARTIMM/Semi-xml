@@ -160,13 +160,8 @@ class Semi-xml::Actions {
   method no-elements-literal ( $match ) { $keep-literal = True; }
   method no-elements ( $match )         { $keep-literal = False; }
 
-#  method body-contents ( $match ) {
-#say "BC: '$match'";
-#  }
-  
   method body-start ( $match ) {
     $tag-name ~~ s/^$tag-type//;
-#say "BS: $tag-name, $tag-type, '$match'";
 
     if $tag-type ~~ m/^'$.'/ {
       $tag-type ~~ m/\$\.(<-[\.]>+)/;
@@ -228,30 +223,24 @@ class Semi-xml::Actions {
     # Test if body starts with '[=' or [+.for which content must be kept
     # exactly as is.
     #
-#say "KL: {$keep-literal ?? 'Y' !! 'N'}, $esc-text";
     if $keep-literal {
       $esc-text ~~ m:g/^^(\s+)/;
-#say "P 0: {$/.perl}";
       my $min-spaces = Inf;
       my @indents = $/[];
       for @indents -> $indent {
         my Str $i = ~$indent;
         $i ~~ s/^\n//;
         my $nspaces = $i.chars;
-#say "Chrs: $nspaces";
         $min-spaces = $nspaces if $nspaces < $min-spaces;
       }
 
-#say "I: $min-spaces";
       $esc-text ~~ s:g/^^\s**{$min-spaces}//;
 
       $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
     else {
-#say "P 1: '$esc-text'";
       $esc-text ~~ s/^\s+//;
-#      $esc-text ~~ s/\s+$//;
       $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
@@ -261,7 +250,6 @@ class Semi-xml::Actions {
   method !register-element ( Str $tag-name, Hash $attrs ) {
     # Test if index is defined.
     #
-#say "XE: '$tag-name'";
     my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
     if $current-element-idx.defined {
       $element-stack[$current-element-idx].append($child-element);
