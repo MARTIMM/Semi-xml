@@ -20,7 +20,8 @@ options/xml-prelude/show:               1;              # Default 0
 options/xml-prelude/version:            1.1;            # Default 1.0
 options/xml-prelude/encoding:           UTF-8;          # Default UTF-8
 
-#output/filename:                        t/some-file;    # Default current file
+output/filename:                        103-xml;        # Default 'x'
+output/filepath:                        t;              # Default path '.'
 output/fileext:                         html;           # Default xml
 ---
 $html [
@@ -59,16 +60,16 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
 ok $xml-text ~~ m/
-      '.green {
-        color: #0f0;
-        background-color: #f0f;
-      }'
-      /, 'Check for literal text in css';
+'.green {
+  color: #0f0;
+  background-color: #f0f;
+}'
+/, 'Check for literal text in css';
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, 'Th after tr found';
 
 ok $xml-text ~~ ms/var a_tags '=' "\$('a');"/, 'Check piece of javascript';
 
-say $xml-text;
+#say $xml-text;
 
 unlink $filename;
 

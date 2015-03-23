@@ -64,7 +64,7 @@ grammar Semi-xml::Grammar {
   # javascript code. ] and # still needs to be escaped when needed. To keep the
   # content of [- ...] also as is written write [+ ...].
   #
-  rule tag-body { <normal-body> }
+  token tag-body { <normal-body> }
 
   # Changed from rule into token because of body character '[' followed up with
   # optional '+', '-' and '=' may not be separated by a space. Then content
@@ -72,19 +72,28 @@ grammar Semi-xml::Grammar {
   # used. Just use a space in front. Can happen in tables showing numbers.
   #
   token normal-body { <body-start> ~ <body-end> <body-contents> }
-  token body-start { '[' }
-  token body-end { ']' }
+  token body-start { '[' {
+                      say "Body start at ", $0.pos
+                         if $Semi-xml::Actions::debug; 
+                     }
+                   }
+  token body-end { ']' {
+                      say "Body end at ", $0.pos, ', ', $?LINE
+                         if $Semi-xml::Actions::debug; 
+                   }
+                 }
 
   # The content can be anything mixed with document tags except following the
   # no-elements character. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
-  rule body-contents {    ( <no-elements> || <no-elements-literal> )
+  token body-contents {    ( <no-elements> || <no-elements-literal> )
                           ( <no-elements-text> )*
                        || <keep-literal>? ( <body-text> || <document> )*
                      }
 
-  token keep-literal { '=' }
+  token keep-literal { <reset-keep-literal> '=' }
+  token reset-keep-literal { <?> }
   token no-elements { '-' }
   token no-elements-literal { '+' }
   token body-text { ( <-[\$\]\\]> || <body-esc> )+ }

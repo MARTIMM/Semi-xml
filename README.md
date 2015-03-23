@@ -106,6 +106,15 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.9.4
+  * Bugfix of introduced spacing caused by empty strings.
+* 0.9.3
+  * When using [= or [+ the modules will try to reduce the white space in the
+    same way as perl 6 does with q:to//.
+  * The filepath is introdused in the prelude. The default will be '.'
+  * The dependencies is introdused in the prelude. The library will not use
+    it and no default is an empty string. A program using the libraries will
+    need to use it and the sxml sources must define it.
 * 0.9.2
   * $!file.dir-list ref-attr=data_href
     Option to set another attrbute for the reference instead of the default href.

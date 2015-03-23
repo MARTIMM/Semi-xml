@@ -39,12 +39,12 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 ok $xml-text ~~ m/'<ul id="ldir0001">'/, 'Id attribute on ul';
 ok $xml-text ~~ m/'<li><h2>t</h2></li>'/, 'Top level h2';
 ok $xml-text ~~ m/'<h3>Grammars</h3>'/, 'Second level Grammars';
-ok $xml-text ~~ m/'<li><a href="" data_href="t/106-xml.t">106-xml</a></li>'/,
+ok $xml-text ~~ m/'<li><a href="" data_href="t/106-xml.t">xml</a></li>'/,
    'Ref to t/106-xml.t using ref-attr'
    ;
 

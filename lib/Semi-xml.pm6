@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.9.2>:auth<https://github.com/MARTIMM> {
+class Semi-xml:ver<0.9.4>:auth<https://github.com/MARTIMM> {
 
   our $debug = False;
 
@@ -30,15 +30,25 @@ class Semi-xml:ver<0.9.2>:auth<https://github.com/MARTIMM> {
     output => {
       # Filename of program is saved without extension
       #
-      filename => '',
+      filepath => '.',
+      filename => 'x',
       fileext => 'xml',
-    }
+    },
+
+    # To be set by sources and used by translater programs
+    #
+    dependencies => ''
   };
 
   # Calculate default filename
   #
-  $*PROGRAM ~~ m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
-  $defaults<output><filename> = ~$/[0];
+#  $*PROGRAM ~~ m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
+#  $defaults<output><filename> = ~$/[0];
+  
+#  my @path-spec = $*SPEC.splitpath($*PROGRAM);
+#  $defaults<output><filename> = @path-spec[2];
+#  $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
+#say "PS: @path-spec[]";
 
   #-----------------------------------------------------------------------------
   #
@@ -74,19 +84,21 @@ class Semi-xml:ver<0.9.2>:auth<https://github.com/MARTIMM> {
       }
     }
 
-    my $sts;
+#    my $sts;
     my $sub-actions;
     if $actions.defined {
       $sub-actions = Semi-xml::Actions.new();
-      $sts = Semi-xml::Grammar.parse( $content, :actions($sub-actions));
+#      $sts = Semi-xml::Grammar.parse( $content, :actions($sub-actions));
+      Semi-xml::Grammar.parse( $content, :actions($sub-actions));
     }
 
     else {
       $actions = Semi-xml::Actions.new();
-      $sts = Semi-xml::Grammar.parse( $content, :actions($actions));
+      Semi-xml::Grammar.parse( $content, :actions($actions));
     }
 
-    die "Failure parsing the content" unless $sts;
+#say "Sts: {$sts.WHAT}, {$sts.perl}";
+#    die "Failure parsing the content" unless $sts;
   }
 
   #-----------------------------------------------------------------------------
@@ -114,6 +126,13 @@ class Semi-xml:ver<0.9.2>:auth<https://github.com/MARTIMM> {
       my $fileext = self.get-option( $cfgs, 'fileext');
 
       $filename ~= ".$fileext";
+    }
+
+say "F 0: $filename";
+    if $filename !~~ m@'/'@ {
+      my $filepath = self.get-option( $cfgs, 'filepath');
+say "F 1: $filepath";
+      $filename = "$filepath/$filename";
     }
 
     my $document = self.get-xml-text;
@@ -166,10 +185,40 @@ class Semi-xml:ver<0.9.2>:auth<https://github.com/MARTIMM> {
 
   #-----------------------------------------------------------------------------
   #
-  method get-option ( Array $hashes, Str $option --> Any ) {
+  multi method get-option ( Array $hashes, Str $option --> Any ) {
     for $hashes.list -> $h {
       if $h{$option}:exists {
-        return $h{$option}
+        return $h{$option};
+      }
+    }
+
+    return Any;
+  }
+
+  #-----------------------------------------------------------------------------
+  #
+  multi method get-option ( Str :$section = '',
+                            Str :$sub-section = '',
+                            Str :$option = '';
+                            --> Any
+                          ) {
+    my Array $hashes;
+    for ( $actions.config, $!configuration, $defaults) -> $h {
+      if $actions.config{$section}:exists {
+        my $e = $actions.config{$section};
+        if $e{$sub-section}:exists {
+          $hashes.push($e{$sub-section});
+        }
+
+        else {
+          $hashes.push($e);
+        }
+      }
+    }
+    
+    for $hashes.list -> $h {
+      if $h{$option}:exists {
+        return $h{$option};
       }
     }
 

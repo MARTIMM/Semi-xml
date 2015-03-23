@@ -13,12 +13,12 @@ use Semi-xml;
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
 ---
-output/fileext:                         html;
+output/fileext: html;
 ---
 $html [
   $body [
-    $p1 [ $!SxmlCore.date [] ]
-    $p2 [ $!SxmlCore.date-time [] ]
+    $p1 [ x y $!SxmlCore.date [] ]
+    $p2 z=txt [ $!SxmlCore.date-time [] ]
   ]
 ]
 EOSX
@@ -30,12 +30,12 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 my $d = Date.today();
-ok $xml-text ~~ m/'<p1>' $d '</p1>'/, 'Check generated date';
+ok $xml-text ~~ m/'<p1>x y ' $d '</p1>'/, 'Check generated date';
 
-ok $xml-text ~~ m/'<p2>' $d 'T' (\d\d ':')**2 \d\d '+' \d**4 '</p2>'/,
+ok $xml-text ~~ m/'<p2 z="txt">' $d ' ' (\d\d ':')**2 \d\d ' ' '+' \d**4 '</p2>'/,
   'Check generated date and time';
 
 unlink $filename;

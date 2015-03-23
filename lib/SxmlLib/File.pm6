@@ -46,13 +46,15 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             # in the parent element of the container.
             #
             for $parent.nodes -> $node {
-              if $node.name eq 'XX-XX-XX' {
-                for $node.nodes -> $x-node {
-                  $parent.append($x-node);
-                }
+              if $node.can('name') {
+                if $node.name eq 'XX-XX-XX' {
+                  for $node.nodes -> $x-node {
+                    $parent.append($x-node);
+                  }
 
-                $node.remove;
-                last;
+                  $node.remove;
+                  last;
+                }
               }
             }
           }

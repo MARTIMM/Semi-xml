@@ -120,9 +120,17 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       my $a = XML::Element.new( :name('a'), :attribs($attrs));
       $li.append($a);
 
+      # Cleanup the reference in such a way that it will become a nice label
+      # The filename can have prefixed numbers so the sorting will automatically
+      # have the proper sequence to show. The number will be removed from the
+      # label.
+      #
       my $a-label = $reference;
-      $a-label ~~ s:g/<-[\/]>+\///;
-      $a-label ~~ s/\.<-[\.]>*$//;
+      $a-label ~~ s:g/<-[\/]>+\///;     # Remove any path leading up to the file
+      $a-label ~~ s/\.<-[\.]>*$//;      # Remove file extension
+      $a-label ~~ s/\d+('-'|'_')*//;    # Remove number with optional '-' or '_'
+      $a-label ~~ s:g/('-'|'_')+/ /;    # Substitute '-' or '_' with space.
+#say "A-Label 4: $a-label";
       $a.append(XML::Text.new(:text($a-label)));
     }
   }
