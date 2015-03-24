@@ -19,6 +19,7 @@ $html [
   $body [
     $p1 [ x y $!SxmlCore.date [] ]
     $p2 z=txt [ $!SxmlCore.date-time [] ]
+    $p3 [ $!SxmlCore.date [] ]
   ]
 ]
 EOSX
@@ -30,7 +31,7 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 my $d = Date.today();
 ok $xml-text ~~ m/'<p1>x y ' $d '</p1>'/, 'Check generated date';

@@ -52,9 +52,9 @@ grammar Semi-xml::Grammar {
                           || (\" <attr-qq-value> \")
                           || <attr-s-value>
                         }
-  token attr-q-value { <-[\']>+ }
-  token attr-qq-value { <-[\"]>+ }
-  token attr-s-value { <-[\s]>+ }
+  token attr-q-value    { <-[\']>+ }
+  token attr-qq-value   { <-[\"]>+ }
+  token attr-s-value    { <-[\s]>+ }
 
   # The tag body is anything enclosed in [...], [=...] or [-...]. The first
   # situation is the normal one of which all spaces will be reduced to one
@@ -64,20 +64,18 @@ grammar Semi-xml::Grammar {
   # javascript code. ] and # still needs to be escaped when needed. To keep the
   # content of [- ...] also as is written write [+ ...].
   #
-  token tag-body { <normal-body> }
-
   # Changed from rule into token because of body character '[' followed up with
   # optional '+', '-' and '=' may not be separated by a space. Then content
   # starting with a those characters doesn't have to be escaped when they are
   # used. Just use a space in front. Can happen in tables showing numbers.
   #
-  token normal-body { <body-start> ~ <body-end> <body-contents> }
-  token body-start { '[' {
+  token tag-body { <body-start> ~ <body-end> <body-contents> }
+  token body-start { <ws> '[' {
                       say "Body start at ", $0.pos
                          if $Semi-xml::Actions::debug; 
                      }
                    }
-  token body-end { ']' {
+  token body-end { ']' <ws> {
                       say "Body end at ", $0.pos, ', ', $?LINE
                          if $Semi-xml::Actions::debug; 
                    }
@@ -88,17 +86,17 @@ grammar Semi-xml::Grammar {
   # other characters in the text, the characters must be escaped.
   #
   token body-contents {    ( <no-elements> || <no-elements-literal> )
-                          ( <no-elements-text> )*
-                       || <keep-literal>? ( <body-text> || <document> )*
-                     }
+                           ( <no-elements-text> )*
+                        || <keep-literal>? ( <body-text> || <document> )*
+                      }
 
-  token keep-literal { <reset-keep-literal> '=' }
-  token reset-keep-literal { <?> }
-  token no-elements { '-' }
-  token no-elements-literal { '+' }
-  token body-text { ( <-[\$\]\\]> || <body-esc> )+ }
-  token no-elements-text { ( <-[\]\\]> || <body-esc> )+ }
-  token body-esc { '\$' || '\[' || '\]' || '\\' }
+  token keep-literal            { <reset-keep-literal> '=' }
+  token reset-keep-literal      { <?> }
+  token no-elements             { '-' }
+  token no-elements-literal     { '+' }
+  token body-text               { ( <-[\$\]\\]> || <body-esc> )+ }
+  token no-elements-text        { ( <-[\]\\]> || <body-esc> )+ }
+  token body-esc                { '\$' || '\[' || '\]' || '\\' }
 
   # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
   # dash within the string is accepted.

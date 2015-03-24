@@ -60,10 +60,13 @@ highlights are programmed in your favorite editor.
 * [ ] '#' commenting should be improved using grammar instead of overall removal
 * [ ] Dependencies on other files
 * External modules
+  * [x] arguments are given via attributes
+  * [x] a tag content between [ ... ] can be a named argument to the sub when
+        the content does not have other tags.
   * [x] Need library paths to find modules
   * [x] Introduced via source prelude
-  * [ ] Introdused via role
-  * [ ] Introdused via defaults
+  * [ ] Introduced via role
+  * [ ] Introduced via defaults
   * [x] tag name substitution and attribute additions. Format is ```$.tagname
         <attrs> [<body>]```.
   * [x] insertion of tags and body using attributes as arguments to

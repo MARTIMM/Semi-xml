@@ -54,6 +54,9 @@ class Semi-xml::Actions {
   my Str $attr-key;
 
   my Bool $keep-literal = False;
+  
+  has $!deferred_call = Any;
+  has $!content-text = Any;
 
   # All config entries are like: '/a/b/c: v;' This must be evauluated as
   # "$!config<$config-path>='$config-value'" so it becomes a key value pair
@@ -163,18 +166,32 @@ class Semi-xml::Actions {
   method body-start ( $match ) {
     $tag-name ~~ s/^$tag-type//;
 
+    # Calls which are deferred must be called now otherwise the call will
+    # be overwitten before the end og the bode is reached..
+    #
+#say "DC: {$!deferred_call.perl}";
+    if $!deferred_call.defined {
+#say "Call ... ";
+      die "A method calls body text cannot have any tags, Tags are ignored";
+      #self.$!deferred_call(XML::Text.new(:text('')));
+    }
+    
+    # Reset any deferred call meganisms
+    #
+    $!deferred_call = Any;
+
     if $tag-type ~~ m/^'$.'/ {
       $tag-type ~~ m/\$\.(<-[\.]>+)/;
       my $module = $/[0].Str;
       if $!objects{$module}.symbols{$tag-name}:exists {
-          my $s = $!objects{$module}.symbols{$tag-name};
-          $tag-name = $s<tag-name>;
+        my $s = $!objects{$module}.symbols{$tag-name};
+        $tag-name = $s<tag-name>;
 
-          # Add attribute to existing
-          #
-          for $s<attributes>.kv -> $k,$v { $attrs{$k} = $v; }
+        # Add attribute to existing
+        #
+        for $s<attributes>.kv -> $k,$v { $attrs{$k} = $v; }
 
-          self!register-element( $tag-name, $attrs);
+        self!register-element( $tag-name, $attrs);
       }
     }
 
@@ -182,9 +199,18 @@ class Semi-xml::Actions {
       $tag-type ~~ m/\$\!(<-[\.]>+)/;
       my $module = $/[0].Str;
       if $!objects{$module}.can($tag-name) {
-        $!objects{$module}."$tag-name"( $element-stack[$current-element-idx],
-                                        $attrs
-                                      );
+        # Defer the call as late as possible until after the body content.
+        # However, when a new tag in the body is used, the call will be
+        # satisfied whithout using the body content.
+        #
+        $!deferred_call = method (XML::Text :$content-text) {
+say "Called ... text = $content-text";
+          $!objects{$module}."$tag-name"(
+            $element-stack[$current-element-idx],
+            $attrs,
+            :$content-text
+          );
+        }
       }
 
       $current-element-idx++;
@@ -204,6 +230,14 @@ class Semi-xml::Actions {
     # on the stack as those are needed anymore.
     #
     $current-element-idx--;
+
+#say "BE-DC: {$!deferred_call.perl}";
+    if $!deferred_call.defined {
+#say "Call ... ";
+      $!content-text //= XML::Text.new(:text(''));
+      self.$!deferred_call(:$!content-text);
+      $!deferred_call = Any;
+    }
   }
 
   method no-elements-text ( $match ) { return self.body-text($match); }
@@ -234,7 +268,8 @@ class Semi-xml::Actions {
         $min-spaces = $nspaces if $nspaces < $min-spaces;
       }
 
-      $esc-text ~~ s:g/^^\s**{$min-spaces}//;
+#say "ET: '$esc-text',$min-spaces\n";
+      $esc-text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
 
       $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
@@ -244,7 +279,19 @@ class Semi-xml::Actions {
       $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
-    $element-stack[$current-element-idx].append($xml) if $xml.defined;
+#say "BT ES: $current-element-idx, $element-stack[$current-element-idx]";
+    if $xml.defined {
+      # When there was a deferred call stored to run
+      #
+      if $!deferred_call.defined {
+        $!content-text = $xml;
+      }
+
+      else {
+        $element-stack[$current-element-idx].append($xml);
+        $!content-text = Any;
+      }
+    }
   }
 
   method !register-element ( Str $tag-name, Hash $attrs ) {
@@ -270,6 +317,13 @@ class Semi-xml::Actions {
       $element-stack[$current-element-idx] = $child-element;
       $!xml-document .= new($element-stack[$current-element-idx]);
     }
+  }
+  
+  # Idea to count lines in the source
+  #
+  method ws ( $match ) {
+#    ~$match ~~ m:g/(\n)/;
+#say "N-" x $/.elems;
   }
 }
 
