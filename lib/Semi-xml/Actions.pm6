@@ -55,8 +55,12 @@ class Semi-xml::Actions {
 
   my Bool $keep-literal = False;
   
-  has $!deferred_call = Any;
-  has $!content-text = Any;
+  has Array $!deferred-calls;
+  has $!deferred-call-idx = -1;
+  has $!content-body = Any;
+
+#  has $!deferred_call = Any;
+#  has $!content-text = Any;
 
   # All config entries are like: '/a/b/c: v;' This must be evauluated as
   # "$!config<$config-path>='$config-value'" so it becomes a key value pair
@@ -169,16 +173,13 @@ class Semi-xml::Actions {
     # Calls which are deferred must be called now otherwise the call will
     # be overwitten before the end og the bode is reached..
     #
-#say "DC: {$!deferred_call.perl}";
-    if $!deferred_call.defined {
-#say "Call ... ";
-      die "A method calls body text cannot have any tags, Tags are ignored";
-      #self.$!deferred_call(XML::Text.new(:text('')));
-    }
+#    if $!deferred_call.defined {
+#      die "A method calls body text cannot have any tags, Tags are ignored";
+#    }
     
     # Reset any deferred call meganisms
     #
-    $!deferred_call = Any;
+#    $!deferred_call = Any;
 
     if $tag-type ~~ m/^'$.'/ {
       $tag-type ~~ m/\$\.(<-[\.]>+)/;
@@ -203,14 +204,18 @@ class Semi-xml::Actions {
         # However, when a new tag in the body is used, the call will be
         # satisfied whithout using the body content.
         #
-        $!deferred_call = method (XML::Text :$content-text) {
-say "Called ... text = $content-text";
+#        $!deferred_call = method (XML::Text :$content-text) {
+        $!deferred-calls[++$!deferred-call-idx]
+           = method (XML::Node :$content-body) {
+say "Called ... text = '$content-body'";
           $!objects{$module}."$tag-name"(
             $element-stack[$current-element-idx],
             $attrs,
-            :$content-text
+            :$content-body
+#            :$content-text
           );
         }
+#say "Def: $!deferred-call-idx, {$!deferred-calls[$!deferred-call-idx].perl}";
       }
 
       $current-element-idx++;
@@ -231,12 +236,11 @@ say "Called ... text = $content-text";
     #
     $current-element-idx--;
 
-#say "BE-DC: {$!deferred_call.perl}";
-    if $!deferred_call.defined {
-#say "Call ... ";
-      $!content-text //= XML::Text.new(:text(''));
-      self.$!deferred_call(:$!content-text);
-      $!deferred_call = Any;
+    if $!deferred-call-idx >= 0 {
+      $!content-body //= XML::Text.new(:text(''));
+#say "BE: $!deferred-call-idx, $!deferred-calls[$!deferred-call-idx]";
+say "BE: '$!content-body'";
+      $!deferred-calls[$!deferred-call-idx--]( self, :$!content-body);
     }
   }
 
@@ -283,13 +287,13 @@ say "Called ... text = $content-text";
     if $xml.defined {
       # When there was a deferred call stored to run
       #
-      if $!deferred_call.defined {
-        $!content-text = $xml;
+      if $!deferred-call-idx >= 0 {
+        $!content-body = $xml;
       }
 
       else {
         $element-stack[$current-element-idx].append($xml);
-        $!content-text = Any;
+        $!content-body = Any;
       }
     }
   }

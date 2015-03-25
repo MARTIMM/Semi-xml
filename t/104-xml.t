@@ -64,17 +64,18 @@ class M::m1 {
 
   method stats ( XML::Element $parent,
                  Hash $attrs,
-                 XML::Text :$content-text
+                 XML::Node :$content-body
                ) {
     my $p = XML::Element.new(:name('p'));
     $parent.append($p);
-    $p.append($content-text);
+say "St: {$p.^name}";
+    $p.append($content-body);
   }
 
 
   method statistics ( XML::Element $parent,
                       Hash $attrs,
-                      XML::Text :$content-text
+                      XML::Node :$content-body
                     ) {
 
     my $table = XML::Element.new(
@@ -91,7 +92,8 @@ class M::m1 {
 
       $td = XML::Element.new(:name('td'));
       $tr.append($td);
-      $td.append(XML::Text.new(:text('data 2 ' ~ $content-text)));
+      $td.append(XML::Text.new(:text('data 2 ' ~ $content-body)));
+#      $td.append($content-body);
 
       $td = XML::Element.new(:name('td'));
       $tr.append($td);
