@@ -109,6 +109,12 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.9.5
+  * Complex nesting of body contents now possible with $!mod.meth [ ]. Also
+    another call to a method is possible in the content body, The content is
+    saved in an element named 'PLACEHOLDER-ELEMENT'. This element is given to
+    the method where the method does anything with it. The method must remove the
+    element after processing.
 * 0.9.4
   * Bugfix of introduced spacing caused by empty strings.
   * Bugfix finding options after parsing with multi method get-option()

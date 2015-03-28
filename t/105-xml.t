@@ -18,7 +18,7 @@ module/file:                            SxmlLib::File;
 ---
 $html [
   $body [
-    $!file.include type=include reference=t/D/d1.sxml []
+    $!file.include type=include reference=t/D/d1.sxml [ ignored content ]
   ]
 ]
 EOSX
@@ -41,11 +41,12 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 ok $xml-text ~~ m/'<h1>'/, 'Check h1 included';
 ok $xml-text ~~ m/'<p>'/, 'Check p included';
 ok $xml-text ~~ m/'How \'bout this!'/, 'Check p content';
+ok $xml-text !~~ m/'ignored content'/, 'Uncopied content';
 
 unlink $filename;
 unlink 't/D/d1.sxml';

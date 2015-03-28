@@ -15,16 +15,26 @@ class Semi-xml::SxmlCore {
 
   # $SxmlCore.date []
   #
-  method date ( XML::Element $parent, Hash $attrs ) {
+  method date ( XML::Element $parent,
+                Hash $attrs,
+                XML::Node :$content-body   # Ignored
+              ) {
+    $content-body.remove;
+
     $parent.append(XML::Text.new(:text(Date.today().Str)));
   }
 
   # $SxmlCore.date-time []
   #
-  method date-time ( XML::Element $parent, Hash $attrs ) {
+  method date-time ( XML::Element $parent,
+                     Hash $attrs,
+                     XML::Node :$content-body   # Ignored
+                   ) {
+    $content-body.remove;
+
     my $date-time = DateTime.now().Str;
-    $date-time ~~ s/'T'/ /;
-    $date-time ~~ s/'+'/ +/;
+    $date-time ~~ s/'T'/ / unless $attrs<iso>:exists;
+    $date-time ~~ s/'+'/ +/ unless $attrs<iso>:exists;
     my $txt-e = XML::Text.new(:text($date-time));
     $parent.append($txt-e);
   }
@@ -57,7 +67,7 @@ class Semi-xml::Actions {
   
   has Array $!deferred-calls;
   has $!deferred-call-idx = -1;
-  has $!content-body = Any;
+#  has $!content-body = Any;
 
 #  has $!deferred_call = Any;
 #  has $!content-text = Any;
@@ -208,15 +218,21 @@ class Semi-xml::Actions {
         # processed element using $current-element-idx
         # 
 #        $!deferred_call = method (XML::Text :$content-text) {
-say "Make call: $current-element-idx, $module, $tag-name, $tag-type";
+#say "Make call: $current-element-idx -> {$current-element-idx + 1}, $module, $tag-name, $tag-type";
+        
+        # Must make a copy of the tag-name to a local variable. If tag-name is
+        # used directly in the closure, the name is not 'frozen' to the value when
+        # the call is defined.
+        #
+        my $tgnm = $tag-name;
         $!deferred-calls[$current-element-idx]
-           = method (XML::Node :@content-body) {
-say "CF: ", callframe(1).file, ', ', callframe(1).line;
-say "Called, text = $module, $tag-name, $tag-type";
-          $!objects{$module}."$tag-name"(
+           = method (XML::Node :$content-body) {
+#say "CF: ", callframe(1).file, ', ', callframe(1).line;
+#say "Called, text = $module, $tgnm, $tag-type";
+          $!objects{$module}."$tgnm"(
             $element-stack[$current-element-idx],
             $attrs,
-            :@content-body
+            :$content-body
 #            :$content-text
           );
         }
@@ -239,24 +255,32 @@ say "Called, text = $module, $tag-name, $tag-type";
     # Go back one level .New child tags will overwrite the previous child
     # on the stack as those are needed anymore.
     #
-#say "BE 0: $current-element-idx, {$!deferred-calls[$current-element-idx].defined ?? 'M yes' !! 'M no'}";
-    $current-element-idx--;
+#say "\nEnd 0: from $current-element-idx -> {$current-element-idx -1}";
 
+      $current-element-idx--;
+#say "End 1: {?$!deferred-calls[$current-element-idx]}";
+#say "End 2: {$element-stack[$current-element-idx] ~~ XML::Element}";
+#say "End 3: {$element-stack[$current-element-idx+1].name eq 'PLACEHOLDER-ELEMENT'}";
+#say "End 4: {$element-stack[$current-element-idx+1].name}";
+#say "End 5: tag = $tag-name";
     if $!deferred-calls[$current-element-idx].defined 
-       and $element-stack[$current-element-idx + 1] ~~ XML::Element
-       and $element-stack[$current-element-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
+       and $element-stack[$current-element-idx] ~~ XML::Element
+       and $element-stack[$current-element-idx+1].name eq 'PLACEHOLDER-ELEMENT' {
 #      $!content-body //= XML::Text.new(:text(''));
 #say "BE: $!deferred-call-idx, $!deferred-calls[$!deferred-call-idx]";
 #say "BE 1: $current-element-idx, {$element-stack[$current-element-idx].name}";
-      my XML::Node @nodes = $element-stack[$current-element-idx + 1].nodes;
-      $element-stack[$current-element-idx + 1].remove;
+#      my XML::Node @nodes = $element-stack[$current-element-idx + 1].nodes;
       $!deferred-calls[$current-element-idx](
         self,
 #        :$!content-body
-        :content-body(@nodes)
+        :content-body($element-stack[$current-element-idx + 1])
       );
 
-      $!content-body = Any;
+#say "R: {$element-stack[$current-element-idx + 1].name}";
+#     if $element-stack[$current-element-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
+#       $element-stack[$current-element-idx + 1].remove;
+#     }
+#       $!content-body = Any;
 
       # Call done, now reset
       #
@@ -264,9 +288,8 @@ say "Called, text = $module, $tag-name, $tag-type";
     }
 
 #    else {
-#      $current-element-idx--;
-say "End: back to $current-element-idx";
-say "     {$element-stack[$current-element-idx].name}" if $current-element-idx >= 0;
+#say "End: back to $current-element-idx";
+
 #    }
   }
 
@@ -313,11 +336,11 @@ say "     {$element-stack[$current-element-idx].name}" if $current-element-idx >
       # When there was a deferred call stored to run
       #
 #      if $!deferred-call-idx >= 0 {
-        $!content-body = $xml;
+#        $!content-body = $xml;
 #      }
 
 #      else {
-say "T: text append on $current-element-idx, {$element-stack[$current-element-idx].name}";
+#say "T: text append on $current-element-idx, {$element-stack[$current-element-idx].name}";
         $element-stack[$current-element-idx].append($xml);
 #        $!content-body = Any;
 #      }
@@ -339,7 +362,7 @@ say "T: text append on $current-element-idx, {$element-stack[$current-element-id
     if $current-element-idx.defined {
       $element-stack[$current-element-idx].append($child-element);
       $element-stack[$current-element-idx + 1] = $child-element;
-say "E: {$child-element.name} append on $current-element-idx, {$element-stack[$current-element-idx].name}";
+#say "E: {$child-element.name} append on $current-element-idx, {$element-stack[$current-element-idx].name}";
 
       # Point to the next level in case there is another tag found in the 
       # current body. This element must become the child element of the
@@ -355,7 +378,7 @@ say "E: {$child-element.name} append on $current-element-idx, {$element-stack[$c
       $current-element-idx = 0;
       $element-stack[$current-element-idx] = $child-element;
       $!xml-document .= new($element-stack[$current-element-idx]);
-say "Root: $current-element-idx, {$element-stack[$current-element-idx].name}";
+#say "Root: $current-element-idx, {$element-stack[$current-element-idx].name}";
     }
   }
   

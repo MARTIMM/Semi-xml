@@ -18,6 +18,7 @@ output/fileext:                         html;
 
 library/m1:                             t;
 module/m1:                              M::m1;
+module/file:                            SxmlLib::File;
 ---
 $html [
   $head [
@@ -38,12 +39,27 @@ $html [
 
     $!m1.stats [ bla die bla \$x [\] ]
     $!m1.stats [ bla die bla $x [ test 2 ] ]
-
+    $!m1.stats [
+      bla die bla
+      $!file.include type=include reference=t/D/d1.sxml []
+    ]
+    
     $!m1.statistics data-weather=set1 [ data ]
     $p [ bla ]
   ]
 ]
 EOSX
+
+#-------------------------------------------------------------------------------
+# Prepare directory and module to load
+#
+mkdir('t/D');
+spurt( 't/D/d1.sxml', q:to/EOSXML/);
+$h1 [ Intro ]
+$p [
+  How 'bout this!
+]
+EOSXML
 
 #-------------------------------------------------------------------------------
 # Prepare directory and module to load
@@ -65,24 +81,25 @@ class M::m1 {
 
   method stats ( XML::Element $parent,
                  Hash $attrs,
-                 XML::Node :@content-body
+                 XML::Node :$content-body
                ) {
 #say "CB 0: {$parent.parent.name}";
-say "CB 0: {$parent.^name}, {$parent.name}";
+#say "CB 0: {$parent.^name}, {$parent.name}";
 #say "CB 0: {@content-body.^name}, {@content-body.name}";
 
     my $p = XML::Element.new(:name('p'));
     $parent.append($p);
-    $p.append($_) for @content-body;
+    $p.append($_) for $content-body.nodes;
+    $content-body.remove;
   }
 
 
   method statistics ( XML::Element $parent,
                       Hash $attrs,
-                      XML::Node :@content-body
+                      XML::Node :$content-body
                     ) {
 #say "CB 1: {$parent.parent.name}";
-say "CB 1: {$parent.^name}, {$parent.name}";
+#say "CB 1: {$parent.^name}, {$parent.name}";
 #say "CB 1: {@content-body.^name}, {@content-body.name}";
 
     my $table = XML::Element.new(
@@ -105,13 +122,14 @@ say "CB 1: {$parent.^name}, {$parent.name}";
       # because it wil reparent everytime. To do it properly, clone the element
       # first.
       #
-      $td.append($_) for @content-body;
+      $td.append($_) for $content-body.nodes;
 
       $td = XML::Element.new(:name('td'));
       $tr.append($td);
       $td.append(XML::Text.new(:text('data 3')));
     }
 
+    $content-body.remove;
     $parent.append($table);
   }
 }
@@ -125,13 +143,16 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 ok $xml-text ~~ m/('<table'.*)**2/, 'Check subst and gen of $.special-table and $!statistics';
 ok $xml-text ~~ m/class\=\"big\-table\"/, 'Check inserted class attribute';
 ok $xml-text ~~ m/id\=\"new\-table\"/, 'Check inserted id attribute';
 
 ok $xml-text ~~ m/'<p>bla die bla $x []</p>'/, 'Check text from $!stats';
+ok $xml-text ~~ m/'<p>bla die bla<x>test 2</x></p>'/, 'Check complex text from $!stats';
+ok $xml-text ~~ m/'<p>bla die bla<h1>Intro</h1><p>How \'bout this!</p></p>'/,
+   'Check complex text with nested call to $!file from $!stats';
 
 ok $xml-text ~~ m/'class="red"'/, 'Check generated class = red';
 ok $xml-text ~~ m/'id="stat-id"'/, 'Check generated id = stat-id';
@@ -143,6 +164,8 @@ unlink $filename;
 unlink 't/M/m1.pm6';
 rmdir('t/M');
 
+unlink 't/D/d1.sxml';
+rmdir('t/D');
 
 #-------------------------------------------------------------------------------
 # Cleanup

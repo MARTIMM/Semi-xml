@@ -24,7 +24,14 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
     my Bool $first_level = True;
     my Hash $top-level-attrs;
 
-    method dir-list ( XML::Element $parent, Hash $attrs is copy ) {
+    #---------------------------------------------------------------------------
+    #
+    method dir-list ( XML::Element $parent,
+                      Hash $attrs is copy,
+                      XML::Node :$content-body   # Ignored
+                    ) {
+      $content-body.remove;
+
       $!directory = $attrs<directory>:delete // '.';
       $!ref-attr = $attrs<ref-attr>:delete // 'href';
 
@@ -38,6 +45,9 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       self!create-list( $parent, @($!directory));
     }
 
+
+    #---------------------------------------------------------------------------
+    #
     method !create-list ( XML::Element $parent, @files-to-process ) {
 
       while @files-to-process.shift() -> $file {
@@ -84,6 +94,8 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       }
     }
 
+    #---------------------------------------------------------------------------
+    #
     method !make-dir-entry ( XML::Element $parent, Str $dir-label is copy
                              --> XML::Element
                            ) {
@@ -103,6 +115,8 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       return $ul;
     }
 
+    #---------------------------------------------------------------------------
+    #
     method !make-entry ( XML::Element $parent, Str $reference ) {
       my $li = XML::Element.new(:name('li'));
       $parent.append($li);

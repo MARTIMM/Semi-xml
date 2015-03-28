@@ -15,8 +15,16 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
   class File {
     has Hash $.symbols = {};
 
+    #---------------------------------------------------------------------------
+    #
+    method include ( XML::Element $parent,
+                     Hash $attrs,
+                     XML::Node :$content-body   # Ignored
+                   ) {
+#say "CB 0: {$content-body}";
+#say "CB 1: {$parent.^name}, {$parent.name}";
+      $content-body.remove;
 
-    method include ( XML::Element $parent, Hash $attrs ) {
       my $type = $attrs<type> // 'reference';
       my $reference = $attrs<reference> // '';
       my $document;
@@ -40,6 +48,11 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             # fail if thare are more than one top level elements.
             #
             my Semi-xml $x .= new;
+            
+            # When parsing another new piece of text, this result will be placed
+            # next to a previously prepared sibling 'PLACEHOLDER-ELEMENT' of
+            # which the contents is given to this method as @content-body
+            #
             $x.parse(:content("\$XX-XX-XX\[$sxml-text\]"));
 
             # Replace all elements below the container tag XX-XX-XX
@@ -47,11 +60,11 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             #
             for $parent.nodes -> $node {
               if $node.can('name') {
+#say "CB 2: $node.name";
                 if $node.name eq 'XX-XX-XX' {
-                  for $node.nodes -> $x-node {
-                    $parent.append($x-node);
-                  }
+                  $parent.append($_) for $node.nodes;
 
+#say "CB 3: remove {$node.name}";
                   $node.remove;
                   last;
                 }
