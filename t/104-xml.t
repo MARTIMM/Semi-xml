@@ -36,7 +36,7 @@ $html [
       $tr [ $td [ data ] ]
     ]
 
-    $!m1.stats [- bla die bla $x [\] ]
+    $!m1.stats [ bla die bla \$x [\] ]
 
     $!m1.statistics data-weather=set1 [ data ]
     $p [ bla ]
@@ -64,19 +64,25 @@ class M::m1 {
 
   method stats ( XML::Element $parent,
                  Hash $attrs,
-                 XML::Node :$content-body
+                 XML::Node :@content-body
                ) {
+#say "CB 0: {$parent.parent.name}";
+say "CB 0: {$parent.^name}, {$parent.name}";
+#say "CB 0: {@content-body.^name}, {@content-body.name}";
+
     my $p = XML::Element.new(:name('p'));
     $parent.append($p);
-say "St: {$p.^name}";
-    $p.append($content-body);
+    $p.append($_) for @content-body;
   }
 
 
   method statistics ( XML::Element $parent,
                       Hash $attrs,
-                      XML::Node :$content-body
+                      XML::Node :@content-body
                     ) {
+#say "CB 1: {$parent.parent.name}";
+say "CB 1: {$parent.^name}, {$parent.name}";
+#say "CB 1: {@content-body.^name}, {@content-body.name}";
 
     my $table = XML::Element.new(
                   :name('table'),
@@ -92,8 +98,13 @@ say "St: {$p.^name}";
 
       $td = XML::Element.new(:name('td'));
       $tr.append($td);
-      $td.append(XML::Text.new(:text('data 2 ' ~ $content-body)));
-#      $td.append($content-body);
+      $td.append(XML::Text.new(:text('data 2 ')));
+
+      # We do this 4 times but only the last td element will have the data
+      # because it wil reparent everytime. To do it properly, clone the element
+      # first.
+      #
+      $td.append($_) for @content-body;
 
       $td = XML::Element.new(:name('td'));
       $tr.append($td);
@@ -124,7 +135,8 @@ ok $xml-text ~~ m/'<p>bla die bla $x []</p>'/, 'Check text from $!stats';
 ok $xml-text ~~ m/'class="red"'/, 'Check generated class = red';
 ok $xml-text ~~ m/'id="stat-id"'/, 'Check generated id = stat-id';
 ok $xml-text ~~ m/('<td>data 1</td>'.*)**4/, "Check 4 inserted 'data 1' td";
-ok $xml-text ~~ m/('<td>data 2 data</td>'.*)**4/, "Check 4 inserted 'data 2 data' content td";
+ok $xml-text ~~ m/('<td>data 2 </td>'.*)**3/, "Check 3 no inserted 'data 2 ' content td";
+ok $xml-text ~~ m/('<td>data 2 data</td>'.*)**1/, "Check 1 inserted 'data 2 data' content td";
 
 unlink $filename;
 unlink 't/M/m1.pm6';

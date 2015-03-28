@@ -33,17 +33,17 @@ class Semi-xml::SxmlCore {
 class Semi-xml::Actions {
   our $debug = False;
 
-  has XML::Document $.xml-document;
 
   # Objects hash with one predefined object for core methods
   #
-  has Hash $.objects = { SxmlCore => Semi-xml::SxmlCore.new()};
+  has Hash $.objects = { SxmlCore => Semi-xml::SxmlCore.new() };
   has Hash $.config = {};
 
   my Hash $config-key = {};
   my Str $config-path;
   my Str $config-value;
 
+  has XML::Document $.xml-document;
   my Array $element-stack;
   my Int $current-element-idx;
 
@@ -169,6 +169,7 @@ class Semi-xml::Actions {
 
   method body-start ( $match ) {
     $tag-name ~~ s/^$tag-type//;
+#say "BS: $tag-name, $tag-type";
 
     # Calls which are deferred must be called now otherwise the call will
     # be overwitten before the end og the bode is reached..
@@ -176,7 +177,7 @@ class Semi-xml::Actions {
 #    if $!deferred_call.defined {
 #      die "A method calls body text cannot have any tags, Tags are ignored";
 #    }
-    
+
     # Reset any deferred call meganisms
     #
 #    $!deferred_call = Any;
@@ -197,28 +198,32 @@ class Semi-xml::Actions {
     }
 
     elsif $tag-type ~~ m/^'$!'/ {
+#      $current-element-idx++;
+
       $tag-type ~~ m/\$\!(<-[\.]>+)/;
       my $module = $/[0].Str;
       if $!objects{$module}.can($tag-name) {
-        # Defer the call as late as possible until after the body content.
-        # However, when a new tag in the body is used, the call will be
-        # satisfied whithout using the body content.
-        #
+        # Defer the call until after the body content. The method is stored
+        # in the array $!deferred-calls at the position as the currently
+        # processed element using $current-element-idx
+        # 
 #        $!deferred_call = method (XML::Text :$content-text) {
-        $!deferred-calls[++$!deferred-call-idx]
-           = method (XML::Node :$content-body) {
-say "Called ... text = '$content-body'";
+say "Make call: $current-element-idx, $module, $tag-name, $tag-type";
+        $!deferred-calls[$current-element-idx]
+           = method (XML::Node :@content-body) {
+say "CF: ", callframe(1).file, ', ', callframe(1).line;
+say "Called, text = $module, $tag-name, $tag-type";
           $!objects{$module}."$tag-name"(
             $element-stack[$current-element-idx],
             $attrs,
-            :$content-body
+            :@content-body
 #            :$content-text
           );
         }
-#say "Def: $!deferred-call-idx, {$!deferred-calls[$!deferred-call-idx].perl}";
-      }
 
-      $current-element-idx++;
+        self!register-element( 'PLACEHOLDER-ELEMENT', {});
+#        $current-element-idx++;
+      }
     }
 
     elsif $tag-type eq '$' {
@@ -234,14 +239,35 @@ say "Called ... text = '$content-body'";
     # Go back one level .New child tags will overwrite the previous child
     # on the stack as those are needed anymore.
     #
+#say "BE 0: $current-element-idx, {$!deferred-calls[$current-element-idx].defined ?? 'M yes' !! 'M no'}";
     $current-element-idx--;
 
-    if $!deferred-call-idx >= 0 {
-      $!content-body //= XML::Text.new(:text(''));
+    if $!deferred-calls[$current-element-idx].defined 
+       and $element-stack[$current-element-idx + 1] ~~ XML::Element
+       and $element-stack[$current-element-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
+#      $!content-body //= XML::Text.new(:text(''));
 #say "BE: $!deferred-call-idx, $!deferred-calls[$!deferred-call-idx]";
-say "BE: '$!content-body'";
-      $!deferred-calls[$!deferred-call-idx--]( self, :$!content-body);
+#say "BE 1: $current-element-idx, {$element-stack[$current-element-idx].name}";
+      my XML::Node @nodes = $element-stack[$current-element-idx + 1].nodes;
+      $element-stack[$current-element-idx + 1].remove;
+      $!deferred-calls[$current-element-idx](
+        self,
+#        :$!content-body
+        :content-body(@nodes)
+      );
+
+      $!content-body = Any;
+
+      # Call done, now reset
+      #
+      $!deferred-calls[$current-element-idx] = Any;
     }
+
+#    else {
+#      $current-element-idx--;
+say "End: back to $current-element-idx";
+say "     {$element-stack[$current-element-idx].name}" if $current-element-idx >= 0;
+#    }
   }
 
   method no-elements-text ( $match ) { return self.body-text($match); }
@@ -283,21 +309,29 @@ say "BE: '$!content-body'";
       $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
-#say "BT ES: $current-element-idx, $element-stack[$current-element-idx]";
     if $xml.defined {
       # When there was a deferred call stored to run
       #
-      if $!deferred-call-idx >= 0 {
+#      if $!deferred-call-idx >= 0 {
         $!content-body = $xml;
-      }
+#      }
 
-      else {
+#      else {
+say "T: text append on $current-element-idx, {$element-stack[$current-element-idx].name}";
         $element-stack[$current-element-idx].append($xml);
-        $!content-body = Any;
-      }
+#        $!content-body = Any;
+#      }
     }
   }
 
+  # Create an xml element and add its attributes. When the $current-element-idx
+  # is not yet defined, a new document must be created and pointers initialized.
+  # The array is like a stack of elements of which each element is a child
+  # of the one before it in the array. The last one in the array is the one  to
+  # which text or other elements are appended. In body-text text elements are
+  # appended to this last element When the block is finished (at body-end) the
+  # pointer is moved up to the parent element in the array.
+  #
   method !register-element ( Str $tag-name, Hash $attrs ) {
     # Test if index is defined.
     #
@@ -305,6 +339,7 @@ say "BE: '$!content-body'";
     if $current-element-idx.defined {
       $element-stack[$current-element-idx].append($child-element);
       $element-stack[$current-element-idx + 1] = $child-element;
+say "E: {$child-element.name} append on $current-element-idx, {$element-stack[$current-element-idx].name}";
 
       # Point to the next level in case there is another tag found in the 
       # current body. This element must become the child element of the
@@ -320,6 +355,7 @@ say "BE: '$!content-body'";
       $current-element-idx = 0;
       $element-stack[$current-element-idx] = $child-element;
       $!xml-document .= new($element-stack[$current-element-idx]);
+say "Root: $current-element-idx, {$element-stack[$current-element-idx].name}";
     }
   }
   
