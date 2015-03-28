@@ -56,6 +56,7 @@ class Semi-xml::Actions {
   has XML::Document $.xml-document;
   my Array $element-stack;
   my Int $current-element-idx;
+  my Array $deferred-calls;
 
   my Str $tag-name;
   my Str $tag-type;
@@ -65,8 +66,18 @@ class Semi-xml::Actions {
 
   my Bool $keep-literal = False;
   
-  has Array $!deferred-calls;
-  has $!deferred-call-idx = -1;
+  has Bool $!init;
+  
+  submethod BUILD ( Bool :$init ) {
+#say "AI: {?$init}";
+    if $init {
+      $current-element-idx = Int;
+      $element-stack = [];
+      $deferred-calls = [];
+    }
+  }
+
+#  has $!deferred-call-idx = -1;
 #  has $!content-body = Any;
 
 #  has $!deferred_call = Any;
@@ -214,7 +225,7 @@ class Semi-xml::Actions {
       my $module = $/[0].Str;
       if $!objects{$module}.can($tag-name) {
         # Defer the call until after the body content. The method is stored
-        # in the array $!deferred-calls at the position as the currently
+        # in the array $deferred-calls at the position as the currently
         # processed element using $current-element-idx
         # 
 #        $!deferred_call = method (XML::Text :$content-text) {
@@ -225,7 +236,7 @@ class Semi-xml::Actions {
         # the call is defined.
         #
         my $tgnm = $tag-name;
-        $!deferred-calls[$current-element-idx]
+        $deferred-calls[$current-element-idx]
            = method (XML::Node :$content-body) {
 #say "CF: ", callframe(1).file, ', ', callframe(1).line;
 #say "Called, text = $module, $tgnm, $tag-type";
@@ -258,19 +269,19 @@ class Semi-xml::Actions {
 #say "\nEnd 0: from $current-element-idx -> {$current-element-idx -1}";
 
       $current-element-idx--;
-#say "End 1: {?$!deferred-calls[$current-element-idx]}";
+#say "End 1: {?$deferred-calls[$current-element-idx]}";
 #say "End 2: {$element-stack[$current-element-idx] ~~ XML::Element}";
 #say "End 3: {$element-stack[$current-element-idx+1].name eq 'PLACEHOLDER-ELEMENT'}";
 #say "End 4: {$element-stack[$current-element-idx+1].name}";
 #say "End 5: tag = $tag-name";
-    if $!deferred-calls[$current-element-idx].defined 
+    if $deferred-calls[$current-element-idx].defined 
        and $element-stack[$current-element-idx] ~~ XML::Element
        and $element-stack[$current-element-idx+1].name eq 'PLACEHOLDER-ELEMENT' {
 #      $!content-body //= XML::Text.new(:text(''));
-#say "BE: $!deferred-call-idx, $!deferred-calls[$!deferred-call-idx]";
+#say "BE: $!deferred-call-idx, $deferred-calls[$!deferred-call-idx]";
 #say "BE 1: $current-element-idx, {$element-stack[$current-element-idx].name}";
 #      my XML::Node @nodes = $element-stack[$current-element-idx + 1].nodes;
-      $!deferred-calls[$current-element-idx](
+      $deferred-calls[$current-element-idx](
         self,
 #        :$!content-body
         :content-body($element-stack[$current-element-idx + 1])
@@ -284,7 +295,7 @@ class Semi-xml::Actions {
 
       # Call done, now reset
       #
-      $!deferred-calls[$current-element-idx] = Any;
+      $deferred-calls[$current-element-idx] = Any;
     }
 
 #    else {

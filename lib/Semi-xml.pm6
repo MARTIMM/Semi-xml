@@ -8,7 +8,7 @@ class Semi-xml:ver<0.9.4>:auth<https://github.com/MARTIMM> {
 
   our $debug = False;
 
-  my Semi-xml::Actions $actions;
+  has Semi-xml::Actions $actions;
   has Hash $.styles;
   has Hash $.configuration;
 
@@ -49,6 +49,13 @@ class Semi-xml:ver<0.9.4>:auth<https://github.com/MARTIMM> {
 #  $defaults<output><filename> = @path-spec[2];
 #  $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
 #say "PS: @path-spec[]";
+  
+  has Bool $!init;
+  
+  submethod BUILD ( Bool :$init ) {
+#say "SI: {?$init}";
+    $actions = Semi-xml::Actions.new(:$init);
+  }
 
   #-----------------------------------------------------------------------------
   #
@@ -85,17 +92,16 @@ class Semi-xml:ver<0.9.4>:auth<https://github.com/MARTIMM> {
     }
 
 #    my $sts;
-    my $sub-actions;
-    if $actions.defined {
-      $sub-actions = Semi-xml::Actions.new();
+#    my $sub-actions;
+#    if $actions.defined {
+#      $sub-actions = Semi-xml::Actions.new();
 #      $sts = Semi-xml::Grammar.parse( $content, :actions($sub-actions));
-      Semi-xml::Grammar.parse( $content, :actions($sub-actions));
-    }
+#      Semi-xml::Grammar.parse( $content, :actions($sub-actions));
+#    }
 
-    else {
-      $actions = Semi-xml::Actions.new();
+#    else {
       Semi-xml::Grammar.parse( $content, :actions($actions));
-    }
+#    }
 
 #say "Sts: {$sts.WHAT}, {$sts.perl}";
 #    die "Failure parsing the content" unless $sts;
@@ -128,10 +134,10 @@ class Semi-xml:ver<0.9.4>:auth<https://github.com/MARTIMM> {
       $filename ~= ".$fileext";
     }
 
-say "F 0: $filename";
+#say "F 0: $filename";
     if $filename !~~ m@'/'@ {
       my $filepath = self.get-option( $cfgs, 'filepath');
-say "F 1: $filepath";
+#say "F 1: $filepath";
       $filename = "$filepath/$filename";
     }
 

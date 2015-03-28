@@ -26,8 +26,8 @@ sub MAIN ( $filename ) {
   for $dep-list.list -> $dependency {
     say "Processing dependency $dependency";
     $dep = process-sxml($dependency);
-    $dep-list.push($dep.split(/\s* ',' \s*/));
-last;
+    $dep-list.push($dep.split(/\s* ',' \s*/)) if $dep.defined;
+#last;
   }
 }
 
@@ -35,14 +35,14 @@ last;
 #
 sub process-sxml ( $filename ) {
 
-  my Semi-xml $x .= new(True);
+  my Semi-xml $x .= new(:init);
   $x does sxml-role;
 
   my @path-spec = $*SPEC.splitpath($filename);
   $x.configuration<output><filepath> = @path-spec[1];
   $x.configuration<output><filename> = @path-spec[2];
   $x.configuration<output><filename> ~~ s/\.<-[\.]>+$//;
-say "PS: @path-spec[]";
+#say "PS: @path-spec[]";
 
   if $filename.IO ~~ :r {
     $x.parse-file(:$filename);
