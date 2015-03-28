@@ -37,6 +37,7 @@ $html [
     ]
 
     $!m1.stats [ bla die bla \$x [\] ]
+    $!m1.stats [ bla die bla $x [ test 2 ] ]
 
     $!m1.statistics data-weather=set1 [ data ]
     $p [ bla ]
