@@ -38,6 +38,36 @@ class Semi-xml::SxmlCore {
     my $txt-e = XML::Text.new(:text($date-time));
     $parent.append($txt-e);
   }
+
+  # $SxmlCore.comment []
+  #
+  method comment ( XML::Element $parent,
+                   Hash $attrs,
+                   XML::Node :$content-body
+                 ) {
+    $parent.append(XML::Comment.new(:data([~] $content-body.nodes)));
+    $content-body.remove;
+  }
+
+  # $SxmlCore.cdata []
+  #
+  method cdata ( XML::Element $parent,
+                 Hash $attrs,
+                 XML::Node :$content-body
+               ) {
+    $parent.append(XML::CDATA.new(:data([~] $content-body.nodes)));
+    $content-body.remove;
+  }
+
+  # $SxmlCore.pi []
+  #
+  method pi ( XML::Element $parent,
+              Hash $attrs,
+              XML::Node :$content-body
+            ) {
+    $parent.append(XML::PI.new(:data([~] $content-body.nodes)));
+    $content-body.remove;
+  }
 }
 
 class Semi-xml::Actions {

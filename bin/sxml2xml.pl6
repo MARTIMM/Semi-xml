@@ -22,12 +22,13 @@ sub MAIN ( $filename ) {
 #say "PF: {$x.configuration<output><filename>}";
 
   my $dep = process-sxml($filename);
-  my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
-  for $dep-list.list -> $dependency {
-    say "Processing dependency $dependency";
-    $dep = process-sxml($dependency);
-    $dep-list.push($dep.split(/\s* ',' \s*/)) if $dep.defined;
-#last;
+  if $dep.defined {
+    my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
+    for $dep-list.list -> $dependency {
+      say "Processing dependency $dependency";
+      $dep = process-sxml($dependency);
+      $dep-list.push($dep.split(/\s* ',' \s*/)) if $dep.defined;
+    }
   }
 }
 

@@ -54,11 +54,13 @@ highlights are programmed in your favorite editor.
 ## Ideas and Todo
 
 * [x] Parser is class. Styles can be templated and added in the form of a role.
-      The same information can be supplied in the prelude of the source. Of all
+      The same information can be supplied in the prelude of the source. For all
       settings, defaults are provided when possible.
 * [ ] Xml Namespaces
+* [ ] Doctype entities
 * [ ] '#' commenting should be improved using grammar instead of overall removal
-* [ ] Dependencies on other files
+* [x] Dependencies on other files
+* [ ] Partial parsing of prelude or document.
 * External modules
   * [x] arguments are given via attributes
   * [x] a tag content between [ ... ] can be a named argument to the sub when
@@ -77,8 +79,6 @@ highlights are programmed in your favorite editor.
 * [x] Add another set of brackets which will not allow child elements. This
       is handy to write javascript and or stylesheets whithout the need to
       escape every other character like the $ and #. [-...] perhaps?
-* Replacing anonymous methods in an external module from the hash to class
-  methods.
 * Now modules can be used from sxml, the following libs might come in handy
   * SxmlLib::File - File and link handling.
     * [x] include other documents
@@ -87,10 +87,11 @@ highlights are programmed in your favorite editor.
   * [ ] Generating tables
   * [ ] generating graphics, statistics, svg etc
   * A by default included library to handle special items like
-    * [ ] Comments <!-- ... --> Not needed?. Perhaps ```$!Comment []```.
-    * [ ] Processing Instructions <?PI ...?>. Perhaps ```$!PI target=php []```.
-    * [ ] Cdata <[CDATA[...]]> Perhaps ```$!CData []```.
-    * [x] Date and time. ```$!SxmlCore.date []``` and ```$!SxmlCore.date-time```.
+    * [x] ```$!SxmlCore.comment [ ... ]``` for comments <!-- ... -->.
+    * [x] ```$!SxmlCore.PI [...]``` for <?...?>.
+    * [x] ```$!SxmlCore.CData []``` for <[CDATA[...]]>.
+    * [x] ```$!SxmlCore.date``` [] for date
+    * [x] ```$!SxmlCore.date-time iso=1 []``` for datetime.
 * Items needed in program sxml2xml
   * [ ] Exporting generated xml to other programs instead of file
   * [ ] Generate a content header!
@@ -109,7 +110,11 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.10.0
+  * Added methods for xml comment, cdata and pi.
 * 0.9.5
+  * Bugfix in dependencies due to inititializing step
+  * Initialization of Semi-xml and Actions class.
   * Complex nesting of body contents now possible with $!mod.meth [ ]. Also
     another call to a method is possible in the content body, The content is
     saved in an element named 'PLACEHOLDER-ELEMENT'. This element is given to

@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.9.4>:auth<https://github.com/MARTIMM> {
+class Semi-xml:ver<0.10.0>:auth<https://github.com/MARTIMM> {
 
   our $debug = False;
 

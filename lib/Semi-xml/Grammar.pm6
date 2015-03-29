@@ -12,7 +12,7 @@ grammar Semi-xml::Grammar {
   # document
   #
   rule TOP { ( "---" <prelude> "---" ) ** 0..1 <document> }
-  
+
   # The prelude is a series of configuration options looking like
   #
   # /x/y/opt:  value;
