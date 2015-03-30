@@ -1,0 +1,70 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
+#
+---
+options/xml-prelude/show:       1;
+
+options/doctype/show:           1;
+#options/doctype/definition:     
+#options/doctype/entities:
+#    company "Acme Mc Carpenter, Inc",
+#    product "Data2any",
+#    % isopub SYSTEM "Entities/isopub.ent",
+##    %isopub\;,
+#    ouml "&#246\;"
+#    ;
+
+output/filepath:                .;
+
+output/program/xml:     | xmllint --format - > sxml2xml.xml;
+output/program/chk:
+        | tee sxml2xml.xml | xmllint --format -
+        | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc
+        ;
+output/program/xep:
+        | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
+        | xep -fo - -pdf sxml2xml.pdf
+        ;
+
+#module/list:                    SxmlLib::Html::List;
+
+#dependencies/files:             Sxml/home.sxml, Sxml/about.sxml,
+#                                Sxml/crossroads.sxml;
+---
+$book xmlns=http://docbook.org/ns/docbook
+      xmlns:xi=http://www.w3.org/2001/XInclude
+      xmlns:xl=http://www.w3.org/1999/xlink
+      version=5.0
+      xml:lang=en [
+  $title [ Using Semi-xml ]
+  $info [
+    $author [
+      $personname [
+        $firstname [ Marcel ]
+        $surname [ Timmerman ]
+      ]
+      $email [ mt1957@gmail.com ]
+    ]
+    
+    $address [
+      $city [ Haarlem ]
+      $country [ Netherlands ]
+    ]
+
+    $copyright [
+      $year [ 2015, 2016 ... Inf ]
+      $holder [ Marcel Timmerman ]
+    ]
+
+    $date [ $!SxmlCore.date [] ]
+    $abstract [
+      $para [
+	sxml2xml is capable of transforming an internally build data
+	structure into xml after which it is possible to store it in a file
+	or send it to any program for conversion or some other type of
+	processor. 
+      ]
+
+      $para [ Generated on date $!SxmlCore.date [] ]
+    ]
+  ]
+]

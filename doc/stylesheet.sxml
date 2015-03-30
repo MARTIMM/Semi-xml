@@ -1,0 +1,20 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
+#
+---
+options/xml-prelude/show:       1;
+options/doctype/show:           1;
+
+output/filepath:                .;
+output/fileext:                 xsl;
+
+---
+
+$xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
+
+  # Get the docbook formatting objects stylesheet
+  #
+  $xsl:import href=/usr/share/sgml/docbook/xsl-ns-stylesheets/fo/docbook.xsl []
+
+]
+
+
