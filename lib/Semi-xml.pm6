@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.10.0>:auth<https://github.com/MARTIMM> {
+class Semi-xml:ver<0.11.0>:auth<https://github.com/MARTIMM> {
 
   our $debug = False;
 
@@ -121,28 +121,75 @@ class Semi-xml:ver<0.10.0>:auth<https://github.com/MARTIMM> {
 
   #-----------------------------------------------------------------------------
   #
-  method save ( Str :$filename is copy ) {
+  method save ( Str :$filename is copy, Str :$run-code ) {
     my Array $cfgs = [ $actions.config<output>,
                        $!configuration<output>,
                        $defaults<output>
                      ];
 
-    if !$filename.defined {
-      $filename = self.get-option( $cfgs, 'filename');
-      my $fileext = self.get-option( $cfgs, 'fileext');
-
-      $filename ~= ".$fileext";
-    }
-
-#say "F 0: $filename";
-    if $filename !~~ m@'/'@ {
-      my $filepath = self.get-option( $cfgs, 'filepath');
-#say "F 1: $filepath";
-      $filename = "$filepath/$filename";
-    }
-
     my $document = self.get-xml-text;
-    spurt( $filename, $document);
+
+    if $run-code.defined {
+#say "Run $run-code";
+      my $cmd = self.get-option( :section('output'),
+                                 :sub-section('program'),
+                                 :option($run-code)
+                               );
+
+#-----
+# Temporary solution for command
+#
+if !$filename.defined {
+  $filename = self.get-option( $cfgs, 'filename');
+  my $fileext = self.get-option( $cfgs, 'fileext');
+
+  $filename ~= ".$fileext";
+}
+
+if $filename !~~ m@'/'@ {
+  my $filepath = self.get-option( $cfgs, 'filepath');
+  $filename = "$filepath/$filename" if $filepath;
+}
+
+spurt( $filename, $document);
+#-----
+
+      if $cmd.defined {
+        $cmd ~~ s:g/\n/ /;
+        $cmd ~~ s:g/\s+/ /;
+        $cmd ~~ s/^\s*\|//;
+#        my $program-io = IO::Pipe.to($cmd);
+#say "IO: $program-io";
+
+        # No pipe to executable at the moment so take a different route...
+        #
+#        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
+        shell("cat $filename | $cmd");
+      }
+
+      else {
+        say "Code '$run-code' to select command not found";
+        exit(0);
+      }
+    }
+
+    else {
+      if !$filename.defined {
+        $filename = self.get-option( $cfgs, 'filename');
+        my $fileext = self.get-option( $cfgs, 'fileext');
+
+        $filename ~= ".$fileext";
+      }
+
+  say "F 0: $filename";
+      if $filename !~~ m@'/'@ {
+        my $filepath = self.get-option( $cfgs, 'filepath');
+  say "F 1: $filepath";
+        $filename = "$filepath/$filename" if $filepath;
+      }
+
+      spurt( $filename, $document);
+    }
   }
 
   #-----------------------------------------------------------------------------

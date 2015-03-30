@@ -53,50 +53,63 @@ highlights are programmed in your favorite editor.
 
 ## Ideas and Todo
 
-* [x] Parser is class. Styles can be templated and added in the form of a role.
-      The same information can be supplied in the prelude of the source. For all
-      settings, defaults are provided when possible.
-* [ ] Xml Namespaces
-* [ ] Doctype entities
-* [ ] '#' commenting should be improved using grammar instead of overall removal
-* [x] Dependencies on other files
-* [ ] Partial parsing of prelude or document.
+* Parser and actions.
+  * [x] Parser is class. Styles can be templated and added in the form of a role.
+        The same information can be supplied in the prelude of the source. For all
+        settings, defaults are provided when possible.
+  * [ ] Xml Namespaces
+  * [ ] Doctype entities
+  * [ ] '#' commenting should be improved using grammar instead of overall removal
+  * [ ] Better error messages when parser fails.
+  * [x] Add another set of brackets which will not allow child elements. This
+        is handy to write javascript and or stylesheets whithout the need to
+        escape every other character like the $ and #.
+  * [x] Exporting generated xml to other programs instead of file using prelude
+        path ```output/program/<label>: <command line to run>;```. E.g. when
+        ```output/program/chk: | xmllint --format -;``` is defined in the
+        prelude one can run ```sxml2xml -run chk my-file.sxml```.
+
+        To get the user information save() has a new named argument :$run-code
+        which is the key as in /output/program/<run-code>
+
 * External modules
-  * [x] arguments are given via attributes
-  * [x] a tag content between [ ... ] can be a named argument to the sub when
-        the content does not have other tags.
+  * [x] A methods tag content between [ ... ] can be a named argument to the sub.
   * [x] Need library paths to find modules
   * [x] Introduced via source prelude
   * [ ] Introduced via role
   * [ ] Introduced via defaults
-  * [x] tag name substitution and attribute additions. Format is ```$.tagname
-        <attrs> [<body>]```.
-  * [x] insertion of tags and body using attributes as arguments to
-        subs/methods. Format ```$!tagname <attrs> [<body>]```
-* [ ] Documentation.
-* [ ] Tutorials.
-* [ ] Better error messages when parser fails.
-* [x] Add another set of brackets which will not allow child elements. This
-      is handy to write javascript and or stylesheets whithout the need to
-      escape every other character like the $ and #. [-...] perhaps?
+  * [x] ```$.tagname <attrs> [<body>]``` for tag name substitution and
+        attribute additions.
+  * [x] ```$!tagname <attrs> [<body>]``` for insertion of tags and body using
+        attributes as arguments to subs/methods.
+
 * Now modules can be used from sxml, the following libs might come in handy
   * SxmlLib::File - File and link handling.
     * [x] include other documents
     * [ ] link to page or image checking and generating
+
+  * And ...
     * [ ] avatar linking
-  * [ ] Generating tables
-  * [ ] generating graphics, statistics, svg etc
-  * A by default included library to handle special items like
+    * [ ] Generating tables
+    * [ ] generating graphics, statistics, svg etc
+
+  * A Sxml core library included by default to handle simple items like
     * [x] ```$!SxmlCore.comment [ ... ]``` for comments <!-- ... -->.
     * [x] ```$!SxmlCore.PI [...]``` for <?...?>.
     * [x] ```$!SxmlCore.CData []``` for <[CDATA[...]]>.
     * [x] ```$!SxmlCore.date``` [] for date
     * [x] ```$!SxmlCore.date-time iso=1 []``` for datetime.
+
 * Items needed in program sxml2xml
-  * [ ] Exporting generated xml to other programs instead of file
   * [ ] Generate a content header!
   * [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the
         sxml2xml program will not bother (yet).
+  * [x] Dependencies on other files
+  * [ ] Partial parsing of prelude or document.
+
+* And ...
+  * [ ] Documentation.
+  * [ ] Tutorials.
 
 ## Bugs
 
@@ -110,6 +123,10 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.11.0
+  * Feed xml result to other programs. Not directly but with a work around.
+  * Preparations to use xml namespaces.
+  * Start of documentation in the doc directory using the semi-xml language.
 * 0.10.0
   * Added methods for xml comment, cdata and pi.
 * 0.9.5

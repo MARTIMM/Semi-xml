@@ -21,8 +21,9 @@ grammar Semi-xml::Grammar {
   rule config-entry { <config-keypath> ':' <config-value> ';' }
   token config-keypath { <config-key> ( '/' <config-key> )* }
   token config-key { <identifier> }
-  rule config-value { <-[;]>+ }
-  
+  rule config-value { <-[;]>+ || <config-value-esc> }
+  token config-value-esc { '\;' }
+
   # A document is only a tag with its content. Defined like this there can only
   # be one toplevel document.
   #
@@ -35,19 +36,21 @@ grammar Semi-xml::Grammar {
   #
   rule tag { <tag-name> ( <attribute> )* }
 #  token tag-name { ( '$.' || '$!' || '$' ) <identifier> }
-  token tag-name { <tag-type> <identifier> }
+#  token tag-name { <tag-type> <identifier> }
+  token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 }
   token tag-type {   ('$.' <identifier> '.' )
                   || ('$!' <identifier> '.' )
                   || '$'
                  }
-                  
+
 
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   # 
   token attribute { <attr-key> '=' <attr-value-spec> }
-  token attr-key { <identifier> }
+#  token attr-key { <identifier> }
+  token attr-key { <identifier> [ ':' <identifier> ]**0..1 }
   token attr-value-spec {    (\' <attr-q-value> \')
                           || (\" <attr-qq-value> \")
                           || <attr-s-value>

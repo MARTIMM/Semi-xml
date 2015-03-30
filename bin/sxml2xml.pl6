@@ -15,18 +15,21 @@ role sxml-role {
 }
 
 #-------------------------------------------------------------------------------
+#= sxml2xml -run run-code filename.sxml
 #
-sub MAIN ( $filename ) {
+sub MAIN ( $filename, Str :$run ) {
 #  $filename ~~ m/(.*?)\.<{$filename.IO.extension}>$/;
 #  $x.configuration<output><filename> = ~$/[0];
 #say "PF: {$x.configuration<output><filename>}";
 
-  my $dep = process-sxml($filename);
+  
+
+  my $dep = process-sxml( $filename, :$run);
   if $dep.defined {
     my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
     for $dep-list.list -> $dependency {
       say "Processing dependency $dependency";
-      $dep = process-sxml($dependency);
+      $dep = process-sxml( $dependency, :$run);
       $dep-list.push($dep.split(/\s* ',' \s*/)) if $dep.defined;
     }
   }
@@ -34,7 +37,7 @@ sub MAIN ( $filename ) {
 
 #-------------------------------------------------------------------------------
 #
-sub process-sxml ( $filename ) {
+sub process-sxml ( Str $filename, Str :$run ) {
 
   my Semi-xml $x .= new(:init);
   $x does sxml-role;
@@ -47,7 +50,16 @@ sub process-sxml ( $filename ) {
 
   if $filename.IO ~~ :r {
     $x.parse-file(:$filename);
-    $x.save;
+#say "PS: $filename {?$run ?? $run !! '-'}";
+
+    if $run.defined {
+      $x.save(:run-code($run));
+    }
+    
+    else {
+      $x.save;
+    }
+
     return $x.get-option( :section('dependencies'), :option('files'));
   }
 
