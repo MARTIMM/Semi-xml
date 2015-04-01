@@ -152,6 +152,7 @@ if $filename !~~ m@'/'@ {
 }
 
 spurt( $filename, $document);
+say "save to $filename";
 #-----
 
       if $cmd.defined {
@@ -164,6 +165,7 @@ spurt( $filename, $document);
         # No pipe to executable at the moment so take a different route...
         #
 #        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
+say "Cmd: cat $filename | $cmd";
         shell("cat $filename | $cmd");
       }
 
@@ -181,10 +183,8 @@ spurt( $filename, $document);
         $filename ~= ".$fileext";
       }
 
-  say "F 0: $filename";
       if $filename !~~ m@'/'@ {
         my $filepath = self.get-option( $cfgs, 'filepath');
-  say "F 1: $filepath";
         $filename = "$filepath/$filename" if $filepath;
       }
 
@@ -198,6 +198,7 @@ spurt( $filename, $document);
     # Get the top element name
     #
     my $root-element = $actions.xml-document.root.name;
+    $root-element ~~ s/^(<-[:]>+\:)//;
 
     my Str $document = '';
 

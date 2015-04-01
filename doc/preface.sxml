@@ -1,0 +1,9 @@
+$preface [
+  $title [ Introduction of &library; ]
+  $para [
+     Welcome to\ $emphasis[&library;]. &library; is a Perl 6 module to convert
+     a semi xml text into\ $emphasis[XML]. This article will explain the
+     language this module can parse.
+  ]
+]
+

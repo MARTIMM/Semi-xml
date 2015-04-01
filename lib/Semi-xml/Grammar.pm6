@@ -21,7 +21,7 @@ grammar Semi-xml::Grammar {
   rule config-entry { <config-keypath> ':' <config-value> ';' }
   token config-keypath { <config-key> ( '/' <config-key> )* }
   token config-key { <identifier> }
-  rule config-value { <-[;]>+ || <config-value-esc> }
+  rule config-value { <config-value-esc> || <-[;]>+ }
   token config-value-esc { '\;' }
 
   # A document is only a tag with its content. Defined like this there can only
