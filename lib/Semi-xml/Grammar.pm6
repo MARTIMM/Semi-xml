@@ -3,6 +3,8 @@ use v6;
 
 grammar Semi-xml::Grammar {
 
+  my $T;
+
   # A complete document looks like the following of which the prelude an dashes
   # are optional
   #
@@ -37,7 +39,7 @@ grammar Semi-xml::Grammar {
   rule tag { <tag-name> ( <attribute> )* }
 #  token tag-name { ( '$.' || '$!' || '$' ) <identifier> }
 #  token tag-name { <tag-type> <identifier> }
-  token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 }
+  token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 {$T = ~$/;}}
   token tag-type {   ('$.' <identifier> '.' )
                   || ('$!' <identifier> '.' )
                   || '$'
@@ -72,32 +74,63 @@ grammar Semi-xml::Grammar {
   # starting with a those characters doesn't have to be escaped when they are
   # used. Just use a space in front. Can happen in tables showing numbers.
   #
-  token tag-body { <body-start> ~ <body-end> <body-contents> }
-  token body-start { <ws> '[' {
-                      say "Body start at ", $0.pos
-                         if $Semi-xml::Actions::debug; 
-                     }
-                   }
-  token body-end { ']' <ws> {
-                      say "Body end at ", $0.pos, ', ', $?LINE
-                         if $Semi-xml::Actions::debug; 
-                   }
-                 }
+  token tag-body {
+    <reset-keep-literal>
+    (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
+    || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
+    )
+  }
 
+  token reset-keep-literal { <?> }
+
+  token body1-start {
+    <ws> '[' {
+      say "Body 1 start '$T'"; 
+#      say "Body start at ", $0.pos if $Semi-xml::Actions::debug; 
+    }
+  }
   # The content can be anything mixed with document tags except following the
   # no-elements character. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
-  token body-contents {    ( <no-elements> || <no-elements-literal> )
-                           ( <no-elements-text> )*
-                        || <keep-literal>? ( <body-text> || <document> )*
-                      }
+  token body1-contents {
+#    ( <no-elements> || <no-elements-literal> ) ( <no-elements-text> )*
+#    || <keep-literal>? ( <body1-text> || <document> )*
+    <keep-literal>? ( <body1-text> || <document> )*
+  }
+  token body1-end {
+    ']' <ws> {
+#       say "Body end at ", $0.pos, ', ', $?LINE if $Semi-xml::Actions::debug; 
+       say "Body 1 end '$T'"; 
+       $T = 'parent';
+    }
+  }
 
-  token keep-literal            { <reset-keep-literal> '=' }
-  token reset-keep-literal      { <?> }
+  token body2-start {
+    '[!' {
+#      say "Body start at ", $0.pos if $Semi-xml::Actions::debug; 
+      say "Body 2 start '$T'"; 
+    }
+  }
+
+  # Cannot use body2-end because method will be called twice, here and later
+  # when encountering the string '!]'.
+  #
+  token body2-contents { <keep-literal>? .*? <?b2e> }
+  token b2e { '!]' }
+  token body2-end {
+    '!]' {
+#       say "Body end at ", $0.pos, ', ', $?LINE if $Semi-xml::Actions::debug; 
+       say "Body 2 end '$T'";
+       $T = 'parent';
+    }
+  }
+
+
+  token keep-literal            { '=' }
   token no-elements             { '-' }
   token no-elements-literal     { '+' }
-  token body-text               { ( <-[\$\]\\]> || <body-esc> )+ }
+  token body1-text               { ( <-[\$\]\\]> || <body-esc> )+ }
   token no-elements-text        { ( <-[\]\\]> || <body-esc> )+ }
   token body-esc                { '\$' || '\[' || '\]' || '\\' }
 

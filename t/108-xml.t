@@ -42,7 +42,7 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 my $d = Date.today();
 ok $xml-text ~~ m/'<!--comment text-->'/, 'Check comments';

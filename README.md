@@ -71,6 +71,10 @@ highlights are programmed in your favorite editor.
 
         To get the user information save() has a new named argument :$run-code
         which is the key as in /output/program/<run-code>
+  * [ ] Define rules to define spacing around tags. Default would be to have no
+        space at all. This can mean that the current syntax of $x[ ], $x[= ],
+        $x[- ] and $x[+ ] may change because it won't be nessesary if layout
+        can be defined beforehand.
 
 * External modules
   * [x] A methods tag content between [ ... ] can be a named argument to the sub.

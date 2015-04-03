@@ -4,8 +4,9 @@ use Semi-xml;
 
 #-------------------------------------------------------------------------------
 # Testing;
-#   Write file using default filename from program
-#   Test |[ ]| contents to keep content as-is
+#   Test $tag [ ... ]   Normal content
+#   Test $tag [! ... !] Text only no child elements
+#
 #-------------------------------------------------------------------------------
 # Setup
 #
@@ -32,9 +33,10 @@ $html [
         background-color: \#f0f;
       }
     ]
-    $script [+
+    $script [!=
       var a_tags = $('a');
-    ]
+      var b = a_tags[1];
+    !]
   ]
 
   $body [
@@ -42,7 +44,11 @@ $html [
     $table [
       $tr [
         $th[ header ]
-        $td[ data ]
+        $td[ data at $a href='http://example.com/' []
+          $p [
+            jhghjasdjhg asdhajh a$b [kjsdhfkj]sdjhkjh $u [kjdshkjh $b [hg]]
+          ]
+        ]
       ]
     ]
   ]
@@ -69,7 +75,7 @@ ok $xml-text ~~ ms/ '<tr>' '<th>' /, 'Th after tr found';
 
 ok $xml-text ~~ ms/var a_tags '=' "\$('a');"/, 'Check piece of javascript';
 
-#say $xml-text;
+say $xml-text;
 
 unlink $filename;
 
