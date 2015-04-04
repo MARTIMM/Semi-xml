@@ -14,5 +14,5 @@
         "SxmlLib::Html::List": "lib/SxmlLib/Html/List.pm6",
     },
     "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-    "version": "0.11.0"
+    "version": "0.12.0"
 }

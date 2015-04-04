@@ -44,7 +44,7 @@ $html [
     $table [
       $tr [
         $th[ header ]
-        $td[ data at $a href='http://example.com/' []
+        $td[ data at $*a href='http://example.com/' []
           $p [
             jhghjasdjhg asdhajh a$b [kjsdhfkj]sdjhkjh $u [kjdshkjh $b [hg]]
           ]
@@ -77,9 +77,13 @@ ok $xml-text ~~ m/
 var b = a_tags[1];'
 /, 'Check for literal text in javascript';
 
-ok $xml-text ~~ ms/ '<tr>' '<th>' /, 'Th after tr found';
+ok $xml-text ~~ ms/ '<tr>' '<th>' /, "'Th' after 'tr' found";
 
-ok $xml-text ~~ ms/var a_tags '=' "\$('a');"/, 'Check piece of javascript';
+ok $xml-text ~~ ms/'data at <a href'/, "Testing \$* tag";
+
+ok $xml-text ~~ ms/'a<b>kjsdhfkj</b> sdjhkjh<u>kjdshkjh<b>hg</b></u>'/,
+   'Check part of result for spacing'
+   ;
 
 #say $xml-text;
 

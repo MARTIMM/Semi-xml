@@ -3,8 +3,6 @@ use v6;
 
 grammar Semi-xml::Grammar {
 
-  my $T;
-
   # A complete document looks like the following of which the prelude an dashes
   # are optional
   #
@@ -37,21 +35,18 @@ grammar Semi-xml::Grammar {
   # $table class=bussiness id=sect1 
   #
   rule tag { <tag-name> ( <attribute> )* }
-#  token tag-name { ( '$.' || '$!' || '$' ) <identifier> }
-#  token tag-name { <tag-type> <identifier> }
-  token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 {$T = ~$/;}}
+  token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 }
   token tag-type {   ('$.' <identifier> '.' )
                   || ('$!' <identifier> '.' )
+                  || '$*'
                   || '$'
                  }
-
 
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   # 
   token attribute { <attr-key> '=' <attr-value-spec> }
-#  token attr-key { <identifier> }
   token attr-key { <identifier> [ ':' <identifier> ]**0..1 }
   token attr-value-spec {    (\' <attr-q-value> \')
                           || (\" <attr-qq-value> \")
@@ -82,57 +77,30 @@ grammar Semi-xml::Grammar {
     )
   }
 
-  token body1-start {
-    <ws> '[' {
-      say "Body 1 start '$T'"; 
-#      say "Body start at ", $0.pos if $Semi-xml::Actions::debug; 
-    }
-  }
+  token body1-start     { '[' }
+
   # The content can be anything mixed with document tags except following the
   # no-elements character. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
-  token body1-contents {
-#    ( <no-elements> || <no-elements-literal> ) ( <no-elements-text> )*
-#    || <keep-literal>? ( <body1-text> || <document> )*
-    <keep-literal>? ( <body1-text> || <document> )*
-  }
-  token body1-end {
-    ']' <ws> {
-#       say "Body end at ", $0.pos, ', ', $?LINE if $Semi-xml::Actions::debug; 
-       say "Body 1 end '$T'"; 
-       $T = 'parent';
-    }
-  }
+  token body1-contents  { <keep-literal>? ( <body1-text> || <document> )* }
+  token body1-end       { ']' }
+  token body1-text      { ( <-[\$\]\\]> || <body-esc> )+ }
 
-  token body2-start {
-    '[!' {
-#      say "Body start at ", $0.pos if $Semi-xml::Actions::debug; 
-      say "Body 2 start '$T'"; 
-    }
-  }
+
+  token body2-start     { '[!' }
+  token body2-contents  { <keep-literal>? <body2-text> }
 
   # Cannot use body2-end because method will be called twice, here and later
   # when encountering the string '!]'.
   #
-  token body2-contents { <keep-literal>? <body2-text> }
-  token body2-text { .*? <?b2e> }
-  token b2e { '!]' }
-  token body2-end {
-    '!]' {
-#       say "Body end at ", $0.pos, ', ', $?LINE if $Semi-xml::Actions::debug; 
-       say "Body 2 end '$T'";
-       $T = 'parent';
-    }
-  }
+  token body2-text      { .*? <?b2e> }
+  token b2e             { '!]' }
+  token body2-end       { '!]' }
 
 
-  token keep-literal            { '=' }
-  token no-elements             { '-' }
-  token no-elements-literal     { '+' }
-  token body1-text               { ( <-[\$\]\\]> || <body-esc> )+ }
-  token no-elements-text        { ( <-[\]\\]> || <body-esc> )+ }
-  token body-esc                { '\$' || '\[' || '\]' || '\\' }
+  token keep-literal    { '=' }
+  token body-esc        { '\$' || '\[' || '\]' || '\\' }
 
   # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
   # dash within the string is accepted.

@@ -71,10 +71,22 @@ highlights are programmed in your favorite editor.
 
         To get the user information save() has a new named argument :$run-code
         which is the key as in /output/program/<run-code>
-  * [ ] Define rules to define spacing around tags. Default would be to have no
-        space at all. This can mean that the current syntax of $x[ ], $x[= ],
-        $x[- ] and $x[+ ] may change because it won't be nessesary if layout
-        can be defined beforehand.
+  * Define rules to define spacing around tags. Default would be to have no
+    space at all. This can mean that the current syntax of $x[ ], $x[= ],
+    $x[- ] and $x[+ ] may change because it won't be nessesary if layout
+    can be defined beforehand.
+
+    Well, that happened;
+    * [x] ```$x [ ... ]```. Normal tag where all leading and trailing spaces are
+          removed and inbetween spaces reduced to one space.
+    * [x] ```$x [! ... !]```. Body can not have tags. '$' is ignored and this
+          character as well as ']' do not have to be escaped. Only '#' must
+          be escaped at this moment.
+    * [x] [ ... ] and [! ... !] can have a '=' directly after the '[' or '[!'.
+          Leading newlines and trailing spaces are removed. Furthermore all
+          indents are reduced to the minimum spacing as is done in perl6.
+    * [x] A tag can start with '$', '$.', '$!'. Now also '$*' is introduced
+          which will add a space around the tag and its content.
 
 * External modules
   * [x] A methods tag content between [ ... ] can be a named argument to the sub.
@@ -127,6 +139,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.12.0
+  * Change of syntax to better control spacing and layout.
 * 0.11.0
   * Feed xml result to other programs. Not directly but with a work around.
   * Preparations to use xml namespaces.

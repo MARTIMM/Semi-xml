@@ -143,7 +143,7 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 ok $xml-text ~~ m/('<table'.*)**2/, 'Check subst and gen of $.special-table and $!statistics';
 ok $xml-text ~~ m/class\=\"big\-table\"/, 'Check inserted class attribute';

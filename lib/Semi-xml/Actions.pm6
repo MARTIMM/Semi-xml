@@ -73,7 +73,6 @@ class Semi-xml::SxmlCore {
 class Semi-xml::Actions {
   our $debug = False;
 
-
   # Objects hash with one predefined object for core methods
   #
   has Hash $.objects = { SxmlCore => Semi-xml::SxmlCore.new() };
@@ -98,20 +97,17 @@ class Semi-xml::Actions {
 
   has Bool $!init;
 
+  # Initialize some variables when init is set. Must be done when a new object
+  # is created: the variables are 'seen' in the other object
+  #
   submethod BUILD ( Bool :$init ) {
-#say "AI: {?$init}";
+
     if $init {
       $current-element-idx = Int;
       $el-stack = [];
       $deferred-calls = [];
     }
   }
-
-#  has $!deferred-call-idx = -1;
-#  has $!content-body = Any;
-
-#  has $!deferred_call = Any;
-#  has $!content-text = Any;
 
   # All config entries are like: '/a/b/c: v;' This must be evauluated as
   # "$!config<$config-path>='$config-value'" so it becomes a key value pair
@@ -143,11 +139,9 @@ class Semi-xml::Actions {
   #
   method prelude ( $match ) {
 
-#say "D: ", ($debug ?? 'Y' !! 'N');
     if $!config<option><debug>:exists and $!config<option><debug> {
       say "\nTurn debugging on\n";
       $debug = True;
-#say "D: ", ($debug ?? 'Y' !! 'N');
     }
 
     if $!config<module>:exists {
@@ -167,9 +161,8 @@ class Semi-xml::Actions {
             use v6;$use-lib
             use $value;
             \$obj = $value.new;
+          EOCODE
 
-            EOCODE
-#say "Code:\n$code\n";
           EVAL($code);
           if $! {
             say "Eval error:\n$!\n";
@@ -185,7 +178,6 @@ class Semi-xml::Actions {
 
   method tag-type ( $match ) {
     $tag-type = ~$match;
-#say "TT: '$tag-type'";
   }
 
   method tag-name ( $match ) {
@@ -196,7 +188,6 @@ class Semi-xml::Actions {
     $attrs = {};
 
     $tag-name = ~$match;
-#say "TN: '$tag-name'";
   }
 
   method attr-key       ( $match ) { $attr-key = ~$match; }
@@ -215,53 +206,14 @@ class Semi-xml::Actions {
   #
   method reset-keep-literal ( $match )  { $keep-literal = False; }
   method keep-literal ( $match )        { $keep-literal = True; }
-  method no-elements-literal ( $match ) { $keep-literal = True; }
-  method no-elements ( $match )         { $keep-literal = False; }
-
 
   method body1-start ( $match )         { self!process-tag(); }
-
-  method no-elements-text ( $match )    { return self.body1-text($match); }
-
   method body1-text ( $match )          { self!process-text($match); }
-
-  method body1-end ( $match ) {
-    # Go back one level .New child tags will overwrite the previous child
-    # on the stack as those are not needed anymore.
-    #
-    $current-element-idx--;
-say '--';
-    if $deferred-calls[$current-element-idx].defined 
-       and $el-stack[$current-element-idx] ~~ XML::Element
-       and $el-stack[$current-element-idx+1].name eq 'PLACEHOLDER-ELEMENT' {
-
-      # Call the deferred method and pass the element 'PLACEHOLDER-ELEMENT' and
-      # all children below it. The method must remove this element before
-      # returning otherwise it will become an xml tag.
-      #
-      $deferred-calls[$current-element-idx](
-        self,
-        :content-body($el-stack[$current-element-idx + 1])
-      );
-
-      # Call done, now reset
-      #
-      $deferred-calls[$current-element-idx] = Any;
-    }
-  }
+  method body1-end ( $match )           { self!process-body-end(); }
 
   method body2-start ( $match )         { self!process-tag(); }
-
   method body2-text ( $match )          { self!process-text($match); }
-
-  method body2-end ( $match ) {
-say "b2e: $match";
-    # Go back one level .New child tags will overwrite the previous child
-    # on the stack as those are not needed anymore.
-    #
-    $current-element-idx--;
-say "--";
-  }
+  method body2-end ( $match )           { self!process-body-end(); }
 
   # Idea to count lines in the source
   #
@@ -321,8 +273,6 @@ say "--";
         my $tgnm = $tag-name;
         $deferred-calls[$current-element-idx]
            = method (XML::Node :$content-body) {
-#say "CF: ", callframe(1).file, ', ', callframe(1).line;
-#say "Called, text = $module, $tgnm, $tag-type";
           $!objects{$module}."$tgnm"(
             $el-stack[$current-element-idx],
             $attrs,
@@ -332,6 +282,10 @@ say "--";
 
         self!register-element( 'PLACEHOLDER-ELEMENT', {});
       }
+    }
+
+    elsif $tag-type eq '$*' {
+      self!register-element( $tag-name, $attrs, :decorate);
     }
 
     elsif $tag-type eq '$' {
@@ -351,21 +305,23 @@ say "--";
   # appended to this last element When the block is finished (at body1-end) the
   # pointer is moved up to the parent element in the array.
   #
-  method !register-element ( Str $tag-name, Hash $attrs ) {
+  method !register-element ( Str $tag-name, Hash $attrs, :$decorate = False ) {
     # Test if index is defined.
     #
     my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
     if $current-element-idx.defined {
+      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text('')))
+        if $decorate;
       $el-stack[$current-element-idx].append($child-element);
+      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text('')))
+        if $decorate;
       $el-stack[$current-element-idx + 1] = $child-element;
-#say "E: {$child-element.name} append on $current-element-idx, {$el-stack[$current-element-idx].name}";
 
       # Point to the next level in case there is another tag found in the 
       # current body. This element must become the child element of the
       # current one.
       #
       $current-element-idx++;
-say "++ $tag-name";
     }
 
     else {
@@ -374,7 +330,6 @@ say "++ $tag-name";
       $current-element-idx = 0;
       $el-stack[$current-element-idx] = $child-element;
       $!xml-document .= new($el-stack[$current-element-idx]);
-say "Root: $tag-name";
     }
   }
 
@@ -382,11 +337,9 @@ say "Root: $tag-name";
   #
   method !process-text ( $match ) {
     my $esc-text = self!process-esc(~$match);
-say "btc 0: $esc-text";
-    $esc-text ~~ s/^\n+//;
-#    $esc-text ~~ s/^\s+//;
     my $xml;
     if $keep-literal {
+      $esc-text ~~ s/^\n+//;
       $esc-text ~~ s/\s+$//;
       my $min-spaces = Inf;
 
@@ -395,7 +348,8 @@ say "btc 0: $esc-text";
       $esc-text ~~ m:g/^^(\s+)/;
       my @indents = $/[];
 
-      # Then get the length
+      # Then get the length of each whitespace and remember the shortest length
+      #
       for @indents -> $indent {
         my Str $i = ~$indent;
         $i ~~ s/^\n//;
@@ -403,7 +357,6 @@ say "btc 0: $esc-text";
         $min-spaces = $nspaces if $nspaces < $min-spaces;
       }
 
-say "ET: '$esc-text',$min-spaces\n";
       $esc-text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
 
       $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
@@ -411,12 +364,11 @@ say "ET: '$esc-text',$min-spaces\n";
 
     else {
       $esc-text ~~ s/^\s+//;
+      $esc-text ~~ s/\s+$//;
       $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
-    if $xml.defined {
-      $el-stack[$current-element-idx].append($xml);
-    }
+    $el-stack[$current-element-idx].append($xml) if $xml.defined;
   }
 
   # Substitute some escape characters in entities and remove the remaining
@@ -435,6 +387,33 @@ say "ET: '$esc-text',$min-spaces\n";
     $esc ~~ s:g/\\//;
 
     return $esc;
+  }
+
+  # Process body ending
+  #
+  method !process-body-end
+  {
+    # Go back one level .New child tags will overwrite the previous child
+    # on the stack as those are not needed anymore.
+    #
+    $current-element-idx--;
+    if $deferred-calls[$current-element-idx].defined 
+       and $el-stack[$current-element-idx] ~~ XML::Element
+       and $el-stack[$current-element-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
+
+      # Call the deferred method and pass the element 'PLACEHOLDER-ELEMENT' and
+      # all children below it. The method must remove this element before
+      # returning otherwise it will become an xml tag.
+      #
+      $deferred-calls[$current-element-idx](
+        self,
+        :content-body($el-stack[$current-element-idx + 1])
+      );
+
+      # Call done, now reset
+      #
+      $deferred-calls[$current-element-idx] = Any;
+    }
   }
 }
 
