@@ -95,9 +95,9 @@ class Semi-xml::Actions {
   my Str $attr-key;
 
   my Bool $keep-literal = False;
-  
+
   has Bool $!init;
-  
+
   submethod BUILD ( Bool :$init ) {
 #say "AI: {?$init}";
     if $init {
@@ -221,47 +221,9 @@ class Semi-xml::Actions {
 
   method body1-start ( $match )         { self!process-tag(); }
 
-  method no-elements-text ( $match ) { return self.body1-text($match); }
+  method no-elements-text ( $match )    { return self.body1-text($match); }
 
-  method body1-text ( $match ) {
-
-    # Add textual items after cleanup of escaped characters.
-    #
-    my $xml;
-    my $esc-text = self!process-esc(~$match);
-
-    $esc-text ~~ s/^\n+//;
-    $esc-text ~~ s/\s+$//;
-
-    # Test if body starts with '[=' or [+.for which content must be kept
-    # exactly as is.
-    #
-    if $keep-literal {
-      $esc-text ~~ m:g/^^(\s+)/;
-      my $min-spaces = Inf;
-      my @indents = $/[];
-      for @indents -> $indent {
-        my Str $i = ~$indent;
-        $i ~~ s/^\n//;
-        my $nspaces = $i.chars;
-        $min-spaces = $nspaces if $nspaces < $min-spaces;
-      }
-
-#say "ET: '$esc-text',$min-spaces\n";
-      $esc-text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
-
-      $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
-    }
-
-    else {
-      $esc-text ~~ s/^\s+//;
-      $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
-    }
-
-    if $xml.defined {
-      $el-stack[$current-element-idx].append($xml);
-    }
-  }
+  method body1-text ( $match )          { self!process-text($match); }
 
   method body1-end ( $match ) {
     # Go back one level .New child tags will overwrite the previous child
@@ -288,19 +250,9 @@ say '--';
     }
   }
 
-  method body2-start ( $match ) { self!process-tag(); }
+  method body2-start ( $match )         { self!process-tag(); }
 
-  method body2-contents ( $match ) {
-    my $esc-text = self!process-esc(~$match);
-
-    $esc-text ~~ s/^\n+//;
-    $esc-text ~~ s/^\s+//;
-
-    my $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
-    if $xml.defined {
-      $el-stack[$current-element-idx].append($xml);
-    }
-  }
+  method body2-text ( $match )          { self!process-text($match); }
 
   method body2-end ( $match ) {
 say "b2e: $match";
@@ -318,6 +270,7 @@ say "--";
 #say "N-" x $/.elems;
   }
 
+  #-----------------------------------------------------------------------------
   # Process tags
   #
   method !process-tag ( ) {
@@ -425,6 +378,47 @@ say "Root: $tag-name";
     }
   }
 
+  # Process the text after finding body terminator
+  #
+  method !process-text ( $match ) {
+    my $esc-text = self!process-esc(~$match);
+say "btc 0: $esc-text";
+    $esc-text ~~ s/^\n+//;
+#    $esc-text ~~ s/^\s+//;
+    my $xml;
+    if $keep-literal {
+      $esc-text ~~ s/\s+$//;
+      my $min-spaces = Inf;
+
+      # Get all spaces at the start of a line
+      #
+      $esc-text ~~ m:g/^^(\s+)/;
+      my @indents = $/[];
+
+      # Then get the length
+      for @indents -> $indent {
+        my Str $i = ~$indent;
+        $i ~~ s/^\n//;
+        my $nspaces = $i.chars;
+        $min-spaces = $nspaces if $nspaces < $min-spaces;
+      }
+
+say "ET: '$esc-text',$min-spaces\n";
+      $esc-text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
+
+      $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
+    }
+
+    else {
+      $esc-text ~~ s/^\s+//;
+      $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
+    }
+
+    if $xml.defined {
+      $el-stack[$current-element-idx].append($xml);
+    }
+  }
+
   # Substitute some escape characters in entities and remove the remaining
   # backslashes.
   #
@@ -439,7 +433,7 @@ say "Root: $tag-name";
     # Remove rest of the backslashes
     #
     $esc ~~ s:g/\\//;
-    
+
     return $esc;
   }
 }

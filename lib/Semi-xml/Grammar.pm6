@@ -74,14 +74,13 @@ grammar Semi-xml::Grammar {
   # starting with a those characters doesn't have to be escaped when they are
   # used. Just use a space in front. Can happen in tables showing numbers.
   #
+  token reset-keep-literal { <?> }
   token tag-body {
     <reset-keep-literal>
     (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
     || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
     )
   }
-
-  token reset-keep-literal { <?> }
 
   token body1-start {
     <ws> '[' {
@@ -116,7 +115,8 @@ grammar Semi-xml::Grammar {
   # Cannot use body2-end because method will be called twice, here and later
   # when encountering the string '!]'.
   #
-  token body2-contents { <keep-literal>? .*? <?b2e> }
+  token body2-contents { <keep-literal>? <body2-text> }
+  token body2-text { .*? <?b2e> }
   token b2e { '!]' }
   token body2-end {
     '!]' {

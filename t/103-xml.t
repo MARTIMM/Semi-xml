@@ -71,11 +71,17 @@ ok $xml-text ~~ m/
   background-color: #f0f;
 }'
 /, 'Check for literal text in css';
+
+ok $xml-text ~~ m/
+'var a_tags = $(\'a\');
+var b = a_tags[1];'
+/, 'Check for literal text in javascript';
+
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, 'Th after tr found';
 
 ok $xml-text ~~ ms/var a_tags '=' "\$('a');"/, 'Check piece of javascript';
 
-say $xml-text;
+#say $xml-text;
 
 unlink $filename;
 
