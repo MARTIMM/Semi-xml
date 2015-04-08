@@ -24,7 +24,8 @@ module/Db5-b:                   SxmlLib::Docbook5::Basic;
 $.Db5-b.article [
   $title [ Using Docbook 5 ]
   $!Db5-b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
-               city=Haarlem country=Netherlands [
+               city=Haarlem country=Netherlands
+               copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
     $para [abstract test]
   ]
 ]
