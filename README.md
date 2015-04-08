@@ -101,8 +101,13 @@ highlights are programmed in your favorite editor.
 
 * Now modules can be used from sxml, the following libs might come in handy
   * SxmlLib::File - File and link handling.
-    * [x] include other documents
-    * [ ] link to page or image checking and generating
+    * [x] include() other documents.
+    * [ ] link to page or image checking and generating.
+  * SxmlLib::Html::List - Html lists like ul/li
+    * [x] dir-list() to recursively create list of files and directories.
+  * SxmlLib::Docbook5::Basic - Basic docbook methods
+    * [x] book and article substitute tags to add extra attributes to the tag.
+    * [x] info() to specify the elaborate info tag in an easy way.
 
   * And ...
     * [ ] avatar linking
@@ -110,11 +115,11 @@ highlights are programmed in your favorite editor.
     * [ ] generating graphics, statistics, svg etc
 
   * A Sxml core library included by default to handle simple items like
-    * [x] ```$!SxmlCore.comment [ ... ]``` for comments <!-- ... -->.
-    * [x] ```$!SxmlCore.PI [...]``` for <?...?>.
-    * [x] ```$!SxmlCore.CData []``` for <[CDATA[...]]>.
-    * [x] ```$!SxmlCore.date``` [] for date
-    * [x] ```$!SxmlCore.date-time iso=1 []``` for datetime.
+    * [x] comment() for comments <!-- ... -->.
+    * [x] PI() for <?...?>.
+    * [x] CData() for <[CDATA[...]]>.
+    * [x] date() for date
+    * [x] date-time() for datetime.
 
 * Items needed in program sxml2xml
   * [ ] Generate a content header!
@@ -139,8 +144,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
-* 0.12.0
-  * Change of syntax to better control spacing and layout.
+* 0.13.0 Added Docbook5 basic module SxmlLib::Docbook5::Basic.
+* 0.12.0 Change of syntax to better control spacing and layout.
 * 0.11.0
   * Feed xml result to other programs. Not directly but with a work around.
   * Preparations to use xml namespaces.
