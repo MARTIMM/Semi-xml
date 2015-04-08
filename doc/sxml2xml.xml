@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book [
+<!DOCTYPE article [
 <!ENTITY company "Acme Mc Carpenter, Inc">
 <!ENTITY program "sxml2xml">
 <!ENTITY library "Semi-xml">
 <!ENTITY nbsp " ">
 ]>
-<book xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
   <title>Using Semi-xml</title>
   <info>
     <author>
@@ -23,11 +23,11 @@
       <year>2015, 2016 ... Inf</year>
       <holder>Marcel Timmerman</holder>
     </copyright>
-    <date>2015-04-01</date>
+    <date>2015-04-06</date>
     <abstract>
       <para>The library &library; provides methods to parse a text and generate any XML language be it html, soap or xsl.</para>
       <para>The program &program; uses this library to transform text from a file into xml after which it is possible to store it in a file or send it to any program for conversion to other types or for checking. examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep.</para>
-      <para>The latest version of this document is generated on date 2015-04-01</para>
+      <para>The latest version of this document is generated on date 2015-04-06</para>
     </abstract>
   </info>
   <dedication>
@@ -35,7 +35,6 @@
   </dedication>
   <preface>
     <title>Introduction of &library;</title>
-    <para>Welcome to&nbsp;
-    <emphasis>&library;</emphasis> . &library; is a Perl 6 module to convert a semi xml text into&nbsp;<emphasis>XML</emphasis> . This article will explain the language this module can parse.</para>
+    <para>Welcome to&nbsp;<emphasis>&library;</emphasis> . &library; is a Perl 6 module to convert a semi xml text into&nbsp;<emphasis>XML</emphasis> . This article will explain the language this module can parse.</para>
   </preface>
-</book>
+</article>

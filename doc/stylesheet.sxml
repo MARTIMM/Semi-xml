@@ -6,7 +6,7 @@ options/doctype/show:           1;
 
 output/filepath:                .;
 output/fileext:                 xsl;
-output/filename:                sxml2xml;
+#output/filename:                sxml2xml;
 
 output/program/xml:             | xmllint --format - > sxml2xml-f.xsl;
 ---

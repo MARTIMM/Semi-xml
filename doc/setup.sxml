@@ -21,14 +21,14 @@ output/program/chk:
         | tee sxml2xml.xml | xmllint --format -
         | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc
         ;
-output/program/xep:
-        | xsltproc --encoding utf-8 --xinclude sxml2xml.xsl -
+output/program/pdf:
+        | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
         | xep -fo - -pdf sxml2xml.pdf
         ;
 
 module/file:                            SxmlLib::File;
 ---
-$book xmlns=http://docbook.org/ns/docbook
+$article xmlns=http://docbook.org/ns/docbook
       xmlns:xi=http://www.w3.org/2001/XInclude
       xmlns:xl=http://www.w3.org/1999/xlink
       version=5.0

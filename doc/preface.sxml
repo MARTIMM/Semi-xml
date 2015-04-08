@@ -1,4 +1,4 @@
-$preface [
+$sect1 [
   $title [ Introduction of &library; ]
   $para [
      Welcome to\ $emphasis[&library;]. &library; is a Perl 6 module to convert
