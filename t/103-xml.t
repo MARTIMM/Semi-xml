@@ -85,7 +85,7 @@ ok $xml-text ~~ ms/'a<b>kjsdhfkj</b> sdjhkjh<u>kjdshkjh<b>hg</b></u>'/,
    'Check part of result for spacing'
    ;
 
-#say $xml-text;
+say $xml-text;
 
 unlink $filename;
 

@@ -67,6 +67,7 @@ EOSXML
 mkdir('t/M');
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
 use XML;
+use Semi-xml::Actions;
 
 class M::m1 {
   has Hash $.symbols = {
@@ -108,17 +109,22 @@ class M::m1 {
                 );
 
     for ^4 {
+.say;
       my $tr = XML::Element.new(:name('tr'));
       $table.append($tr);
       my $td = XML::Element.new(:name('td'));
       $tr.append($td);
-      $td.append(XML::Text.new(:text('data 1')));
+      $td.append(Semi-xml::Text.new( :strip, :text('data 1')));
+      
+      if $_ == 2 {
+        $td.append(Semi-xml::Text.new( :text(' ' ~ $attrs<data-weather>)));
+      }
 
       $td = XML::Element.new(:name('td'));
       $tr.append($td);
       $td.append(XML::Text.new(:text('data 2 ')));
 
-      # We do this 4 times but only the last td element will have the data
+      # We do this 4 times but only the first td element will have the data
       # because it wil reparent everytime. To do it properly, clone the element
       # first.
       #
@@ -156,7 +162,8 @@ ok $xml-text ~~ m/'<p>bla die bla<h1>Intro</h1><p>How \'bout this!</p></p>'/,
 
 ok $xml-text ~~ m/'class="red"'/, 'Check generated class = red';
 ok $xml-text ~~ m/'id="stat-id"'/, 'Check generated id = stat-id';
-ok $xml-text ~~ m/('<td>data 1</td>'.*)**4/, "Check 4 inserted 'data 1' td";
+ok $xml-text ~~ m/('<td>data 1 set1</td>'.*)**1/, "Check 1 inserted 'data 1 set1' td";
+ok $xml-text ~~ m/('<td>data 1</td>'.*)**3/, "Check 3 inserted 'data 1' td";
 ok $xml-text ~~ m/('<td>data 2 </td>'.*)**3/, "Check 3 no inserted 'data 2 ' content td";
 ok $xml-text ~~ m/('<td>data 2 data</td>'.*)**1/, "Check 1 inserted 'data 2 data' content td";
 

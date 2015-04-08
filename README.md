@@ -144,6 +144,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.13.1
+  * Bugfix spacing around tag by modifying Semi-xml::Text.
 * 0.13.0 Added Docbook5 basic module SxmlLib::Docbook5::Basic.
 * 0.12.0 Change of syntax to better control spacing and layout.
 * 0.11.0

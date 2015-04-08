@@ -1,9 +1,23 @@
 use v6;
 use XML;
 
-class Semi-xml::Text is XML::Text {
+class Semi-xml::Text does XML::Node {
+
+  has Bool $.strip;
+  has Str $.txt;
+
   method Str ( ) {
-    return $.text;
+    return $!txt;
+  }
+
+  submethod BUILD ( Bool :$strip = False, Str :$text ) {
+    $!strip = $strip;
+    $!txt = $text;
+    if $strip {
+      $!txt ~~ s:g/\s+$//;  ## Chop out trailing spaces.
+      $!txt ~~ s:g/^\s+//;  ## Chop out leading spaces.
+    }
+    $!txt .= chomp;         ## Remove a trailing newline if it exists.
   }
 }
 
@@ -268,14 +282,15 @@ class Semi-xml::Actions {
 
         # Must make a copy of the tag-name to a local variable. If tag-name is
         # used directly in the closure, the name is not 'frozen' to the value when
-        # the call is defined.
+        # the call is defined.. Same goes for attributes.
         #
         my $tgnm = $tag-name;
+        my $ats = $attrs;
         $deferred-calls[$current-element-idx]
            = method (XML::Node :$content-body) {
           $!objects{$module}."$tgnm"(
             $el-stack[$current-element-idx],
-            $attrs,
+            $ats,
             :$content-body
           );
         }
@@ -310,10 +325,10 @@ class Semi-xml::Actions {
     #
     my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
     if $current-element-idx.defined {
-      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text('')))
+      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text(' ')))
         if $decorate;
       $el-stack[$current-element-idx].append($child-element);
-      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text('')))
+      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text(' ')))
         if $decorate;
       $el-stack[$current-element-idx + 1] = $child-element;
 
