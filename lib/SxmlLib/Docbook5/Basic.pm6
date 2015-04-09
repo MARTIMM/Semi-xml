@@ -53,23 +53,22 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
     #---------------------------------------------------------------------------
     # $!m.info attributes [ content ]
-    # Attributs
-    #  firstname, surname, email
+    # Attributes
+    #   firstname, surname, email,
+    #   addr-city, addr-country,
+    #   copy-year, copy-holder
     # Content
-    #  $para [] blocks used to describe abstract
+    #   $para [] blocks used to describe abstract
     #
     method info ( XML::Element $parent,
                   Hash $attrs is copy,
                   XML::Node :$content-body
                 ) {
 
-say "ATTR: {$attrs.perl}";
-
       my $firstname = $attrs<firstname>;
       my $surname = $attrs<surname>;
       my $email = $attrs<email>;
 
-#      if $email.defined {
       my $info = XML::Element.new(:name('info'));
       $parent.append($info);
 
@@ -97,7 +96,6 @@ say "ATTR: {$attrs.perl}";
 
       my $city = $attrs<city>;
       my $country = $attrs<country>;
-#      my $ = $attrs<>;
       if $city.defined or $country.defined {
         my $address = XML::Element.new(:name('address'));
         $info.append($address);
@@ -132,7 +130,6 @@ say "ATTR: {$attrs.perl}";
           $copyright.append($c);
           $c.append(XML::Text.new(:text($copy-holder)));
         }
-        
       }
         
 

@@ -16,7 +16,8 @@ options/doctype/definition: [
 
 output/filepath:                .;
 
-output/program/xml:     | xmllint --format - > sxml2xml.xml;
+output/program/xml:
+        | xmllint --format - > sxml2xml.xml;
 output/program/chk:
         | tee sxml2xml.xml | xmllint --format -
         | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc
@@ -26,59 +27,31 @@ output/program/pdf:
         | xep -fo - -pdf sxml2xml.pdf
         ;
 
-module/file:                            SxmlLib::File;
+module/File:                    SxmlLib::File;
+module/Db5b:                    SxmlLib::Docbook5::Basic;
 ---
-$article xmlns=http://docbook.org/ns/docbook
-      xmlns:xi=http://www.w3.org/2001/XInclude
-      xmlns:xl=http://www.w3.org/1999/xlink
-      version=5.0
-      xml:lang=en [
+$.Db5b.article [
   $title [ Using Semi-xml ]
-  $info [
-    $author [
-      $personname [
-        $firstname [ Marcel ]
-        $surname [ Timmerman ]
-      ]
-      $email [ mt1957@gmail.com ]
-    ]
-    
-    $address [
-      $city [ Haarlem ]
-      $country [ Netherlands ]
-    ]
-
-    $copyright [
-      $year [ 2015, 2016 ... Inf ]
-      $holder [ Marcel Timmerman ]
-    ]
-
-    $date [ $!SxmlCore.date [] ]
-    $abstract [
-      $para [
-	The library &library; provides methods to parse a text and generate
-        any XML language be it html, soap or xsl.
-      ]
-      
-      $para [
-        The program &program; uses this library to transform text from a file
-        into xml after which it is possible to store it in a file
-	or send it to any program for conversion to other types or for checking. 
-        examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep.
-      ]
-
-      $para [ The latest version of this document is generated on date
-        $!SxmlCore.date []
-      ]
-    ]
-  ]
-  
-  $dedication [
+  $!Db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
+              city=Haarlem country=Netherlands
+              copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
     $para [
-      To my wife Juhi, who finds me too often behind the computer.
-#       &dArr; &dlarr;
+      The library &library; provides methods to parse a text and generate
+      any XML language be it html, soap or xsl.
+    ]
+
+    $para [
+      The program &program; uses this library to transform text from a file
+      into xml after which it is possible to store it in a file
+      or send it to any program for conversion to other types or for checking. 
+      examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep.
+    ]
+
+    $para [
+      The latest version of this document is generated on date
+      $!SxmlCore.date []
     ]
   ]
-  
-  $!file.include type=include reference=preface.sxml []
+
+  $!File.include type=include reference=preface.sxml []
 ]
