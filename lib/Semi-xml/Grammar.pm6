@@ -11,7 +11,10 @@ grammar Semi-xml::Grammar {
   # ---
   # document
   #
-  rule TOP { ( "---" <prelude> "---" ) ** 0..1 <document> }
+  rule TOP {
+     ( "---" <prelude> "---" ) ** 0..1 <document>
+     ']'? {say "Seeing some leftover ']'-ts";}
+   }
 
   # The prelude is a series of configuration options looking like
   #
