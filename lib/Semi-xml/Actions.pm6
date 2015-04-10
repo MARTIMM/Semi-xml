@@ -278,6 +278,7 @@ class Semi-xml::Actions {
       #
       $tag-type ~~ m/\$\!(<-[\.]>+)/;
       my $module = $/[0].Str;
+say "MT: $module, $tag-type";
       if $!objects{$module}.can($tag-name) {
 
         # Must make a copy of the tag-name to a local variable. If tag-name is

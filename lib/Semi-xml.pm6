@@ -13,7 +13,7 @@ class Semi-xml:ver<0.13.1>:auth<https://github.com/MARTIMM> {
   has Hash $.configuration;
 
   my Hash $defaults = {
-    options => {
+    option => {
       doctype => {
         show => 0,
         definition => '',
@@ -207,9 +207,9 @@ say "Cmd: cat $filename | $cmd";
     if ?$root-element {
       # Check if xml prelude must be shown
       #
-      my Array $cfgs = [ $actions.config<options><xml-prelude>,
-                         $!configuration<options><xml-prelude>,
-                         $defaults<options><xml-prelude>
+      my Array $cfgs = [ $actions.config<option><xml-prelude>,
+                         $!configuration<option><xml-prelude>,
+                         $defaults<option><xml-prelude>
                        ];
       if self.get-option( $cfgs, 'show') {
         my $version = self.get-option( $cfgs, 'version');
@@ -221,9 +221,9 @@ say "Cmd: cat $filename | $cmd";
 
       # Check if doctype must be shown
       #
-      $cfgs = [ $actions.config<options><doctype>,
-                $!configuration<options><doctype>,
-                $defaults<options><doctype>
+      $cfgs = [ $actions.config<option><doctype>,
+                $!configuration<option><doctype>,
+                $defaults<option><doctype>
               ];
       if self.get-option( $cfgs, 'show') {
         my $definition = self.get-option( $cfgs, 'definition');
@@ -253,7 +253,7 @@ say "Cmd: cat $filename | $cmd";
   #
   multi method get-option ( Str :$section = '',
                             Str :$sub-section = '',
-                            Str :$option = '';
+                            Str :$option = ''
                             --> Any
                           ) {
     my Array $hashes;

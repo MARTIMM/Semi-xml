@@ -96,42 +96,42 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
       my $city = $attrs<city>;
       my $country = $attrs<country>;
+      my $ = $attrs<>;
       if $city.defined or $country.defined {
         my $address = XML::Element.new(:name('address'));
         $info.append($address);
-      
+
         if $city.defined {
           my $c = XML::Element.new(:name('city'));
           $address.append($c);
           $c.append(XML::Text.new(:text($city)));
         }
-      
+
         if $country.defined {
           my $c = XML::Element.new(:name('country'));
           $address.append($c);
           $c.append(XML::Text.new(:text($country)));
         }
       }
-      
+
       my $copy-year = $attrs<copy-year>;
       my $copy-holder = $attrs<copy-holder>;
       if $copy-year.defined or $copy-holder.defined {
         my $copyright = XML::Element.new(:name('copyright'));
         $info.append($copyright);
-      
+
         if $copy-year.defined {
           my $c = XML::Element.new(:name('year'));
           $copyright.append($c);
           $c.append(XML::Text.new(:text($copy-year)));
         }
-      
+
         if $copy-holder.defined {
           my $c = XML::Element.new(:name('holder'));
           $copyright.append($c);
           $c.append(XML::Text.new(:text($copy-holder)));
         }
       }
-        
 
       my $date = XML::Element.new(:name('date'));
       $info.append($date);

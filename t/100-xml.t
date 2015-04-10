@@ -19,7 +19,7 @@ isa_ok $x, 'Semi-xml', $x.^name;
 #
 role pink {
   has Hash $!configuration = {
-             options => {
+             option => {
                doctype => {
 #                 definition => '',
 #                 entities => []

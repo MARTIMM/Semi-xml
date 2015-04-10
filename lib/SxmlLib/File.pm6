@@ -21,8 +21,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
                      Hash $attrs,
                      XML::Node :$content-body   # Ignored
                    ) {
-#say "CB 0: {$content-body}";
-#say "CB 1: {$parent.^name}, {$parent.name}";
+
       $content-body.remove;
 
       my $type = $attrs<type> // 'reference';
@@ -60,11 +59,9 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             #
             for $parent.nodes -> $node {
               if $node.can('name') {
-#say "CB 2: $node.name";
                 if $node.name eq 'XX-XX-XX' {
                   $parent.append($_) for $node.nodes;
 
-#say "CB 3: remove {$node.name}";
                   $node.remove;
                   last;
                 }

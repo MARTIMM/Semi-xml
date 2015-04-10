@@ -13,11 +13,11 @@ spurt( $filename, q:to/EOSX/);
 #!bin/sxml2xml.pl6
 #
 ---
-options/doctype/show:                   1;              # Default 0
+option/doctype/show:                    1;              # Default 0
 
-options/xml-prelude/show:               1;              # Default 0
-options/xml-prelude/version:            1.1;            # Default 1.0
-options/xml-prelude/encoding:           UTF-8;          # Default UTF-8
+option/xml-prelude/show:                1;              # Default 0
+option/xml-prelude/version:             1.1;            # Default 1.0
+option/xml-prelude/encoding:            UTF-8;          # Default UTF-8
 
 output/filename:                        t/some-file;    # Default current file
 output/fileext:                         html;           # Default xml
