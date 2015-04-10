@@ -129,8 +129,17 @@ highlights are programmed in your favorite editor.
   * [ ] Partial parsing of prelude or document.
 
 * And ...
-  * [ ] Documentation.
-  * [ ] Tutorials.
+  * Documentation.
+    * Module and program documentation
+      * [ ] Semi-xml
+      * [ ] Semi-xml::Action
+      * [ ] Semi-xml::Grammar
+      * [ ] Semi-xml::SxmlCore
+      * [ ] Semi-xml::Text
+      * [ ] sxml2xml
+    * [ ] Is now started as a docbook 5 document. There are references to local
+          iconfiles and fonts for which I don't know yet if it may be included.
+    * [ ] Tutorials.
 
 ## Bugs
 
