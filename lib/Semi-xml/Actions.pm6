@@ -278,7 +278,6 @@ class Semi-xml::Actions {
       #
       $tag-type ~~ m/\$\!(<-[\.]>+)/;
       my $module = $/[0].Str;
-say "MT: $module, $tag-type";
       if $!objects{$module}.can($tag-name) {
 
         # Must make a copy of the tag-name to a local variable. If tag-name is
@@ -395,8 +394,8 @@ say "MT: $module, $tag-type";
     # Entity must be known in the xml result!
     #
     $esc ~~ s:g/\\\s/\&nbsp;/;
-    $esc ~~ s:g/\\\</\&lt;/;
-    $esc ~~ s:g/\\\>/\&gt;/;
+    $esc ~~ s:g/\</\&lt;/;
+    $esc ~~ s:g/\>/\&gt;/;
 
     # Remove rest of the backslashes
     #

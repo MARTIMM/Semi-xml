@@ -113,6 +113,7 @@ highlights are programmed in your favorite editor.
     * [ ] avatar linking
     * [ ] Generating tables
     * [ ] generating graphics, statistics, svg etc
+    * [ ] Lorem ipsum generator.
 
   * A Sxml core library included by default to handle simple items like
     * [x] comment() for comments <!-- ... -->.
@@ -153,6 +154,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.13.2
+  * Bugfix serializing < and > into &lt; and &gt;.
 * 0.13.1
   * Bugfix spacing around tag by modifying Semi-xml::Text.
 * 0.13.0 Added Docbook5 basic module SxmlLib::Docbook5::Basic.
