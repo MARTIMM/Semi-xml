@@ -160,6 +160,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.14.1
+  * Bugfix. spacing around text. XML::Text completely replaced by Semi-xml::Text
 * 0.14.0 Introducing $*<tag and $*>tag to add a space to the left or right.
 * 0.13.2
   * Bugfix serializing < and > into &lt; and &gt;.

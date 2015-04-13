@@ -344,7 +344,7 @@ class Semi-xml::Actions {
       $el-stack[$current-el-idx].append($child-element);
       $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
         if $decorate-right or $decorate;
-say "CE: '{~$el-stack[$current-el-idx]}', $decorate, $decorate-left, $decorate-right";
+#say "CE: '{~$el-stack[$current-el-idx]}', $decorate, $decorate-left, $decorate-right";
       $el-stack[$current-el-idx + 1] = $child-element;
 
       # Copy current 'keep literal' state.
@@ -371,13 +371,15 @@ say "CE: '{~$el-stack[$current-el-idx]}', $decorate, $decorate-left, $decorate-r
   # Process the text after finding body terminator
   #
   method !process-text ( $match ) {
+#say "!PRT mch 0: '$match'";
     my $esc-text = self!process-esc(~$match);
+#say "!PRT mch 1: '$esc-text'";
 
     my $xml;
     $el-keep-literal[$current-el-idx] ||= $keep-literal;
     if $el-keep-literal[$current-el-idx] {
 #    if $keep-literal {
-say "!PRT lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
+#say "!PRT lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
 
 # At the moment too complex to handle removal of a minimal indentation
 if 0 {
@@ -408,9 +410,12 @@ if 0 {
     }
 
     else {
+#say "!PRT mch 2: '$esc-text'";
       $esc-text ~~ s/^\s+//;
       $esc-text ~~ s/\s+$//;
-      $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
+#say "!PRT mch 3: '$esc-text'";
+#      $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
+      $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
     $el-stack[$current-el-idx].append($xml) if $xml.defined;
@@ -438,7 +443,7 @@ if 0 {
   #
   method !process-body-end {
 
-say "!PBE lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
+#say "!PBE lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
     # Go back one level .New child tags will overwrite the previous child
     # on the stack as those are not needed anymore.
     #

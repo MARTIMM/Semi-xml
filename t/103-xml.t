@@ -44,9 +44,10 @@ $html [
     $table [
       $tr [
         $th[ header ]
-        $td[ data at $*a href='http://example.com/' []
+        $td[ data at $*<a href='http://example.com/' []
           $p [
-            jhghjasdjhg asdhajh a$b [kjsdhfkj]sdjhkjh $u [kjdshkjh $b [hg]]
+            jhghjasdjhg asdhajh a $b [kjsdhfkj]sdjhkjh
+            $*<u [kjdshkjh $*<b [hg]].
           ]
         ]
       ]
@@ -61,31 +62,37 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
+#say $xml-text;
+
+
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
 ok $xml-text ~~ m/
-'.green {
-  color: #0f0;
-  background-color: #f0f;
-}'
+'      .green {
+        color: #0f0;
+        background-color: #f0f;
+      }
+'
 /, 'Check for literal text in css';
 
 ok $xml-text ~~ m/
-'var a_tags = $(\'a\');
-var b = a_tags[1];'
+'      var a_tags = $(\'a\');
+      var b = a_tags[1];
+'
 /, 'Check for literal text in javascript';
 
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, "'Th' after 'tr' found";
 
-ok $xml-text ~~ ms/'data at <a href'/, "Testing \$* tag";
-
-ok $xml-text ~~ ms/'a<b>kjsdhfkj</b> sdjhkjh<u>kjdshkjh<b>hg</b></u>'/,
-   'Check part of result for spacing'
+ok $xml-text ~~ ms/'data at <a href="http://example.com/"/><p>'/,
+   "Testing \$* tag"
    ;
 
-say $xml-text;
+ok $xml-text ~~ ms/'a<b>kjsdhfkj</b>sdjhkjh <u>kjdshkjh <b>hg</b></u>.</p>'/,
+   'Check part of result spacing tag $*<'
+   ;
+
 
 unlink $filename;
 

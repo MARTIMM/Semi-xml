@@ -50,7 +50,7 @@ grammar Semi-xml::Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   # 
-  token attribute { <ws>? <attr-key> '=' <attr-value-spec> <ws>? }
+  token attribute { <ws>? <attr-key> '=' <attr-value-spec> }
   token attr-key { <identifier> [ ':' <identifier> ]**0..1 }
   token attr-value-spec {    (\' <attr-q-value> \')
                           || (\" <attr-qq-value> \")
@@ -86,11 +86,7 @@ grammar Semi-xml::Grammar {
   # no-elements character. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
-  token body1-contents {
-    <keep-literal>?
-    ( <body1-text> || <document> )*
-  }
-
+  token body1-contents  { <keep-literal>? ( <body1-text> || <document> )* }
   token body1-end       { ']' }
   token body1-text      { ( <-[\$\]\\]> || <body-esc> )+ }
 

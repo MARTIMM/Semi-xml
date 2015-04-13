@@ -41,7 +41,7 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 ok $xml-text ~~ m/'<h1>'/, 'Check h1 included';
 ok $xml-text ~~ m/'<p>'/, 'Check p included';
