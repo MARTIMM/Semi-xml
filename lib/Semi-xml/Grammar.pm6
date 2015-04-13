@@ -12,9 +12,9 @@ grammar Semi-xml::Grammar {
   # document
   #
   rule TOP {
-     ( "---" <prelude> "---" ) ** 0..1 <document>
-     ']'? {say "Seeing some leftover ']'-ts";}
-   }
+    ( "---" <prelude> "---" ) ** 0..1 <document>
+#    ']'? {say "Seeing some leftover ']'-ts";}
+  }
 
   # The prelude is a series of configuration options looking like
   #
@@ -30,18 +30,19 @@ grammar Semi-xml::Grammar {
   # A document is only a tag with its content. Defined like this there can only
   # be one toplevel document.
   #
-  rule document { <tag> <tag-body> }
+  token document { <tag> <tag-body> }
 
   # A tag is an identifier prefixed with $. $! or $ to attach several semantics
   # to the tag.
   #
   # $table class=bussiness id=sect1 
   #
-  rule tag { <tag-name> ( <attribute> )* }
+  token reset-keep-literal { <?> }
+  token tag { <reset-keep-literal> <tag-name> ( <attribute> )* }
   token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 }
   token tag-type {   ('$.' <identifier> '.' )
                   || ('$!' <identifier> '.' )
-                  || '$*'
+                  || '$*<' || '$*>' || '$*'
                   || '$'
                  }
 
@@ -49,7 +50,7 @@ grammar Semi-xml::Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   # 
-  token attribute { <attr-key> '=' <attr-value-spec> }
+  token attribute { <ws>? <attr-key> '=' <attr-value-spec> <ws>? }
   token attr-key { <identifier> [ ':' <identifier> ]**0..1 }
   token attr-value-spec {    (\' <attr-q-value> \')
                           || (\" <attr-qq-value> \")
@@ -72,9 +73,8 @@ grammar Semi-xml::Grammar {
   # starting with a those characters doesn't have to be escaped when they are
   # used. Just use a space in front. Can happen in tables showing numbers.
   #
-  token reset-keep-literal { <?> }
   token tag-body {
-    <reset-keep-literal>
+    <ws>?
     (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
     || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
     )
@@ -86,7 +86,11 @@ grammar Semi-xml::Grammar {
   # no-elements character. To use the brackets and
   # other characters in the text, the characters must be escaped.
   #
-  token body1-contents  { <keep-literal>? ( <body1-text> || <document> )* }
+  token body1-contents {
+    <keep-literal>?
+    ( <body1-text> || <document> )*
+  }
+
   token body1-end       { ']' }
   token body1-text      { ( <-[\$\]\\]> || <body-esc> )+ }
 
@@ -103,7 +107,7 @@ grammar Semi-xml::Grammar {
 
 
   token keep-literal    { '=' }
-  token body-esc        { '\$' || '\[' || '\]' || '\\' }
+  token body-esc        { '\\' . }
 
   # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
   # dash within the string is accepted.

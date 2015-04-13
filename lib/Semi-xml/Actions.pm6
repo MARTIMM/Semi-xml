@@ -97,9 +97,10 @@ class Semi-xml::Actions {
   my Str $config-value;
 
   has XML::Document $.xml-document;
+  my Int $current-el-idx;
   my Array $el-stack;
-  my Int $current-element-idx;
   my Array $deferred-calls;
+  my Array $el-keep-literal;
 
   my Str $tag-name;
   my Str $tag-type;
@@ -107,7 +108,7 @@ class Semi-xml::Actions {
   my Hash $attrs;
   my Str $attr-key;
 
-  my Bool $keep-literal = False;
+  my Bool $keep-literal;
 
   has Bool $!init;
 
@@ -117,7 +118,7 @@ class Semi-xml::Actions {
   submethod BUILD ( Bool :$init ) {
 
     if $init {
-      $current-element-idx = Int;
+      $current-el-idx = Int;
       $el-stack = [];
       $deferred-calls = [];
     }
@@ -286,10 +287,10 @@ class Semi-xml::Actions {
         #
         my $tgnm = $tag-name;
         my $ats = $attrs;
-        $deferred-calls[$current-element-idx]
+        $deferred-calls[$current-el-idx]
            = method (XML::Node :$content-body) {
           $!objects{$module}."$tgnm"(
-            $el-stack[$current-element-idx],
+            $el-stack[$current-el-idx],
             $ats,
             :$content-body
           );
@@ -297,6 +298,14 @@ class Semi-xml::Actions {
 
         self!register-element( 'PLACEHOLDER-ELEMENT', {});
       }
+    }
+
+    elsif $tag-type eq '$*<' {
+      self!register-element( $tag-name, $attrs, :decorate-left);
+    }
+
+    elsif $tag-type eq '$*>' {
+      self!register-element( $tag-name, $attrs, :decorate-right);
     }
 
     elsif $tag-type eq '$*' {
@@ -312,7 +321,7 @@ class Semi-xml::Actions {
     }
   }
 
-  # Create an xml element and add its attributes. When the $current-element-idx
+  # Create an xml element and add its attributes. When the $current-el-idx
   # is not yet defined, a new document must be created and pointers initialized.
   # The array is like a stack of elements of which each element is a child
   # of the one before it in the array. The last one in the array is the one  to
@@ -320,31 +329,42 @@ class Semi-xml::Actions {
   # appended to this last element When the block is finished (at body1-end) the
   # pointer is moved up to the parent element in the array.
   #
-  method !register-element ( Str $tag-name, Hash $attrs, :$decorate = False ) {
+  method !register-element ( Str $tag-name,
+                             Hash $attrs,
+                             :$decorate = False,
+                             :$decorate-left = False,
+                             :$decorate-right = False
+                           ) {
     # Test if index is defined.
     #
     my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
-    if $current-element-idx.defined {
-      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text(' ')))
-        if $decorate;
-      $el-stack[$current-element-idx].append($child-element);
-      $el-stack[$current-element-idx].append(Semi-xml::Text.new(:text(' ')))
-        if $decorate;
-      $el-stack[$current-element-idx + 1] = $child-element;
+    if $current-el-idx.defined {
+      $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
+        if $decorate-left or $decorate;
+      $el-stack[$current-el-idx].append($child-element);
+      $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
+        if $decorate-right or $decorate;
+say "CE: '{~$el-stack[$current-el-idx]}', $decorate, $decorate-left, $decorate-right";
+      $el-stack[$current-el-idx + 1] = $child-element;
+
+      # Copy current 'keep literal' state.
+      #
+      $el-keep-literal[$current-el-idx + 1] = $el-keep-literal[$current-el-idx];
 
       # Point to the next level in case there is another tag found in the 
       # current body. This element must become the child element of the
       # current one.
       #
-      $current-element-idx++;
+      $current-el-idx++;
     }
 
     else {
       # First element is a root element
       #
-      $current-element-idx = 0;
-      $el-stack[$current-element-idx] = $child-element;
-      $!xml-document .= new($el-stack[$current-element-idx]);
+      $current-el-idx = 0;
+      $el-stack[$current-el-idx] = $child-element;
+      $el-keep-literal[$current-el-idx] = False;
+      $!xml-document .= new($el-stack[$current-el-idx]);
     }
   }
 
@@ -352,11 +372,20 @@ class Semi-xml::Actions {
   #
   method !process-text ( $match ) {
     my $esc-text = self!process-esc(~$match);
+
     my $xml;
-    if $keep-literal {
-      $esc-text ~~ s/^\n+//;
-      $esc-text ~~ s/\s+$//;
-      my $min-spaces = Inf;
+    $el-keep-literal[$current-el-idx] ||= $keep-literal;
+    if $el-keep-literal[$current-el-idx] {
+#    if $keep-literal {
+say "!PRT lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
+
+# At the moment too complex to handle removal of a minimal indentation
+if 0 {
+#if $keep-literal {
+#      $esc-text ~~ s/^\n+//;
+#      $esc-text ~~ s/\s+$//;
+#}
+
 
       # Get all spaces at the start of a line
       #
@@ -365,15 +394,16 @@ class Semi-xml::Actions {
 
       # Then get the length of each whitespace and remember the shortest length
       #
+      my $min-spaces = Inf;
       for @indents -> $indent {
         my Str $i = ~$indent;
-        $i ~~ s/^\n//;
+        $i ~~ s/^\n+//;
         my $nspaces = $i.chars;
-        $min-spaces = $nspaces if $nspaces < $min-spaces;
+        $min-spaces min= $nspaces;
       }
 
       $esc-text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
-
+}
       $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
@@ -383,7 +413,7 @@ class Semi-xml::Actions {
       $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
     }
 
-    $el-stack[$current-element-idx].append($xml) if $xml.defined;
+    $el-stack[$current-el-idx].append($xml) if $xml.defined;
   }
 
   # Substitute some escape characters in entities and remove the remaining
@@ -406,28 +436,32 @@ class Semi-xml::Actions {
 
   # Process body ending
   #
-  method !process-body-end
-  {
+  method !process-body-end {
+
+say "!PBE lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
     # Go back one level .New child tags will overwrite the previous child
     # on the stack as those are not needed anymore.
     #
-    $current-element-idx--;
-    if $deferred-calls[$current-element-idx].defined 
-       and $el-stack[$current-element-idx] ~~ XML::Element
-       and $el-stack[$current-element-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
+    $current-el-idx--;
+    if $deferred-calls[$current-el-idx].defined 
+       and $el-stack[$current-el-idx] ~~ XML::Element
+       and $el-stack[$current-el-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
 
       # Call the deferred method and pass the element 'PLACEHOLDER-ELEMENT' and
       # all children below it. The method must remove this element before
       # returning otherwise it will become an xml tag.
       #
-      $deferred-calls[$current-element-idx](
+      $deferred-calls[$current-el-idx](
         self,
-        :content-body($el-stack[$current-element-idx + 1])
+        :content-body($el-stack[$current-el-idx + 1])
       );
+    }
 
-      # Call done, now reset
-      #
-      $deferred-calls[$current-element-idx] = Any;
+    # Call done, now reset
+    #
+    if $current-el-idx >= 0 {
+      $deferred-calls[$current-el-idx] = Any;
+      $el-keep-literal[$current-el-idx + 1] = False;
     }
   }
 }

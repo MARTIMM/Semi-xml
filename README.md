@@ -87,6 +87,8 @@ highlights are programmed in your favorite editor.
           indents are reduced to the minimum spacing as is done in perl6.
     * [x] A tag can start with '$', '$.', '$!'. Now also '$*' is introduced
           which will add a space around the tag and its content.
+    * [x] Another addition '$*<' and '$*> is introduced to add a space to the
+          left or right of the tag and its content.
 
 * External modules
   * [x] A methods tag content between [ ... ] can be a named argument to the sub.
@@ -151,11 +153,18 @@ Still at omega state, bugs come and go(hopefully).
   ```output/filename: ../index;``` the result will come in the directory below
   the users directory. Need to think about this what is best. Maybe add a config
   item, something like filepath.
+* At the moment it is too complex to handle removal of a minimal indentation in
+  in pieces of text which must be kept as is typed. Needed in e.g. <pre> in html
+  or <programlisting> in docbook. The complexity is caused by using child
+  elements in such tags.
 
 ## Changes
 
+* 0.14.0 Introducing $*<tag and $*>tag to add a space to the left or right.
 * 0.13.2
   * Bugfix serializing < and > into &lt; and &gt;.
+  * Bugfix using docbook <co> in <programlisting>. Needed some changes in
+    the grammar in capturing spaces around elements.
 * 0.13.1
   * Bugfix spacing around tag by modifying Semi-xml::Text.
 * 0.13.0 Added Docbook5 basic module SxmlLib::Docbook5::Basic.
