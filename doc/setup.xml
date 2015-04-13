@@ -5,4 +5,36 @@
         <!ENTITY library "Semi-xml">
         <!ENTITY nbsp " ">
 ]>
-<article xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en"><title>Using Semi-xml</title><info><author><personname><firstname>Marcel</firstname><surname>Timmerman</surname></personname></author><address><city>Haarlem</city><country>Netherlands</country></address><copyright><year>2015, 2016 ... Inf</year><holder>Marcel Timmerman</holder></copyright><date>2015-04-09</date><abstract><para>The library &library; provides methods to parse a text and generate any XML language be it html, soap or xsl.</para><para>The program &program; uses this library to transform text from a file into xml after which it is possible to store it in a file or send it to any program for conversion to other types or for checking. examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep.</para><para>The latest version of this document is generated on date 2015-04-09</para></abstract></info><sect1><title>Introduction of &library;</title><para>Welcome to&nbsp;<emphasis>&library;</emphasis> . &library; is a Perl 6 module to convert a semi xml text into&nbsp;<emphasis>XML</emphasis> . This article will explain the language this module can parse.</para></sect1></article>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en"><title>Using Semi-xml</title><info><author><personname><firstname>Marcel</firstname><surname>Timmerman</surname></personname></author><address><city>Haarlem</city><country>Netherlands</country></address><copyright><year>2015, 2016 ... Inf</year><holder>Marcel Timmerman</holder></copyright><date>2015-04-13</date><abstract><para>The library &library; provides methods to parse a text and generate any XML language be it html, soap or xsl.</para><para>The program &program; uses this library to transform text from a file into xml after which it is possible to store it in a file or send it to any program for conversion to other types or for checking. examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep.</para><para>The latest version of this document is generated on date 2015-04-13</para></abstract></info><sect1><title>Introduction of &library;</title><para>Welcome to&nbsp;<emphasis>&library;</emphasis> . &library; is a Perl 6 module to convert a semi xml text into&nbsp;<emphasis>XML</emphasis> . This article will explain the language this module can parse.</para><para>The language exists of a prelude and the document. The prelude is used to introduce external modules and to define ways to output the resulting xml.</para></sect1><sect1><title>the language</title><para>As been said, the semi xml language consists of two parts. A prelude and a document. The prelude starts with 3 dashes and ends with it. The prelude itself consists of a series of key-value pairs. The keys are defined as a series of catagories and subcatagories looking much like a filepath. The value can be anything. The key value pair is separated by a colon ':' and the pair ends in a ';'. The prelude part is also optional. In that case defaults will be applied.</para><para>The document follows the prelude and is the thing you want to publish. It has a similar look as xml (in this case its html) but is easier to read.</para><para>Below you see a simple layout example.<programlisting>
+        ---
+        option/doctype/show: 1;         <co xml:id="co.ex01.prelude">x</co>
+        ---
+        $html [                         <co xml:id="co.ex01.document">x</co>
+          $head [
+            $title [Hello World]
+          ]
+          $body [
+            $h1 [My first header]
+            $p [
+              And another greeting
+            ]
+          ]
+        ]
+      </programlisting><calloutlist><callout arearefs="co.ex01.prelude"><para>The prelude has only one entry. Here we want a doctype before the result.</para></callout><callout arearefs="co.ex01.document"><para>The document will result in a html document. It clearly shows &lt;html&gt;, &lt;head&gt; and &lt;body&gt; elements.</para></callout></calloutlist> The result will be after running through a XML formatter.<programlisting>
+        &lt;!DOCTYPE html&gt;
+        &lt;html&gt;
+          &lt;head&gt;
+            &lt;title&gt;Hello World&lt;/title&gt;
+          &lt;/head&gt;
+          &lt;body&gt;
+            &lt;h1&gt;My first header&lt;/h1&gt;
+            &lt;p&gt;And another greeting&lt;/p&gt;
+          &lt;/body&gt;
+        &lt;/html&gt;
+      </programlisting></para><sect2><title>Prelude</title><para>Below you see an example of two options to let the xml prelude be written at the start of the result as well as a doctype.<programlisting>
+          ---
+          option/xml-prelude/show:    1;
+          option/doctype/show:    1;
+          ---
+        </programlisting>
+      </para></sect2><sect2><title>Document</title><para/><sect3><title>Tag types</title><para/></sect3></sect2></sect1><sect1><title>Using &library;</title><para/></sect1><sect1><title>Creating methods to be used as a tag</title><para/></sect1><sect1><title>Using &program;</title><para/></sect1><sect1><title>Examples</title><para/></sect1><sect1><title>Information</title><para/></sect1><index/></article>

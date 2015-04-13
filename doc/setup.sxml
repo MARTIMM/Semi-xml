@@ -1,9 +1,9 @@
 #!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
 #
 ---
-options/xml-prelude/show:       1;
-options/doctype/show:           1;
-options/doctype/definition: [
+option/xml-prelude/show:       1;
+option/doctype/show:           1;
+option/doctype/definition: [
         <!ENTITY company "Acme Mc Carpenter, Inc">
         <!ENTITY program "sxml2xml">
         <!ENTITY library "Semi-xml">
@@ -27,7 +27,7 @@ output/program/pdf:
         | xep -fo - -pdf sxml2xml.pdf
         ;
 
-module/File:                    SxmlLib::File;
+#module/File:                    SxmlLib::File;
 module/Db5b:                    SxmlLib::Docbook5::Basic;
 ---
 $.Db5b.article [
@@ -53,5 +53,151 @@ $.Db5b.article [
     ]
   ]
 
-  $!File.include type=include reference=preface.sxml []
+#  $!File.include type=include reference=preface.sxml []
+  $sect1 [
+    $title [ Introduction of &library; ]
+    $para [
+      Welcome to\ $emphasis[&library;]. &library; is a Perl 6 module to convert
+      a semi xml text into\ $emphasis[XML]. This article will explain the
+      language this module can parse.
+    ]
+
+    $para [
+      The language exists of a prelude and the document. The prelude is
+      used to introduce external modules and to define ways to output the 
+      resulting xml.
+    ]
+  ]
+
+  $sect1 [
+    $title [the language]
+    $para [
+      As been said, the semi xml language consists of two parts. A prelude and a
+      document. The prelude starts with 3 dashes and ends with it. The prelude
+      itself consists of a series of key-value pairs. The keys are defined as a
+      series of catagories and subcatagories looking much like a filepath. The
+      value can be anything. The key value pair is separated by a colon ':' and
+      the pair ends in a ';'. The prelude part is also optional. In that case
+      defaults will be applied.
+    ]
+    $para [
+      The document follows the prelude and is the thing you want to publish. It
+      has a similar look as xml (in this case its html) but is easier to read.
+    ]
+
+    $para [
+      Below you see a simple layout example.
+      $programlisting [=
+        ---
+        option/doctype/show: 1;         $co xml:id=co.ex01.prelude [x]
+        ---
+        \$html [                         $co xml:id=co.ex01.document [x]
+          \$head [
+            \$title [Hello World\]
+          \]
+          \$body [
+            \$h1 [My first header\]
+            \$p [
+              And another greeting
+            \]
+          \]
+        \]
+      ]
+
+      $calloutlist [
+        $callout arearefs=co.ex01.prelude [
+          $para [
+            The prelude has only one entry. Here we want a doctype before the
+            result.
+          ]
+        ]
+
+        $callout arearefs=co.ex01.document [
+          $para [
+            The document will result in a html document. It clearly shows
+            <html>, <head> and <body> elements.
+          ]
+        ]
+      ]
+
+      The result will be after running through a XML formatter.
+      $programlisting [=
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Hello World</title>
+          </head>
+          <body>
+            <h1>My first header</h1>
+            <p>And another greeting</p>
+          </body>
+        </html>
+      ]
+    ]
+
+    $sect2 [
+      $title [Prelude]
+      $para [
+        Below you see an example of two options to let the xml prelude be
+        written at the start of the result as well as a doctype.
+        $programlisting [!=
+          ---
+          option/xml-prelude/show:    1;
+          option/doctype/show:    1;
+          ---
+        !]
+      ]
+    ]
+
+    $sect2 [
+      $title [Document]
+      $para [
+
+      ]
+
+      $sect3 [
+        $title [Tag types]
+        $para [
+
+        ]
+      ]
+    ]
+  ]
+
+  $sect1 [
+    $title [ Using &library; ]
+    $para [
+
+    ]
+  ]
+
+  $sect1 [
+    $title [ Creating methods to be used as a tag ]
+    $para [
+
+    ]
+  ]
+
+  $sect1 [
+    $title [ Using &program; ]
+    $para [
+
+    ]
+  ]
+
+  $sect1 [
+    $title [ Examples ]
+    $para [
+
+    ]
+  ]
+
+  $sect1 [
+    $title [ Information ]
+    $para [
+
+    ]
+  ]
+
+  $index []
 ]
