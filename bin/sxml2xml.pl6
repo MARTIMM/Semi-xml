@@ -27,7 +27,9 @@ sub MAIN ( $filename, Str :$run ) {
   my $dep = process-sxml( $filename, :$run);
   if $dep.defined {
     my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
-    for $dep-list.list -> $dependency {
+    for $dep-list.list -> $dependency is copy {
+      $dependency ~~ s/^\s+//;
+      $dependency ~~ s/\s+$//;
       say "Processing dependency $dependency";
       $dep = process-sxml( $dependency, :$run);
       $dep-list.push($dep.split(/\s* ',' \s*/)) if $dep.defined;
@@ -42,9 +44,14 @@ sub process-sxml ( Str $filename, Str :$run ) {
   my Semi-xml $x .= new(:init);
   $x does sxml-role;
 
+  # Split filename in its parts
+  #
   my @path-spec = $*SPEC.splitpath($filename);
   $x.configuration<output><filepath> = @path-spec[1];
   $x.configuration<output><filename> = @path-spec[2];
+
+  # Drop extension
+  #
   $x.configuration<output><filename> ~~ s/\.<-[\.]>+$//;
 #say "PS: @path-spec[]";
 

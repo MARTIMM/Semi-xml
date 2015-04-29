@@ -124,15 +124,31 @@ class Semi-xml::Actions {
     }
   }
 
+  #-----------------------------------------------------------------------------
+  # ... To be tested, not acticve yet...
+  method !set-hash ( Hash $h is copy, *@keys is copy, Any :$value --> Any ) {
+#    state &infix:<dh> ::= &postcircumfix:<{ }>;
+#    [dh] $h, @keys = $value;
+
+    say "H 1: {$h.perl}, ", @keys, ", $value";
+    
+    my $leaf-key = @keys.pop;
+    @keys ==> map {$h = $h{$_} // %()};
+    $h{$leaf-key} = $value;
+    say "H 3: {$h.perl}, ", @keys, ", $value";
+  }
+
   # All config entries are like: '/a/b/c: v;' This must be evauluated as
   # "$!config<$config-path>='$config-value'" so it becomes a key value pair
   # in the config.
   #
   method config-entry ( $match ) {
     if $config-path.defined and $config-value.defined {
+#self!set-hash( $!config, $config-path.split(/ \/ /), :value($config-value));
       $config-path ~~ s:g/ \/ /\>\</;
       $config-path = "\$!config\<$config-path\>='$config-value'";
-
+#say "CP: $config-path";
+#exit(0);
       EVAL("$config-path");
     }
   }
