@@ -34,7 +34,7 @@ $.Db5b.article [
   $title [ Using Semi-xml ]
   $!Db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
               city=Haarlem country=Netherlands
-              copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
+              copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
     $para [
       The library &library; provides methods to parse a text and generate
       any XML language be it html, soap or xsl.

@@ -160,6 +160,10 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.14.2
+  * Added a trick from the panda program to reorder the options to the front so
+    the sxml files can be made executable and on the commandline some added
+    options which would come after the filename instead of before.
 * 0.14.1
   * Bugfix. spacing around text. XML::Text completely replaced by Semi-xml::Text
 * 0.14.0 Introducing $*<tag and $*>tag to add a space to the left or right.

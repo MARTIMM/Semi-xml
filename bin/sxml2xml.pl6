@@ -8,6 +8,11 @@ BEGIN {
 
 use Semi-xml;
 
+# Allow switches after positionals. Pinched from the panda program. Now it is
+# possible to make the sxml file executable with the path of this program.
+#
+@*ARGS = @*ARGS.grep(/^ '-'/), @*ARGS.grep(/^ <-[-]>/);
+
 #-------------------------------------------------------------------------------
 #
 role sxml-role {
@@ -22,7 +27,6 @@ sub MAIN ( $filename, Str :$run ) {
 #  $x.configuration<output><filename> = ~$/[0];
 #say "PF: {$x.configuration<output><filename>}";
 
-  
 
   my $dep = process-sxml( $filename, :$run);
   if $dep.defined {
