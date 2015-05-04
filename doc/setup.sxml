@@ -55,7 +55,7 @@ $.Db5b.article [
 
 #  $!File.include type=include reference=preface.sxml []
   $sect1 [
-    $title [ Introduction of &library; ]
+    $title [ Introduction of module &library; ]
     $para [
       Welcome to\ $emphasis[&library;]. &library; is a Perl 6 module to convert
       a semi xml text into\ $emphasis[XML]. This article will explain the
@@ -89,9 +89,9 @@ $.Db5b.article [
       Below you see a simple layout example.
       $programlisting [=
         ---
-        option/doctype/show: 1;         $co xml:id=co.ex01.prelude [x]
+        option/doctype/show: 1;         $co xml:id=co.ex01.prelude []
         ---
-        \$html [                         $co xml:id=co.ex01.document [x]
+        \$html [                         $co xml:id=co.ex01.document []
           \$head [
             \$title [Hello World\]
           \]
@@ -165,7 +165,7 @@ $.Db5b.article [
   ]
 
   $sect1 [
-    $title [ Using &library; ]
+    $title [ Using module &library; ]
     $para [
 
     ]
@@ -179,7 +179,7 @@ $.Db5b.article [
   ]
 
   $sect1 [
-    $title [ Using &program; ]
+    $title [ Using program &program; ]
     $para [
 
     ]
