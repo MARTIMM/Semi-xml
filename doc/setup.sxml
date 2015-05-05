@@ -37,11 +37,11 @@ $.Db5b.article [
               copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
     $para [
       The library &library; provides methods to parse a text and generate
-      any XML language be it html, soap or xsl.
+      any $abbrev[XML] language be it html, soap or xsl.
     ]
 
     $para [
-      The program &program; uses this library to transform text from a file
+      The program &program; uses this library to transform sxml text from a file
       into xml after which it is possible to store it in a file
       or send it to any program for conversion to other types or for checking. 
       examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep.
@@ -57,9 +57,9 @@ $.Db5b.article [
   $sect1 [
     $title [ Introduction of module &library; ]
     $para [
-      Welcome to\ $emphasis[&library;]. &library; is a Perl 6 module to convert
-      a semi xml text into\ $emphasis[XML]. This article will explain the
-      language this module can parse.
+      Welcome to $emphasis[&library;]. As mentioned in the abstract &library;
+      is a Perl 6 module to convert a semi xml text into $emphasis[XML]. This
+      article will explain the language this module can parse.
     ]
 
     $para [
