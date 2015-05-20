@@ -1,0 +1,116 @@
+# Css3 stylesheet
+#
+$style [!
+
+   /* These are styles for html */
+
+   @font-face {
+     font-family:       'Pamela';
+     font-style:        normal;
+     font-weight:       400;
+     src: url('http://localhost/I/Fonts/Pamela.ttf') format('truetype');
+   }
+
+   body {
+     width:             210mm;
+     margin:            15px auto;
+     font-family:       Arial, sans-serif;
+   }
+
+   p {
+     margin:            0 0 20px 0;
+   }
+
+   p, li {
+     line-height:       20px;
+   }
+
+   header\#page_header {
+     width:             100%;
+   }
+
+   header\#page_header nav ul, \#page_footer nav ul {
+     list-style:        none;
+     margin:            0;
+     padding:           0;
+   }
+
+   \#page_header nav ul li, footer\#page_footer nav ul li {
+     margin:            0 20px 0 0;
+     padding:           0;
+     display:           inline;
+   }
+
+   section\#posts {
+     float:             left;
+     width:             74%;
+   }
+
+   section\#posts aside {
+     float:             right;
+     width:             35%;
+     margin-left:       5%;
+     font-size:         20px;
+     line-height:       40px;
+     font-family:       Pamela;
+   }
+
+   section\#sidebar {
+     float:             left;
+     width:             25%;
+   }
+
+   footer\#page_footer {
+     clear:             both;
+     width:             100%;
+     display:           block;
+     text-align:        center;
+   }
+
+
+#      @media print
+#      { nav, article > footer
+#        { display:         none;
+#        }
+#      }
+
+
+   /* My part */
+   section {
+     background-color:  \#ffeeff;
+#        border-style:      solid;
+#        border-width:      1px;
+   }
+
+   section\#sidebar {
+     background-color:  \#ffddff;
+#        border-style:      solid;
+#        border-width:      1px;
+   }
+
+   aside {
+     background-color:  \#ffffee;
+     border-style:      solid;
+     border-width:      1px;
+     padding:           2px;
+   }
+
+   footer {
+     background-color:  \#eeffff;
+#     border-style:      solid;
+#     border-width:      1px;
+   }
+
+   /* http://en.wikipedia.org/wiki/Paper_size */
+   .A4-Paper {
+     width:             210mm;
+     height:            297mm;
+     min-width:         210mm;
+     min-height:        297mm;
+     padding:           5mm;
+     margin:            0;
+     border-style:      solid;
+     border-width:      1px;
+     background-color:  \#fefffe;
+   }
+!]

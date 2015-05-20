@@ -1,0 +1,67 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
+#
+---
+output/filepath:                .;
+
+output/program/html:            | cat > e02.html;
+output/program/pdf:             | wkhtmltopdf-i386 - e02.pdf;
+
+module/LoremIpsum:              SxmlLib::LoremIpsum;
+module/File:                    SxmlLib::File;
+---
+$html lang=en-US dir=ltr [
+  $head [
+    $meta charset=utf-8 []
+    $title [ Example 2, Html5 and Css styling ]
+    $!File.include type=include reference=e02-style.sxml []
+  ]
+
+  $body [
+    $section id=posts [
+      $article class=posts [
+        $header [
+          $h1 [ First page from HTML5 and CSS3 ]
+          $nav [
+            $ul [
+              $li [ Contact ]
+              $li [ Download ]
+              $li [ Help ]
+            ]
+          ]
+        ]
+
+        $aside [
+          $p [
+            $!LoremIpsum.show type=sentences size=4 []
+          ]
+        ]
+
+        $p [
+          $!LoremIpsum.show type=veggie-ipsum []
+        ]
+
+        $footer [
+          $p [
+            \\xA9 mt1957
+          ]
+
+          $nav [
+            $ul [
+              $li [ Contact ]
+            ]
+          ]
+        ]
+      ]
+    ]
+
+    $section [
+      $nav [
+        $ul [
+          $li [ Oct 2010 ]
+          $li [ Nov 2010 ]
+        ]
+      ]
+    ]
+
+  ]
+]
