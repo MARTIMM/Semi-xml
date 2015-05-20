@@ -148,15 +148,15 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 ok $xml-text ~~ m/('<table'.*)**2/, 'Check subst and gen of $.special-table and $!statistics';
 ok $xml-text ~~ m/class\=\"big\-table\"/, 'Check inserted class attribute';
 ok $xml-text ~~ m/id\=\"new\-table\"/, 'Check inserted id attribute';
 
-ok $xml-text ~~ m/'<p> bla die bla $x [] </p>'/, 'Check text from $!stats';
-ok $xml-text ~~ m/'<p> bla die bla <x> test 2 </x> </p>'/, 'Check complex text from $!stats';
-ok $xml-text ~~ m/'<p> bla die bla  <h1> Intro </h1> <p> How \'bout this! </p>  </p>'/,
+ok $xml-text ~~ m/'<p>bla die bla $x []</p>'/, 'Check text from $!stats';
+ok $xml-text ~~ m/'<p>bla die bla<x>test 2</x></p>'/, 'Check complex text from $!stats';
+ok $xml-text ~~ m/'<p>bla die bla<h1>Intro</h1><p>How \'bout this!</p></p>'/,
    'Check complex text with nested call to $!file from $!stats';
 
 ok $xml-text ~~ m/'class="red"'/, 'Check generated class = red';
@@ -164,7 +164,7 @@ ok $xml-text ~~ m/'id="stat-id"'/, 'Check generated id = stat-id';
 ok $xml-text ~~ m/('<td>data 1 set1</td>'.*)**1/, "Check 1 inserted 'data 1 set1' td";
 ok $xml-text ~~ m/('<td>data 1</td>'.*)**3/, "Check 3 inserted 'data 1' td";
 ok $xml-text ~~ m/('<td>data 2 </td>'.*)**3/, "Check 3 no inserted 'data 2 ' content td";
-ok $xml-text ~~ m/'<td>data 2  data </td>'/, "Check 1 inserted 'data 2 data' content td";
+ok $xml-text ~~ m/('<td>data 2 data</td>'.*)**1/, "Check 1 inserted 'data 2 data' content td";
 
 unlink $filename;
 unlink 't/M/m1.pm6';

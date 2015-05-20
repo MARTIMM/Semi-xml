@@ -6,6 +6,7 @@ use Semi-xml;
 # Testing;
 #   Test $tag [ ... ]   Normal content
 #   Test $tag [! ... !] Text only no child elements
+#   Test $*tag [ ... ] Spacing around tags
 #
 #-------------------------------------------------------------------------------
 # Setup
@@ -62,7 +63,7 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,

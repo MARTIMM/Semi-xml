@@ -31,12 +31,12 @@ my Semi-xml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 my $d = Date.today();
-ok $xml-text ~~ m/'<p1>x y ' $d '</p1>'/, 'Check generated date';
+ok $xml-text ~~ m/'<p1>x y ' $d'</p1>'/, 'Check generated date';
 
-ok $xml-text ~~ m/'<p2 z="txt">' $d ' ' (\d\d ':')**2 \d\d ' ' '+' \d**4 '</p2>'/,
+ok $xml-text ~~ m/'<p2 z="txt"> ' $d ' ' (\d\d ':')**2 \d\d ' ' '+' \d**4'</p2>'/,
   'Check generated date and time';
 
 is $x.get-option( :section('output'), :option('fileext')), 'html', 'Check fileext option';
