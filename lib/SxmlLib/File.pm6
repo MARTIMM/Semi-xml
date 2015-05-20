@@ -52,30 +52,31 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             # next to a previously prepared sibling 'PLACEHOLDER-ELEMENT' of
             # which the contents is given to this method as @content-body
             #
-            $x.parse(:content("\$XX-XX-XX\[$sxml-text\]"));
+            $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
 
-            # Replace all elements below the container tag XX-XX-XX
-            # in the parent element of the container.
+            # Search for node XX-XX-XX and move all nodes below that container
+            # to the parent element of the container.
             #
             for $parent.nodes -> $node {
-              if $node.can('name') {
-                if $node.name eq 'XX-XX-XX' {
-                  $parent.append($_) for $node.nodes;
 
-                  $node.remove;
-                  last;
-                }
+              # Skip all non-element nodes like XML::Text
+              #
+              if $node ~~ XML::Element and $node.name eq 'XX-XX-XX' {
+                $parent.append($_) for $node.nodes;
+
+                $node.remove;
+                last;
               }
             }
           }
 
           else {
-            say "Reference '$reference' not found";
+            die "Reference '$reference' not found";
           }
         }
 
         default {
-          say "Type $type not recognized with \$!include";
+          die "Type $type not recognized with \$!include";
         }
       }
     }

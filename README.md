@@ -160,6 +160,9 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.14.3
+  * File.pm6 had a bug which didn't include the files anymore. Unknown how
+    and why it was intrduced.
 * 0.14.2
   * Added a trick from the panda program to reorder the options to the front so
     the sxml files can be made executable and on the commandline some added

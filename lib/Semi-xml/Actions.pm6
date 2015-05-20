@@ -96,7 +96,7 @@ class Semi-xml::Actions {
   my Str $config-path;
   my Str $config-value;
 
-  has XML::Document $.xml-document;
+  my XML::Document $xml-document;
   my Int $current-el-idx;
   my Array $el-stack;
   my Array $deferred-calls;
@@ -110,18 +110,19 @@ class Semi-xml::Actions {
 
   my Bool $keep-literal;
 
-  has Bool $!init;
+#  has Bool $!init;
 
   # Initialize some variables when init is set. Must be done when a new object
   # is created: the variables are 'seen' in the other object
   #
   submethod BUILD ( Bool :$init ) {
-
-    if $init {
+#say "BUILD: {?$init}";
+    if ?$init {
       $current-el-idx = Int;
       $el-stack = [];
       $deferred-calls = [];
     }
+#say "BUILD: {$current-el-idx ?? $current-el-idx !! 'undef'}";
   }
 
   #-----------------------------------------------------------------------------
@@ -301,6 +302,10 @@ class Semi-xml::Actions {
 
         self!register-element( 'PLACEHOLDER-ELEMENT', {});
       }
+      
+      else {
+        die "No method '$tag-name' and/or module link '$module' found";
+      }
     }
 
     elsif $tag-type eq '$*<' {
@@ -338,9 +343,13 @@ class Semi-xml::Actions {
                              :$decorate-left = False,
                              :$decorate-right = False
                            ) {
+
     # Test if index is defined.
     #
     my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
+
+#say "CE IDX: ", ($current-el-idx.defined ?? $current-el-idx !! 'undef');
+
     if $current-el-idx.defined {
       $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
         if $decorate-left or $decorate;
@@ -365,10 +374,12 @@ class Semi-xml::Actions {
       # First element is a root element
       #
       $current-el-idx = 0;
+#say "CE IDX init: $current-el-idx";
       $el-stack[$current-el-idx] = $child-element;
       $el-keep-literal[$current-el-idx] = False;
-      $!xml-document .= new($el-stack[$current-el-idx]);
+      $xml-document .= new($el-stack[$current-el-idx]);
     }
+#say "CE IDX -->> ", ($current-el-idx.defined ?? $current-el-idx !! 'undef');
   }
 
   # Process the text after finding body terminator
@@ -414,8 +425,8 @@ if 0 {
 
     else {
 #say "!PRT mch 2: '$esc-text'";
-      $esc-text ~~ s/^\s+//;
-      $esc-text ~~ s/\s+$//;
+      $esc-text ~~ s/^\s+/ /;
+      $esc-text ~~ s/\s+$/ /;
 #say "!PRT mch 3: '$esc-text'";
 #      $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
       $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
@@ -446,11 +457,14 @@ if 0 {
   #
   method !process-body-end {
 
-#say "!PBE lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
+#say "PBE: ", callframe(1).file, ', ', callframe(1).line;
+#say "PBE lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
     # Go back one level .New child tags will overwrite the previous child
     # on the stack as those are not needed anymore.
     #
     $current-el-idx--;
+#say "PBE: -->> $current-el-idx";
+
     if $deferred-calls[$current-el-idx].defined 
        and $el-stack[$current-el-idx] ~~ XML::Element
        and $el-stack[$current-el-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
@@ -471,6 +485,10 @@ if 0 {
       $deferred-calls[$current-el-idx] = Any;
       $el-keep-literal[$current-el-idx + 1] = False;
     }
+  }
+  
+  method get-document ( --> XML::Document ) {
+    return $xml-document;
   }
 }
 

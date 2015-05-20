@@ -8,7 +8,7 @@ class Semi-xml:ver<0.14.2>:auth<https://github.com/MARTIMM> {
 
   our $debug = False;
 
-  has Semi-xml::Actions $actions;
+  has Semi-xml::Actions $.actions;
   has Hash $.styles;
   has Hash $.configuration;
 
@@ -54,7 +54,7 @@ class Semi-xml:ver<0.14.2>:auth<https://github.com/MARTIMM> {
   
   submethod BUILD ( Bool :$init ) {
 #say "SI: {?$init}";
-    $actions = Semi-xml::Actions.new(:$init);
+    $!actions = Semi-xml::Actions.new(:$init);
   }
 
   #-----------------------------------------------------------------------------
@@ -93,14 +93,17 @@ class Semi-xml:ver<0.14.2>:auth<https://github.com/MARTIMM> {
 
 #    my $sts;
 #    my $sub-actions;
-#    if $actions.defined {
+#    if $!actions.defined {
 #      $sub-actions = Semi-xml::Actions.new();
 #      $sts = Semi-xml::Grammar.parse( $content, :actions($sub-actions));
 #      Semi-xml::Grammar.parse( $content, :actions($sub-actions));
 #    }
 
 #    else {
-      Semi-xml::Grammar.parse( $content, :actions($actions));
+#say "A0: {$!actions.get-document.WHERE}";
+#say "A1: $content";
+      Semi-xml::Grammar.parse( $content, :actions($!actions));
+#say "A2: {$!actions.get-document}";
 #    }
 
 #say "Sts: {$sts.WHAT}, {$sts.perl}";
@@ -110,7 +113,7 @@ class Semi-xml:ver<0.14.2>:auth<https://github.com/MARTIMM> {
   #-----------------------------------------------------------------------------
   #
   method root-element ( --> XML::Element ) {
-    return $actions.xml-document.root;
+    return $!actions.get-document.root;
   }
 
   #-----------------------------------------------------------------------------
@@ -122,7 +125,7 @@ class Semi-xml:ver<0.14.2>:auth<https://github.com/MARTIMM> {
   #-----------------------------------------------------------------------------
   #
   method save ( Str :$filename is copy, Str :$run-code ) {
-    my Array $cfgs = [ $actions.config<output>,
+    my Array $cfgs = [ $!actions.config<output>,
                        $!configuration<output>,
                        $defaults<output>
                      ];
@@ -152,7 +155,7 @@ if $filename !~~ m@'/'@ {
 }
 
 spurt( $filename, $document);
-say "save to $filename";
+#say "save to $filename";
 #-----
 
       if $cmd.defined {
@@ -165,7 +168,7 @@ say "save to $filename";
         # No pipe to executable at the moment so take a different route...
         #
 #        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
-say "Cmd: cat $filename | $cmd";
+#say "Cmd: cat $filename | $cmd";
         shell("cat $filename | $cmd");
       }
 
@@ -197,7 +200,7 @@ say "Cmd: cat $filename | $cmd";
   method get-xml-text ( ) {
     # Get the top element name
     #
-    my $root-element = $actions.xml-document.root.name;
+    my $root-element = $!actions.get-document.root.name;
     $root-element ~~ s/^(<-[:]>+\:)//;
 
     my Str $document = '';
@@ -207,11 +210,12 @@ say "Cmd: cat $filename | $cmd";
     if ?$root-element {
       # Check if xml prelude must be shown
       #
-      my Array $cfgs = [ $actions.config<option><xml-prelude>,
+      my Array $cfgs = [ $!actions.config<option><xml-prelude>,
                          $!configuration<option><xml-prelude>,
                          $defaults<option><xml-prelude>
                        ];
-      if self.get-option( $cfgs, 'show') {
+#say "XO: {? self.get-option( $cfgs, 'show')}";
+      if ? self.get-option( $cfgs, 'show') {
         my $version = self.get-option( $cfgs, 'version');
         my $encoding = self.get-option( $cfgs, 'encoding');
 
@@ -221,17 +225,17 @@ say "Cmd: cat $filename | $cmd";
 
       # Check if doctype must be shown
       #
-      $cfgs = [ $actions.config<option><doctype>,
+      $cfgs = [ $!actions.config<option><doctype>,
                 $!configuration<option><doctype>,
                 $defaults<option><doctype>
               ];
-      if self.get-option( $cfgs, 'show') {
+      if ? self.get-option( $cfgs, 'show') {
         my $definition = self.get-option( $cfgs, 'definition');
         my $ws = $definition ?? ' ' !! '';
         $document ~= "<!DOCTYPE $root-element$ws$definition>\n";
       }
 
-      $document ~= $actions.xml-document.root;
+      $document ~= $!actions.get-document.root;
     }
 
     return $document;
@@ -257,7 +261,7 @@ say "Cmd: cat $filename | $cmd";
                             --> Any
                           ) {
     my Array $hashes;
-    for ( $actions.config, $!configuration, $defaults) -> $h {
+    for ( $!actions.config, $!configuration, $defaults) -> $h {
       if $h{$section}:exists {
         my $e = $h{$section};
 
