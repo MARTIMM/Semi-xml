@@ -5,11 +5,11 @@
         <!ENTITY library "Semi-xml">
         <!ENTITY nbsp " ">
 ]>
-<article xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en"> <title> Using Semi-xml </title> <info><author><personname><firstname>Marcel</firstname><surname>Timmerman</surname></personname></author><address><city>Haarlem</city><country>Netherlands</country></address><copyright><year>2015, * + 1 ... Inf</year><holder>Marcel Timmerman</holder></copyright><date>2015-05-05</date><abstract> <para> The library &library; provides methods to parse a text and generate
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en"> <title> Using Semi-xml </title> <info><author><personname><firstname>Marcel</firstname><surname>Timmerman</surname></personname></author><address><city>Haarlem</city><country>Netherlands</country></address><copyright><year>2015, * + 1 ... Inf</year><holder>Marcel Timmerman</holder></copyright><date>2015-05-17</date><abstract> <para> The library &library; provides methods to parse a text and generate
       any <abbrev>XML</abbrev> language be it html, soap or xsl. </para> <para> The program &program; uses this library to transform sxml text from a file
       into xml after which it is possible to store it in a file
       or send it to any program for conversion to other types or for checking. 
-      examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep. </para> <para> The latest version of this document is generated on date 2015-05-05 </para> </abstract></info> <sect1> <title> Introduction of module &library; </title> <para> Welcome to <emphasis>&library;</emphasis>. As mentioned in the abstract &library;
+      examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep. </para> <para> The latest version of this document is generated on date 2015-05-17 </para> </abstract></info> <sect1> <title> Introduction of module &library; </title> <para> Welcome to <emphasis>&library;</emphasis>. As mentioned in the abstract &library;
       is a Perl 6 module to convert a semi xml text into <emphasis>XML</emphasis>. This
       article will explain the language this module can parse. </para> <para> The language exists of a prelude and the document. The prelude is
       used to introduce external modules and to define ways to output the 
