@@ -44,16 +44,13 @@ class Semi-xml:ver<0.14.3>:auth<https://github.com/MARTIMM> {
   #
 #  $*PROGRAM ~~ m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
 #  $defaults<output><filename> = ~$/[0];
-  
+
 #  my @path-spec = $*SPEC.splitpath($*PROGRAM);
 #  $defaults<output><filename> = @path-spec[2];
 #  $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
 #say "PS: @path-spec[]";
-  
-  has Bool $!init;
-  
+
   submethod BUILD ( Bool :$init ) {
-#say "SI: {?$init}";
     $!actions = Semi-xml::Actions.new(:$init);
   }
 
@@ -91,23 +88,9 @@ class Semi-xml:ver<0.14.3>:auth<https://github.com/MARTIMM> {
       }
     }
 
-#    my $sts;
-#    my $sub-actions;
-#    if $!actions.defined {
-#      $sub-actions = Semi-xml::Actions.new();
-#      $sts = Semi-xml::Grammar.parse( $content, :actions($sub-actions));
-#      Semi-xml::Grammar.parse( $content, :actions($sub-actions));
-#    }
-
-#    else {
-#say "A0: {$!actions.get-document.WHERE}";
-#say "A1: $content";
-      Semi-xml::Grammar.parse( $content, :actions($!actions));
-#say "A2: {$!actions.get-document}";
-#    }
-
-#say "Sts: {$sts.WHAT}, {$sts.perl}";
-#    die "Failure parsing the content" unless $sts;
+    # Parse the content. Parse can be recursively called
+    #
+    Semi-xml::Grammar.parse( $content, :actions($!actions));
   }
 
   #-----------------------------------------------------------------------------
@@ -124,6 +107,12 @@ class Semi-xml:ver<0.14.3>:auth<https://github.com/MARTIMM> {
 
   #-----------------------------------------------------------------------------
   #
+#  method conversion:<Str> ( --> Str ) {
+#    return self.get-xml-text;
+#  }
+
+  #-----------------------------------------------------------------------------
+  #
   method save ( Str :$filename is copy, Str :$run-code ) {
     my Array $cfgs = [ $!actions.config<output>,
                        $!configuration<output>,
@@ -131,9 +120,9 @@ class Semi-xml:ver<0.14.3>:auth<https://github.com/MARTIMM> {
                      ];
 
     my $document = self.get-xml-text;
+#    my Str $document = self;
 
     if $run-code.defined {
-#say "Run $run-code";
       my $cmd = self.get-option( :section('output'),
                                  :sub-section('program'),
                                  :option($run-code)
@@ -197,7 +186,8 @@ spurt( $filename, $document);
 
   #-----------------------------------------------------------------------------
   #
-  method get-xml-text ( ) {
+  method get-xml-text ( --> Str ) {
+
     # Get the top element name
     #
     my $root-element = $!actions.get-document.root.name;
@@ -208,13 +198,14 @@ spurt( $filename, $document);
     # If there is one, try to generate the xml
     #
     if ?$root-element {
+
       # Check if xml prelude must be shown
       #
       my Array $cfgs = [ $!actions.config<option><xml-prelude>,
                          $!configuration<option><xml-prelude>,
                          $defaults<option><xml-prelude>
                        ];
-#say "XO: {? self.get-option( $cfgs, 'show')}";
+
       if ? self.get-option( $cfgs, 'show') {
         my $version = self.get-option( $cfgs, 'version');
         my $encoding = self.get-option( $cfgs, 'encoding');
@@ -229,6 +220,7 @@ spurt( $filename, $document);
                 $!configuration<option><doctype>,
                 $defaults<option><doctype>
               ];
+
       if ? self.get-option( $cfgs, 'show') {
         my $definition = self.get-option( $cfgs, 'definition');
         my $ws = $definition ?? ' ' !! '';
@@ -274,7 +266,7 @@ spurt( $filename, $document);
         }
       }
     }
-    
+
     for $hashes.list -> $h {
       if $h{$option}:exists {
         return $h{$option};

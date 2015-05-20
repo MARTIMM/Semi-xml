@@ -32,7 +32,7 @@ package Semi-xml {
 
     has Hash $.symbols = {};
 
-    # $SxmlCore.date []
+    # $!SxmlCore.date []
     #
     method date ( XML::Element $parent,
                   Hash $attrs,
@@ -43,7 +43,7 @@ package Semi-xml {
       $parent.append(XML::Text.new(:text(Date.today().Str)));
     }
 
-    # $SxmlCore.date-time []
+    # $!SxmlCore.date-time []
     #
     method date-time ( XML::Element $parent,
                        Hash $attrs,
@@ -58,7 +58,7 @@ package Semi-xml {
       $parent.append($txt-e);
     }
 
-    # $SxmlCore.comment []
+    # $!SxmlCore.comment []
     #
     method comment ( XML::Element $parent,
                      Hash $attrs,
@@ -68,7 +68,7 @@ package Semi-xml {
       $content-body.remove;
     }
 
-    # $SxmlCore.cdata []
+    # $!SxmlCore.cdata []
     #
     method cdata ( XML::Element $parent,
                    Hash $attrs,
@@ -78,7 +78,7 @@ package Semi-xml {
       $content-body.remove;
     }
 
-    # $SxmlCore.pi []
+    # $!SxmlCore.pi []
     #
     method pi ( XML::Element $parent,
                 Hash $attrs,
@@ -117,19 +117,16 @@ package Semi-xml {
 
     my Bool $keep-literal;
 
-  #  has Bool $!init;
 
     # Initialize some variables when init is set. Must be done when a new object
     # is created: the variables are 'seen' in the other object
     #
     submethod BUILD ( Bool :$init ) {
-  #say "BUILD: {?$init}";
       if ?$init {
         $current-el-idx = Int;
         $el-stack = [];
         $deferred-calls = [];
       }
-  #say "BUILD: {$current-el-idx ?? $current-el-idx !! 'undef'}";
     }
 
     #-----------------------------------------------------------------------------
@@ -355,15 +352,12 @@ package Semi-xml {
       #
       my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
 
-  #say "CE IDX: ", ($current-el-idx.defined ?? $current-el-idx !! 'undef');
-
       if $current-el-idx.defined {
         $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
           if $decorate-left or $decorate;
         $el-stack[$current-el-idx].append($child-element);
         $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
           if $decorate-right or $decorate;
-  #say "CE: '{~$el-stack[$current-el-idx]}', $decorate, $decorate-left, $decorate-right";
         $el-stack[$current-el-idx + 1] = $child-element;
 
         # Copy current 'keep literal' state.
@@ -381,20 +375,16 @@ package Semi-xml {
         # First element is a root element
         #
         $current-el-idx = 0;
-  #say "CE IDX init: $current-el-idx";
         $el-stack[$current-el-idx] = $child-element;
         $el-keep-literal[$current-el-idx] = False;
         $xml-document .= new($el-stack[$current-el-idx]);
       }
-  #say "CE IDX -->> ", ($current-el-idx.defined ?? $current-el-idx !! 'undef');
     }
 
     # Process the text after finding body terminator
     #
     method !process-text ( $match ) {
-  #say "!PRT mch 0: '$match'";
       my $esc-text = self!process-esc(~$match);
-  #say "!PRT mch 1: '$esc-text'";
 
       my $xml;
       $el-keep-literal[$current-el-idx] ||= $keep-literal;
@@ -431,10 +421,8 @@ package Semi-xml {
       }
 
       else {
-  #say "!PRT mch 2: '$esc-text'";
         $esc-text ~~ s/^\s+/ /;
         $esc-text ~~ s/\s+$/ /;
-  #say "!PRT mch 3: '$esc-text'";
   #      $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
         $xml = Semi-xml::Text.new( :text($esc-text), :strip)
           if $esc-text.chars > 0;
@@ -463,15 +451,11 @@ package Semi-xml {
 
     # Process body ending
     #
-    method !process-body-end {
-
-  #say "PBE: ", callframe(1).file, ', ', callframe(1).line;
-  #say "PBE lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
+    method !process-body-end ( ) {
       # Go back one level .New child tags will overwrite the previous child
       # on the stack as those are not needed anymore.
       #
       $current-el-idx--;
-  #say "PBE: -->> $current-el-idx";
 
       if $deferred-calls[$current-el-idx].defined 
          and $el-stack[$current-el-idx] ~~ XML::Element
