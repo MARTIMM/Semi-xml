@@ -116,6 +116,7 @@ package Semi-xml {
     my Str $attr-key;
 
     my Bool $keep-literal;
+    my Bool $has-comment;
 
 
     # Initialize some variables when init is set. Must be done when a new object
@@ -126,6 +127,7 @@ package Semi-xml {
         $current-el-idx = Int;
         $el-stack = [];
         $deferred-calls = [];
+        $has-comment = False;
       }
     }
 
@@ -243,6 +245,10 @@ package Semi-xml {
     method ws ( $match ) {
   #    ~$match ~~ m:g/(\n)/;
   #say "N-" x $/.elems;
+    }
+
+    method comment ( $match is rw ) {
+      $has-comment = True;
     }
 
     #-----------------------------------------------------------------------------
@@ -384,7 +390,16 @@ package Semi-xml {
     # Process the text after finding body terminator
     #
     method !process-text ( $match ) {
-      my $esc-text = self!process-esc(~$match);
+
+      # Check if there is a comment found in this text, if so remove it and then
+      # modify/remove escape characters
+      #
+      my $text = ~$match;
+      if $has-comment {
+        $text ~~ s:g/ '#' <-[\n]>* \n //;
+        $has-comment = False;
+      }
+      $text = self!process-esc($text);
 
       my $xml;
       $el-keep-literal[$current-el-idx] ||= $keep-literal;
@@ -395,14 +410,14 @@ package Semi-xml {
   # At the moment too complex to handle removal of a minimal indentation
   if 0 {
   #if $keep-literal {
-  #      $esc-text ~~ s/^\n+//;
-  #      $esc-text ~~ s/\s+$//;
+  #      $text ~~ s/^\n+//;
+  #      $text ~~ s/\s+$//;
   #}
 
 
         # Get all spaces at the start of a line
         #
-        $esc-text ~~ m:g/^^(\s+)/;
+        $text ~~ m:g/^^(\s+)/;
         my @indents = $/[];
 
         # Then get the length of each whitespace and remember the shortest length
@@ -415,17 +430,17 @@ package Semi-xml {
           $min-spaces min= $nspaces;
         }
 
-        $esc-text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
+        $text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
   }
-        $xml = Semi-xml::Text.new(:text($esc-text)) if $esc-text.chars > 0;
+        $xml = Semi-xml::Text.new(:text($text)) if $text.chars > 0;
       }
 
       else {
-        $esc-text ~~ s/^\s+/ /;
-        $esc-text ~~ s/\s+$/ /;
-  #      $xml = XML::Text.new(:text($esc-text)) if $esc-text.chars > 0;
-        $xml = Semi-xml::Text.new( :text($esc-text), :strip)
-          if $esc-text.chars > 0;
+        $text ~~ s/^\s+/ /;
+        $text ~~ s/\s+$/ /;
+  #      $xml = XML::Text.new(:text($text)) if $text.chars > 0;
+        $xml = Semi-xml::Text.new( :text($text), :strip)
+          if $text.chars > 0;
       }
 
       $el-stack[$current-el-idx].append($xml) if $xml.defined;

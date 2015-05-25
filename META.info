@@ -15,5 +15,5 @@
         "SxmlLib::Docbook5::Basic": "lib/SxcmlLib/Docbook5::Basic.pm6",
     },
     "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-    "version": "0.14.3"
+    "version": "0.14.4"
 }

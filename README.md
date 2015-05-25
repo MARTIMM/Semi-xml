@@ -160,6 +160,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.14.4
+  * Change way comments are processed. Needs some extra work.
 * 0.14.3
   * File.pm6 had a bug which didn't include the files anymore. Unknown how
     and why it was intrduced.

@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.14.3>:auth<https://github.com/MARTIMM> {
+class Semi-xml:ver<0.14.4>:auth<https://github.com/MARTIMM> {
 
   our $debug = False;
 
@@ -67,10 +67,11 @@ class Semi-xml:ver<0.14.3>:auth<https://github.com/MARTIMM> {
   #
   method parse ( :$content is copy ) {
 
-    # Remove comments
+    # Remove comments, trailing and leading spaces
     #
-    $content ~~ s:g/<-[\\]>\#.*?$$//;
-    $content ~~ s/^\#.*?$$\n//;
+#    $content ~~ s:g/<-[\\]>\#.*?$$//;
+#    $content ~~ s/^\#.*?$$\n//;
+#say "\nContent;\n$content\n\n";
     $content ~~ s/^\s+//;
     $content ~~ s/\s+$//;
 

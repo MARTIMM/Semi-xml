@@ -13,8 +13,7 @@ package Semi-xml {
     # document
     #
     rule TOP {
-      ( "---" <prelude> "---" ) ** 0..1 <document>
-  #    ']'? {say "Seeing some leftover ']'-ts";}
+      ( <comment>* "---" <prelude> "---" ) ** 0..1 <document>
     }
 
     # The prelude is a series of configuration options looking like
@@ -22,7 +21,12 @@ package Semi-xml {
     # /x/y/opt:  value;
     #
     rule prelude { <config-entry>* }
-    rule config-entry { <config-keypath> ':' <config-value> ';' }
+    rule config-entry {
+      <comment>*
+      <config-keypath> ':' <config-value> ';'
+      <comment>*
+    }
+
     token config-keypath { <config-key> ( '/' <config-key> )* }
     token config-key { <identifier> }
     rule config-value { <config-value-esc> || <-[;]>+ }
@@ -31,7 +35,7 @@ package Semi-xml {
     # A document is only a tag with its content. Defined like this there can only
     # be one toplevel document.
     #
-    token document { <tag> <tag-body> }
+    token document { <comment>* <tag> <tag-body> <comment>* }
 
     # A tag is an identifier prefixed with $. $! or $ to attach several semantics
     # to the tag.
@@ -41,8 +45,8 @@ package Semi-xml {
     token reset-keep-literal { <?> }
     token tag { <reset-keep-literal> <tag-name> ( <attribute> )* }
     token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 }
-    token tag-type {   ('$.' <identifier> '.' )
-                    || ('$!' <identifier> '.' )
+    token tag-type {   ( '$.' <identifier> '.' )
+                    || ( '$!' <identifier> '.' )
                     || '$*<' || '$*>' || '$*'
                     || '$'
                    }
@@ -51,7 +55,7 @@ package Semi-xml {
     # key is an identifier and the value can be anything. Enclose the value in
     # quotes ' or " when there are whitespace characters in the value.
     # 
-    token attribute { <ws>? <attr-key> '=' <attr-value-spec> }
+    token attribute { <ws>? <attr-key> '=' <attr-value-spec> <comment>*}
     token attr-key { <identifier> [ ':' <identifier> ]**0..1 }
     token attr-value-spec {    (\' <attr-q-value> \')
                             || (\" <attr-qq-value> \")
@@ -75,10 +79,11 @@ package Semi-xml {
     # used. Just use a space in front. Can happen in tables showing numbers.
     #
     token tag-body {
-      <ws>?
+      <ws>? <comment>*
       (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
       || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
       )
+      <comment>*
     }
 
     token body1-start     { '[' }
@@ -89,7 +94,7 @@ package Semi-xml {
     #
     token body1-contents  { <keep-literal>? ( <body1-text> || <document> )* }
     token body1-end       { ']' }
-    token body1-text      { ( <-[\$\]\\]> || <body-esc> )+ }
+    token body1-text      { ( <comment> || <-[\$\]\\]> || <body-esc> )+ }
 
 
     token body2-start     { '[!' }
@@ -99,12 +104,15 @@ package Semi-xml {
     # when encountering the string '!]'.
     #
     token body2-text      { .*? <?b2e> }
+
     token b2e             { '!]' }
     token body2-end       { '!]' }
 
 
     token keep-literal    { '=' }
     token body-esc        { '\\' . }
+
+    token comment         { '#' <-[\n]>* \n }
 
     # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
     # dash within the string is accepted.
