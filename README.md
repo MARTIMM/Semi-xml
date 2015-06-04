@@ -125,7 +125,7 @@ highlights are programmed in your favorite editor.
     * [x] date-time() for datetime.
 
 * Items needed in program sxml2xml
-  * [ ] Generate a content header!
+  * [x] Generate a http header!
   * [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the
         sxml2xml program will not bother (yet).
   * [x] Dependencies on other files
@@ -160,6 +160,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.15.0
+  * Output of http header
 * 0.14.4
   * Change way comments are processed. Needs some extra work.
 * 0.14.3

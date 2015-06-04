@@ -4,7 +4,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-class Semi-xml:ver<0.14.4>:auth<https://github.com/MARTIMM> {
+class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
 
   our $debug = False;
 
@@ -202,16 +202,30 @@ spurt( $filename, $document);
 
       # Check if xml prelude must be shown
       #
-      my Array $cfgs = [ $!actions.config<option><xml-prelude>,
-                         $!configuration<option><xml-prelude>,
-                         $defaults<option><xml-prelude>
+      my Array $cfgs = [ $!actions.config<option><http-header>,
+                         $!configuration<option><http-header>,
+                         $defaults<option><http-header>
                        ];
+      if ? self.get-option( $cfgs, 'show') {
+        my $header = self.get-option( $cfgs, 'content');
+        $header ~~ s/^ \s+//;
+        $header ~~ s/\s+ $//;
+        $header ~~ s/ '=' /:/;
+        $document ~= "$header\n\n";
+      }
+
+      # Check if xml prelude must be shown
+      #
+      $cfgs = [ $!actions.config<option><xml-prelude>,
+                $!configuration<option><xml-prelude>,
+                $defaults<option><xml-prelude>
+              ];
 
       if ? self.get-option( $cfgs, 'show') {
         my $version = self.get-option( $cfgs, 'version');
         my $encoding = self.get-option( $cfgs, 'encoding');
 
-        $document = "<?xml version=\"$version\"";
+        $document ~= "<?xml version=\"$version\"";
         $document ~= " encoding=\"$encoding\"?>\n";
       }
 
