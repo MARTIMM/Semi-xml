@@ -16,8 +16,8 @@ use Semi-xml;
 #
 my $sxml-text = q:to/EOSX/;
 ---
-options/xml-prelude/show:       1;
-options/doctype/show:           1;
+option/xml-prelude/show:       1;
+option/doctype/show:           1;
 
 module/Db5:                   SxmlLib::Docbook5::Basic;
 ---
