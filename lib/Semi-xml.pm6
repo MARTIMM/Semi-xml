@@ -24,7 +24,11 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
         show => 0,
         version => '1.0',
         encoding => 'UTF-8',
-      }
+      },
+
+      http-header => {
+        show => 0,
+      },
     },
 
     output => {
@@ -196,34 +200,36 @@ spurt( $filename, $document);
 
     my Str $document = '';
 
+    # Get all configuration items in one hash, later settings overrides previous
+    # Therefore defaults first, then from user config in roles then the settings
+    # from the sxml file.
+    #
+    my Hash $configuration = $defaults;
+    self.gather-configuration( $configuration, $!configuration, $!actions.config);
+
     # If there is one, try to generate the xml
     #
     if ?$root-element {
 
-      # Check if xml prelude must be shown
+      # Check if a http header must be shown
       #
-      my Array $cfgs = [ $!actions.config<option><http-header>,
-                         $!configuration<option><http-header>,
-                         $defaults<option><http-header>
-                       ];
-      if ? self.get-option( $cfgs, 'show') {
-        my $header = self.get-option( $cfgs, 'content');
-        $header ~~ s/^ \s+//;
-        $header ~~ s/\s+ $//;
-        $header ~~ s/ '=' /:/;
-        $document ~= "$header\n\n";
+      my Hash $http-header = $configuration<option><http-header>;
+
+      if ? $http-header<show> {
+        for $http-header.kv -> $k, $v {
+          next if $k ~~ 'show';
+          $document ~= "$k: $v\n";
+        }
+        $document ~= "\n";
       }
 
       # Check if xml prelude must be shown
       #
-      $cfgs = [ $!actions.config<option><xml-prelude>,
-                $!configuration<option><xml-prelude>,
-                $defaults<option><xml-prelude>
-              ];
+      my Hash $xml-prelude = $configuration<option><xml-prelude>;
 
-      if ? self.get-option( $cfgs, 'show') {
-        my $version = self.get-option( $cfgs, 'version');
-        my $encoding = self.get-option( $cfgs, 'encoding');
+      if ? $xml-prelude<show> {
+        my $version = $xml-prelude<version>;
+        my $encoding = $xml-prelude<encoding>;
 
         $document ~= "<?xml version=\"$version\"";
         $document ~= " encoding=\"$encoding\"?>\n";
@@ -231,13 +237,10 @@ spurt( $filename, $document);
 
       # Check if doctype must be shown
       #
-      $cfgs = [ $!actions.config<option><doctype>,
-                $!configuration<option><doctype>,
-                $defaults<option><doctype>
-              ];
+      my Hash $doc-type = $configuration<option><doctype>;
 
-      if ? self.get-option( $cfgs, 'show') {
-        my $definition = self.get-option( $cfgs, 'definition');
+      if ? $doc-type<show> {
+        my $definition = $doc-type<definition>;
         my $ws = $definition ?? ' ' !! '';
         $document ~= "<!DOCTYPE $root-element$ws$definition>\n";
       }
@@ -246,6 +249,28 @@ spurt( $filename, $document);
     }
 
     return $document;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Gather information from @hashes in the config $cfg. The config is modified
+  # to containt all possible settings from the hashes. The $cfg cannot be empty
+  #
+  method gather-configuration ( Hash $cfg, *@hashes --> Hash ) {
+    for @hashes -> Hash $h {
+      for $h.kv -> $k, $v {
+        given $v {
+          when Hash {
+            self.gather-configuration( $cfg{$k}, $v);
+          }
+
+          default {
+            $cfg{$k} = $v;
+          }
+        }
+      }
+    }
+
+    return $cfg;
   }
 
   #-----------------------------------------------------------------------------

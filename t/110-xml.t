@@ -10,13 +10,13 @@ use Semi-xml;
 #
 my $sxml-text = q:to/EOSX/;
 ---
-option/http-header/show:               1;
-option/http-header/content:
-  content-type=text/html
-  ;
+option/http-header/show:                1;
+option/http-header/content-type:        text/html;
+option/http-header/content-language:    en;
 
-option/xml-prelude/show:               1;
-option/doctype/show:                   1;
+option/xml-prelude/show:                1;
+
+option/doctype/show:                    1;
 ---
 $html [
   $body [
@@ -33,7 +33,8 @@ $x.parse(:content($sxml-text));
 my Str $xml-text = ~$x;
 say $xml-text;
 
-#ok $xml-text ~~ m/'<info>'/, 'Check info';
+ok $xml-text ~~ m:s/ 'content-type' ':' 'text/html' /, 'Http content type';
+ok $xml-text ~~ m:s/ 'content-language' ':' 'en' /, 'Http content language';
 
 #-------------------------------------------------------------------------------
 # Cleanup
