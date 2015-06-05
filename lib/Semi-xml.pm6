@@ -260,7 +260,13 @@ spurt( $filename, $document);
       for $h.kv -> $k, $v {
         given $v {
           when Hash {
-            self.gather-configuration( $cfg{$k}, $v);
+            if ?$cfg{$k} {
+              self.gather-configuration( $cfg{$k}, $v);
+            }
+
+            else {
+              $cfg{$k} = $v;
+            }
           }
 
           default {
