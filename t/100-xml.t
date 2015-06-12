@@ -1,4 +1,5 @@
 use v6;
+
 use Test;
 use Semi-xml;
 
@@ -13,7 +14,7 @@ use Semi-xml;
 # Setup
 #
 my Semi-xml $x .= new;
-isa_ok $x, 'Semi-xml', $x.^name;
+isa-ok $x, 'Semi-xml', $x.^name;
 
 # Def=vise a role to add
 #

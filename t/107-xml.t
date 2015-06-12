@@ -36,7 +36,11 @@ say $xml-text;
 my $d = Date.today();
 ok $xml-text ~~ m/'<p1>x y ' $d'</p1>'/, 'Check generated date';
 
-ok $xml-text ~~ m/'<p2 z="txt"> ' $d ' ' (\d\d ':')**2 \d\d ' ' '+' \d**4'</p2>'/,
+ok $xml-text ~~ m/ '<p2 z="txt"> '
+                   $d                                   # year-month-day
+                   ' ' (\d\d ':')**2 \d\d               # hour:minute
+                   ' ' '+' \d\d ':' \d\d'</p2>'         # time
+                 /,
   'Check generated date and time';
 
 is $x.get-option( :section('output'), :option('fileext')), 'html', 'Check fileext option';

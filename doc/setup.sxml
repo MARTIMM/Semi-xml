@@ -8,11 +8,11 @@ option/doctype/definition: [
         <!ENTITY program "sxml2xml">
         <!ENTITY library "Semi-xml">
         <!ENTITY nbsp " ">
+];
 #        <!ENTITY % isoamsa SYSTEM "/home/marcel/Languages/Perl/Lib/Modules/Data2any-Xml/Entities/isoamsa.ent">
 #        %isoamsa\;
 #        <!ENTITY % isopub SYSTEM "/home/marcel/Languages/Perl/Lib/Modules/Data2any-Xml/Entities/isopub.ent">
 #        #%isopub\;
-];
 
 output/filepath:                .;
 
