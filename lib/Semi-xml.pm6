@@ -127,24 +127,30 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
     my $document = self.get-xml-text;
 #    my Str $document = self;
 
+    my Hash $configuration = $defaults;
+    self.gather-configuration(
+      $configuration,
+      $!configuration,
+      $!actions.config
+    );
+
     if $run-code.defined {
-      my $cmd = self.get-option( :section('output'),
-                                 :sub-section('program'),
-                                 :option($run-code)
-                               );
+      my $cmd = $configuration<output><program>{$run-code};
+
+      if $cmd.defined {
 
 #-----
-# Temporary solution for command
+# Temporary solution for pipe to command
 #
 if !$filename.defined {
-  $filename = self.get-option( $cfgs, 'filename');
-  my $fileext = self.get-option( $cfgs, 'fileext');
+  $filename = [~] '.___', $configuration<output><filename>, '___';
+  my $fileext = $configuration<output><fileext>;
 
   $filename ~= ".$fileext";
 }
 
 if $filename !~~ m@'/'@ {
-  my $filepath = self.get-option( $cfgs, 'filepath');
+  my $filepath = $configuration<output><filepath>;
   $filename = "$filepath/$filename" if $filepath;
 }
 
@@ -152,7 +158,6 @@ spurt( $filename, $document);
 #say "save to $filename";
 #-----
 
-      if $cmd.defined {
         $cmd ~~ s:g/\n/ /;
         $cmd ~~ s:g/\s+/ /;
         $cmd ~~ s/^\s*\|//;
@@ -164,24 +169,28 @@ spurt( $filename, $document);
 #        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
 #say "Cmd: cat $filename | $cmd";
         shell("cat $filename | $cmd");
+        unlink $filename;
       }
 
       else {
-        say "Code '$run-code' to select command not found";
-        exit(0);
+        $filename = $configuration<output><filename>;
+        my $fileext = $configuration<output><fileext>;
+        $filename ~= ".$fileext";
+
+        say "Code '$run-code' to select command not found, Shoosen to dump to $filename";
       }
     }
 
     else {
       if !$filename.defined {
-        $filename = self.get-option( $cfgs, 'filename');
-        my $fileext = self.get-option( $cfgs, 'fileext');
+        $filename = $configuration<output><filename>;
+        my $fileext = $configuration<output><fileext>;
 
         $filename ~= ".$fileext";
       }
 
       if $filename !~~ m@'/'@ {
-        my $filepath = self.get-option( $cfgs, 'filepath');
+        my $filepath = $configuration<output><filepath>;
         $filename = "$filepath/$filename" if $filepath;
       }
 
