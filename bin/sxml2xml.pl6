@@ -57,19 +57,10 @@ sub process-sxml ( Str $filename, Str :$run ) {
   # Drop extension
   #
   $x.configuration<output><filename> ~~ s/\.<-[\.]>+$//;
-#say "PS: @path-spec[]";
 
   if $filename.IO ~~ :r {
     $x.parse-file(:$filename);
-#say "PS: $filename {?$run ?? $run !! '-'}";
-
-    if $run.defined {
-      $x.save(:run-code($run));
-    }
-    
-    else {
-      $x.save;
-    }
+    $x.save(:run-code($run));
 
     return $x.get-option( :section('dependencies'), :option('files'));
   }

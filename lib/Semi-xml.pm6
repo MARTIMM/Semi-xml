@@ -62,8 +62,9 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
   #
   method parse-file ( Str :$filename ) {
     if $filename.IO ~~ :r {
+      $!actions = Semi-xml::Actions.new(:init);
       my $text = slurp($filename);
-      return self.parse( :content($text) );
+      self.parse(:content($text));
     }
   }
 
@@ -117,13 +118,9 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
 #  }
 
   #-----------------------------------------------------------------------------
+  # Expect filename without extension
   #
   method save ( Str :$filename is copy, Str :$run-code ) {
-    my Array $cfgs = [ $!actions.config<output>,
-                       $!configuration<output>,
-                       $defaults<output>
-                     ];
-
     my $document = self.get-xml-text;
 #    my Str $document = self;
 
@@ -142,20 +139,24 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
 #-----
 # Temporary solution for pipe to command
 #
-if !$filename.defined {
-  $filename = [~] '.___', $configuration<output><filename>, '___';
+# If not defined or empty device name from config
+#
+if !?$filename {
+  $filename = $configuration<output><filename>;
   my $fileext = $configuration<output><fileext>;
 
   $filename ~= ".$fileext";
 }
 
+# If not absolute prefix the path from the config
+#
 if $filename !~~ m@'/'@ {
   my $filepath = $configuration<output><filepath>;
   $filename = "$filepath/$filename" if $filepath;
 }
 
+$filename = [~] $filename, '___ ___';
 spurt( $filename, $document);
-#say "save to $filename";
 #-----
 
         $cmd ~~ s:g/\n/ /;
@@ -168,7 +169,7 @@ spurt( $filename, $document);
         #
 #        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
 #say "Cmd: cat $filename | $cmd";
-        shell("cat $filename | $cmd");
+        shell("cat '$filename' | $cmd");
         unlink $filename;
       }
 
