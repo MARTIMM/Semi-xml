@@ -89,9 +89,9 @@ $.Db5b.article [
       Below you see a simple layout example.
       $programlisting [=
         ---
-        option/doctype/show: 1;         $co xml:id=co.ex01.prelude []
+        option/doctype/show: 1; $co xml:id=co.ex01.prelude []
         ---
-        \$html [                         $co xml:id=co.ex01.document []
+        \$html [ $co xml:id=co.ex01.document []
           \$head [
             \$title [Hello World\]
           \]
@@ -142,8 +142,8 @@ $.Db5b.article [
         written at the start of the result as well as a doctype.
         $programlisting [!=
           ---
-          option/xml-prelude/show:    1;
-          option/doctype/show:    1;
+          option/xml-prelude/show:      1;
+          option/doctype/show:          1;
           ---
         !]
       ]
@@ -157,6 +157,13 @@ $.Db5b.article [
 
       $sect3 [
         $title [Tag types]
+        $para [
+
+        ]
+      ]
+
+      $sect3 [
+        $title [Predefined library tag types]
         $para [
 
         ]
