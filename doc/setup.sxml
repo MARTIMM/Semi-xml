@@ -57,7 +57,7 @@ $.Db5b.article [
   $sect1 [
     $title [ Introduction of module &library; ]
     $para [
-      Welcome to $emphasis[&library;]. As mentioned in the abstract &library;
+      Welcome to $*<emphasis[&library;]. As mentioned in the abstract &library;
       is a Perl 6 module to convert a semi xml text into $emphasis[XML]. This
       article will explain the language this module can parse.
     ]
@@ -121,7 +121,7 @@ $.Db5b.article [
       ]
 
       The result will be after running through a XML formatter.
-      $programlisting [=
+      $programlisting [!=
         <!DOCTYPE html>
         <html>
           <head>
@@ -132,11 +132,16 @@ $.Db5b.article [
             <p>And another greeting</p>
           </body>
         </html>
-      ]
+      !]
     ]
 
     $sect2 [
       $title [Prelude]
+      $para [
+        The prelude is used to e.g. control to output of the result. Other
+        usages are referencing libraries to be used later in the document.
+      ]
+      
       $para [
         Below you see an example of two options to let the xml prelude be
         written at the start of the result as well as a doctype.
@@ -147,6 +152,105 @@ $.Db5b.article [
           ---
         !]
       ]
+
+$!SxmlCore.comment [        
+        $sect4 [
+          $title [  ]
+          $para [
+          ]
+        ]
+]
+
+      $sect3 [
+        $title [ Options used by the library &library; ]
+        
+        $sect4 [
+          $title [ module ]
+          $para [
+          ]
+        ]
+        
+        $sect4 [
+          $title [ option/doctype/definition ]
+          $para [
+option/doctype/definition: [
+        <!ENTITY company "Acme Mc Carpenter, Inc">
+        <!ENTITY program "sxml2xml">
+        <!ENTITY library "Semi-xml">
+        <!ENTITY nbsp " ">
+          ]
+        ]
+        
+        $sect4 [
+          $title [ option/doctype/show ]
+          $para [
+          ]
+        ]
+        
+        $sect4 [
+          $title [ option/http-header ]
+          $para [
+          ]
+        ]
+
+        $sect4 [
+          $title [ option/xml-prelude/encoding ]
+          $para [
+          ]
+        ]
+        
+        $sect4 [
+          $title [ option/xml-prelude/show ]
+          $para [
+          ]
+        ]
+
+        $sect4 [
+          $title [ option/xml-prelude/version ]
+          $para [
+          ]
+        ]
+        
+        $sect4 [
+          $title [ output/fileext ]
+          $para [
+          ]
+        ]
+        
+        $sect4 [
+          $title [ output/filename ]
+          $para [
+          ]
+        ]
+        
+        $sect4 [
+          $title [ output/filepath ]
+          $para [
+          ]
+        ]
+        
+        $sect4 [
+          $title [ output/program ]
+          $para [
+output/program/pdf:
+        | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
+        | xep -fo - -pdf sxml2xml.pdf
+        ;
+          ]
+        ]
+      ]
+
+      $sect3 [
+        $title [ Options used by the program &program; ]
+        
+        $sect4 [
+          $title [ dependencies/files ]
+          $para [ The value of this option is a list of paths to semi-xml
+            documents which must be processed after the current one.
+          ]
+        ]
+      ]
+
     ]
 
     $sect2 [
