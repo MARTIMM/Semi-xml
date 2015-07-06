@@ -10,7 +10,7 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
 
   has Semi-xml::Actions $.actions;
   has Hash $.styles;
-  has Hash $.configuration;
+  has Hash $.configuration is rw;
 
   my Hash $defaults = {
     option => {
@@ -120,8 +120,11 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
   #-----------------------------------------------------------------------------
   # Expect filename without extension
   #
-  method save ( Str :$filename is copy, Str :$run-code ) {
-    my $document = self.get-xml-text;
+  method save ( Str :$filename is copy,
+                Str :$run-code,
+                XML::Document :$other-document
+              ) {
+    my $document = self.get-xml-text(:$other-document);
 #    my Str $document = self;
 
     my Hash $configuration = $defaults;
@@ -130,6 +133,8 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
       $!configuration,
       $!actions.config
     );
+
+say $configuration<output><program>.perl;
 
     if $run-code.defined {
       my $cmd = $configuration<output><program>{$run-code};
@@ -168,7 +173,7 @@ spurt( $filename, $document);
         # No pipe to executable at the moment so take a different route...
         #
 #        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
-#say "Cmd: cat $filename | $cmd";
+say "Cmd: cat $filename | $cmd";
         shell("cat '$filename' | $cmd");
         unlink $filename;
       }
@@ -201,11 +206,13 @@ spurt( $filename, $document);
 
   #-----------------------------------------------------------------------------
   #
-  method get-xml-text ( --> Str ) {
+  method get-xml-text ( :$other-document --> Str ) {
 
     # Get the top element name
     #
-    my $root-element = $!actions.get-document.root.name;
+    my $root-element = ?$other-document
+                         ?? $other-document.root.name
+                         !! $!actions.get-document.root.name;
     $root-element ~~ s/^(<-[:]>+\:)//;
 
     my Str $document = '';
@@ -255,7 +262,9 @@ spurt( $filename, $document);
         $document ~= "<!DOCTYPE $root-element$ws$definition>\n";
       }
 
-      $document ~= $!actions.get-document.root;
+      $document ~= ?$other-document
+                      ?? $other-document.root
+                      !! $!actions.get-document.root;
     }
 
     return $document;
