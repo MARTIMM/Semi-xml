@@ -8,7 +8,7 @@ sources such as files, text, code , variables etc.
 
 ## Introduction
 
-I'm a lazy bum, so writing xml is too exhousting. instead of writing;
+I'm a lazy bum, so writing xml is too exhausting. instead of writing;
 
 ```xml
 <html>
@@ -17,11 +17,11 @@ I'm a lazy bum, so writing xml is too exhousting. instead of writing;
   </head>
   <body>
     <h1> Introduction </h1>
-    <p class='green'> Piece of text. See <a href='google.com'>google</a> </p>
+    <p class='green'> Piece of text. See <a href='google.com'>google</a>. </p>
   </body>
 </html>
 ```
-(9 lines, 23 words, 194 characters)
+(9 lines, 23 words, 195 characters)
 
 I want to do something like the following
 
@@ -32,11 +32,11 @@ $html [
   ]
   $body [
     $h1 [ Introduction ]
-    $p class=green [ Piece of text. See $a href=google.com [google]]
+    $p class=green [ Piece of text. See $*<a href=google.com [google].]
   ]
 ]
 ```
-(9 lines, 29 words, 161 characters. Less characters typed and still indenting.)
+(9 lines, 29 words, 164 characters. Less characters typed and still indenting.)
 
 This second form looks much more airy and better to read. There are also some
 other advantages using it this way. It will be even better to read when language
