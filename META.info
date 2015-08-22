@@ -1,19 +1,19 @@
 {
-    "author": "Marcel Timmerman",
-    "depends": [
-        "XML"
-    ],
-    "description": "Lazy Bum Xml",
-    "name": "Semi-xml",
-    "provides": {
-        "Semi-xml": "lib/Semi-xml.pm6",
-        "Semi-xml::Grammar": "lib/Semi-xml/Grammar.pm6",
-        "Semi-xml::Actions": "lib/Semi-xml/Actions.pm6",
-        
-        "SxmlLib::File": "lib/SxmlLib/File.pm6",
-        "SxmlLib::Html::List": "lib/SxmlLib/Html/List.pm6",
-        "SxmlLib::Docbook5::Basic": "lib/SxcmlLib/Docbook5::Basic.pm6",
-    },
-    "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-    "version": "0.15.0"
+  "author": "Marcel Timmerman",
+  "depends": [
+    "XML"
+  ],
+  "description": "Lazy Bum Xml",
+  "name": "Semi-xml",
+  "provides": {
+    "Semi-xml": "lib/Semi-xml.pm6",
+    "Semi-xml::Grammar": "lib/Semi-xml/Grammar.pm6",
+    "Semi-xml::Actions": "lib/Semi-xml/Actions.pm6",
+
+    "SxmlLib::File": "lib/SxmlLib/File.pm6",
+    "SxmlLib::Html::List": "lib/SxmlLib/Html/List.pm6",
+    "SxmlLib::Docbook5::Basic": "lib/SxcmlLib/Docbook5::Basic.pm6"
+  },
+  "source-url": "git://github.com/MARTIMM/Semi-xml.git",
+  "version": "0.15.0"
 }

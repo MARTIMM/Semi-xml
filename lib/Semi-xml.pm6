@@ -134,7 +134,7 @@ class Semi-xml:ver<0.15.0>:auth<https://github.com/MARTIMM> {
       $!actions.config
     );
 
-say $configuration<output><program>.perl;
+#say $configuration<output><program>.perl;
 
     if $run-code.defined {
       my $cmd = $configuration<output><program>{$run-code};

@@ -5,7 +5,7 @@ package Semi-xml {
 
   #-----------------------------------------------------------------------------
   #
-  class Semi-xml::Text does XML::Node {
+  class Text does XML::Node {
 
     has Bool $.strip;
     has Str $.txt;
@@ -28,7 +28,7 @@ package Semi-xml {
   #-----------------------------------------------------------------------------
   # Core module with common used methods
   #
-  class Semi-xml::SxmlCore {
+  class SxmlCore {
 
     has Hash $.symbols = {};
 
@@ -91,7 +91,7 @@ package Semi-xml {
 
   #-----------------------------------------------------------------------------
   #
-  class Semi-xml::Actions {
+  class Actions {
     our $debug = False;
 
     # Objects hash with one predefined object for core methods

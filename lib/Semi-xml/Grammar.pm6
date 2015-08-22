@@ -2,7 +2,7 @@ use v6;
 #use Grammar::Tracer;
 
 package Semi-xml {
-  grammar Semi-xml::Grammar {
+  grammar Grammar {
 
     # A complete document looks like the following of which the prelude an dashes
     # are optional
