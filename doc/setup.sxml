@@ -7,6 +7,7 @@ option/doctype/definition: [
         <!ENTITY company "Acme Mc Carpenter, Inc">
         <!ENTITY program "sxml2xml">
         <!ENTITY library "Semi-xml">
+        <!ENTITY language "sxml">
         <!ENTITY nbsp " ">
 ];
 #        <!ENTITY % isoamsa SYSTEM "/home/marcel/Languages/Perl/Lib/Modules/Data2any-Xml/Entities/isoamsa.ent">
@@ -29,6 +30,7 @@ output/program/pdf:
 
 #module/File:                    SxmlLib::File;
 module/Db5b:                    SxmlLib::Docbook5::Basic;
+module/Db5f:                    SxmlLib::Docbook5::FixedLayout;
 ---
 $.Db5b.article [
   $title [ Using Semi-xml ]
@@ -36,15 +38,18 @@ $.Db5b.article [
               city=Haarlem country=Netherlands
               copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
     $para [
-      The library &library; provides methods to parse a text and generate
-      any $abbrev[XML] language be it html, soap or xsl.
+      The Perl 6 library &library; is a library which helps translating a
+      language called Semi-xml or $*abbrev[&language;] into the known xml
+      languages such as HTML, soap or xsl. HTML is known not to be strict as
+      XHTML but it doesn't hurt when it is.
     ]
 
     $para [
-      The program &program; uses this library to transform sxml text from a file
-      into xml after which it is possible to store it in a file
-      or send it to any program for conversion to other types or for checking. 
-      examples are xsltproc, xmllint, rnv, wkhtmltopdf and xep.
+      In the package there is also a program called &program; which uses this
+      library to transform &language; text from a file into xml after which it
+      is possible to store it in a file or send it to any program for conversion
+      to other types or for checking.  examples are xsltproc, xmllint, rnv,
+      wkhtmltopdf and xep.
     ]
 
     $para [
@@ -87,23 +92,16 @@ $.Db5b.article [
 
     $para [
       Below you see a simple layout example.
-      $programlisting [=
-        ---
-        option/doctype/show: 1; $co xml:id=co.ex01.prelude []
-        ---
-        \$html [ $co xml:id=co.ex01.document []
-          \$head [
-            \$title [Hello World\]
-          \]
-          \$body [
-            \$h1 [My first header\]
-            \$p [
-              And another greeting
-            \]
-          \]
-        \]
-      ]
 
+      $!Db5f.load-test-example
+         path=Book-Examples/BE-001.sxml
+         start='$!SxmlCore.comment [Start]'
+         stop='$!SxmlCore.comment [Stop]'
+         callout-prefix='co.ex01.cl'
+         callout-rows='0 4'
+         callout-col=70 []
+
+$!SxmlCore.comment [
       $calloutlist [
         $callout arearefs=co.ex01.prelude [
           $para [
@@ -119,20 +117,15 @@ $.Db5b.article [
           ]
         ]
       ]
+]
 
       The result will be after running through a XML formatter.
-      $programlisting [!=
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Hello World</title>
-          </head>
-          <body>
-            <h1>My first header</h1>
-            <p>And another greeting</p>
-          </body>
-        </html>
-      !]
+      $!Db5f.load-test-example
+         path=Book-Examples/BE-001.xml
+         start='<!--Start-->'
+         stop='<!--Stop-->'
+         keep-literal=1
+         fix-indent=2 []
     ]
 
     $sect2 [
@@ -153,7 +146,7 @@ $.Db5b.article [
         !]
       ]
 
-$!SxmlCore.comment [        
+$!SxmlCore.comment [
         $sect4 [
           $title [  ]
           $para [

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE x>
+<x>
+  <co xml:id="co.ex01.document"/>
+  <!--Start-->
+  <html>
+    <head>
+      <title>Hello World</title>
+    </head>
+    <body>
+      <h1>My first header</h1>
+      <p>And another greeting</p>
+    </body>
+  </html>
+  <!--Stop-->
+</x>
