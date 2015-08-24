@@ -9,6 +9,10 @@ option/doctype/definition: [
         <!ENTITY library "Semi-xml">
         <!ENTITY language "sxml">
         <!ENTITY nbsp " ">
+        <!ENTITY E "entity">
+        <!ENTITY SUE "substitution-entity">
+        <!ENTITY COE "command-entity">
+        <!ENTITY SPE "spaced-entity">
 ];
 #        <!ENTITY % isoamsa SYSTEM "/home/marcel/Languages/Perl/Lib/Modules/Data2any-Xml/Entities/isoamsa.ent">
 #        %isoamsa\;
@@ -38,18 +42,19 @@ $.Db5b.article [
               city=Haarlem country=Netherlands
               copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
     $para [
-      The Perl 6 library &library; is a library which helps translating a
-      language called Semi-xml or $*abbrev[&language;] into the known xml
-      languages such as HTML, soap or xsl. HTML is known not to be strict as
-      XHTML but it doesn't hurt when it is.
+      The &library; package comprises of a set of Perl 6 modules to convert a
+      language coined 'semi xml' or &language; text into $*emphasis[XML]
+      languages such as $*<emphasis[HTML], $*emphasis[SOAP] or $*<emphasis[XSL].
+#      \\0x00A9\\U00A9 \\xC2
+#      \\xAE
     ]
 
     $para [
       In the package there is also a program called &program; which uses this
-      library to transform &language; text from a file into xml after which it
-      is possible to store it in a file or send it to any program for conversion
-      to other types or for checking.  examples are xsltproc, xmllint, rnv,
-      wkhtmltopdf and xep.
+      library to transform &language; text from a file into XML after which it
+      is stored in another file. The generated XML can also be send to any
+      program for conversion to other formats or for checking. Examples are
+      xsltproc, xmllint, rnv, wkhtmltopdf, xep etcetera.
     ]
 
     $para [
@@ -62,70 +67,258 @@ $.Db5b.article [
   $sect1 [
     $title [ Introduction of module &library; ]
     $para [
-      Welcome to $*<emphasis[&library;]. As mentioned in the abstract &library;
-      is a Perl 6 module to convert a semi xml text into $emphasis[XML]. This
-      article will explain the language this module can parse.
+      Welcome to $*<emphasis[&library;]. As mentioned in the abstract, the 
+      modules in the library helps the programmer to convert &language; text
+      into $*<emphasis[XML].
+    ]
+    
+    $sect2 [
+      $title [Advantages using this language]
+      $itemizedlist [
+        $listitem [
+          It is more clear to read the text which is where you want to focus on
+          and therefor more maintainable than XML is.
+        ]
+
+        $listitem [
+          Some language constructs will help inserting predefined text. An
+          example of this might be to insert a lot of attributes of some element
+          and hide it under a name.
+        ]
+
+        $listitem [
+          There are also constructs which are able to call code in modules to
+          simplify things. An example is the use of one of the core methods
+          to insert a date or time-stamp in the text. As an example above at the
+          end of the abstract a date is generated. This date will always be the
+          current date when the text is processed again. This specific part
+          adds dynamism to your text.
+        ]
+
+        $listitem [
+          The language is extensible. Developers can add their own libraries
+          to load for example data from a database and inserting it in the text
+          as a HTML table.
+        ]
+      ]
     ]
 
-    $para [
-      The language exists of a prelude and the document. The prelude is
-      used to introduce external modules and to define ways to output the 
-      resulting xml.
+    $sect2 [
+      $title [Disadvantages]
+      $itemizedlist [
+        $listitem [
+          There is an extra level of processing. If the XML text is simple
+          one should not be bothered learning this language. Especially when
+          the dynamic constructs aren't used.
+        ]
+        
+        $listitem [
+          This project is only just started. There are many things left on the
+          wish list. E.g. I would like to give proper messages when mistakes are
+          made in the syntax.
+        ]
+      ]
+    ]
+    
+    $sect2 [
+      $title [Information given in this article]
+      $itemizedlist [
+        $listitem [
+          $para [
+            $*<emphasis[The language]. Here the basic layout will be explained,
+            the terminology and meaning of the syntax. The start will be gentle
+            showing simple cases first..
+
+            $itemizedlist [
+              $listitem [
+                $para [
+                  $*<emphasis[The document section]. The document is where text
+                  is written for the specific documents together with the
+                  elements to format the text. Some of the special elements will
+                  need the prelude section explained in the next section.
+                ]
+              ]
+              $listitem [
+                $para [
+                  $*<emphasis[The prelude section]. The prelude section will be
+                  explained. In this section you can control the output of the
+                  result. Some options are only used by the program &program;.
+                  Defaults are also explained.
+                ]
+              ]
+            ]
+          ]
+        ]
+
+        $listitem [
+          $para [
+            $*<emphasis[The programmers view]. Developers can write new modules
+            with methods to process tasks not yet captured by this package.
+            
+            $itemizedlist [
+              $listitem [
+                $para [
+                  $*<emphasis[Classes data and methods]. An explanation of the
+                  layout of a users module and an explanation of how to specify
+                  the options in the prelude
+                ]
+              ]
+              $listitem [
+                $para [
+                  $*<emphasis[Substitution data]. Declarations of data which
+                  can be used to substitute into the text.
+                ]
+              ]
+              $listitem [
+                $para [
+                  $*<emphasis[Methods]. Methods which help inserting new text
+                  and entities into the text.
+                ]
+              ]
+            ]
+          ]
+        ]
+
+        $listitem [
+          $para [
+            $*<emphasis[Using the program]. The program is used to read
+            &language; from a file and saved or send away. Explanation of
+            arguments and prelude options can be found here.
+          ]
+        ]
+        $listitem [
+          $para [
+            $*<emphasis[Examples]. Many short examples to show its use of sxml.
+          ]
+        ]
+
+$!SxmlCore.comment [
+        $listitem [
+          $*<emphasis[].
+        ]
+]
+      ]
     ]
   ]
 
   $sect1 [
-    $title [the language]
+    $title [The language]
+
     $para [
-      As been said, the semi xml language consists of two parts. A prelude and a
-      document. The prelude starts with 3 dashes and ends with it. The prelude
-      itself consists of a series of key-value pairs. The keys are defined as a
-      series of catagories and subcatagories looking much like a filepath. The
-      value can be anything. The key value pair is separated by a colon ':' and
-      the pair ends in a ';'. The prelude part is also optional. In that case
-      defaults will be applied.
-    ]
-    $para [
-      The document follows the prelude and is the thing you want to publish. It
-      has a similar look as xml (in this case its html) but is easier to read.
+      The language exists of two parts, a prelude and the document. The prelude
+      is used to set options which introduce external modules or to define ways
+      to output the resulting xml.
     ]
 
     $para [
-      Below you see a simple layout example.
+      The prelude starts with 3 dashes and ends with it. The prelude
+      itself consists of a series of key-value pairs. The keys are defined as a
+      series of catagories and subcatagories. The value can be anything. The key
+      value pair is separated by a colon ':' and the pair ends in a ';'. The
+      prelude part is also optional. In that case defaults will be applied.
+      $programlisting [!=
+      ---
+      ... prelude area ...
+      ---
+      ... document area ...
+      !]
+    ]
+
+    $para [
+      The document follows the prelude and is the thing you want to publish. It
+      has a similar look as any xml typed language but is easier to read.
+    ]
+
+    $para [
+      Below you see a simple layout example where the prelude is not used. When
+      it is done like that a second file is generated with the generated XML.
+      The name of the file is the same but with an extension of '.xml'.
 
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.sxml
          start='$!SxmlCore.comment [Start]'
          stop='$!SxmlCore.comment [Stop]'
-         callout-prefix='co.ex01.cl'
-         callout-rows='0 4'
-         callout-col=70 []
+         fix-indent=2
+         callout-prefix=BE-001.
+         callout-rows=0,2,10
+         callout-col=64
+         []
 
-$!SxmlCore.comment [
       $calloutlist [
-        $callout arearefs=co.ex01.prelude [
+        $callout arearefs=BE-001.01 [
+          $para [!
+            An element which becomes <html> with a body starting with '['
+            enclosing other elements and text.
+          !]
+        ]
+
+        $callout arearefs=BE-001.02 [
           $para [
-            The prelude has only one entry. Here we want a doctype before the
-            result.
+            The title element only contains text and no other elements.
           ]
         ]
 
-        $callout arearefs=co.ex01.document [
-          $para [
-            The document will result in a html document. It clearly shows
-            <html>, <head> and <body> elements.
-          ]
+        $callout arearefs=BE-001.03 [
+          $para [!
+            The html element ends here with the ']' generating </html>.
+          !]
         ]
       ]
-]
+    ]
 
-      The result will be after running through a XML formatter.
+    $para [
+      The result after running through &program; will be
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.xml
          start='<!--Start-->'
          stop='<!--Stop-->'
          keep-literal=1
-         fix-indent=2 []
+         fix-indent=2
+         callout-prefix=BE-001.
+         callout-rows=0,2,8
+         callout-col=64
+         []
+
+      $calloutlist [
+        $callout arearefs=BE-001.01 [
+          $para [!
+            Result <html>.
+          !]
+        ]
+
+        $callout arearefs=BE-001.02 [
+          $para [!
+            The title element as <title>... text ... </title>.
+          !]
+        ]
+
+        $callout arearefs=BE-001.03 [
+          $para [!
+            The html element ends here with the generated </html>.
+          !]
+        ]
+      ]
+    ]
+
+    $sect2 [
+      $title [Document]
+      $para [
+
+      ]
+
+      $sect3 [
+        $title [Entity types]
+        $para [
+
+        ]
+      ]
+
+      $sect3 [
+        $title [Core entity types]
+        $para [
+
+        ]
+      ]
     ]
 
     $sect2 [
@@ -191,7 +384,7 @@ option/doctype/definition: [
           $para [
           ]
         ]
-        
+
         $sect4 [
           $title [ option/xml-prelude/show ]
           $para [
@@ -233,71 +426,80 @@ output/program/pdf:
         ]
       ]
 
-      $sect3 [
-        $title [ Options used by the program &program; ]
-        
-        $sect4 [
-          $title [ dependencies/files ]
-          $para [ The value of this option is a list of paths to semi-xml
-            documents which must be processed after the current one.
-          ]
-        ]
-      ]
+    ]
+  ]
 
+  $sect1 [
+    $title [The programmers view]
+    $para [
     ]
 
     $sect2 [
-      $title [Document]
+      $title [Classes data and methods]
       $para [
 
       ]
+    ]
 
-      $sect3 [
-        $title [Tag types]
-        $para [
+    $sect2 [
+      $title [Substitution data]
+      $para [
 
-        ]
-      ]
-
-      $sect3 [
-        $title [Predefined library tag types]
-        $para [
-
-        ]
       ]
     ]
+
+    $sect2 [
+      $title [Methods]
+      $para [
+
+      ]
+    ]
+
+
   ]
 
   $sect1 [
-    $title [ Using module &library; ]
+    $title [Using program &program;]
     $para [
 
     ]
-  ]
-
-  $sect1 [
-    $title [ Creating methods to be used as a tag ]
-    $para [
-
+    
+    $sect2 [
+      $title [Program arguments]
+      $para [
+        $synopsis [!=
+          sxml2xml [--run=<run-selector>] <sxml-file>
+        !]
+      ]
     ]
-  ]
-
-  $sect1 [
-    $title [ Using program &program; ]
-    $para [
-
+        
+    $sect2 [
+      $title [Prelude options]
+      $sect3 [
+        $title [dependencies/files]
+        $para [ The value of this option is a list of paths to semi-xml
+          documents which must be processed after the current one.
+        ]
+      ]
     ]
-  ]
 
-  $sect1 [
-    $title [ Examples ]
-    $para [
-
+    $sect2 [
+      $title [Unix she-bang usage]
+      $para [
+      ]
     ]
+
+$!SxmlCore.comment [
+    $sect2 [
+      $title []
+      $para [
+      ]
+    ]
+]
   ]
 
   $sect1 [
-    $title [ Information ]
+    $title [Examples]
     $para [
 
     ]

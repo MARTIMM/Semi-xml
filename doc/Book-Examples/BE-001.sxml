@@ -1,22 +1,22 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --run=xml
 ---
-option/doctype/show: 1;# $co xml:id=co.ex01.prelude []
-output/program/xml:
-        | xmllint --format - > BE-001.xml;
+option/doctype/show:    1;
+output/program/xml:     | xmllint --format - > BE-001.xml;
 ---
-$x [ $co xml:id=co.ex01.document []
-$!SxmlCore.comment [Start]
-$html [
-  $head [
-    $title [Hello World]
-  ]
-  $body [
-    $h1 [My first header]
-    $p [
-      And another greeting
+# Small trick to select a complete document using onother top level element
+$x [
+  $!SxmlCore.comment [Start]
+  $html [
+    $head [
+      $title [Hello World]
+    ]
+    $body [
+      $h1 [My first header]
+      $p [
+        And another greeting
+      ]
     ]
   ]
-]
-$!SxmlCore.comment [Stop]
+  $!SxmlCore.comment [Stop]
 ]
 
