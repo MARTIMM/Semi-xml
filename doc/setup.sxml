@@ -267,7 +267,9 @@ $!SxmlCore.comment [
     ]
 
     $para [
-      The result after running through &program; will be
+      The result after running through &program; is shown below. Importend to
+      note that this text is nicely formatted for this example and the output
+      would be more like a one-liner.
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.xml
          start='<!--Start-->'
