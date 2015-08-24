@@ -55,9 +55,14 @@ $xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
     select="'/home/marcel/Graphics/IconsArchive/Icons/32x32/Docbook/'" []
   $xsl:param name=admon.graphics.extension select="'.png'" []
 
+  # Fonts and sizes
+  #
 #   $xsl:param name=body.font.family select="'Courier'" []
 #   $xsl:param name=body.font.size select=12 []
 #   $xsl:param name=title.font.size select=20 []
+
+  $xsl:param name=body.font.master select=10 []
+#  $xsl:param name=programlisting.font.size select=8 []
 
 #   $xsl:param name=fop.extensions select=1 []
 
