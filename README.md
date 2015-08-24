@@ -72,19 +72,15 @@ highlights are programmed in your favorite editor.
         To get the user information save() has a new named argument :$run-code
         which is the key as in /output/program/<run-code>
   * Define rules to define spacing around tags. Default would be to have no
-    space at all. This can mean that the current syntax of $x[ ], $x[= ],
-    $x[- ] and $x[+ ] may change because it won't be nessesary if layout
-    can be defined beforehand.
+    space at all.
 
-    Well, that happened;
     * [x] ```$x [ ... ]```. Normal tag where all leading and trailing spaces are
           removed and inbetween spaces reduced to one space.
     * [x] ```$x [! ... !]```. Body can not have tags. '$' is ignored and this
           character as well as ']' do not have to be escaped. Only '#' must
           be escaped at this moment.
     * [x] [ ... ] and [! ... !] can have a '=' directly after the '[' or '[!'.
-          Leading newlines and trailing spaces are removed. Furthermore all
-          indents are reduced to the minimum spacing as is done in perl6.
+          Leading newlines and trailing spaces are removed.
     * [x] A tag can start with '$', '$.', '$!'. Now also '$*' is introduced
           which will add a space around the tag and its content.
     * [x] Another addition '$*<' and '$*> is introduced to add a space to the
@@ -107,9 +103,13 @@ highlights are programmed in your favorite editor.
     * [ ] link to page or image checking and generating.
   * SxmlLib::Html::List - Html lists like ul/li
     * [x] dir-list() to recursively create list of files and directories.
+  * SxmlLib::Html::FixedLayout - Content from files to be used in <pre>
+    * [x] load-test-example
   * SxmlLib::Docbook5::Basic - Basic docbook methods
     * [x] book and article substitute tags to add extra attributes to the tag.
     * [x] info() to specify the elaborate info tag in an easy way.
+  * SxmlLib::Html::FixedLayout - Content from files to be used in <programlisting>
+    * [x] load-test-example
 
   * And ...
     * [ ] avatar linking
@@ -157,9 +157,16 @@ Still at omega state, bugs come and go(hopefully).
   in pieces of text which must be kept as is typed. Needed in e.g. <pre> in html
   or <programlisting> in docbook. The complexity is caused by using child
   elements in such tags.
+* Better grammar error messages instead of stackdumps caused by these syntax
+  failures.
+* All indents of generated documents should unindented to proper level
+  are reduced to the minimum spacing as is done in perl6.
 
 ## Changes
 
+* 0.16.0
+  * Adding modules to output formatted text read from files. There is one for
+    Html and one for Docbook 5.
 * 0.15.0
   * Output of http header
 * 0.14.4

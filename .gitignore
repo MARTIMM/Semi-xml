@@ -1,10 +1,6 @@
 .directory
-*/*.pdf
 *.pdf
-*/*.html
 *.html
-*/*.xml
 *.xml
-*/*.xsl
 *.xsl
 spellTmp*
