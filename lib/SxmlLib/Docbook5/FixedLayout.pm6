@@ -60,11 +60,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
         $text = 'empty file or not found';
       }
 
-      if $keep-literal {
-        $text ~~ s:g/\</\&lt;/;
-        $text ~~ s:g/\>/\&gt;/;
-      }
-
       $fix-indent = Int($fix-indent);
       if $fix-indent > 0 {
         my $rm-indent = ' ' x $fix-indent;
@@ -85,7 +80,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
         my $text-start-line = 0;
         my $callout-count = 1;
-        my @cl-rows = $callout-rows.split(/\s+|','/);
+        my @cl-rows = $callout-rows.split(/<[\s,]>+/);
         if @cl-rows.elems {
           my @lines = $text.split(/\n/);
           for @cl-rows -> $row is copy {
@@ -109,6 +104,11 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
               }
 
               $text = @lines[$text-start-line..$row].join("\n");
+              if $keep-literal {
+                $text ~~ s:g/\</\&lt;/;
+                $text ~~ s:g/\>/\&gt;/;
+              }
+              
               $pl.append(Semi-xml::Text.new(:$text));
               my $co = XML::Element.new(
                 :name('co'),
@@ -129,6 +129,10 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
           #
           if $text-start-line < @lines.elems {
             $text = @lines[$text-start-line ..^ @lines.elems].join("\n");
+            if $keep-literal {
+              $text ~~ s:g/\</\&lt;/;
+              $text ~~ s:g/\>/\&gt;/;
+            }
             $pl.append(Semi-xml::Text.new(:$text));
           }
         }
