@@ -114,8 +114,8 @@ highlights are programmed in your favorite editor.
   * And ...
     * [ ] avatar linking
     * [ ] Generating tables
-    * [ ] generating graphics, statistics, svg etc
-    * [ ] Lorem ipsum generator.
+    * [ ] Generating graphics, statistics, svg etc
+    * [x] Lorem ipsum generator.
 
   * A Sxml core library included by default to handle simple items like
     * [x] comment() for comments <!-- ... -->.
@@ -130,18 +130,20 @@ highlights are programmed in your favorite editor.
         sxml2xml program will not bother (yet).
   * [x] Dependencies on other files
   * [ ] Partial parsing of prelude or document.
+  * [ ] Store back into sxml. This cannot be dynamic for the moment.
 
 * And ...
   * Documentation.
     * Module and program documentation
-      * [ ] Semi-xml
+      * [ ] Semi-xml::Sxml
       * [ ] Semi-xml::Action
       * [ ] Semi-xml::Grammar
       * [ ] Semi-xml::SxmlCore
       * [ ] Semi-xml::Text
       * [ ] sxml2xml
-    * [ ] Is now started as a docbook 5 document. There are references to local
-          iconfiles and fonts for which I don't know yet if it may be included.
+    * [ ] Documentation is started as a docbook 5 document. There are references
+          to local iconfiles and fonts for which I don't know yet if it may be
+          included.
     * [ ] Tutorials.
 
 ## Bugs
@@ -157,8 +159,6 @@ Still at omega state, bugs come and go(hopefully).
   in pieces of text which must be kept as is typed. Needed in e.g. <pre> in html
   or <programlisting> in docbook. The complexity is caused by using child
   elements in such tags.
-* Better grammar error messages instead of stackdumps caused by these syntax
-  failures.
 * All indents of generated documents should unindented to proper level
   are reduced to the minimum spacing as is done in perl6.
 
