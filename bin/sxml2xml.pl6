@@ -45,7 +45,7 @@ sub MAIN ( $filename, Str :$run ) {
 #
 sub process-sxml ( Str $filename, Str :$run ) {
 
-  my Semi-xml $x .= new(:init);
+  my Semi-xml::Sxml $x .= new(:init);
   $x does sxml-role;
 
   # Split filename in its parts
