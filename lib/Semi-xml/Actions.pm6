@@ -4,6 +4,10 @@ use XML;
 package Semi-xml {
 
   #-----------------------------------------------------------------------------
+  # Must make this class to substitute on XML::Text. That class removes all
+  # spaces at the start and end of the content and removes newlines too
+  # This is bad for tags like HTML <pre> and friends. With this class stripping
+  # can be controlled better.
   #
   class Text does XML::Node {
 
@@ -20,8 +24,8 @@ package Semi-xml {
       if $strip {
         $!txt ~~ s:g/\s+$//;  ## Chop out trailing spaces.
         $!txt ~~ s:g/^\s+//;  ## Chop out leading spaces.
+        $!txt .= chomp;       ## Remove a trailing newline if it exists.
       }
-      $!txt .= chomp;         ## Remove a trailing newline if it exists.
     }
   }
 
@@ -187,7 +191,7 @@ package Semi-xml {
               use $value;
               \$obj = $value.new;
             EOCODE
-
+#say "\n$code\n";
             EVAL($code);
             if $! {
               say "Eval error:\n$!\n";
@@ -260,7 +264,7 @@ package Semi-xml {
       #
       $tag-name ~~ s/^$tag-type//;
 
-      # Check substituteable tags starting with $.
+      # Check substitutable tags starting with $.
       #
       if $tag-type ~~ m/^'$.'/ {
         # Get modulename
@@ -300,14 +304,17 @@ package Semi-xml {
           # the call is defined.. Same goes for attributes.
           #
           my $tgnm = $tag-name;
+          my $mod = $module;
           my $ats = $attrs;
-          $deferred-calls[$current-el-idx]
-             = method (XML::Node :$content-body) {
-            $!objects{$module}."$tgnm"(
-              $el-stack[$current-el-idx],
-              $ats,
-              :$content-body
-            );
+          my $cei = $current-el-idx;
+#say "\nCan do $tgnm in module $mod, ",
+#  $cei > 0 ?? $el-stack[$cei - 1].name !! 'top',
+#  ', ', $el-stack[$cei].name;
+
+          $deferred-calls[$cei] =
+            method (XML::Node :$content-body) {
+#say "\nCalled $tgnm in module $mod";
+              $!objects{$mod}."$tgnm"( $el-stack[$cei], $ats, :$content-body);
           }
 
           self!register-element( 'PLACEHOLDER-ELEMENT', {});
@@ -484,12 +491,23 @@ package Semi-xml {
           self,
           :content-body($el-stack[$current-el-idx + 1])
         );
+#say "\nEl = $current-el-idx\n\n", $el-stack[$current-el-idx].Str, "\n\n";
+
+        # Remove PLACEHOLDER-ELEMENT if still available
+        #
+        $el-stack[$current-el-idx + 1].remove
+          if ?$el-stack[$current-el-idx + 1];
       }
 
       # Call done, now reset
       #
       if $current-el-idx >= 0 {
+        # Remove method from stack
+        #
         $deferred-calls[$current-el-idx] = Any;
+
+        # Reset the 'keep literal state'
+        #
         $el-keep-literal[$current-el-idx + 1] = False;
       }
     }
