@@ -130,7 +130,8 @@ highlights are programmed in your favorite editor.
         sxml2xml program will not bother (yet).
   * [x] Dependencies on other files
   * [ ] Partial parsing of prelude or document.
-  * [ ] Store back into sxml. This cannot be dynamic for the moment.
+  * [ ] Store internal representatio back into sxml. This cannot be dynamic for
+        the moment.
 
 * And ...
   * Documentation.
