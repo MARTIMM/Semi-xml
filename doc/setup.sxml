@@ -45,8 +45,6 @@ $.Db5b.article [
       The &library; package comprises of a set of Perl 6 modules to convert a
       language coined 'semi xml' or &language; text into $*emphasis[XML]
       languages such as $*<emphasis[HTML], $*emphasis[SOAP] or $*<emphasis[XSL].
-#      \\0x00A9\\U00A9 \\xC2
-#      \\xAE
     ]
 
     $para [
@@ -241,26 +239,26 @@ $!SxmlCore.comment [
          start='$!SxmlCore.comment [Start]'
          stop='$!SxmlCore.comment [Stop]'
          fix-indent=2
-         callout-prefix=BE-001.
+         callout-prefix=BE-001.a
          callout-rows=0,2,10
          callout-col=64
          []
 
       $calloutlist [
-        $callout arearefs=BE-001.01 [
+        $callout arearefs=BE-001.a01 [
           $para [!
             An element which becomes <html> with a body starting with '['
             enclosing other elements and text.
           !]
         ]
 
-        $callout arearefs=BE-001.02 [
+        $callout arearefs=BE-001.a02 [
           $para [
             The title element only contains text and no other elements.
           ]
         ]
 
-        $callout arearefs=BE-001.03 [
+        $callout arearefs=BE-001.a03 [
           $para [!
             The html element ends here with the ']' generating </html>.
           !]
@@ -278,25 +276,25 @@ $!SxmlCore.comment [
          stop='<!--Stop-->'
          keep-literal=1
          fix-indent=2
-         callout-prefix=BE-001.
+         callout-prefix=BE-001.b
          callout-rows=0,2,8
          callout-col=64
          []
 
       $calloutlist [
-        $callout arearefs=BE-001.01 [
+        $callout arearefs=BE-001.b01 [
           $para [!
             Result of '$html [' starts with <html>.
           !]
         ]
 
-        $callout arearefs=BE-001.02 [
+        $callout arearefs=BE-001.b02 [
           $para [!
             The title element is generated as <title>... text ... </title>.
           !]
         ]
 
-        $callout arearefs=BE-001.03 [
+        $callout arearefs=BE-001.b03 [
           $para [!
             The html element ends here with the generated </html>.
           !]
