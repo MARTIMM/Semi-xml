@@ -464,9 +464,16 @@ package Semi-xml {
       $esc ~~ s:g/\</\&lt;/;
       $esc ~~ s:g/\>/\&gt;/;
 
-      # Remove rest of the backslashes
+      # Remove rest of the backslashes unless followed by hex numbers prefixed
+      # by an 'x'
       #
-      $esc ~~ s:g/\\//;
+      if $esc ~~ m/ \\ 'x' <[0..9A..F]>+ / {
+        $esc ~~ s:g/ ( \\\\ 'x' <[0..9A..F]>+) /{EVAL(qq@$/@)}/;
+      }
+      
+      else {
+        $esc ~~ s:g/\\//;
+      }
 
       return $esc;
     }

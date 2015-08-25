@@ -1,0 +1,18 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
+#
+---
+option/xml-prelude/show:        1;
+option/doctype/show:            1;
+
+output/filepath:                .;
+
+output/program/xml:             | xmllint --format - > unicode.xml;
+output/program/pdf:             | wkhtmltopdf - unicode.pdf;
+---
+$html [
+  $body [
+    $p [
+      Unicode letters: \\xAE
+    ]
+  ]
+]
