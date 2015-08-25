@@ -71,14 +71,16 @@ $.Db5b.article [
       modules in the library helps the programmer to convert &language; text
       into $*<emphasis[XML].
     ]
-    
+
     $sect2 [
       $title [Advantages using this language]
       $itemizedlist [
-        $listitem [
+        $listitem [!
           It is more clear to read the text which is where you want to focus on
-          and therefor more maintainable than XML is.
-        ]
+          and therefor more maintainable than XML is. One of those thing I find
+          annoying is writing the end tag. This is solved by using '[' and ']'
+          to enclose a deeper level of nesting.
+        !]
 
         $listitem [
           Some language constructs will help inserting predefined text. An
@@ -111,7 +113,7 @@ $.Db5b.article [
           one should not be bothered learning this language. Especially when
           the dynamic constructs aren't used.
         ]
-        
+
         $listitem [
           This project is only just started. There are many things left on the
           wish list. E.g. I would like to give proper messages when mistakes are
@@ -119,7 +121,7 @@ $.Db5b.article [
         ]
       ]
     ]
-    
+
     $sect2 [
       $title [Information given in this article]
       $itemizedlist [
@@ -154,7 +156,7 @@ $.Db5b.article [
           $para [
             $*<emphasis[The programmers view]. Developers can write new modules
             with methods to process tasks not yet captured by this package.
-            
+
             $itemizedlist [
               $listitem [
                 $para [
@@ -206,8 +208,8 @@ $!SxmlCore.comment [
 
     $para [
       The language exists of two parts, a prelude and the document. The prelude
-      is used to set options which introduce external modules or to define ways
-      to output the resulting xml.
+      is used to set options to introduce external modules or to define ways
+      to output the resulting xml. The prelude is also optional. 
     ]
 
     $para [
@@ -230,9 +232,10 @@ $!SxmlCore.comment [
     ]
 
     $para [
-      Below you see a simple layout example where the prelude is not used. When
-      it is done like that a second file is generated with the generated XML.
-      The name of the file is the same but with an extension of '.xml'.
+      Below you see a simple example where the prelude is not used. When
+      the prelude is missing the default action is to write the result into a
+      second file. The name of the file is kept the same but with an extension
+      of '.xml'.
 
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.sxml
@@ -329,7 +332,7 @@ $!SxmlCore.comment [
         The prelude is used to e.g. control to output of the result. Other
         usages are referencing libraries to be used later in the document.
       ]
-      
+
       $para [
         Below you see an example of two options to let the xml prelude be
         written at the start of the result as well as a doctype.
@@ -351,13 +354,13 @@ $!SxmlCore.comment [
 
       $sect3 [
         $title [ Options used by the library &library; ]
-        
+
         $sect4 [
           $title [ module ]
           $para [
           ]
         ]
-        
+
         $sect4 [
           $title [ option/doctype/definition ]
           $para [
@@ -368,13 +371,13 @@ option/doctype/definition: [
         <!ENTITY nbsp " ">
           ]
         ]
-        
+
         $sect4 [
           $title [ option/doctype/show ]
           $para [
           ]
         ]
-        
+
         $sect4 [
           $title [ option/http-header ]
           $para [
@@ -398,25 +401,25 @@ option/doctype/definition: [
           $para [
           ]
         ]
-        
+
         $sect4 [
           $title [ output/fileext ]
           $para [
           ]
         ]
-        
+
         $sect4 [
           $title [ output/filename ]
           $para [
           ]
         ]
-        
+
         $sect4 [
           $title [ output/filepath ]
           $para [
           ]
         ]
-        
+
         $sect4 [
           $title [ output/program ]
           $para [
@@ -465,7 +468,7 @@ output/program/pdf:
     $para [
 
     ]
-    
+
     $sect2 [
       $title [Program arguments]
       $para [
@@ -474,7 +477,7 @@ output/program/pdf:
         !]
       ]
     ]
-        
+
     $sect2 [
       $title [Prelude options]
       $sect3 [
