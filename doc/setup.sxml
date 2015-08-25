@@ -9,10 +9,10 @@ option/doctype/definition: [
         <!ENTITY library "Semi-xml">
         <!ENTITY language "sxml">
         <!ENTITY nbsp " ">
-        <!ENTITY E "entity">
-        <!ENTITY SUE "substitution-entity">
-        <!ENTITY COE "command-entity">
-        <!ENTITY SPE "spaced-entity">
+        <!ENTITY E "element">
+        <!ENTITY SUE "substitution-element">
+        <!ENTITY COE "command-element">
+        <!ENTITY SPE "spaced-element">
 ];
 #        <!ENTITY % isoamsa SYSTEM "/home/marcel/Languages/Perl/Lib/Modules/Data2any-Xml/Entities/isoamsa.ent">
 #        %isoamsa\;
@@ -213,11 +213,10 @@ $!SxmlCore.comment [
     ]
 
     $para [
-      The prelude starts with 3 dashes and ends with it. The prelude
-      itself consists of a series of key-value pairs. The keys are defined as a
-      series of catagories and subcatagories. The value can be anything. The key
-      value pair is separated by a colon ':' and the pair ends in a ';'. The
-      prelude part is also optional. In that case defaults will be applied.
+      The prelude starts with 3 dashes and ends with it. The prelude itself
+      consists of a series of key-value pairs to control the way output is to be
+      delivered. The prelude part is also optional. In that case defaults will
+      be applied.
       $programlisting [!=
       ---
       ... prelude area ...
@@ -287,13 +286,13 @@ $!SxmlCore.comment [
       $calloutlist [
         $callout arearefs=BE-001.01 [
           $para [!
-            Result <html>.
+            Result of '$html [' starts with <html>.
           !]
         ]
 
         $callout arearefs=BE-001.02 [
           $para [!
-            The title element as <title>... text ... </title>.
+            The title element is generated as <title>... text ... </title>.
           !]
         ]
 
@@ -330,17 +329,25 @@ $!SxmlCore.comment [
       $title [Prelude]
       $para [
         The prelude is used to e.g. control to output of the result. Other
-        usages are referencing libraries to be used later in the document.
+        usages are referencing libraries to be used in the document.
+      ]
+
+      $para [
+        The prelude consists of a series of key-value pairs. The keys are
+        defined as a series of catagories and subcatagories. The value can be
+        anything. The key value pair is separated by a colon ':' and the pair
+        ends in a ';'. The prelude part is also optional. In that case defaults
+        will be applied.
       ]
 
       $para [
         Below you see an example of two options to let the xml prelude be
-        written at the start of the result as well as a doctype.
+        written as well as a doctype at the start of the result.
         $programlisting [!=
-          ---
-          option/xml-prelude/show:      1;
-          option/doctype/show:          1;
-          ---
+---
+option/xml-prelude/show:      1;
+option/doctype/show:          1;
+---
         !]
       ]
 
@@ -364,12 +371,14 @@ $!SxmlCore.comment [
         $sect4 [
           $title [ option/doctype/definition ]
           $para [
+            $programlisting [!=
 option/doctype/definition: [
-        <!ENTITY company "Acme Mc Carpenter, Inc">
-        <!ENTITY program "sxml2xml">
-        <!ENTITY library "Semi-xml">
-        <!ENTITY nbsp " ">
-          ]
+  <!ENTITY company "Acme Mc Carpenter, Inc">
+  <!ENTITY program "sxml2xml">
+  <!ENTITY library "Semi-xml">
+  <!ENTITY nbsp " ">
+]
+          !]
         ]
 
         $sect4 [
@@ -423,10 +432,12 @@ option/doctype/definition: [
         $sect4 [
           $title [ output/program ]
           $para [
+            $programlisting [!=
 output/program/pdf:
-        | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
-        | xep -fo - -pdf sxml2xml.pdf
-        ;
+  | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
+  | xep -fo - -pdf sxml2xml.pdf
+  ;
+            !]
           ]
         ]
       ]
@@ -473,7 +484,7 @@ output/program/pdf:
       $title [Program arguments]
       $para [
         $synopsis [!=
-          sxml2xml [--run=<run-selector>] <sxml-file>
+sxml2xml [--run=<run-selector>] <sxml-file>
         !]
       ]
     ]
@@ -482,7 +493,8 @@ output/program/pdf:
       $title [Prelude options]
       $sect3 [
         $title [dependencies/files]
-        $para [ The value of this option is a list of paths to semi-xml
+        $para [
+          The value of this option is a list of paths to semi-xml
           documents which must be processed after the current one.
         ]
       ]
