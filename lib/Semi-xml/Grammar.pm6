@@ -112,7 +112,7 @@ package Semi-xml {
     token keep-literal    { '=' }
     token body-esc        { '\\' . }
 
-    token comment         { '#' <-[\n]>* \n }
+    token comment         { \n? \s* '#' <-[\n]>* \n }
 
     # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
     # dash within the string is accepted.
