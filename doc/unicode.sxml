@@ -9,6 +9,8 @@ output/filepath:                .;
 output/program/html:            | xmllint --format - > unicode.html;
 output/program/pdf:             | wkhtmltopdf - unicode.pdf;
 ---
+# See http://www.utf8-chartable.de/unicode-utf8-table.pl?number=128&utf8=string-literal&unicodeinhtml=hex
+#
 $html [
   $head [
     $meta charset=utf-8 [ ]
