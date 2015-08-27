@@ -79,36 +79,57 @@ package Semi-xml {
     # used. Just use a space in front. Can happen in tables showing numbers.
     #
     token tag-body {
-      <ws>? <comment>*
-      (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
-      || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
+      <ws>?
+      ( '[' ~ ']'
+        ( <non-nesting> <body2-contents>        # Only text content
+          || <body1-contents>                   # Content with nested elements
+        )
       )
-      <comment>*
     }
 
-    token body1-start     { '[' }
+#    token tag-body {
+#      <ws>? <comment>*
+#      (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
+#      || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
+#      )
+#      <comment>*
+#    }
+
+#    token body1-start     { '[' }
 
     # The content can be anything mixed with document tags except following the
     # no-elements character. To use the brackets and
     # other characters in the text, the characters must be escaped.
     #
-    token body1-contents  { <keep-literal>? ( <body1-text> || <document> )* }
-    token body1-end       { ']' }
+    token body1-contents  {
+      <body-start>
+      <keep-literal>?
+      ( <body1-text> || <document> )*
+      <body-end>
+    }
+
+    token body-start     { <?after '['> }
+    token body-end       { <?before ']'> }
+#    token body1-end       { ']' }
     token body1-text      { ( <comment> || <-[\$\]\\]> || <body-esc> )+ }
 
-
-    token body2-start     { '[!' }
-    token body2-contents  { <keep-literal>? <body2-text> }
+#    token body2-start     { '[!' }
+    token body2-contents  {
+      <body-start>
+      <keep-literal>? <body2-text>
+      <body-end>
+    }
 
     # Cannot use body2-end because method will be called twice, here and later
     # when encountering the string '!]'.
     #
-    token body2-text      { .*? <?b2e> }
+    token body2-text      { .*? <?before ']'> }
 
-    token b2e             { '!]' }
-    token body2-end       { '!]' }
+#    token b2e             { '!]' }
+#    token body2-end       { '!]' }
 
 
+    token non-nesting     { '!' }
     token keep-literal    { '=' }
     token body-esc        { '\\' . }
 
@@ -117,6 +138,6 @@ package Semi-xml {
     # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
     # dash within the string is accepted.
     #
-    token identifier { <.ident> [ '-' <.ident> ]* }
+    token identifier { <ident> [ '-' <ident> ]* }
   }
 }
