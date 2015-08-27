@@ -216,10 +216,10 @@ $!SxmlCore.comment [
       delivered. The prelude part is also optional. In that case defaults will
       be applied.
       $programlisting [!=
-      ---
-      ... prelude area ...
-      ---
-      ... document area ...
+---
+... prelude area ...
+---
+... document area ...
       !]
     ]
 
@@ -305,18 +305,71 @@ $!SxmlCore.comment [
     $sect2 [
       $title [Document]
       $para [
+        The document is where the text comes in the same way as in a normal XML
+        document. The elements most of us are aware of all start with a dollar
+        '\$'. Above in an example we have seen the expression $*<emphasis [
+        \$title \[ Hello World \] ]. The body of the element is enclosed between
+        square brackets '\[' and '\]'. Within these brackets you can write new
+        elements intermittent with normal text. The methods in the library will
+        not check if a particular element may be used on such place, you will
+        need to look into the specifics of the XML language at hand.. So the the
+        syntax of writing an element structure is quite simple.
+      ]
 
+      $para [
+        However, &language; is capable of doing more than just entering XML
+        elements in an alternative way. E.g. an element might need attributes.
+        Below you see in a not too strict $*emphasis[BNF] variant a part of the
+        syntax;
+        $programlisting [!=
+<document> ::= <prefix> <element> ( <attribute> '=' <attr-value> )*
+               '[' <body-start-control> <body> <body-end-control>
+               ']';
+
+<prefix> ::= '$.' | '$!' | '$*<' | '$*>' | '$*' | '$';
+
+<element> ::= <identifier>;
+<attribute> ::= <identifier>;
+<attr-value> ::= '"' <ws-text> '"' | "'" <ws-text> "'"
+                 | <non-ws-text>;
+
+<identifier> ::=  <letter> (<letter>|<number>)*
+                  ( '-' (<letter> (<letter>|<number>)+) )*;
+
+<body-start-control> ::= '!=' | '!' | '=';
+<body-end-control> ::= '!';
+        !]
+
+        White space is forbidden between the <prefix> and <element> as well as 
+        between the <attribute>, '=' and <attr-value>. Furthermore between the
+        brackets and <body-start-control> and <body-end-control> are also no
+        spaces. In the BNF above is not appearant that the '\[!' combination
+        must be used with the '!\] combination.
       ]
 
       $sect3 [
-        $title [Entity types]
+        $title [Element types]
         $para [
 
         ]
       ]
 
       $sect3 [
-        $title [Core entity types]
+        $title [Escaping characters]
+        $para [
+
+        ]
+      ]
+
+      $sect3 [
+        $title [Unicode characters]
+        $para [
+
+        ]
+      ]
+
+      $sect3 [
+        $title [Core elements]
         $para [
 
         ]
@@ -376,7 +429,8 @@ option/doctype/definition: [
   <!ENTITY library "Semi-xml">
   <!ENTITY nbsp " ">
 ]
-          !]
+            !]
+          ]
         ]
 
         $sect4 [
@@ -511,6 +565,37 @@ $!SxmlCore.comment [
       ]
     ]
 ]
+  ]
+
+  $sect1 [
+    $title [Syntax]
+    $para [
+      $programlisting [!=
+<sxml-syntax> ::= <prelude-section>? <document>;
+
+<prelude-section> ::= '---' <new-line> <key-value-pairs>* '---' <new-line>;
+<key-value-pairs> ::= <key-name> ':' <value> ';';
+<key-name> ::= <key-part> ('/' <key-part>)*;
+<key-part> ::= <letter> (<letter>|<number>)*;
+
+<document> ::= <prefix> <element> ( <attribute> '=' <attr-value> )*
+               '[' <body-start-control> <body> <body-end-control>
+               ']';
+
+<prefix> ::= '$.' | '$!' | '$*<' | '$*>' | '$*' | '$';
+
+<element> ::= <identifier>;
+<attribute> ::= <identifier>;
+<attr-value> ::= '"' <ws-text> '"' | "'" <ws-text> "'"
+                 | <non-ws-text>;
+
+<identifier> ::=  <letter> (<letter>|<number>)*
+                  ( '-' (<letter> (<letter>|<number>)+) )*;
+
+<body-start-control> ::= '!=' | '!' | '=';
+<body-end-control> ::= '!';
+      !]
+    ]
   ]
 
   $sect1 [
