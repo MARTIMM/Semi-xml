@@ -470,7 +470,7 @@ package Semi-xml {
       #
       if $esc ~~ m/ '\\x' <xdigit>+ / {
         my $set-utf8 = sub ( $m1, $m2) {
-say "m1 & m2: $m1, $m2";
+#say "m1 & m2: $m1, $m2";
           return Blob.new(:16($m1.Str),:16($m2.Str)).decode;
         };
         $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
@@ -478,7 +478,7 @@ say "m1 & m2: $m1, $m2";
       
       if $esc ~~ m/ '\\u' <xdigit>+ / {
         my $set-utf8 = sub ($m1) {
-say "m1: $m1";
+#say "m1: $m1";
           return chr(:16($m1.Str));
         };
         $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;

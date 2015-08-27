@@ -165,6 +165,9 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.16.1
+  * Input of unicode characters by html codes, unicode codepoints, utf8 codes
+    or literal characters. E.g. &#x01E3;, \u01E3, \xC7A3, ǣ
 * 0.16.0
   * Adding modules to output formatted text read from files. There is one for
     Html and one for Docbook 5.

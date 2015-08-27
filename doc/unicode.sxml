@@ -18,33 +18,40 @@ $html [
   $body [
     $table [
       $tr [
-        $th [Literal value]
+        $th colspan=2 [Hexadecimal codes]
+        $th [Literal Utf8]
+        $th [Codepoint]
+        $th [Html]
+        $th [Copy/Paste]
+      ]
+      $tr [
+        $th [Literal Utf8]
         $th [Codepoint]
         $th [\\x<hex>]
         $th [\\u<hex>]
         $th [&amp;\#<hex>;]
         $th [literal]
       ]
-      
+
       $tr [
-        $td [C7A3]
-        $td [01E3]
+        $th [C7A3]
+        $th [01E3]
         $td [\xC7A3]
         $td [\u01E3]
         $td [&\#x01E3;]
         $td [ǣ]
       ]
       $tr [
-        $td [C2AE]
-        $td [00AE]
+        $th [C2AE]
+        $th [00AE]
         $td [\xC2AE]
         $td [\u00AE]
         $td [&\#x00AE;]
         $td [®]
       ]
       $tr [
-        $td [C984]
-        $td [0244]
+        $th [C984]
+        $th [0244]
         $td [\xC984]
         $td [\u0244]
         $td [&\#x0244;]
