@@ -403,7 +403,7 @@ package Semi-xml {
       #
       my $text = ~$match;
       if $has-comment {
-        $text ~~ s:g/ '#' <-[\n]>* \n //;
+        $text ~~ s:g/ \n \s* '#' <-[\n]>* \n /\n/;
         $has-comment = False;
       }
       $text = self!process-esc($text);
@@ -460,14 +460,32 @@ package Semi-xml {
 
       # Entity must be known in the xml result!
       #
+      $esc ~~ s:g/\\\\/\&\#x5C;/;
       $esc ~~ s:g/\\\s/\&nbsp;/;
       $esc ~~ s:g/\</\&lt;/;
       $esc ~~ s:g/\>/\&gt;/;
 
-      # Remove rest of the backslashes
+      # Remove rest of the backslashes unless followed by hex numbers prefixed
+      # by an 'x'
       #
+      if $esc ~~ m/ '\\x' <xdigit>+ / {
+        my $set-utf8 = sub ( $m1, $m2) {
+say "m1 & m2: $m1, $m2";
+          return Blob.new(:16($m1.Str),:16($m2.Str)).decode;
+        };
+        $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
+      }
+      
+      if $esc ~~ m/ '\\u' <xdigit>+ / {
+        my $set-utf8 = sub ($m1) {
+say "m1: $m1";
+          return chr(:16($m1.Str));
+        };
+        $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
+      }
+      
       $esc ~~ s:g/\\//;
-
+#say "\n$esc\n\n";
       return $esc;
     }
 
