@@ -27,7 +27,7 @@ EOSX
 
 # Parse
 #
-my Semi-xml $x .= new;
+my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
@@ -35,7 +35,7 @@ ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text !~~ m/\<head\>/, 'Head not found';
 ok $xml-text ~~ ms/Data from file/, 'Section text found';
 
-#say $xml-text;
+say $xml-text;
 
 unlink $filename;
 

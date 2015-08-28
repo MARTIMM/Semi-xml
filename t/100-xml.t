@@ -13,8 +13,8 @@ use Semi-xml;
 #-------------------------------------------------------------------------------
 # Setup
 #
-my Semi-xml $x .= new;
-isa-ok $x, 'Semi-xml', $x.^name;
+my Semi-xml::Sxml $x .= new;
+isa-ok $x, 'Sxml', $x.^name;
 
 # Def=vise a role to add
 #
@@ -38,7 +38,7 @@ role pink {
 # Add the role to the parser
 #
 $x does pink;
-is $x.^name, 'Semi-xml+{pink}', $x.^name;
+is $x.^name, 'Sxml+{pink}', $x.^name;
 
 # Setup the text to parse
 #
