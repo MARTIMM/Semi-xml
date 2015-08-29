@@ -1,5 +1,5 @@
 use v6;
-#use Grammar::Tracer;
+use Grammar::Tracer;
 
 package Semi-xml {
   grammar Grammar {
@@ -45,11 +45,12 @@ package Semi-xml {
     token reset-keep-literal { <?> }
     token tag { <reset-keep-literal> <tag-name> ( <attribute> )* }
     token tag-name { <tag-type> <identifier> [ ':' <identifier> ]**0..1 }
-    token tag-type {   ( '$.' <identifier> '.' )
-                    || ( '$!' <identifier> '.' )
-                    || '$*<' || '$*>' || '$*'
-                    || '$'
-                   }
+    token tag-type {
+      ( '$.' <identifier> '.' )
+      || ( '$!' <identifier> '.' )
+      || '$*<' || '$*>' || '$*'
+      || '$'
+    }
 
     # The tag may be followed by attributes. These are key=value constructs. The
     # key is an identifier and the value can be anything. Enclose the value in
@@ -57,10 +58,11 @@ package Semi-xml {
     # 
     token attribute { <ws>? <attr-key> '=' <attr-value-spec> <comment>*}
     token attr-key { <identifier> [ ':' <identifier> ]**0..1 }
-    token attr-value-spec {    (\' <attr-q-value> \')
-                            || (\" <attr-qq-value> \")
-                            || <attr-s-value>
-                          }
+    token attr-value-spec {
+      (\' <attr-q-value> \')
+      || (\" <attr-qq-value> \")
+      || <attr-s-value>
+    }
     token attr-q-value    { <-[\']>+ }
     token attr-qq-value   { <-[\"]>+ }
     token attr-s-value    { <-[\s]>+ }
@@ -102,23 +104,25 @@ package Semi-xml {
     # other characters in the text, the characters must be escaped.
     #
     token body1-contents  {
-      <body-start>
+      <body1-start>
       <keep-literal>?
       ( <body1-text> || <document> )*
       <body-end>
     }
 
-    token body-start     { <?after '['> }
-    token body-end       { <?before ']'> }
+    token body1-start     { <?after '['> }
 #    token body1-end       { ']' }
     token body1-text      { ( <comment> || <-[\$\]\\]> || <body-esc> )+ }
 
 #    token body2-start     { '[!' }
     token body2-contents  {
-      <body-start>
+      <body2-start>
       <keep-literal>? <body2-text>
       <body-end>
     }
+
+    token body2-start     { <?after '!'> }
+    token body-end        { <?before ']'> }
 
     # Cannot use body2-end because method will be called twice, here and later
     # when encountering the string '!]'.
@@ -138,6 +142,6 @@ package Semi-xml {
     # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
     # dash within the string is accepted.
     #
-    token identifier { <ident> [ '-' <ident> ]* }
+    token identifier { <.ident> [ '-' <.ident> ]* }
   }
 }

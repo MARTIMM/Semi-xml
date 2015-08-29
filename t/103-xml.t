@@ -37,7 +37,7 @@ $html [
     $script [!=
       var a_tags = $('a');
       var b = a_tags[1];
-    !]
+    ]
   ]
 
   $body [
@@ -59,7 +59,7 @@ EOSX
 
 # Parse
 #
-my Semi-xml $x .= new;
+my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
@@ -78,11 +78,9 @@ ok $xml-text ~~ m/
 '
 /, 'Check for literal text in css';
 
-ok $xml-text ~~ m/
-'      var a_tags = $(\'a\');
-      var b = a_tags[1];
-'
-/, 'Check for literal text in javascript';
+#ok $xml-text ~~ ms/var a_tags '=' '$(\'a\');' var b '=' a_tags\[1\];/,
+ok $xml-text ~~ ms/var a_tags '=' "\$('a');" var b '=' a_tags/,
+   'Check for literal text in javascript';
 
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, "'Th' after 'tr' found";
 

@@ -236,13 +236,16 @@ package Semi-xml {
     method reset-keep-literal ( $match )  { $keep-literal = False; }
     method keep-literal ( $match )        { $keep-literal = True; }
 
+#    method body-start ( $match )          { self!process-tag(); }
+    method body-end ( $match )            { self!process-body-end(); }
+
     method body1-start ( $match )         { self!process-tag(); }
     method body1-text ( $match )          { self!process-text($match); }
-    method body1-end ( $match )           { self!process-body-end(); }
+#    method body1-end ( $match )           { self!process-body-end(); }
 
     method body2-start ( $match )         { self!process-tag(); }
     method body2-text ( $match )          { self!process-text($match); }
-    method body2-end ( $match )           { self!process-body-end(); }
+#    method body2-end ( $match )           { self!process-body-end(); }
 
     # Idea to count lines in the source
     #
@@ -397,6 +400,9 @@ package Semi-xml {
     # Process the text after finding body terminator
     #
     method !process-text ( $match ) {
+
+#say "\n---\n", $match<hash><comment>, "\n---\n"
+#  if $match<hash><comment>.defined;
 
       # Check if there is a comment found in this text, if so remove it and then
       # modify/remove escape characters
