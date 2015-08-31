@@ -10,12 +10,17 @@
     "Semi-xml::Actions": "lib/Semi-xml/Actions.pm6",
     "Semi-xml": "lib/Semi-xml.pm6",
 
-    "SxmlLib::File": "lib/SxmlLib/File.pm6",
+    "SxmlLib::Docbook5::Basic": "lib/SxmlLib/Docbook5::Basic.pm6",
+    "SxmlLib::Docbook5::FixedLayout": "lib/SxmlLib/Docbook5::FixedLayout.pm6",
+
+    "SxmlLib::Html::FixedLayout": "lib/SxmlLib/Html/FixedLayout.pm6",
     "SxmlLib::Html::List": "lib/SxmlLib/Html/List.pm6",
-    "SxmlLib::Docbook5::Basic": "lib/SxcmlLib/Docbook5::Basic.pm6",
+
+    "SxmlLib::File": "lib/SxmlLib/File.pm6",
+    "SxmlLib::LoremIpsum": "lib/SxmlLib/LoremIpsum.pm6",
 
     "sxml2xml": "bin/sxml2xml.pl6"
   },
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "0.16.1"
+  "version": "0.16.2"
 }

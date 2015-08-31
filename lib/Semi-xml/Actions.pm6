@@ -1,7 +1,7 @@
 use v6;
 use XML;
 
-package Semi-xml {
+package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
 
   #-----------------------------------------------------------------------------
   # Must make this class to substitute on XML::Text. That class removes all

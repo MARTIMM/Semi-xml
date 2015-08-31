@@ -54,9 +54,9 @@ highlights are programmed in your favorite editor.
 ## Ideas and Todo
 
 * Parser and actions.
-  * [x] Parser is class. Styles can be templated and added in the form of a role.
-        The same information can be supplied in the prelude of the source. For all
-        settings, defaults are provided when possible.
+  * [x] Parser is a class. Styles can be templated and added in the form of a
+        role. The same information can be supplied in the prelude of the source.
+        For all settings, defaults are provided when possible.
   * [ ] Xml Namespaces
   * [ ] Doctype entities
   * [ ] '#' commenting should be improved using grammar instead of overall removal
@@ -165,6 +165,12 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.16.2
+  * Small changes in the grammar to slim down the match object during parsing.
+    E.g. ```<comment>``` subrules are changed into ```<.comment>``` which will
+    prevent storing information about the capture in the match object.
+  * Bugfixes in test code. Initializing ```Semi-xml``` objects into
+    ```Semi-xml::Sxml```.
 * 0.16.1
   * Input of unicode characters by html codes, unicode codepoints, utf8 codes
     or literal characters. E.g. &#x01E3;, \u01E3, \xC7A3, ǣ
