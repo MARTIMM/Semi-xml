@@ -57,7 +57,7 @@ mkdir('t/D');
 spurt( 't/D/d1.sxml', q:to/EOSXML/);
 $h1 [ Intro ]
 $p [
-  How 'bout this!
+  How 'bout this!'
 ]
 EOSXML
 
@@ -144,7 +144,7 @@ EOMOD
 #-------------------------------------------------------------------------------
 # Parse
 #
-my Semi-xml $x .= new;
+my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
@@ -156,7 +156,7 @@ ok $xml-text ~~ m/id\=\"new\-table\"/, 'Check inserted id attribute';
 
 ok $xml-text ~~ m/'<p>bla die bla $x []</p>'/, 'Check text from $!stats';
 ok $xml-text ~~ m/'<p>bla die bla<x>test 2</x></p>'/, 'Check complex text from $!stats';
-ok $xml-text ~~ m/'<p>bla die bla<h1>Intro</h1><p>How \'bout this!</p></p>'/,
+ok $xml-text ~~ m/'<p>bla die bla<h1>Intro</h1><p>How \'bout this!\'</p></p>'/,
    'Check complex text with nested call to $!file from $!stats';
 
 ok $xml-text ~~ m/'class="red"'/, 'Check generated class = red';

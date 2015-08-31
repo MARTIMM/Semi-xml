@@ -32,7 +32,7 @@ $.Db5.article [
 EOSX
 
 #-------------------------------------------------------------------------------
-my Semi-xml $x .= new;
+my Semi-xml::Sxml $x .= new;
 $x.parse(:content($sxml-text));
 
 my Str $xml-text = ~$x;

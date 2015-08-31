@@ -1,5 +1,5 @@
 use v6;
-use Grammar::Tracer;
+#use Grammar::Tracer;
 
 package Semi-xml {
   grammar Grammar {
@@ -82,58 +82,26 @@ package Semi-xml {
     #
     token tag-body {
       <ws>?
-      ( '[' ~ ']'
-        ( <non-nesting> <body2-contents>        # Only text content
-          || <body1-contents>                   # Content with nested elements
-        )
+      (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
+      || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
       )
+      <comment>*
     }
-
-#    token tag-body {
-#      <ws>? <comment>*
-#      (  <body2-start> ~ <body2-end> <body2-contents>     # Only text content
-#      || <body1-start> ~ <body1-end> <body1-contents>     # Normal body content
-#      )
-#      <comment>*
-#    }
-
-#    token body1-start     { '[' }
 
     # The content can be anything mixed with document tags except following the
     # no-elements character. To use the brackets and
     # other characters in the text, the characters must be escaped.
     #
-    token body1-contents  {
-      <body1-start>
-      <keep-literal>?
-      ( <body1-text> || <document> )*
-      <body-end>
-    }
-
-    token body1-start     { <?after '['> }
-#    token body1-end       { ']' }
+    token body1-contents  { <.keep-literal>? ( <body1-text> || <document> )* }
+    token body1-start     { '[' }
+    token body1-end       { ']' }
     token body1-text      { ( <comment> || <-[\$\]\\]> || <body-esc> )+ }
 
-#    token body2-start     { '[!' }
-    token body2-contents  {
-      <body2-start>
-      <keep-literal>? <body2-text>
-      <body-end>
-    }
+    token body2-start     { '[!' }
+    token body2-contents  { <.keep-literal>? <body2-text> }
+    token body2-text      { .*? <?before '!]'> }
+    token body2-end       { '!]' }
 
-    token body2-start     { <?after '!'> }
-    token body-end        { <?before ']'> }
-
-    # Cannot use body2-end because method will be called twice, here and later
-    # when encountering the string '!]'.
-    #
-    token body2-text      { .*? <?before ']'> }
-
-#    token b2e             { '!]' }
-#    token body2-end       { '!]' }
-
-
-    token non-nesting     { '!' }
     token keep-literal    { '=' }
     token body-esc        { '\\' . }
 

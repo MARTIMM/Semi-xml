@@ -37,7 +37,7 @@ EOSXML
 #-------------------------------------------------------------------------------
 # Parse
 #
-my Semi-xml $x .= new;
+my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
