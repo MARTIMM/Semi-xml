@@ -83,7 +83,7 @@ highlights are programmed in your favorite editor.
           Leading newlines and trailing spaces are removed.
     * [x] A tag can start with '$', '$.', '$!'. Now also '$*' is introduced
           which will add a space around the tag and its content.
-    * [x] Another addition '$*<' and '$*> is introduced to add a space to the
+    * [x] Another addition '$\*\<' and '$\*\>' is introduced to add a space to the
           left or right of the tag and its content.
 
 * External modules
