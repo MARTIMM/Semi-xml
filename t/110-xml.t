@@ -39,5 +39,5 @@ ok $xml-text ~~ m:s/ 'content-language' ':' 'en' /, 'Http content language';
 #-------------------------------------------------------------------------------
 # Cleanup
 #
-done();
+done-testing();
 exit(0);

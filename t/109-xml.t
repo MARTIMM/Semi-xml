@@ -51,5 +51,5 @@ ok $xml-text ~~ m/'<abstract><para>abstract test</para></abstract>'/, 'Check abs
 #-------------------------------------------------------------------------------
 # Cleanup
 #
-done();
+done-testing();
 exit(0);
