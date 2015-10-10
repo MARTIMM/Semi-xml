@@ -8,6 +8,11 @@ Package to generate xml from an easier readable and writable description plus,
 because it is written in perl 6, the possibility to insert xml from other
 sources such as files, text, code , variables etc.
 
+## Versions of PERL, MOARVM
+
+* Perl6 version ```2015.09-329-ga27d6f6```
+* MoarVM version ```2015.09-74-gedc44b5```
+
 ## Introduction
 
 I'm a lazy bum, so writing xml is too exhausting. instead of writing;
