@@ -86,5 +86,5 @@ ok $xml-text ~~ m/'<z data_2="double \'quoted\' tests">'/, 'Class test 4';
 #-------------------------------------------------------------------------------
 # Cleanup
 #
-done();
+done-testing();
 exit(0);

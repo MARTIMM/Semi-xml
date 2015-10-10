@@ -33,7 +33,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
         }
 
         when 'include' {
-
           # Check if readable
           #
           if $reference.IO ~~ :r {
@@ -47,12 +46,15 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             # fail if thare are more than one top level elements.
             #
             my Semi-xml::Sxml $x .= new;
-            
+
             # When parsing another new piece of text, this result will be placed
             # next to a previously prepared sibling 'PLACEHOLDER-ELEMENT' of
             # which the contents is given to this method as @content-body
             #
-            $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
+            # The top level node xx-xx-xx is used to be sure there is only one
+            # element at the top when parsing starts.
+            #
+            my $e = $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
 
             # Search for node XX-XX-XX and move all nodes below that container
             # to the parent element of the container.
@@ -62,7 +64,10 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
               # Skip all non-element nodes like XML::Text
               #
               if $node ~~ XML::Element and $node.name eq 'XX-XX-XX' {
-                $parent.append($_) for $node.nodes;
+                while $node.nodes.elems {
+                  my $fnode = $node.nodes.shift;
+                  $parent.append($fnode);
+                }
 
                 $node.remove;
                 last;

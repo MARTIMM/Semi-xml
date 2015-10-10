@@ -31,16 +31,16 @@ my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 my $d = Date.today();
 ok $xml-text ~~ m/'<p1>x y ' $d'</p1>'/, 'Check generated date';
 
-ok $xml-text ~~ m/ '<p2 z="txt"> '
-                   $d                                   # year-month-day
-                   ' ' (\d\d ':')**2 \d\d               # hour:minute
-                   ' ' '+' \d\d ':' \d\d'</p2>'         # time
-                 /,
+ok $xml-text ~~ m:s/ '<p2 z="txt">'
+                     $d                                 # year-month-day
+                     (\d\d ':')**2 \d\d                 # hour:minute
+                     '+' \d\d ':' \d\d'</p2>'           # time
+                   /,
   'Check generated date and time';
 
 is $x.get-option( :section('output'), :option('fileext')), 'html', 'Check fileext option';
@@ -51,5 +51,5 @@ unlink $filename;
 #-------------------------------------------------------------------------------
 # Cleanup
 #
-done();
+done-testing();
 exit(0);

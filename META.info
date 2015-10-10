@@ -22,5 +22,5 @@
     "sxml2xml": "bin/sxml2xml.pl6"
   },
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "0.16.2"
+  "version": "0.16.3"
 }

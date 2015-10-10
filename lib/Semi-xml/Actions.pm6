@@ -19,12 +19,14 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
     }
 
     submethod BUILD ( Bool :$strip = False, Str :$text ) {
+
       $!strip = $strip;
       $!txt = $text;
+
       if $strip {
-        $!txt ~~ s:g/\s+$//;  ## Chop out trailing spaces.
-        $!txt ~~ s:g/^\s+//;  ## Chop out leading spaces.
-        $!txt .= chomp;       ## Remove a trailing newline if it exists.
+        $!txt ~~ s:g/\s+$$//;   ## Chop out trailing spaces from lines.
+        $!txt ~~ s:g/^^\s+//;   ## Chop out leading spaces from lines.
+        $!txt .= chomp;         ## Remove a trailing newline if it exists.
       }
     }
   }
@@ -251,7 +253,7 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
   #say "N-" x $/.elems;
     }
 
-    method comment ( $match is rw ) {
+    method comment ( $match ) {
       $has-comment = True;
     }
 
@@ -297,25 +299,26 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
         #
         $tag-type ~~ m/\$\!(<-[\.]>+)/;
         my $module = $/[0].Str;
+#say "Test \$!$module.$tag-name";
         if $!objects{$module}.can($tag-name) {
 
-          # Must make a copy of the tag-name to a local variable. If tag-name is
-          # used directly in the closure, the name is not 'frozen' to the value when
-          # the call is defined.. Same goes for attributes.
+          # Must make a copy of the tag-name to a local variable. If tag-name
+          # is used directly in the closure, the name is not 'frozen' to the
+          # value when the call is defined.. Same goes for attributes.
           #
           my $tgnm = $tag-name;
           my $mod = $module;
           my $ats = $attrs;
           my $cei = $current-el-idx;
-#say "\nCan do $tgnm in module $mod, ",
+#say "\nCan do \$!$mod.$tgnm in element ",
 #  $cei > 0 ?? $el-stack[$cei - 1].name !! 'top',
 #  ', ', $el-stack[$cei].name;
 
           $deferred-calls[$cei] =
             method (XML::Node :$content-body) {
-#say "\nCalled $tgnm in module $mod";
+#say "\nCalled \$!$mod.$tgnm";
               $!objects{$mod}."$tgnm"( $el-stack[$cei], $ats, :$content-body);
-          }
+            }
 
           self!register-element( 'PLACEHOLDER-ELEMENT', {});
         }
@@ -338,6 +341,7 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
       }
 
       elsif $tag-type eq '$' {
+#say "Register element: $tag-name, $attrs";
         self!register-element( $tag-name, $attrs);
       }
 
@@ -446,14 +450,14 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
       }
 
       else {
-        $text ~~ s/^\s+/ /;
-        $text ~~ s/\s+$/ /;
-  #      $xml = XML::Text.new(:text($text)) if $text.chars > 0;
-        $xml = Semi-xml::Text.new( :text($text), :strip)
-          if $text.chars > 0;
+        $text ~~ s/\s+$//;        ## Chop out trailing spaces from the text.
+        $text ~~ s/^\s+//;        ## Chop out leading spaces from the text.
+        $xml = Semi-xml::Text.new( :text($text), :strip) if $text.chars > 0;
       }
 
+#say "append to $el-stack[$current-el-idx]" if $xml.defined;
       $el-stack[$current-el-idx].append($xml) if $xml.defined;
+#say "appended $el-stack[$current-el-idx]" if $xml.defined;
     }
 
     # Substitute some escape characters in entities and remove the remaining
@@ -504,9 +508,9 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
          and $el-stack[$current-el-idx] ~~ XML::Element
          and $el-stack[$current-el-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
 
-        # Call the deferred method and pass the element 'PLACEHOLDER-ELEMENT' and
-        # all children below it. The method must remove this element before
-        # returning otherwise it will become an xml tag.
+        # Call the deferred method and pass the element 'PLACEHOLDER-ELEMENT'
+        # and all children below it. The method must remove this element
+        # before returning otherwise it will become an xml tag.
         #
         $deferred-calls[$current-el-idx](
           self,

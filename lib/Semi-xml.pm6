@@ -5,7 +5,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
+package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
 
   class Sxml {
 
@@ -67,7 +67,11 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
       if $filename.IO ~~ :r {
         $!actions = Semi-xml::Actions.new(:init);
         my $text = slurp($filename);
-        self.parse(:content($text));
+        return self.parse(:content($text));
+      }
+      
+      else {
+        die "Filename $filename not readable";
       }
     }
 
@@ -99,7 +103,7 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
 
       # Parse the content. Parse can be recursively called
       #
-      Semi-xml::Grammar.parse( $content, :actions($!actions));
+      return Semi-xml::Grammar.parse( $content, :actions($!actions));
     }
 
     #---------------------------------------------------------------------------
@@ -186,7 +190,7 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
           my $fileext = $configuration<output><fileext>;
           $filename ~= ".$fileext";
 
-          say "Code '$run-code' to select command not found, Shoosen to dump to $filename";
+          say "Code '$run-code' to select command not found, Choosen to dump to $filename";
         }
       }
 
