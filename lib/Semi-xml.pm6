@@ -190,7 +190,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
           my $fileext = $configuration<output><fileext>;
           $filename ~= ".$fileext";
 
-          say "Code '$run-code' to select command not found, Shoosen to dump to $filename";
+          say "Code '$run-code' to select command not found, Choosen to dump to $filename";
         }
       }
 

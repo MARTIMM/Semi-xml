@@ -299,7 +299,7 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
         #
         $tag-type ~~ m/\$\!(<-[\.]>+)/;
         my $module = $/[0].Str;
-say "Test \$!$module.$tag-name";
+#say "Test \$!$module.$tag-name";
         if $!objects{$module}.can($tag-name) {
 
           # Must make a copy of the tag-name to a local variable. If tag-name
@@ -310,13 +310,13 @@ say "Test \$!$module.$tag-name";
           my $mod = $module;
           my $ats = $attrs;
           my $cei = $current-el-idx;
-say "\nCan do \$!$mod.$tgnm in element ",
-  $cei > 0 ?? $el-stack[$cei - 1].name !! 'top',
-  ', ', $el-stack[$cei].name;
+#say "\nCan do \$!$mod.$tgnm in element ",
+#  $cei > 0 ?? $el-stack[$cei - 1].name !! 'top',
+#  ', ', $el-stack[$cei].name;
 
           $deferred-calls[$cei] =
             method (XML::Node :$content-body) {
-say "\nCalled \$!$mod.$tgnm";
+#say "\nCalled \$!$mod.$tgnm";
               $!objects{$mod}."$tgnm"( $el-stack[$cei], $ats, :$content-body);
             }
 
@@ -341,7 +341,7 @@ say "\nCalled \$!$mod.$tgnm";
       }
 
       elsif $tag-type eq '$' {
-say "Register element: $tag-name, $attrs";
+#say "Register element: $tag-name, $attrs";
         self!register-element( $tag-name, $attrs);
       }
 
@@ -455,9 +455,9 @@ say "Register element: $tag-name, $attrs";
         $xml = Semi-xml::Text.new( :text($text), :strip) if $text.chars > 0;
       }
 
-say "append to $el-stack[$current-el-idx]" if $xml.defined;
+#say "append to $el-stack[$current-el-idx]" if $xml.defined;
       $el-stack[$current-el-idx].append($xml) if $xml.defined;
-say "appended $el-stack[$current-el-idx]" if $xml.defined;
+#say "appended $el-stack[$current-el-idx]" if $xml.defined;
     }
 
     # Substitute some escape characters in entities and remove the remaining

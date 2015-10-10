@@ -51,8 +51,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
       while @files-to-process.shift() -> $file {
 
-#say "F: $file, {$file.IO.absolute()}";
-
         # Process directories
         #
         if $file.IO ~~ :d {
@@ -64,7 +62,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             $first_level = False;
           }
 
-#say "L 0: $level";
           my $dir := $file;                   # Alias to proper name
 
           my $ul = self!make-dir-entry( $parent, $dir);
@@ -104,7 +101,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       $parent.append($ul);
       my $li = XML::Element.new(:name('li'));
       $ul.append($li);
-#say "L 1: $level";
       my $hdr = XML::Element.new(:name('h' ~ @!header[$level]));
       $li.append($hdr);
 
@@ -143,7 +139,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       $a-label ~~ s/\.<-[\.]>*$//;      # Remove file extension
       $a-label ~~ s/\d+('-'|'_')*//;    # Remove number with optional '-' or '_'
       $a-label ~~ s:g/('-'|'_')+/ /;    # Substitute '-' or '_' with space.
-#say "A-Label 4: $a-label";
+
       $a.append(XML::Text.new(:text($a-label)));
     }
   }

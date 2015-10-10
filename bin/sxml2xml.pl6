@@ -2,16 +2,18 @@
 #
 use v6;
 
-BEGIN {
-  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
-}
+#BEGIN {
+#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
+#}
 
 use Semi-xml;
 
-# Allow switches after positionals. Pinched from the panda program. Now it is
-# possible to make the sxml file executable with the path of this program.
+# Allow switches after positionals. Pinched from an older panda version. Now
+# it is possible to make the sxml file executable with the path of this
+# program.
 #
-@*ARGS = @*ARGS.grep(/^ '-'/), @*ARGS.grep(/^ <-[-]>/);
+my @a = grep( /^ <-[-]>/, @*ARGS);
+@*ARGS = (|grep( /^ '-'/, @*ARGS), |@a);
 
 #-------------------------------------------------------------------------------
 #
@@ -22,11 +24,7 @@ role sxml-role {
 #-------------------------------------------------------------------------------
 #= sxml2xml -run run-code filename.sxml
 #
-sub MAIN ( $filename, Str :$run ) {
-#  $filename ~~ m/(.*?)\.<{$filename.IO.extension}>$/;
-#  $x.configuration<output><filename> = ~$/[0];
-#say "PF: {$x.configuration<output><filename>}";
-
+sub MAIN ( Str $filename, Str :$run ) {
 
   my $dep = process-sxml( $filename, :$run);
   if $dep.defined {
@@ -43,7 +41,7 @@ sub MAIN ( $filename, Str :$run ) {
 
 #-------------------------------------------------------------------------------
 #
-sub process-sxml ( Str $filename, Str :$run ) {
+sub process-sxml ( Str:D $filename, Str :$run ) {
 
   my Semi-xml::Sxml $x .= new(:init);
   $x does sxml-role;
@@ -66,7 +64,6 @@ sub process-sxml ( Str $filename, Str :$run ) {
   }
 
   else {
-    say "File $filename not readable";
-    exit(1);
+    die "File $filename not readable";
   }
 }
