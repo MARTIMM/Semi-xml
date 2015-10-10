@@ -1,0 +1,14 @@
+branches:
+  only:
+    - master
+
+language: perl6
+
+perl6:
+  - latest
+
+install:
+  - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
+  - panda installdeps .
+
+

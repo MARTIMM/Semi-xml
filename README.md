@@ -1,5 +1,7 @@
 # Semi-xml
 
+[![Build Status](https://travis-ci.org/MARTIMM/Semi-xml.svg?branch=master)](https://travis-ci.org/MARTIMM/Semi-xml)
+
 ## Description
 
 Package to generate xml from an easier readable and writable description plus,
@@ -165,6 +167,7 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.16.3 Bugfixes in code and tests
 * 0.16.2
   * Small changes in the grammar to slim down the match object during parsing.
     E.g. ```<comment>``` subrules are changed into ```<.comment>``` which will
