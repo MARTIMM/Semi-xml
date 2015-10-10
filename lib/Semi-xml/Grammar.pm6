@@ -46,10 +46,10 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
     token tag { <.reset-keep-literal> <.tag-name> ( <.attribute> )* }
     token tag-name { <.tag-type> <.identifier> [ ':' <.identifier> ]**0..1 }
     token tag-type {
-      ( '$.' <.identifier> '.' )
-      || ( '$!' <.identifier> '.' )
-      || '$*<' || '$*>' || '$*'
-      || '$'
+      ( '$.' <.identifier> '.' ) ||
+      ( '$!' <.identifier> '.' ) ||
+      '$*<' || '$*>' || '$*'     ||
+      '$'
     }
 
     # The tag may be followed by attributes. These are key=value constructs. The
@@ -59,9 +59,9 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
     token attribute { <.ws>? <.attr-key> '=' <.attr-value-spec> }
     token attr-key { <.identifier> [ ':' <.identifier> ]**0..1 }
     token attr-value-spec {
-      (\' <.attr-q-value> \')
-      || (\" <.attr-qq-value> \")
-      || <.attr-s-value>
+      (\' <.attr-q-value> \')  ||
+      (\" <.attr-qq-value> \") ||
+      <.attr-s-value>
     }
     token attr-q-value    { <-[\']>+ }
     token attr-qq-value   { <-[\"]>+ }

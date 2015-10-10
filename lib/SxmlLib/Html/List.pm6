@@ -8,7 +8,7 @@ use Semi-xml;
 use XML;
 
 # Package cannot be placed in Semi-xml/Lib and named File.pm6. Evaluation seems
-# to fail not finding the symbol &File when doing so.
+# to fail not finding the methods when doing so (perl6 2015-04).
 #
 package SxmlLib:auth<https://github.com/MARTIMM> {
 
@@ -39,16 +39,15 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       # to the maximum length of $max_level
       #
       @!header = EVAL($attrs<header>:delete) // 1;
-      @!header.push( @!header[@!header.end] xx ($max_level - +@!header) );
+      @!header.push: |(@!header[@!header.end] xx ($max_level - +@!header));
 
       $top-level-attrs = $attrs;
       self!create-list( $parent, @($!directory));
     }
 
-
     #---------------------------------------------------------------------------
     #
-    method !create-list ( XML::Element $parent, @files-to-process ) {
+    method !create-list ( XML::Element $parent, @files-to-process is copy ) {
 
       while @files-to-process.shift() -> $file {
 
