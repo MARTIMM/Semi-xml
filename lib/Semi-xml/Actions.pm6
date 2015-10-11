@@ -171,18 +171,18 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
 
     my XML::Document $xml-document;
     my Int $current-el-idx;
-    my Array $el-stack;
-    my Array $deferred-calls;
-    my Array $el-keep-literal;
+    my Array $el-stack = [];
+    my Array $deferred-calls = [];
+    my Array $el-keep-literal = [];
 
     my Str $tag-name;
     my Str $tag-type;
 
-    my Hash $attrs;
+    my Hash $attrs = {};
     my Str $attr-key;
 
-    my Bool $keep-literal;
-    my Bool $has-comment;
+    my Bool $keep-literal = False;
+    my Bool $has-comment = False;
 
 
     # Initialize some variables when init is set. Must be done when a new object
@@ -190,9 +190,23 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
     #
     submethod BUILD ( Bool :$init ) {
       if ?$init {
+        $config-key = {};
+        $config-path = Str;
+        $config-value = Str;
+
+        $xml-document = XML::Document;
         $current-el-idx = Int;
         $el-stack = [];
         $deferred-calls = [];
+        $el-keep-literal = [];
+        
+        $tag-name = Str;
+        $tag-type = Str;
+        
+        $attrs = {};
+        $attr-key = Str;
+        
+        $keep-literal = False;
         $has-comment = False;
       }
     }

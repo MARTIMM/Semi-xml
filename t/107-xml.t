@@ -35,7 +35,7 @@ my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 my $d = Date.today().Str;
 ok $xml-text ~~ m:s/ $d /, 'Check date of today';
@@ -46,7 +46,7 @@ ok $xml-text ~~ m:s/ '1957-06-01' /, 'Check specific date on 1st day';
 ok $xml-text ~~ m:s/ '1957-01-01' /, 'Check specific date on 1st day and month';
 
 $d = DateTime.now(:timezone(960)).Str;
-say "DT +T: $d";
+#say "DT +T: $d";
 ok $xml-text ~~ m:s/'<Z>' $d '</Z>'/, 'Check date and time in timezone';
 
 is $x.get-option( :section('output'), :option('fileext')), 'mxml', 'Check fileext option';

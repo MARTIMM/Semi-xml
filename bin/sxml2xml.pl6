@@ -2,9 +2,9 @@
 #
 use v6;
 
-#BEGIN {
-#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
-#}
+BEGIN {
+  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
+}
 
 use Semi-xml;
 
@@ -18,7 +18,7 @@ my @a = grep( /^ <-[-]>/, @*ARGS);
 #-------------------------------------------------------------------------------
 #
 role sxml-role {
-  has Hash $.configuration = { output => { } };
+  has Hash $.user-configuration = { output => { } };
 }
 
 #-------------------------------------------------------------------------------
@@ -33,8 +33,8 @@ sub MAIN ( Str $filename, Str :$run ) {
       $dependency ~~ s/^\s+//;
       $dependency ~~ s/\s+$//;
       say "Processing dependency $dependency";
-      $dep = process-sxml( $dependency, :$run);
-      $dep-list.push($dep.split(/\s* ',' \s*/)) if $dep.defined;
+      my $dep = process-sxml( $dependency, :$run) if ? $dependency;
+      $dep-list.push: |$dep.split(/\s* ',' \s*/) if ? $dep;
     }
   }
 }
@@ -57,10 +57,10 @@ sub process-sxml ( Str:D $filename, Str :$run ) {
   $x.configuration<output><filename> ~~ s/\.<-[\.]>+$//;
 
   if $filename.IO ~~ :r {
-    $x.parse-file(:$filename);
+    my $X = $x.parse-file(:$filename);
     $x.save(:run-code($run));
-
-    return $x.get-option( :section('dependencies'), :option('files'));
+    my $deps = $x.get-option( :section('dependencies'), :option('files')) // '';
+    return $deps;
   }
 
   else {

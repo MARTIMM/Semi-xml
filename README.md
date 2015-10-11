@@ -172,6 +172,8 @@ Still at omega state, bugs come and go(hopefully).
 
 ## Changes
 
+* 0.17.0
+  * Automatic generating directories before writing to files. See save().
 * 0.16.3
   * Bugfixes in code and tests. September brought a lot of changes which
     had its influence in the program, modules and tests. Also some undetected

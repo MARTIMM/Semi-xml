@@ -5,7 +5,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
+package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
   class Sxml {
 
@@ -15,7 +15,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
     has Hash $.styles;
     has Hash $.configuration is rw;
 
-    my Hash $defaults = {
+    has Hash $!defaults = {
       option => {
         doctype => {
           show => 0,
@@ -50,11 +50,11 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
     # Calculate default filename
     #
   #  $*PROGRAM ~~ m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
-  #  $defaults<output><filename> = ~$/[0];
+  #  $!defaults<output><filename> = ~$/[0];
 
   #  my @path-spec = $*SPEC.splitpath($*PROGRAM);
-  #  $defaults<output><filename> = @path-spec[2];
-  #  $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
+  #  $!defaults<output><filename> = @path-spec[2];
+  #  $!defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
   #say "PS: @path-spec[]";
 
     submethod BUILD ( Bool :$init ) {
@@ -91,11 +91,11 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
       #
       for self.^attributes -> $class-attr {
         given $class-attr.name {
-          when '$!styles' {
+          when '$!user-styles' {
             $!styles = $class-attr.get_value(self);
           }
 
-          when '$!configuration' {
+          when '$!user-configuration' {
             $!configuration = $class-attr.get_value(self);
           }
         }
@@ -134,7 +134,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
       my $document = self.get-xml-text(:$other-document);
   #    my Str $document = self;
 
-      my Hash $configuration = $defaults;
+      my Hash $configuration = $!defaults;
       self.gather-configuration(
         $configuration,
         $!configuration,
@@ -202,8 +202,10 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
           $filename ~= ".$fileext";
         }
 
+        my $filepath = $configuration<output><filepath>;
+        mkdir $filepath unless $filepath.IO ~~ :e;
+
         if $filename !~~ m@'/'@ {
-          my $filepath = $configuration<output><filepath>;
           $filename = "$filepath/$filename" if $filepath;
         }
 
@@ -228,7 +230,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
       # previous Therefore defaults first, then from user config in roles then
       # the settings from the sxml file.
       #
-      my Hash $configuration = $defaults;
+      my Hash $configuration = $!defaults;
       self.gather-configuration( $configuration, $!configuration, $!actions.config);
 
       # If there is one, try to generate the xml
@@ -308,7 +310,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
 
     #---------------------------------------------------------------------------
     #
-    multi method get-option ( Array $hashes, Str $option --> Any ) {
+    multi method get-option ( Array $hashes!, Str $option! --> Any ) {
       for $hashes.list -> $h {
         if $h{$option}:exists {
           return $h{$option};
@@ -326,7 +328,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
                               --> Any
                             ) {
       my Array $hashes;
-      for ( $!actions.config, $!configuration, $defaults) -> $h {
+      for ( $!actions.config, $!configuration, $!defaults) -> $h {
         if $h{$section}:exists {
           my $e = $h{$section};
 
