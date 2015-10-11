@@ -46,10 +46,62 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
                 ) {
       $content-body.remove;
 
-      $parent.append(XML::Text.new(:text(Date.today().Str)));
+      my Int $year = +$attrs<year> if ? $attrs<year>;
+      my Int $month = +$attrs<month> if ? $attrs<month>;
+      my Int $day = +$attrs<day> if ? $attrs<day>;
+
+      if ? $year and ? $month and ? $day {
+        $parent.append(
+          XML::Text.new(
+            :text(Date.new( $year, $month, $day).Str)
+          )
+        );
+      }
+
+      elsif ? $year {
+        if ? $month and ? $day {
+          $parent.append(
+            XML::Text.new(
+              :text(Date.new( :$year, :$month, :$day).Str)
+            )
+          );
+        }
+
+        elsif ? $month {
+          $parent.append(
+            XML::Text.new(
+              :text(Date.new( :$year, :$month).Str)
+            )
+          );
+        }
+
+        elsif ? $day {
+          $parent.append(
+            XML::Text.new(
+              :text(Date.new( :$year, :$day).Str)
+            )
+          );
+        }
+
+        else {
+          $parent.append(
+            XML::Text.new(
+              :text(Date.new(:$year).Str)
+            )
+          );
+        }
+      }
+
+      else {
+        $parent.append(
+          XML::Text.new(
+            :text(Date.today().Str)
+          )
+        );
+      }
     }
 
-    # $!SxmlCore.date-time []
+    # $!SxmlCore.date-time timezone=tz iso=n []
     #
     method date-time ( XML::Element $parent,
                        Hash $attrs,
@@ -57,11 +109,19 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
                      ) {
       $content-body.remove;
 
-      my $date-time = DateTime.now().Str;
+      my $date-time;
+      if $attrs<timezone> {
+        $date-time = DateTime.now(:timezone($attrs<timezone>)).Str;
+      }
+      
+      else {
+        $date-time = DateTime.now().Str;
+      }
+
       $date-time ~~ s/'T'/ / unless $attrs<iso>:exists;
       $date-time ~~ s/'+'/ +/ unless $attrs<iso>:exists;
-      my $txt-e = XML::Text.new(:text($date-time));
-      $parent.append($txt-e);
+
+      $parent.append(XML::Text.new(:text($date-time)));
     }
 
     # $!SxmlCore.comment []
