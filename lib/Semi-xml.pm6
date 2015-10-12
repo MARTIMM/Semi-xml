@@ -95,7 +95,7 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
             $!styles = $class-attr.get_value(self);
           }
 
-          when '$!user-configuration' {
+          when '$!configuration' {
             $!configuration = $class-attr.get_value(self);
           }
         }

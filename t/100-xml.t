@@ -19,7 +19,7 @@ isa-ok $x, 'Sxml', $x.^name;
 # Def=vise a role to add
 #
 role pink {
-  has Hash $!user-configuration = {
+  has Hash $!configuration = {
              option => {
                doctype => {
 #                 definition => '',

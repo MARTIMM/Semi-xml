@@ -67,7 +67,7 @@ ok $filename.IO ~~ :e, "File $filename written";
 unlink $filename;
 
 role pink {
-  has Hash $!user-configuration = {
+  has Hash $!configuration = {
     output => {
       filename => 't/another',
       fileext => 'html'
