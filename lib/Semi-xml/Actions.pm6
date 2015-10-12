@@ -1,7 +1,7 @@
 use v6;
 use XML;
 
-package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
+package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
   #-----------------------------------------------------------------------------
   # Must make this class to substitute on XML::Text. That class removes all
@@ -9,7 +9,7 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
   # This is bad for tags like HTML <pre> and friends. With this class stripping
   # can be controlled better.
   #
-  class Text does XML::Node {
+  our class Text does XML::Node {
 
     has Bool $.strip;
     has Str $.txt;
@@ -34,7 +34,7 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
   #-----------------------------------------------------------------------------
   # Core module with common used methods
   #
-  class SxmlCore {
+  our class SxmlCore {
 
     has Hash $.symbols = {};
 

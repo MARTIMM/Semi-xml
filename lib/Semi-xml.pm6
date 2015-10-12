@@ -58,18 +58,18 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
   #say "PS: @path-spec[]";
 
     submethod BUILD ( Bool :$init ) {
-      $!actions = Semi-xml::Actions.new(:$init);
+      $!actions .= new(:$init);
     }
 
     #---------------------------------------------------------------------------
     #
     method parse-file ( Str :$filename ) {
       if $filename.IO ~~ :r {
-        $!actions = Semi-xml::Actions.new(:init);
+        $!actions .= new(:init);
         my $text = slurp($filename);
         return self.parse(:content($text));
       }
-      
+
       else {
         die "Filename $filename not readable";
       }
