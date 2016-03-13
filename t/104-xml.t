@@ -14,11 +14,14 @@ spurt( $filename, q:to/EOSX/);
 #!bin/sxml2xml.pl6
 #
 ---
+
 output/fileext:                         html;
+option/debug:                           1;
 
 library/m1:                             t;
 module/m1:                              M::m1;
 module/file:                            SxmlLib::File;
+
 ---
 $html [
   $head [

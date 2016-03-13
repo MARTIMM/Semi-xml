@@ -1,5 +1,5 @@
-use v6;
-
+use v6.c;
+use XML;
 use Semi-xml::Grammar;
 use Semi-xml::Actions;
 
@@ -11,7 +11,9 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
 
     our $debug = False;
 
+    has Semi-xml::Grammar $!grammar;
     has Semi-xml::Actions $.actions;
+
     has Hash $.styles;
     has Hash $.configuration is rw;
 
@@ -57,19 +59,20 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
   #  $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
   #say "PS: @path-spec[]";
 
-    submethod BUILD ( Bool :$init ) {
-      $!actions = Semi-xml::Actions.new(:$init);
+    submethod BUILD ( ) {
+      $!grammar .= new;
+      $!actions .= new;
     }
 
     #---------------------------------------------------------------------------
     #
     method parse-file ( Str :$filename ) {
       if $filename.IO ~~ :r {
-        $!actions = Semi-xml::Actions.new(:init);
+#        $!actions = Semi-xml::Actions.new(:init);
         my $text = slurp($filename);
         return self.parse(:content($text));
       }
-      
+
       else {
         die "Filename $filename not readable";
       }
@@ -103,13 +106,14 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
 
       # Parse the content. Parse can be recursively called
       #
-      return Semi-xml::Grammar.parse( $content, :actions($!actions));
+      return $!grammar.parse( $content, :actions($!actions));
     }
 
     #---------------------------------------------------------------------------
     #
     method root-element ( --> XML::Element ) {
-      return $!actions.get-document.root;
+      my $doc = $!actions.get-document;
+      return ?$doc ?? $doc.root !! XML::Element;
     }
 
     #---------------------------------------------------------------------------
@@ -217,9 +221,18 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
 
       # Get the top element name
       #
-      my $root-element = ?$other-document
-                           ?? $other-document.root.name
-                           !! $!actions.get-document.root.name;
+      my $root-element;
+      if ?$other-document {
+        $root-element = $other-document.root.name;
+      }
+
+      else {
+        my $doc = $!actions.get-document;
+        $root-element = ?$doc ?? $doc.root.name !! Any;
+      }
+      
+      return '' unless $root-element.defined;
+
       $root-element ~~ s/^(<-[:]>+\:)//;
 
       my Str $document = '';
@@ -283,7 +296,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
     # cannot be empty
     #
     method gather-configuration ( Hash $cfg, *@hashes --> Hash ) {
-      for @hashes -> Hash $h {
+      for @hashes -> $h {
         for $h.kv -> $k, $v {
           given $v {
             when Hash {
