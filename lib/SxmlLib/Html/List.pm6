@@ -30,6 +30,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
                       Hash $attrs is copy,
                       XML::Node :$content-body   # Ignored
                     ) {
+
       $!directory = $attrs<directory>:delete // '.';
       $!ref-attr = $attrs<ref-attr>:delete // 'href';
 

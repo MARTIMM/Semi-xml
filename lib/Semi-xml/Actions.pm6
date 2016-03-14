@@ -1,7 +1,8 @@
 use v6.c;
 use XML;
 
-package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
+#package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
+package Semi-xml {
 
   #-----------------------------------------------------------------------------
   # Must make this class to substitute on XML::Text. That class removes all
@@ -334,7 +335,12 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
 #say "Attrs: $ats";
 #say "Content body: ", $content-body.Str;
 
-            $!objects{$mod}."$tgnm"( $!el-stack[$cei], $ats, :$content-body);
+            $!objects{$mod}."$tgnm"(
+              $!el-stack[$cei],         # Parent tag
+              $ats,                     # attributes of current tag
+              :$content-body            # content of current tag in a
+                                        # PLACEHOLDER-ELEMENT tag
+            );
           };
 
           self!register-element( 'PLACEHOLDER-ELEMENT', {});
