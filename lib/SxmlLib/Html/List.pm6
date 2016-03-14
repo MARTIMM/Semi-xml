@@ -20,9 +20,9 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
     has Str $!ref-attr;
 
     constant C-MAX-LEVEL = 6;
-    my Int $level = 0;
-    my Bool $first_level = True;
-    my Hash $top-level-attrs;
+    has Int $!level = 0;
+    has Bool $!first_level = True;
+    has Hash $!top-level-attrs;
 
     #---------------------------------------------------------------------------
     #
@@ -41,7 +41,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       @!header.push: |@list;
       @!header.push: |(@list[@list.end] xx (C-MAX-LEVEL - +@list));
 
-      $top-level-attrs = $attrs;
+      $!top-level-attrs = $attrs;
       self!create-list( $parent, @($!directory));
     }
 
@@ -61,12 +61,12 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
           #
           next if $dir ~~ m/^ '.' / or $dir ~~ m/ '/.' /;
 
-          if !$first_level {
-            $level++;
+          if not $!first_level {
+            $!level++;
           }
 
           else {
-            $first_level = False;
+            $!first_level = False;
           }
 
           my $ul = self!make-dir-entry( $parent, $dir);
@@ -74,10 +74,10 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
           my @new-files = dir( $dir, :Str);
           self!create-list( $ul, @(sort @new-files));
 
-          $level--;
-          if $level < 0 {
-            $level = 0;
-            $first_level = True;
+          $!level--;
+          if $!level < 0 {
+            $!level = 0;
+            $!first_level = True;
           }
         }
 
@@ -100,13 +100,13 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
     method !make-dir-entry ( XML::Element $parent, Str $dir-label is copy
                              --> XML::Element
                            ) {
-      my $ul = XML::Element.new( :name('ul'), :attribs($top-level-attrs));
-      $top-level-attrs = %();
+      my $ul = XML::Element.new( :name('ul'), :attribs($!top-level-attrs));
+      $!top-level-attrs = %();
 
       $parent.append($ul);
       my $li = XML::Element.new(:name('li'));
       $ul.append($li);
-      my $hdr = XML::Element.new(:name('h' ~ @!header[$level]));
+      my $hdr = XML::Element.new(:name('h' ~ @!header[$!level]));
       $li.append($hdr);
 
       $dir-label ~~ s:g/<-[\/]>+\///;
