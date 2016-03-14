@@ -52,12 +52,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
             # Search for the PLACEHOLDER-ELEMENT child under the parent node
             #
-            my XML::Node $placeholder;
-            for $parent.nodes -> $node {
-              if $node ~~ XML::Element and $node.name eq 'PLACEHOLDER-ELEMENT' {
-                $placeholder = $node;
-              }
-            }
+            my XML::Node $placeholder = $x.find-placeholder($parent);
 
             # Search for node XX-XX-XX and move all nodes below that container
             # just after the $placeholder element found above.
@@ -68,8 +63,8 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
               # placeholder which then pushed to the back by the next
               # element
               #
-              my $fnode = $node.nodes.pop;
-              $parent.after( $placeholder, $fnode);
+              my $fnode = $node.nodes[0];
+              $parent.before( $placeholder, $fnode);
             }
           }
 
@@ -82,8 +77,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
           die "Type $type not recognized with \$!include";
         }
       }
-
-#      $content-body.remove;
     }
   }
 }
