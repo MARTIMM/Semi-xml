@@ -1,7 +1,9 @@
-use v6;
+use v6.c;
 #use Grammar::Tracer;
 
-package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
+#package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
+package Semi-xml {
+
   grammar Grammar {
 
     # A complete document looks like the following of which the prelude an dashes

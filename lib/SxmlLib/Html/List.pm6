@@ -1,4 +1,4 @@
-use v6;
+use v6.c;
 
 #BEGIN {
 #  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
@@ -19,10 +19,10 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
     has Int @!header;
     has Str $!ref-attr;
 
-    my Int $level = 0;
-    constant $max_level = 6;
-    my Bool $first_level = True;
-    my Hash $top-level-attrs;
+    constant C-MAX-LEVEL = 6;
+    has Int $!level = 0;
+    has Bool $!first_level = True;
+    has Hash $!top-level-attrs;
 
     #---------------------------------------------------------------------------
     #
@@ -30,18 +30,19 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
                       Hash $attrs is copy,
                       XML::Node :$content-body   # Ignored
                     ) {
-      $content-body.remove;
 
       $!directory = $attrs<directory>:delete // '.';
       $!ref-attr = $attrs<ref-attr>:delete // 'href';
 
       # Set the numbers into the array and fill it up using the last number
-      # to the maximum length of $max_level
+      # to the maximum length of C-MAX-LEVEL. So if arrey = [2,3] then
+      # result will be [2,3,3,3,3,3,3]
       #
-      @!header = EVAL($attrs<header>:delete) // 1;
-      @!header.push: |(@!header[@!header.end] xx ($max_level - +@!header));
+      my @list = map {.Int}, ($attrs<header>:delete).split(',');
+      @!header.push: |@list;
+      @!header.push: |(@list[@list.end] xx (C-MAX-LEVEL - +@list));
 
-      $top-level-attrs = $attrs;
+      $!top-level-attrs = $attrs;
       self!create-list( $parent, @($!directory));
     }
 
@@ -54,25 +55,30 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
         # Process directories
         #
         if $file.IO ~~ :d {
-          if !$first_level {
-            $level++;
+
+          my $dir := $file;                   # Alias to proper name
+
+          # Skip hidden directories
+          #
+          next if $dir ~~ m/^ '.' / or $dir ~~ m/ '/.' /;
+
+          if not $!first_level {
+            $!level++;
           }
 
           else {
-            $first_level = False;
+            $!first_level = False;
           }
-
-          my $dir := $file;                   # Alias to proper name
 
           my $ul = self!make-dir-entry( $parent, $dir);
 
           my @new-files = dir( $dir, :Str);
           self!create-list( $ul, @(sort @new-files));
 
-          $level--;
-          if $level < 0 {
-            $level = 0;
-            $first_level = True;
+          $!level--;
+          if $!level < 0 {
+            $!level = 0;
+            $!first_level = True;
           }
         }
 
@@ -95,13 +101,13 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
     method !make-dir-entry ( XML::Element $parent, Str $dir-label is copy
                              --> XML::Element
                            ) {
-      my $ul = XML::Element.new( :name('ul'), :attribs($top-level-attrs));
-      $top-level-attrs = %();
+      my $ul = XML::Element.new( :name('ul'), :attribs($!top-level-attrs));
+      $!top-level-attrs = %();
 
       $parent.append($ul);
       my $li = XML::Element.new(:name('li'));
       $ul.append($li);
-      my $hdr = XML::Element.new(:name('h' ~ @!header[$level]));
+      my $hdr = XML::Element.new(:name('h' ~ @!header[$!level]));
       $li.append($hdr);
 
       $dir-label ~~ s:g/<-[\/]>+\///;

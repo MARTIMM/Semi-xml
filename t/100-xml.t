@@ -1,4 +1,4 @@
-use v6;
+use v6.c;
 
 use Test;
 use Semi-xml;
@@ -14,31 +14,31 @@ use Semi-xml;
 # Setup
 #
 my Semi-xml::Sxml $x .= new;
-isa-ok $x, 'Sxml', $x.^name;
+isa-ok $x, 'Semi-xml::Sxml', $x.^name;
 
-# Def=vise a role to add
+# Devise a role to add
 #
 role pink {
   has Hash $!configuration = {
-             option => {
-               doctype => {
-#                 definition => '',
-#                 entities => []
-                 show => 1,
-               },
-               xml-prelude => {
-                 show => 1,
-                 version => '1.0',
-                 encoding => 'UTF-8'
-               },
-             }
-           };
+    option => {
+      doctype => {
+#        definition => '',
+#        entities => []
+        show => 1,
+      },
+      xml-prelude => {
+        show => 1,
+        version => '1.0',
+        encoding => 'UTF-8'
+      },
+    }
+  };
 }
 
 # Add the role to the parser
 #
 $x does pink;
-is $x.^name, 'Sxml+{pink}', $x.^name;
+is $x.^name, 'Semi-xml::Sxml+{pink}', $x.^name;
 
 # Setup the text to parse
 #

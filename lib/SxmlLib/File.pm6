@@ -1,8 +1,4 @@
-use v6;
-
-#BEGIN {
-#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
-#}
+use v6.c;
 
 use Semi-xml;
 use XML;
@@ -19,10 +15,8 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
     #
     method include ( XML::Element $parent,
                      Hash $attrs,
-                     XML::Node :$content-body   # Ignored
+                     XML::Node :$content-body
                    ) {
-
-      $content-body.remove;
 
       my $type = $attrs<type> // 'reference';
       my $reference = $attrs<reference> // '';
@@ -43,7 +37,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
 
             # Create the parser object and parse its content. Important to
             # encapsulate the content in another tag because parsing will
-            # fail if thare are more than one top level elements.
+            # fail if there are more than one top level elements.
             #
             my Semi-xml::Sxml $x .= new;
 
@@ -56,22 +50,21 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             #
             my $e = $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
 
-            # Search for node XX-XX-XX and move all nodes below that container
-            # to the parent element of the container.
+            # Search for the PLACEHOLDER-ELEMENT child under the parent node
             #
-            for $parent.nodes -> $node {
+            my XML::Node $placeholder = $x.find-placeholder($parent);
 
-              # Skip all non-element nodes like XML::Text
+            # Search for node XX-XX-XX and move all nodes below that container
+            # just after the $placeholder element found above.
+            #
+            my $node = $x.root-element;
+            while $node.nodes.elems {
+              # Take the last first because next it is inserted after the
+              # placeholder which then pushed to the back by the next
+              # element
               #
-              if $node ~~ XML::Element and $node.name eq 'XX-XX-XX' {
-                while $node.nodes.elems {
-                  my $fnode = $node.nodes.shift;
-                  $parent.append($fnode);
-                }
-
-                $node.remove;
-                last;
-              }
+              my $fnode = $node.nodes[0];
+              $parent.before( $placeholder, $fnode);
             }
           }
 

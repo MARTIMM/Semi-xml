@@ -1,7 +1,8 @@
-use v6;
+use v6.c;
 use XML;
 
-package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
+#package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
+package Semi-xml {
 
   #-----------------------------------------------------------------------------
   # Must make this class to substitute on XML::Text. That class removes all
@@ -44,7 +45,6 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
                   Hash $attrs,
                   XML::Node :$content-body   # Ignored
                 ) {
-      $content-body.remove;
 
       my Int $year = +$attrs<year> if ? $attrs<year>;
       my Int $month = +$attrs<month> if ? $attrs<month>;
@@ -107,7 +107,6 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
                        Hash $attrs,
                        XML::Node :$content-body   # Ignored
                      ) {
-      $content-body.remove;
 
       my $date-time;
       if $attrs<timezone> {
@@ -131,7 +130,6 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
                      XML::Node :$content-body
                    ) {
       $parent.append(XML::Comment.new(:data([~] $content-body.nodes)));
-      $content-body.remove;
     }
 
     # $!SxmlCore.cdata []
@@ -141,7 +139,6 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
                    XML::Node :$content-body
                  ) {
       $parent.append(XML::CDATA.new(:data([~] $content-body.nodes)));
-      $content-body.remove;
     }
 
     # $!SxmlCore.pi []
@@ -151,7 +148,6 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
                 XML::Node :$content-body
               ) {
       $parent.append(XML::PI.new(:data([~] $content-body.nodes)));
-      $content-body.remove;
     }
   }
 
@@ -165,75 +161,59 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
     has Hash $.objects = { SxmlCore => Semi-xml::SxmlCore.new() };
     has Hash $.config = {};
 
-    my Hash $config-key = {};
-    my Str $config-path;
-    my Str $config-value;
+    has Str $!config-path;
+    has Str $!config-value;
 
-    my XML::Document $xml-document;
-    my Int $current-el-idx;
-    my Array $el-stack = [];
-    my Array $deferred-calls = [];
-    my Array $el-keep-literal = [];
+    has XML::Document $!xml-document;
+    has Int $!current-el-idx;
+    has Array $!el-stack;
+    has Array $!deferred-calls;
+    has Array $!el-keep-literal;
 
-    my Str $tag-name;
-    my Str $tag-type;
+    has Str $!tag-name;
+    has Str $!tag-type;
 
-    my Hash $attrs = {};
-    my Str $attr-key;
+    has Hash $!attrs;
+    has Str $!attr-key;
 
-    my Bool $keep-literal = False;
-    my Bool $has-comment = False;
-
+    has Bool $!keep-literal;
+    has Bool $!has-comment;
 
     # Initialize some variables when init is set. Must be done when a new object
     # is created: the variables are 'seen' in the other object
     #
-    submethod BUILD ( Bool :$init ) {
-      if ?$init {
-        $config-key = {};
-        $config-path = Str;
-        $config-value = Str;
-
-        $xml-document = XML::Document;
-        $current-el-idx = Int;
-        $el-stack = [];
-        $deferred-calls = [];
-        $el-keep-literal = [];
-        
-        $tag-name = Str;
-        $tag-type = Str;
-        
-        $attrs = {};
-        $attr-key = Str;
-        
-        $keep-literal = False;
-        $has-comment = False;
-      }
+    submethod BUILD ( ) {
+      $!current-el-idx = Int;
+      $!el-stack = [];
+      $!deferred-calls = [];
+      $!has-comment = False;
     }
 
     #-----------------------------------------------------------------------------
     # All config entries are like: '/a/b/c: v;' This must be evauluated as
-    # "$!config<$config-path>='$config-value'" so it becomes a key value pair
+    # "$!config<$!config-path>='$!config-value'" so it becomes a key value pair
     # in the config.
     #
     method config-entry ( $match ) {
-      if $config-path.defined and $config-value.defined {
+      if $!config-path.defined and $!config-value.defined {
 
         # Remove first character if /
         #
-        $config-path ~~ s/^\///;
+        $!config-path ~~ s/^\///;
+        my $cp = $!config-path;
 
-        # Remove in between / with ><. After that, enclose the line with <...>.
-        #
-        $config-path ~~ s:g/ \/ /\>\</;
-        $config-path = "\$!config\<$config-path\>='$config-value'";
+        my @paths = $!config-path.split('/');
+        my $cf := $!config;
+        for @paths -> $p {
+          $cf := $cf{$p};
+        }
 
-        EVAL("$config-path");
+        $cf = $!config-value;
       }
     }
 
-    method config-keypath ( $match ) { $config-path = ~$match; }
-    method config-value ( $match )   { $config-value = ~$match; }
+    method config-keypath ( $match ) { $!config-path = ~$match; }
+    method config-value ( $match )   { $!config-value = ~$match; }
 
     # After all of the prelude is stored, check if the 'module' keyword is used.
     # If so, evaluate the module and save the created object in $!objects. E.g.
@@ -244,7 +224,7 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
     #
     method prelude ( $match ) {
 
-      if $!config<option><debug>:exists and $!config<option><debug> {
+      if $!config<option><debug>:exists and ?$!config<option><debug> {
         say "\nTurn debugging on\n";
         $debug = True;
       }
@@ -256,14 +236,16 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
           }
 
           else {
+#`{{
             my $use-lib = '';
             if $!config<library>{$key}:exists {
               $use-lib = "\nuse lib '$!config<library>{$key}';";
             }
 
             my $obj;
+
             my $code = qq:to/EOCODE/;
-              use v6;$use-lib
+              use v6.c;$use-lib
               use $value;
               \$obj = $value.new;
             EOCODE
@@ -276,26 +258,40 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
             else {
               $!objects{$key} = $obj;
             }
+}}
+#say "use lib $!config<library>{$key}" if $!config<library>{$key}:exists;
+#say "require ::($value)";
+            if $!config<library>{$key}:exists {
+              my $repository = CompUnit::Repository::FileSystem.new(
+                :prefix($!config<library>{$key})
+              );
+              CompUnit::RepositoryRegistry.use-repository($repository);
+            }
+
+            require ::($value);
+            my $obj = ::($value).new;
+            $!objects{$key} = $obj;
+#say "Obj methods: ", $obj.^methods;
           }
         }
       }
     }
 
     method tag-type ( $match ) {
-      $tag-type = ~$match;
+      $!tag-type = ~$match;
     }
 
     method tag-name ( $match ) {
       # Initialize on start of a new tag. Everything of any previous tag is
       # handled and stored.
       #
-      $attr-key = Str;
-      $attrs = {};
+      $!attr-key = Str;
+      $!attrs = {};
 
-      $tag-name = ~$match;
+      $!tag-name = ~$match;
     }
 
-    method attr-key       ( $match ) { $attr-key = ~$match; }
+    method attr-key       ( $match ) { $!attr-key = ~$match; }
 
     method attr-s-value   ( $match ) { self!attr-value(~$match); }
     method attr-q-value   ( $match ) { self!attr-value(~$match); }
@@ -303,14 +299,14 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
     method !attr-value ( $m is copy ) {
       $m ~~ s:g/\"/\&quot;/;
-      $attrs{$attr-key} = $m;
+      $!attrs{$!attr-key} = $m;
     }
 
     # Before the body starts, save the tag name and create the element with
     # its attributes.
     #
-    method reset-keep-literal ( $match )  { $keep-literal = False; }
-    method keep-literal ( $match )        { $keep-literal = True; }
+    method reset-keep-literal ( $match )  { $!keep-literal = False; }
+    method keep-literal ( $match )        { $!keep-literal = True; }
 
     method body1-start ( $match )         { self!process-tag(); }
     method body1-text ( $match )          { self!process-text($match); }
@@ -322,13 +318,13 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
     # Idea to count lines in the source
     #
-    method ws ( $match ) {
-  #    ~$match ~~ m:g/(\n)/;
-  #say "N-" x $/.elems;
-    }
+#    method ws ( $match ) {
+#      ~$match ~~ m:g/(\n)/;
+#  say "N-" x $/.elems;
+#    }
 
     method comment ( $match ) {
-      $has-comment = True;
+      $!has-comment = True;
     }
 
     #-----------------------------------------------------------------------------
@@ -338,85 +334,96 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
       # Check the tag type
       #
-      $tag-name ~~ s/^$tag-type//;
+      my $tt = $!tag-type;
+      $!tag-name ~~ s/^$tt//;
 
       # Check substitutable tags starting with $.
       #
-      if $tag-type ~~ m/^'$.'/ {
+      if $!tag-type ~~ m/^'$.'/ {
         # Get modulename
         #
-        $tag-type ~~ m/\$\.(<-[\.]>+)/;
+        $!tag-type ~~ m/\$\.(<-[\.]>+)/;
         my $module = $/[0].Str;
 
         # Test if method exists in module
         #
-        if $!objects{$module}.symbols{$tag-name}:exists {
-          my $s = $!objects{$module}.symbols{$tag-name};
-          $tag-name = $s<tag-name>;
+#say "PT \$.: $!tag-type, $module, $!objects{$module}.symbols.keys()";
+
+        if $!objects{$module}.symbols{$!tag-name}:exists {
+          my $s = $!objects{$module}.symbols{$!tag-name};
+          $!tag-name = $s<tag-name>;
 
           # Add attribute to existing
           #
-          for $s<attributes>.kv -> $k,$v { $attrs{$k} = $v; }
+          for $s<attributes>.kv -> $k,$v { $!attrs{$k} = $v; }
 
           # And register element
           #
-          self!register-element( $tag-name, $attrs);
+          self!register-element( $!tag-name, $!attrs);
         }
       }
 
       # Check method tags starting with $!
       #
-      elsif $tag-type ~~ m/^'$!'/ {
+      elsif $!tag-type ~~ m/^'$!'/ {
 
         # Get the module name and remove tag type from tag string to get method
         # Then check existence of method in module.
         #
-        $tag-type ~~ m/\$\!(<-[\.]>+)/;
+        $!tag-type ~~ m/\$\!(<-[\.]>+)/;
         my $module = $/[0].Str;
-#say "Test \$!$module.$tag-name";
-        if $!objects{$module}.can($tag-name) {
+#say "Test \$!$module.$!tag-name, ", $!objects{$module}.perl;
+        if $!objects{$module}.can($!tag-name) {
 
           # Must make a copy of the tag-name to a local variable. If tag-name
           # is used directly in the closure, the name is not 'frozen' to the
           # value when the call is defined.. Same goes for attributes.
           #
-          my $tgnm = $tag-name;
+          my $tgnm = $!tag-name;
           my $mod = $module;
-          my $ats = $attrs;
-          my $cei = $current-el-idx;
+          my $ats = $!attrs;
+          my $cei = $!current-el-idx;
 #say "\nCan do \$!$mod.$tgnm in element ",
-#  $cei > 0 ?? $el-stack[$cei - 1].name !! 'top',
-#  ', ', $el-stack[$cei].name;
+#  $cei > 0 ?? $!el-stack[$cei - 1].name !! 'top',
+#  ', ', $!el-stack[$cei].name;
 
-          $deferred-calls[$cei] =
-            method (XML::Node :$content-body) {
+          $!deferred-calls[$cei] = method ( XML::Node :$content-body ) {
 #say "\nCalled \$!$mod.$tgnm";
-              $!objects{$mod}."$tgnm"( $el-stack[$cei], $ats, :$content-body);
-            }
+#say "Parent: $!el-stack[$cei]";
+#say "Attrs: $ats";
+#say "Content body: ", $content-body.Str;
+
+            $!objects{$mod}."$tgnm"(
+              $!el-stack[$cei],         # Parent tag
+              $ats,                     # attributes of current tag
+              :$content-body            # content of current tag in a
+                                        # PLACEHOLDER-ELEMENT tag
+            );
+          };
 
           self!register-element( 'PLACEHOLDER-ELEMENT', {});
         }
 
         else {
-          die "No method '$tag-name' and/or module link '$module' found";
+          die "No method '$!tag-name' and/or module link '$module' found";
         }
       }
 
-      elsif $tag-type eq '$*<' {
-        self!register-element( $tag-name, $attrs, :decorate-left);
+      elsif $!tag-type eq '$*<' {
+        self!register-element( $!tag-name, $!attrs, :decorate-left);
       }
 
-      elsif $tag-type eq '$*>' {
-        self!register-element( $tag-name, $attrs, :decorate-right);
+      elsif $!tag-type eq '$*>' {
+        self!register-element( $!tag-name, $!attrs, :decorate-right);
       }
 
-      elsif $tag-type eq '$*' {
-        self!register-element( $tag-name, $attrs, :decorate);
+      elsif $!tag-type eq '$*' {
+        self!register-element( $!tag-name, $!attrs, :decorate);
       }
 
-      elsif $tag-type eq '$' {
-#say "Register element: $tag-name, $attrs";
-        self!register-element( $tag-name, $attrs);
+      elsif $!tag-type eq '$' {
+#say "Register element: $!tag-name, $!attrs";
+        self!register-element( $!tag-name, $!attrs);
       }
 
       else {
@@ -424,7 +431,8 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
       }
     }
 
-    # Create an xml element and add its attributes. When the $current-el-idx
+    #---------------------------------------------------------------------------
+    # Create an xml element and add its attributes. When the $!current-el-idx
     # is not yet defined, a new document must be created and pointers initialized.
     # The array is like a stack of elements of which each element is a child
     # of the one before it in the array. The last one in the array is the one  to
@@ -432,8 +440,8 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
     # appended to this last element When the block is finished (at body1-end) the
     # pointer is moved up to the parent element in the array.
     #
-    method !register-element ( Str $tag-name,
-                               Hash $attrs,
+    method !register-element ( Str $!tag-name,
+                               Hash $!attrs,
                                :$decorate = False,
                                :$decorate-left = False,
                                :$decorate-right = False
@@ -441,63 +449,61 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
       # Test if index is defined.
       #
-      my $child-element = XML::Element.new( :name($tag-name), :attribs($attrs));
+      my $child-element = XML::Element.new( :name($!tag-name), :attribs($!attrs));
 
-      if $current-el-idx.defined {
-        $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
+      if $!current-el-idx.defined {
+        $!el-stack[$!current-el-idx].append(Semi-xml::Text.new(:text(' ')))
           if $decorate-left or $decorate;
-        $el-stack[$current-el-idx].append($child-element);
-        $el-stack[$current-el-idx].append(Semi-xml::Text.new(:text(' ')))
+        $!el-stack[$!current-el-idx].append($child-element);
+        $!el-stack[$!current-el-idx].append(Semi-xml::Text.new(:text(' ')))
           if $decorate-right or $decorate;
-        $el-stack[$current-el-idx + 1] = $child-element;
+        $!el-stack[$!current-el-idx + 1] = $child-element;
 
         # Copy current 'keep literal' state.
         #
-        $el-keep-literal[$current-el-idx + 1] = $el-keep-literal[$current-el-idx];
+        $!el-keep-literal[$!current-el-idx + 1] = $!el-keep-literal[$!current-el-idx];
 
         # Point to the next level in case there is another tag found in the 
         # current body. This element must become the child element of the
         # current one.
         #
-        $current-el-idx++;
+        $!current-el-idx++;
       }
 
       else {
         # First element is a root element
         #
-        $current-el-idx = 0;
-        $el-stack[$current-el-idx] = $child-element;
-        $el-keep-literal[$current-el-idx] = False;
-        $xml-document .= new($el-stack[$current-el-idx]);
+        $!current-el-idx = 0;
+        $!el-stack[$!current-el-idx] = $child-element;
+        $!el-keep-literal[$!current-el-idx] = False;
+        $!xml-document .= new($!el-stack[$!current-el-idx]);
       }
     }
 
+    #---------------------------------------------------------------------------
     # Process the text after finding body terminator
     #
     method !process-text ( $match ) {
-
-#say "\n---\n", $match<hash><comment>, "\n---\n"
-#  if $match<hash><comment>.defined;
 
       # Check if there is a comment found in this text, if so remove it and then
       # modify/remove escape characters
       #
       my $text = ~$match;
-      if $has-comment {
+      if $!has-comment {
         $text ~~ s:g/ \n \s* '#' <-[\n]>* \n /\n/;
-        $has-comment = False;
+        $!has-comment = False;
       }
       $text = self!process-esc($text);
 
       my $xml;
-      $el-keep-literal[$current-el-idx] ||= $keep-literal;
-      if $el-keep-literal[$current-el-idx] {
-  #    if $keep-literal {
-  #say "!PRT lit: $el-keep-literal[$current-el-idx], {$el-stack[$current-el-idx].name}";
+      $!el-keep-literal[$!current-el-idx] ||= $!keep-literal;
+      if $!el-keep-literal[$!current-el-idx] {
+  #    if $!keep-literal {
+  #say "!PRT lit: $!el-keep-literal[$!current-el-idx], {$!el-stack[$!current-el-idx].name}";
 
   # At the moment too complex to handle removal of a minimal indentation
   if 0 {
-  #if $keep-literal {
+  #if $!keep-literal {
   #      $text ~~ s/^\n+//;
   #      $text ~~ s/\s+$//;
   #}
@@ -529,11 +535,12 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
         $xml = Semi-xml::Text.new( :text($text), :strip) if $text.chars > 0;
       }
 
-#say "append to $el-stack[$current-el-idx]" if $xml.defined;
-      $el-stack[$current-el-idx].append($xml) if $xml.defined;
-#say "appended $el-stack[$current-el-idx]" if $xml.defined;
+#say "append to $!el-stack[$!current-el-idx]" if $xml.defined;
+      $!el-stack[$!current-el-idx].append($xml) if $xml.defined;
+#say "appended $!el-stack[$!current-el-idx]" if $xml.defined;
     }
 
+    #---------------------------------------------------------------------------
     # Substitute some escape characters in entities and remove the remaining
     # backslashes.
     #
@@ -570,49 +577,52 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
       return $esc;
     }
 
+    #---------------------------------------------------------------------------
     # Process body ending
     #
     method !process-body-end ( ) {
       # Go back one level .New child tags will overwrite the previous child
       # on the stack as those are not needed anymore.
       #
-      $current-el-idx--;
+      $!current-el-idx--;
 
-      if $deferred-calls[$current-el-idx].defined 
-         and $el-stack[$current-el-idx] ~~ XML::Element
-         and $el-stack[$current-el-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
+      if $!deferred-calls[$!current-el-idx].defined 
+         and $!el-stack[$!current-el-idx] ~~ XML::Element
+         and $!el-stack[$!current-el-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
+#say "Content of parent: ", $!el-stack[$!current-el-idx + 1].Str;
 
         # Call the deferred method and pass the element 'PLACEHOLDER-ELEMENT'
-        # and all children below it. The method must remove this element
-        # before returning otherwise it will become an xml tag.
+        # and all children below it. The method should not remove this element
+        # before returning because it will be removed after the call.
         #
-        $deferred-calls[$current-el-idx](
+        $!deferred-calls[$!current-el-idx](
           self,
-          :content-body($el-stack[$current-el-idx + 1])
+          :content-body($!el-stack[$!current-el-idx + 1])
         );
-#say "\nEl = $current-el-idx\n\n", $el-stack[$current-el-idx].Str, "\n\n";
+#say "\nEl = $!current-el-idx\n\n", $!el-stack[$!current-el-idx].Str, "\n\n";
 
         # Remove PLACEHOLDER-ELEMENT if still available
         #
-        $el-stack[$current-el-idx + 1].remove
-          if ?$el-stack[$current-el-idx + 1];
+        $!el-stack[$!current-el-idx + 1].remove
+          if ?$!el-stack[$!current-el-idx + 1];
       }
 
       # Call done, now reset
       #
-      if $current-el-idx >= 0 {
+      if $!current-el-idx >= 0 {
         # Remove method from stack
         #
-        $deferred-calls[$current-el-idx] = Any;
+        $!deferred-calls[$!current-el-idx] = Any;
 
         # Reset the 'keep literal state'
         #
-        $el-keep-literal[$current-el-idx + 1] = False;
+        $!el-keep-literal[$!current-el-idx + 1] = False;
       }
     }
 
+    #---------------------------------------------------------------------------
     method get-document ( --> XML::Document ) {
-      return $xml-document;
+      return $!xml-document;
     }
   }
 }

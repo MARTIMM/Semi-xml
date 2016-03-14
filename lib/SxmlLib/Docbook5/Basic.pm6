@@ -1,11 +1,7 @@
-use v6;
-
-#BEGIN {
-#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
-#}
+use v6.c;
 
 use Semi-xml;
-use XML;
+#use XML;
 
 # Package cannot be placed in Semi-xml/Lib and named File.pm6. Evaluation seems
 # to fail not finding the symbol &File when doing so.
@@ -140,7 +136,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       my $abstract = XML::Element.new(:name('abstract'));
       $info.append($abstract);
       $abstract.append($_) for $content-body.nodes;
-      $content-body.remove;
     }
   }
 }

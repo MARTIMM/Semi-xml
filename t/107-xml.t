@@ -1,4 +1,4 @@
-use v6;
+use v6.c;
 use Test;
 use Semi-xml;
 
@@ -37,13 +37,17 @@ $x.parse-file(:$filename);
 my Str $xml-text = ~$x;
 #say $xml-text;
 
-my $d = Date.today().Str;
-ok $xml-text ~~ m:s/ $d /, 'Check date of today';
+diag "This test can go wrong on the split second at midnight";
+my $d = Date.today();
+ok $xml-text ~~ m:s/'<p1>x y ' $d'</p1>'/, 'Check generated date';
 
-ok $xml-text ~~ m:s/ '1957-06-26' /, 'Check specific date';
-ok $xml-text ~~ m:s/ '1957-01-26' /, 'Check specific date on 1st month';
-ok $xml-text ~~ m:s/ '1957-06-01' /, 'Check specific date on 1st day';
-ok $xml-text ~~ m:s/ '1957-01-01' /, 'Check specific date on 1st day and month';
+ok $xml-text ~~ m:s/ '<p2 z="txt">'
+                     $d                                 # year-month-day
+                     (\d\d ':')**2 \d\d                 # hour:minute second
+                     \.\d**6                            # millisec
+                     '+' \d\d ':' \d\d '</p2>'          # timezone offset
+                   /,
+  'Check generated date and time';
 
 $d = DateTime.now(:timezone(960)).Str;
 #say "DT +T: $d";

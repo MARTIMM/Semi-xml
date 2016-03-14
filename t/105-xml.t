@@ -1,4 +1,4 @@
-use v6;
+use v6.c;
 use Test;
 use Semi-xml;
 
@@ -18,6 +18,9 @@ module/file:                            SxmlLib::File;
 ---
 $html [
   $body [
+    $h1 [First chapter]
+    some text
+
     $!file.include type=include reference=t/D/d1.sxml [ ignored content ]
   ]
 ]
@@ -41,7 +44,7 @@ my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+#say "\nXml: $xml-text";
 
 ok $xml-text ~~ m/'<h1>'/, 'Check h1 included';
 ok $xml-text ~~ m/'<p>'/, 'Check p included';
