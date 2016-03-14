@@ -68,7 +68,7 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
     #
     method parse-file ( Str :$filename ) {
       if $filename.IO ~~ :r {
-#        $!actions = Semi-xml::Actions.new(:init);
+#        $!actions = Semi-xml::Actions.new;
         my $text = slurp($filename);
         return self.parse(:content($text));
       }
@@ -360,6 +360,23 @@ package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
       }
 
       return Any;
+    }
+
+    #---------------------------------------------------------------------------
+    # Used from plugins to find the PLACEHOLDER-ELEMENT tag in the given
+    # parent node.
+    #
+    method find-placeholder ( XML::Element $parent --> XML::Element ) {
+
+      my XML::Node $placeholder;
+      for $parent.nodes -> $node {
+        if $node ~~ XML::Element and $node.name eq 'PLACEHOLDER-ELEMENT' {
+          $placeholder = $node;
+          last;
+        }
+      }
+
+      return $placeholder;
     }
   }
 }
