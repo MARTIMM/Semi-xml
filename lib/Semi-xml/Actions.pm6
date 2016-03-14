@@ -44,7 +44,6 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
                   Hash $attrs,
                   XML::Node :$content-body   # Ignored
                 ) {
-      $content-body.remove;
 
       $parent.append(XML::Text.new(:text(Date.today().Str)));
     }
@@ -55,7 +54,6 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
                        Hash $attrs,
                        XML::Node :$content-body   # Ignored
                      ) {
-      $content-body.remove;
 
       my $date-time = DateTime.now().Str;
       $date-time ~~ s/'T'/ / unless $attrs<iso>:exists;
@@ -71,7 +69,6 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
                      XML::Node :$content-body
                    ) {
       $parent.append(XML::Comment.new(:data([~] $content-body.nodes)));
-      $content-body.remove;
     }
 
     # $!SxmlCore.cdata []
@@ -81,7 +78,6 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
                    XML::Node :$content-body
                  ) {
       $parent.append(XML::CDATA.new(:data([~] $content-body.nodes)));
-      $content-body.remove;
     }
 
     # $!SxmlCore.pi []
@@ -91,7 +87,6 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
                 XML::Node :$content-body
               ) {
       $parent.append(XML::PI.new(:data([~] $content-body.nodes)));
-      $content-body.remove;
     }
   }
 
@@ -293,6 +288,8 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
 
         # Test if method exists in module
         #
+#say "PT \$.: $!tag-type, $module, $!objects{$module}.symbols.keys()";
+
         if $!objects{$module}.symbols{$!tag-name}:exists {
           my $s = $!objects{$module}.symbols{$!tag-name};
           $!tag-name = $s<tag-name>;
@@ -531,8 +528,8 @@ package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
 #say "Content of parent: ", $!el-stack[$!current-el-idx + 1].Str;
 
         # Call the deferred method and pass the element 'PLACEHOLDER-ELEMENT'
-        # and all children below it. The method must remove this element
-        # before returning otherwise it will become an xml tag.
+        # and all children below it. The method should not remove this element
+        # before returning because it will be removed after the call.
         #
         $!deferred-calls[$!current-el-idx](
           self,

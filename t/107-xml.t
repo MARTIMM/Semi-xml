@@ -1,4 +1,4 @@
-use v6;
+use v6.c;
 use Test;
 use Semi-xml;
 
@@ -33,13 +33,15 @@ $x.parse-file(:$filename);
 my Str $xml-text = ~$x;
 #say $xml-text;
 
+diag "This test can go wrong on the split second at midnight";
 my $d = Date.today();
-ok $xml-text ~~ m/'<p1>x y ' $d'</p1>'/, 'Check generated date';
+ok $xml-text ~~ m:s/'<p1>x y ' $d'</p1>'/, 'Check generated date';
 
 ok $xml-text ~~ m:s/ '<p2 z="txt">'
                      $d                                 # year-month-day
-                     (\d\d ':')**2 \d\d                 # hour:minute
-                     '+' \d\d ':' \d\d'</p2>'           # time
+                     (\d\d ':')**2 \d\d                 # hour:minute second
+                     \.\d**6                            # millisec
+                     '+' \d\d ':' \d\d '</p2>'          # timezone offset
                    /,
   'Check generated date and time';
 
