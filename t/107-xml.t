@@ -35,7 +35,7 @@ my Semi-xml::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 diag "Some tests can go wrong on the split second at midnight";
 my $d = Date.today().Str;
