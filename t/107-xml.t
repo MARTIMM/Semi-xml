@@ -51,7 +51,9 @@ ok $xml-text ~~ m/ '<Y>'
                      $d                                 # year-month-day
                      'T' (\d\d ':')**2 \d\d             # hour:minute second
                      \.\d**6                            # millisec
-                     '+' \d\d ':' \d\d '</Y>'           # timezone offset
+                     ( '+' \d\d ':' \d\d | 'Z' ) '</Y>' # timezone offset
+                                                        # On travis the local
+                                                        # TZ is 'Z'
                    /,
   'Check iso date, time and timezone';
 
