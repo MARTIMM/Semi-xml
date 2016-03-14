@@ -1,11 +1,7 @@
-use v6;
-
-#BEGIN {
-#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
-#}
+use v6.c;
 
 use Semi-xml;
-use XML;
+#use XML;
 
 # Not yet available for perl 6
 #use Text::Lorem;
@@ -24,8 +20,6 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
                   Hash $attrs,
                   XML::Node :$content-body   # Ignored
                 ) {
-
-      $content-body.remove;
 
       my $type = $attrs<type> // 'sentence';
       my $size = $attrs<size> // 1;

@@ -5,6 +5,7 @@
   "depends": [
     "XML"
   ],
+  "license": "The Artistic License 2.0",
   "description": "Semi xml parser",
   "name": "Semi-xml",
   "perl": "6c",
@@ -25,5 +26,5 @@
     "sxml2xml":                         "bin/sxml2xml.pl6"
   },
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.16.3"
+  "version": "v0.17.0"
 }

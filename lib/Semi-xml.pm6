@@ -5,7 +5,7 @@ use Semi-xml::Actions;
 
 #-------------------------------------------------------------------------------
 #
-package Semi-xml:ver<0.16.3>:auth<https://github.com/MARTIMM> {
+package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
   class Sxml {
 
