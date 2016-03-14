@@ -22,7 +22,7 @@ $top [
   $!SxmlCore.date year=1957 month=6 []
   $!SxmlCore.date year=1957 []
   $*A []
-  $*X [$!SxmlCore.date-time []]
+  $*X [$!SxmlCore.date []]
   $*Y [$!SxmlCore.date-time iso=1 []]
   $*Z [$!SxmlCore.date-time iso=1 timezone=960 []]
 ]
@@ -37,21 +37,31 @@ $x.parse-file(:$filename);
 my Str $xml-text = ~$x;
 #say $xml-text;
 
-diag "This test can go wrong on the split second at midnight";
-my $d = Date.today();
-ok $xml-text ~~ m:s/'<p1>x y ' $d'</p1>'/, 'Check generated date';
+diag "Some tests can go wrong on the split second at midnight";
+my $d = Date.today().Str;
+ok $xml-text ~~ m:s/ '1957-06-26' /, 'Check specific date';
+ok $xml-text ~~ m:s/ '1957-01-26' /, 'Check specific date on 1st month';
+ok $xml-text ~~ m:s/ '1957-06-01' /, 'Check specific date on 1st day';
+ok $xml-text ~~ m:s/ '1957-01-01' /, 'Check specific date on 1st day and month';
 
-ok $xml-text ~~ m:s/ '<p2 z="txt">'
+ok $xml-text ~~ m:s/ '<X>' $d '</X>' /, 'Check date of today';
+
+#say 'Date: ', $d;
+ok $xml-text ~~ m/ '<Y>'
                      $d                                 # year-month-day
-                     (\d\d ':')**2 \d\d                 # hour:minute second
+                     'T' (\d\d ':')**2 \d\d             # hour:minute second
                      \.\d**6                            # millisec
-                     '+' \d\d ':' \d\d '</p2>'          # timezone offset
+                     '+' \d\d ':' \d\d '</Y>'           # timezone offset
                    /,
-  'Check generated date and time';
+  'Check iso date, time and timezone';
 
-$d = DateTime.now(:timezone(960)).Str;
-#say "DT +T: $d";
-ok $xml-text ~~ m:s/'<Z>' $d '</Z>'/, 'Check date and time in timezone';
+ok $xml-text ~~ m/ '<Z>'
+                     $d                                 # year-month-day
+                     'T' (\d\d ':')**2 \d\d             # hour:minute second
+                     \.\d**6                            # millisec
+                     '+00:16</Z>'                       # timezone offset
+                   /,
+  'Check iso date, time and timezone of 960 sec';
 
 is $x.get-option( :section('output'), :option('fileext')), 'mxml', 'Check fileext option';
 is $x.get-option( :section('output'), :option('filepath')), '.', 'Check filepath option';

@@ -109,8 +109,9 @@ package Semi-xml {
                      ) {
 
       my $date-time;
+
       if $attrs<timezone> {
-        $date-time = DateTime.now(:timezone($attrs<timezone>)).Str;
+        $date-time = DateTime.now(:timezone($attrs<timezone>.Int)).Str;
       }
       
       else {
