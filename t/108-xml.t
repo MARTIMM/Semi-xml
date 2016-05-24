@@ -31,6 +31,8 @@ $html [
     $!SxmlCore.pi [perl6 instruction text]
 
     $h1 [End of tests]
+
+    $# [shortcut for simplified comment text]
   ]
 ]
 EOSX
@@ -54,10 +56,15 @@ ok $xml-text ~~ m/'<!--comment text<p>data in section</p><br/>-->'/,
 ok $xml-text ~~ m/'<![CDATA[cdata text]]>'/, 'Check cdata';
 ok $xml-text ~~ m/'<![CDATA[cdata text' \d**4\-\d\d\-\d\d']]>'/,
    'Check cdata with other method';
-ok $xml-text ~~ m/'<![CDATA[cdata text<p>data in section</p><br/>]]>'/,
-   'Check cdata with embedded tags';
 
-ok $xml-text ~~ m/'<?perl6 instruction text?>'/, 'Check pi data';
+like $xml-text,
+     / :s '<![CDATA[' cdata text '<p>' data in section '</p><br/>' ']]>' /,
+     'Check cdata with embedded tags';
+
+like $xml-text, /:s '<?' perl6 instruction text '?>' /, 'Check pi data';
+
+like $xml-text, /:s '<!--' shortcut for simplified comment text '-->' /,
+                'Check shortcut comments';
 
 unlink $filename;
 

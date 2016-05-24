@@ -113,7 +113,7 @@ package Semi-xml {
       if $attrs<timezone> {
         $date-time = DateTime.now(:timezone($attrs<timezone>.Int)).Str;
       }
-      
+
       else {
         $date-time = DateTime.now().Str;
       }
@@ -172,7 +172,8 @@ package Semi-xml {
     has Array $!el-keep-literal;
 
     has Str $!tag-name;
-    has Str $!tag-type;
+    has Str $!tag-type1;
+    has Str $!tag-type2;
 
     has Hash $!attrs;
     has Str $!attr-key;
@@ -278,8 +279,12 @@ package Semi-xml {
       }
     }
 
-    method tag-type ( $match ) {
-      $!tag-type = ~$match;
+    method tag-type1 ( $match ) {
+      $!tag-type1 = ~$match;
+    }
+
+    method tag-type2 ( $match ) {
+      $!tag-type2 = ~$match;
     }
 
     method tag-name ( $match ) {
@@ -333,22 +338,26 @@ package Semi-xml {
     #
     method !process-tag ( ) {
 
+      $!tag-type1 = '' unless $!tag-type1.defined;
+      $!tag-type2 = '' unless $!tag-type2.defined;
+
       # Check the tag type
       #
-      my $tt = $!tag-type;
+      my $tt = $!tag-type1;
       $!tag-name ~~ s/^$tt//;
+#say "TT TN: $tt $!tag-name";
 
       # Check substitutable tags starting with $.
       #
-      if $!tag-type ~~ m/^'$.'/ {
+      if $!tag-type1 ~~ m/^'$.'/ {
         # Get modulename
         #
-        $!tag-type ~~ m/\$\.(<-[\.]>+)/;
+        $!tag-type1 ~~ m/\$\.(<-[\.]>+)/;
         my $module = $/[0].Str;
 
         # Test if method exists in module
         #
-#say "PT \$.: $!tag-type, $module, $!objects{$module}.symbols.keys()";
+#say "PT \$.: $!tag-type1, $module, $!objects{$module}.symbols.keys()";
 
         if $!objects{$module}.symbols{$!tag-name}:exists {
           my $s = $!objects{$module}.symbols{$!tag-name};
@@ -366,12 +375,12 @@ package Semi-xml {
 
       # Check method tags starting with $!
       #
-      elsif $!tag-type ~~ m/^'$!'/ {
+      elsif $!tag-type1 ~~ m/^'$!'/ {
 
         # Get the module name and remove tag type from tag string to get method
         # Then check existence of method in module.
         #
-        $!tag-type ~~ m/\$\!(<-[\.]>+)/;
+        $!tag-type1 ~~ m/\$\!(<-[\.]>+)/;
         my $module = $/[0].Str;
 #say "Test \$!$module.$!tag-name, ", $!objects{$module}.perl;
         if $!objects{$module}.can($!tag-name) {
@@ -410,19 +419,36 @@ package Semi-xml {
         }
       }
 
-      elsif $!tag-type eq '$*<' {
+      elsif $!tag-type1 eq '$*<' {
         self!register-element( $!tag-name, $!attrs, :decorate-left);
       }
 
-      elsif $!tag-type eq '$*>' {
+      elsif $!tag-type1 eq '$*>' {
         self!register-element( $!tag-name, $!attrs, :decorate-right);
       }
 
-      elsif $!tag-type eq '$*' {
+      elsif $!tag-type1 eq '$*' {
         self!register-element( $!tag-name, $!attrs, :decorate);
       }
 
-      elsif $!tag-type eq '$' {
+      elsif $!tag-type2 eq '$#' {
+#say "Register element: SxmlCore.comment, ";
+        my $ats = {};
+        my $cei = $!current-el-idx;
+
+        $!deferred-calls[$cei] = method ( XML::Node :$content-body ) {
+
+          $!objects<SxmlCore>.comment(
+            $!el-stack[$cei],         # Parent tag
+            {},                       # attributes of current tag
+            :$content-body            # content of current tag
+          );
+        };
+
+        self!register-element( 'PLACEHOLDER-ELEMENT', {});
+      }
+
+      elsif $!tag-type1 eq '$' {
 #say "Register element: $!tag-name, $!attrs";
         self!register-element( $!tag-name, $!attrs);
       }
@@ -464,7 +490,7 @@ package Semi-xml {
         #
         $!el-keep-literal[$!current-el-idx + 1] = $!el-keep-literal[$!current-el-idx];
 
-        # Point to the next level in case there is another tag found in the 
+        # Point to the next level in case there is another tag found in the
         # current body. This element must become the child element of the
         # current one.
         #
@@ -564,7 +590,7 @@ package Semi-xml {
         };
         $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
       }
-      
+
       if $esc ~~ m/ '\\u' <xdigit>+ / {
         my $set-utf8 = sub ($m1) {
 #say "m1: $m1";
@@ -572,7 +598,7 @@ package Semi-xml {
         };
         $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
       }
-      
+
       $esc ~~ s:g/\\//;
 #say "\n$esc\n\n";
       return $esc;
@@ -587,7 +613,7 @@ package Semi-xml {
       #
       $!current-el-idx--;
 
-      if $!deferred-calls[$!current-el-idx].defined 
+      if $!deferred-calls[$!current-el-idx].defined
          and $!el-stack[$!current-el-idx] ~~ XML::Element
          and $!el-stack[$!current-el-idx + 1].name eq 'PLACEHOLDER-ELEMENT' {
 #say "Content of parent: ", $!el-stack[$!current-el-idx + 1].Str;
@@ -627,6 +653,3 @@ package Semi-xml {
     }
   }
 }
-
-
-

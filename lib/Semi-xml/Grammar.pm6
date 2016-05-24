@@ -42,22 +42,26 @@ package Semi-xml {
     # A tag is an identifier prefixed with $. $! or $ to attach several semantics
     # to the tag.
     #
-    # $table class=bussiness id=sect1 
+    # $table class=bussiness id=sect1
     #
     token reset-keep-literal { <?> }
     token tag { <.reset-keep-literal> <.tag-name> ( <.attribute> )* }
-    token tag-name { <.tag-type> <.identifier> [ ':' <.identifier> ]**0..1 }
-    token tag-type {
+    token tag-name {
+      <.tag-type1> <.identifier> [ ':' <.identifier> ]**0..1 ||
+      <.tag-type2>
+    }
+    token tag-type1 {
       ( '$.' <.identifier> '.' ) ||
       ( '$!' <.identifier> '.' ) ||
-      '$*<' || '$*>' || '$*'     ||
+      '$*<' || '$*>' || '$*' ||
       '$'
     }
+    token tag-type2 { '$#' }
 
     # The tag may be followed by attributes. These are key=value constructs. The
     # key is an identifier and the value can be anything. Enclose the value in
     # quotes ' or " when there are whitespace characters in the value.
-    # 
+    #
     token attribute { <.ws>? <.attr-key> '=' <.attr-value-spec> }
     token attr-key { <.identifier> [ ':' <.identifier> ]**0..1 }
     token attr-value-spec {
