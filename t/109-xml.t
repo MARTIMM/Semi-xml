@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing SxmlLib::Docbook5::Basic;
@@ -32,7 +32,7 @@ $.Db5.article [
 EOSX
 
 #-------------------------------------------------------------------------------
-my Semi-xml::Sxml $x .= new;
+my SemiXML::Sxml $x .= new;
 $x.parse(:content($sxml-text));
 
 my Str $xml-text = ~$x;

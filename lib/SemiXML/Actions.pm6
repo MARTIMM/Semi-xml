@@ -1,8 +1,7 @@
 use v6.c;
 use XML;
 
-#package Semi-xml:ver<0.16.2>:auth<https://github.com/MARTIMM> {
-package Semi-xml {
+package SemiXML:auth<https://github.com/MARTIMM> {
 
   #-----------------------------------------------------------------------------
   # Must make this class to substitute on XML::Text. That class removes all
@@ -98,7 +97,7 @@ package Semi-xml {
 
     # Objects hash with one predefined object for core methods
     #
-    has Hash $.objects = { SxmlCore => Semi-xml::SxmlCore.new() };
+    has Hash $.objects = { SxmlCore => SemiXML::SxmlCore.new() };
     has Hash $.config = {};
 
 #    has Hash $config-key = {};
@@ -394,10 +393,10 @@ package Semi-xml {
       my $child-element = XML::Element.new( :name($!tag-name), :attribs($!attrs));
 
       if $!current-el-idx.defined {
-        $!el-stack[$!current-el-idx].append(Semi-xml::Text.new(:text(' ')))
+        $!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
           if $decorate-left or $decorate;
         $!el-stack[$!current-el-idx].append($child-element);
-        $!el-stack[$!current-el-idx].append(Semi-xml::Text.new(:text(' ')))
+        $!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
           if $decorate-right or $decorate;
         $!el-stack[$!current-el-idx + 1] = $child-element;
 
@@ -468,13 +467,13 @@ package Semi-xml {
 
         $text ~~ s:g/^^\s**{$min-spaces}// unless $min-spaces == Inf;
   }
-        $xml = Semi-xml::Text.new(:text($text)) if $text.chars > 0;
+        $xml = SemiXML::Text.new(:text($text)) if $text.chars > 0;
       }
 
       else {
         $text ~~ s/\s+$//;        ## Chop out trailing spaces from the text.
         $text ~~ s/^\s+//;        ## Chop out leading spaces from the text.
-        $xml = Semi-xml::Text.new( :text($text), :strip) if $text.chars > 0;
+        $xml = SemiXML::Text.new( :text($text), :strip) if $text.chars > 0;
       }
 
 #say "append to $!el-stack[$!current-el-idx]" if $xml.defined;

@@ -7,12 +7,12 @@
   ],
   "license": "The Artistic License 2.0",
   "description": "Semi xml parser",
-  "name": "Semi-xml",
+  "name": "SemiXML",
   "perl": "6c",
   "provides": {
-    "Semi-xml::Actions":                "lib/Semi-xml/Actions.pm6",
-    "Semi-xml::Grammar":                "lib/Semi-xml/Grammar.pm6",
-    "Semi-xml":                         "lib/Semi-xml.pm6",
+    "SemiXML::Actions":                "lib/SemiXML/Actions.pm6",
+    "SemiXML::Grammar":                "lib/SemiXML/Grammar.pm6",
+    "SemiXML":                         "lib/SemiXML.pm6",
 
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
@@ -25,6 +25,7 @@
 
     "sxml2xml":                         "bin/sxml2xml.pl6"
   },
+  "resources": [],
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.17.0"
+  "version": "v0.18.0"
 }

@@ -1,18 +1,19 @@
 use v6.c;
 use XML;
-use Semi-xml::Grammar;
-use Semi-xml::Actions;
+use SemiXML::Grammar;
+use SemiXML::Actions;
 
 #-------------------------------------------------------------------------------
 #
-package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
+#package SemiXML:ver<0.17.0>:auth<https://github.com/MARTIMM> {
+package SemiXML:auth<https://github.com/MARTIMM> {
 
   class Sxml {
 
     our $debug = False;
 
-    has Semi-xml::Grammar $!grammar;
-    has Semi-xml::Actions $.actions;
+    has SemiXML::Grammar $!grammar;
+    has SemiXML::Actions $.actions;
 
     has Hash $.styles;
     has Hash $.configuration is rw;
@@ -68,7 +69,7 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
     #
     method parse-file ( Str :$filename ) {
       if $filename.IO ~~ :r {
-#        $!actions = Semi-xml::Actions.new;
+#        $!actions = SemiXML::Actions.new;
         my $text = slurp($filename);
         return self.parse(:content($text));
       }
@@ -383,7 +384,7 @@ package Semi-xml:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 
 #-------------------------------------------------------------------------------
 #
-multi sub prefix:<~>( Semi-xml::Sxml $x --> Str ) {
+multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) {
   return ~$x.get-xml-text;
 }
 

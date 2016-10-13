@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -69,8 +69,8 @@ EOSXML
 mkdir('t/M');
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
 #use XML;
-#use Semi-xml::Actions;
-use Semi-xml;
+#use SemiXML::Actions;
+use SemiXML;
 
 class M::m1 {
   has Hash $.symbols = {
@@ -90,7 +90,7 @@ class M::m1 {
                  XML::Node :$content-body
                ) {
 
-    my Semi-xml::Sxml $x .= new;
+    my SemiXML::Sxml $x .= new;
     my XML::Node $placeholder = $x.find-placeholder($parent);
 
     my $p = XML::Element.new(:name('p'));
@@ -127,13 +127,13 @@ class M::m1 {
       #
       my $td = XML::Element.new(:name('td'));
       $tr.append($td);
-      $td.append(Semi-xml::Text.new( :strip, :text('data 1')));
+      $td.append(SemiXML::Text.new( :strip, :text('data 1')));
 
       # On 3rd row add text from attribute
       # <tr><td>data 1 set1</td></tr>
       #
       if $count == 2 {
-        $td.append(Semi-xml::Text.new( :text(' ' ~ $attrs<data-weather>)));
+        $td.append(SemiXML::Text.new( :text(' ' ~ $attrs<data-weather>)));
       }
 
       # <tr><td>data 1</td><td>data 2 </td></tr>
@@ -144,7 +144,7 @@ class M::m1 {
 
       # <tr><td>data 1</td><td>data 2 $count$count$count$count</td></tr>
       #
-      $td.append(Semi-xml::Text.new( :text("$count"))) for ^4;
+      $td.append(SemiXML::Text.new( :text("$count"))) for ^4;
 
       $td = XML::Element.new(:name('td'));
       $tr.append($td);
@@ -160,7 +160,7 @@ EOMOD
 #-------------------------------------------------------------------------------
 # Parse
 #
-my Semi-xml::Sxml $x .= new;
+my SemiXML::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;

@@ -1,7 +1,6 @@
 .precomp/*
 */.precomp/*
 .directory
-*.pdf
 *.html
 *.xml
 *.xsl

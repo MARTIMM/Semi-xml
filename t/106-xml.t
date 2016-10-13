@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -35,7 +35,7 @@ spurt( 't/Grammars/Error messages.html', q:to/EOSXML/);
 <html/>
 EOSXML
 
-my Semi-xml::Sxml $x .= new;
+my SemiXML::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;

@@ -1,12 +1,7 @@
 #!/usr/bin/env perl6
 #
-use v6;
-
-#BEGIN {
-#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
-#}
-
-use Semi-xml;
+use v6.c;
+use SemiXML;
 
 # Allow switches after positionals. Pinched from an older panda version. Now
 # it is possible to make the sxml file executable with the path of this
@@ -43,7 +38,7 @@ sub MAIN ( Str $filename, Str :$run ) {
 #
 sub process-sxml ( Str:D $filename, Str :$run ) {
 
-  my Semi-xml::Sxml $x .= new(:init);
+  my SemiXML::Sxml $x .= new(:init);
   $x does sxml-role;
 
   # Split filename in its parts

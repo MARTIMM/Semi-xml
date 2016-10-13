@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -49,8 +49,8 @@ EOSX
 mkdir('t/M');
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
 #use XML;
-#use Semi-xml::Actions;
-use Semi-xml;
+#use SemiXML::Actions;
+use SemiXML;
 
 class M::m1 {
   has Hash $.symbols = {
@@ -69,7 +69,7 @@ EOMOD
 #-------------------------------------------------------------------------------
 # Parse
 #
-my Semi-xml::Sxml $x .= new;
+my SemiXML::Sxml $x .= new;
 $x.parse-file(:$filename);
 
 my Str $xml-text = ~$x;

@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing http-header
@@ -27,7 +27,7 @@ $html [
 EOSX
 
 #-------------------------------------------------------------------------------
-my Semi-xml::Sxml $x .= new;
+my SemiXML::Sxml $x .= new;
 $x.parse(:content($sxml-text));
 
 my Str $xml-text = ~$x;

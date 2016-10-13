@@ -1,0 +1,48 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
+#
+---
+output/filepath:                        Articles/MongoDB;
+output/fileext:                         html;
+
+module/tools:                           Sxml-Tools;
+library/Stools:                         /home/marcel/Languages/Perl6/Projects/Semi-xml;
+module/Stools:                          SxmlLib::Html::FixedLayout;
+---
+$article class=post [
+  $header [
+    $h2 [ MongoDB and BSON Howto ]
+#    $p [
+#      Posted by someone on
+#      $time datetime=2010-10-01T20:10 [ 1/10/2010 ]
+#    ]
+  ]
+
+  $aside [
+    $p [
+      The Perl 6 modules MongoDB and BSON are maintained by me and can be found
+      $*a href=https://github.com/MARTIMM/mongo-perl6-driver target=_blank
+      [here] and $*<a href=https://github.com/MARTIMM/BSON target=_blank [here].
+      However, the modules are also registered in the Perl 6 module library so
+      when panda is installed you can also install them using panda;
+$pre [=
+> panda install BSON
+> panda install MongoDB
+]
+
+      The first command is not really necessary because MongoDB is depending
+      on it and is defined as such so that panda will install it automatically.
+    ]
+  ]
+
+  $p [
+    The minimal use of the MongoDB driver is loading the Client module to make
+    contact with the server, then do your thing and close it down. In this
+    example a connection with the localhost is made on port 65000.
+    $!Stools.load-test-example path=Wiki-Doc-Tests/T-000.pl6 []
+  ]
+
+  $footer [
+    $hr []
+    $p [ Marcel Timmerman $!SxmlCore.date []]
+  ]
+]
