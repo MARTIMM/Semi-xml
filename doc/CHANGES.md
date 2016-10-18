@@ -2,7 +2,7 @@
 
 * 0.18.0
   * Changed module name from Semi-xml into SemiXML. Changes reflected all files
-  and other modulenames.
+  and other module names.
 * 0.17.0
   * Many changes because of perl6 changes until the end of 2015. Big changes are removal of EVAL() statements and the updates of used perl6 version which is now v6.c. Furthermore there were some bug fixes where code was manipulating the XML nodes. Added also a helper function to find the PLACEHOLDER-ELEMENT.
 * 0.16.3 Bugfixes in code and tests

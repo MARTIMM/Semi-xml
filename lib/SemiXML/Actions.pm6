@@ -131,7 +131,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #-----------------------------------------------------------------------------
-    # All config entries are like: '/a/b/c: v;' This must be evauluated as
+    # All config entries are like: '/a/b/c: v;' This must be evaluated as
     # "$!config<$!config-path>='$!config-value'" so it becomes a key value pair
     # in the config.
     #
