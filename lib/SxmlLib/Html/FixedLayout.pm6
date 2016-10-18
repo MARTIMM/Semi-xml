@@ -1,6 +1,6 @@
 use v6.c;
 
-use Semi-xml;
+use SemiXML;
 #use XML;
 
 package SxmlLib:auth<https://github.com/MARTIMM> {
@@ -68,7 +68,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       #
       my $pre = XML::Element.new(:name('pre'));
       $parent.append($pre);
-      $pre.append(Semi-xml::Text.new(:$text));
+      $pre.append(SemiXML::Text.new(:$text));
     }
   }
 }

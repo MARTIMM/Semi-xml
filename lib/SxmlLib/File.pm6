@@ -1,9 +1,9 @@
 use v6.c;
 
-use Semi-xml;
+use SemiXML;
 use XML;
 
-# Package cannot be placed in Semi-xml/Lib and named File.pm6. Evaluation seems
+# Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
 # to fail not finding the symbol &File when doing so.
 #
 package SxmlLib:auth<https://github.com/MARTIMM> {
@@ -39,7 +39,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
             # encapsulate the content in another tag because parsing will
             # fail if there are more than one top level elements.
             #
-            my Semi-xml::Sxml $x .= new;
+            my SemiXML::Sxml $x .= new;
 
             # When parsing another new piece of text, this result will be placed
             # next to a previously prepared sibling 'PLACEHOLDER-ELEMENT' of

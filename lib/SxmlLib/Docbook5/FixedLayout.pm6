@@ -1,6 +1,6 @@
 use v6.c;
 
-use Semi-xml;
+use SemiXML;
 #use XML;
 
 package SxmlLib:auth<https://github.com/MARTIMM> {
@@ -105,7 +105,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
                 $text ~~ s:g/\>/\&gt;/;
               }
               
-              $pl.append(Semi-xml::Text.new(:$text));
+              $pl.append(SemiXML::Text.new(:$text));
               my $co = XML::Element.new(
                 :name('co'),
                 :attribs(
@@ -114,7 +114,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
               );
 
               $pl.append($co);
-              $pl.append(Semi-xml::Text.new(:text("\n")));
+              $pl.append(SemiXML::Text.new(:text("\n")));
               $text-start-line = $row + 1;
 #say "CR 3: ", $pl.Str;
               $callout-count++;
@@ -129,7 +129,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
               $text ~~ s:g/\</\&lt;/;
               $text ~~ s:g/\>/\&gt;/;
             }
-            $pl.append(Semi-xml::Text.new(:$text));
+            $pl.append(SemiXML::Text.new(:$text));
           }
         }
       }
@@ -137,7 +137,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
       else {
         # Place the selected code in the container
         #
-        $pl.append(Semi-xml::Text.new(:$text));
+        $pl.append(SemiXML::Text.new(:$text));
       }
     }
   }

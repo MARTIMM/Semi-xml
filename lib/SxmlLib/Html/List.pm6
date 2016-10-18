@@ -1,13 +1,13 @@
 use v6.c;
 
 #BEGIN {
-#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
+#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/SemiXML/lib');
 #}
 
-use Semi-xml;
+use SemiXML;
 use XML;
 
-# Package cannot be placed in Semi-xml/Lib and named File.pm6. Evaluation seems
+# Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
 # to fail not finding the methods when doing so (perl6 2015-04).
 #
 package SxmlLib:auth<https://github.com/MARTIMM> {
