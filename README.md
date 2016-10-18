@@ -1,6 +1,7 @@
 # Semi-xml
 
 [![Build Status](https://travis-ci.org/MARTIMM/Semi-xml.svg?branch=master)](https://travis-ci.org/MARTIMM/Semi-xml)
+[![License](https://github.com/MARTIMM/Semi-xml/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
 
 ## Description
 
@@ -71,7 +72,3 @@ For changes look for the file doc/CHANGES.md in this repository.
 ## Aurhor
 
 Marcel Timmerman
-
-## License
-
-Released under [Artistic License 2.0](http://www.perlfoundation.org/artistic_license_2_0).
