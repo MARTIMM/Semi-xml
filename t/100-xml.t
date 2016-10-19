@@ -1,21 +1,22 @@
 use v6.c;
 
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
 #   Role add to parser class
-#   Translation of smi-xml text
+#   Translation of SemiXML text
 #   Control of output via role
 #   Result to text
 #   test attributes
 #-------------------------------------------------------------------------------
 # Setup
 #
-my Semi-xml::Sxml $x .= new;
-isa-ok $x, 'Semi-xml::Sxml', $x.^name;
+my SemiXML::Sxml $x .= new;
+isa-ok $x, 'SemiXML::Sxml', $x.^name;
 
+#`{{
 # Devise a role to add
 #
 role pink {
@@ -34,11 +35,12 @@ role pink {
     }
   };
 }
+}}
 
 # Add the role to the parser
 #
-$x does pink;
-is $x.^name, 'Semi-xml::Sxml+{pink}', $x.^name;
+#$x does pink;
+#is $x.^name, 'SemiXML::Sxml+{pink}', $x.^name;
 
 # Setup the text to parse
 #

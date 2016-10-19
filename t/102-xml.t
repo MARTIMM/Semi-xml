@@ -66,6 +66,7 @@ ok $filename.IO ~~ :e, "File $filename written";
 
 unlink $filename;
 
+#`{{
 role pink {
   has Hash $!configuration = {
     output => {
@@ -76,6 +77,7 @@ role pink {
 }
 
 $x does pink;
+}}
 
 $filename = 't/another.html';
 $x.save;

@@ -1,0 +1,8 @@
+[ option.doctype ]
+  show          = true
+
+[ option.xml-prelude ]
+  show          = true
+  version       = '1.0'
+  encoding      = 'UTF-8'
+
