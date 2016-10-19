@@ -1,28 +1,15 @@
-#!/usr/bin/env sxml2xml.pl6
-#
----
-options/doctype/show:   1;
-
-#output/filename:        index;
-output/filepath:        .;
-output/fileext:         html;
-
-module/list:            SxmlLib::Html::List;
-
-dependencies/files:     Sxml/home.sxml, Sxml/crossroads.sxml, Sxml/about.sxml;
-
----
 $!test-init
   test-file=test1.t
   title='Integer manipulations' [
-  
+
   $!test-doc [
     Test the integer declaration and then assignment of a number. Test
     if the number
-  ] 
+  ]
+
   $!test-code [
     my Int $i;
-    is $i, Any, 'Unititialized Int';
+    is $i, Any, 'Uninitialized Int';
     $i = 10;
     is $i, 10, 'Initialized Int';
   ]
