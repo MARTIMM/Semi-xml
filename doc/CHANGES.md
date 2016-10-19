@@ -1,5 +1,7 @@
 ## Changes
 
+* 0.19.0
+  * Replaced prelude and internal configs with Config::DataLang::Refine
 * 0.18.0
   * Changed module name from Semi-xml into SemiXML. Changes reflected all files
   and other module names.

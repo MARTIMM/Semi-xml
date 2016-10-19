@@ -98,7 +98,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # Objects hash with one predefined object for core methods
     #
     has Hash $.objects = { SxmlCore => SemiXML::SxmlCore.new() };
-    has Hash $.config = {};
+#TODO check out
+    has Hash $.config is rw = {};
+#    has Hash $.config = {};
 
 #    has Hash $config-key = {};
     has Str $!config-path;
@@ -130,6 +132,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $!has-comment = False;
     }
 
+#`{{
     #-----------------------------------------------------------------------------
     # All config entries are like: '/a/b/c: v;' This must be evaluated as
     # "$!config<$!config-path>='$!config-value'" so it becomes a key value pair
@@ -155,7 +158,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     method config-keypath ( $match ) { $!config-path = ~$match; }
     method config-value ( $match )   { $!config-value = ~$match; }
+}}
 
+#`{{
     # After all of the prelude is stored, check if the 'module' keyword is used.
     # If so, evaluate the module and save the created object in $!objects. E.g.
     # suppose a config 'module/file: Sxml::Lib::File;' is used then the object
@@ -177,7 +182,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           }
 
           else {
-#`{{
+#`{ {
             my $use-lib = '';
             if $!config<library>{$key}:exists {
               $use-lib = "\nuse lib '$!config<library>{$key}';";
@@ -199,7 +204,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
             else {
               $!objects{$key} = $obj;
             }
-}}
+} }
 #say "use lib $!config<library>{$key}" if $!config<library>{$key}:exists;
 #say "require ::($value)";
             if $!config<library>{$key}:exists {
@@ -217,6 +222,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
       }
     }
+}}
 
     method tag-type ( $match ) {
       $!tag-type = ~$match;

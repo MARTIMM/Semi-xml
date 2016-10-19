@@ -1,5 +1,6 @@
 
 * Parser and actions.
+  * [ ] Rethinking the parser grammar.
   * [x] Parser is a class. Styles can be templated and added in the form of a role. The same information can be supplied in the prelude of the source. For all settings, defaults are provided when possible.
   * [ ] Xml Namespaces
   * [ ] Doctype entities
@@ -54,19 +55,50 @@
         sxml2xml program will not bother (yet).
   * [x] Dependencies on other files
   * [ ] Partial parsing of prelude or document.
-  * [ ] Store internal representatio back into sxml. This cannot be dynamic for
+  * [ ] Store internal representation back into sxml. This cannot be dynamic for
         the moment.
+
+* [x] Simplify syntax by removing the prelude and move the options into a config file using TOML. Using module Config::DataLang::Refine searching for options files is as follows;
+  * First read program resource version of SemiXML.toml
+  * Then merge ~/.SemiXML.toml, ./.SemiXML.toml, ./SemiXML.toml
+  * Then using main file.sxml merge; <file-location>/file.toml, ~/.file.toml, ./.file.toml and ./file.toml
+
+  * The top level tables in this configuration result are as follows;
+
+    ```
+    [ dependencies ]
+    [ module ]
+    [ option ]
+    [ option.doctype ]
+    [ option.xml-prelude ]
+    [ option.http-header ]
+    [ output ]
+    ```
+
+  * These tables are used as the defaults. Then for each file processed, these are prefixed with the filename. E.g. assuming file.sxml;
+
+    ```
+    [ dependencies.file ]
+    [ option.xml-prelude.file ]
+    ```
+
+  * Then for any used module the same kind of table extension but only in the [module] table. E.g. assume module *SxmlLib::Docbook5::Basic* nicknamed *Db5b*;
+
+    ```
+    [ module ]
+
+    [ module.Db5b ]
+      name    = 'SxmlLib::Docbook5::Basic'
+    ```
+* [ ] Use Config::DataLang::Refine to select the data according to plan shown above.
+
+* [ ] Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
+* [ ] Use the resources field from META.info to save the core Sxml pluggable modules.
 
 * And ...
   * Documentation.
     * Module and program documentation
-      * [ ] Semi-xml::Sxml
-      * [ ] Semi-xml::Action
-      * [ ] Semi-xml::Grammar
-      * [ ] Semi-xml::SxmlCore
-      * [ ] Semi-xml::Text
-      * [ ] sxml2xml
     * [ ] Documentation is started as a docbook 5 document. There are references
           to local iconfiles and fonts for which I don't know yet if it may be
-          included.
+          included (license issues).
     * [ ] Tutorials.

@@ -2,11 +2,13 @@ use v6.c;
 use XML;
 use SemiXML::Grammar;
 use SemiXML::Actions;
+use Config::DataLang::Refine;
 
 #-------------------------------------------------------------------------------
-#
 #package SemiXML:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 package SemiXML:auth<https://github.com/MARTIMM> {
+
+  subset ParseResult where $_ ~~ any(Match|Nil);
 
   class Sxml {
 
@@ -16,8 +18,11 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has SemiXML::Actions $.actions;
 
     has Hash $.styles;
-    has Hash $.configuration is rw;
+#    has Hash $.configuration is rw;
 
+#TODO remove needed role adds for use of $.configuration
+
+#`{{
     my Hash $defaults = {
       option => {
         doctype => {
@@ -49,6 +54,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       #
       dependencies => ''
     };
+}}
 
     # Calculate default filename
     #
@@ -63,88 +69,208 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     submethod BUILD ( ) {
       $!grammar .= new;
       $!actions .= new;
+
+say "%?RESOURCES<SemiXML.toml>";
+      my Str $rsrc-bn = %?RESOURCES<SemiXML.toml>.IO.basename;
+      my Str $rsrc-p = %?RESOURCES<SemiXML.toml>.IO.abspath;
+      my Str $rsrc-d = $rsrc-p;
+      $rsrc-d ~~ s/ '/'? $rsrc-bn //;
+
+      my Config::DataLang::Refine $c0 = self!load-config(
+        :config-name($rsrc-bn),
+        :locations([$rsrc-d])
+      );
+#say "\n$rsrc-bn, $rsrc-d, $c0.config.perl()";
+
+      my Hash $other-config = ? $c0 ?? $c0.config.clone !! {};
+      $c0 = self!load-config( :config-name<SemiXML.toml>, :$other-config);
+#say "\nSemiXML.toml, $c0.config.perl()";
+
+      $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
+say "\nC 1: ", $!actions.config.keys;
+
     }
 
     #---------------------------------------------------------------------------
-    #
-    method parse-file ( Str :$filename ) {
+    method parse-file ( Str :$filename --> ParseResult ) {
+
+      my ParseResult $pr;
+
+#say "$filename: $filename.IO.r()";
       if $filename.IO ~~ :r {
-#        $!actions = SemiXML::Actions.new;
+
+        my Str $name-bn = $filename.IO.basename;
+        my Str $name-p = $filename.IO.abspath;
+        my Str $name-d = $name-p;
+        $name-d ~~ s/ \/? $name-bn//;
+        $name-bn ~~ s/ '.sxml' /.toml/;
+
+        # Only assign if config is defined
+        my Hash $other-config = $!actions.config.clone if ? $!actions.config;
+        my Config::DataLang::Refine $c0 = self!load-config(
+          :config-name($name-bn),
+          :locations([$name-d]),
+          :$other-config
+        );
+#say "\n$name-bn, $name-d, $c0.config.perl()";
+
+        # Set the config in the actions
+        $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
+
+say "\nC 2: ", $!actions.config.keys;
+
         my $text = slurp($filename);
-        return self.parse(:content($text));
+        $pr = self.parse(:content($text));
+        die "Parse failure" if $pr ~~ Nil;
+
+        # Calculate default filename
+#        $name-bn = $*PROGRAM.basename;
+#        $name-p = $*PROGRAM.abspath;
+#        $name-e = $*PROGRAM.abspath;
+#        m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
+#        my @path-spec = $*SPEC.splitpath($*PROGRAM);
+#        $defaults<output><filename> = @path-spec[2];
+#        $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
+#say "PS: @path-spec[]";
+say "$name-bn, $name-p, $name-p.IO.extension()";
+
+        # Did not parse a file but content
+        if $!actions.config<output><filename>:!exists {
+          my Str $fn = $filename.IO.basename;
+say "Fn: $fn";
+          my $ext = $filename.IO.extension;
+          $fn ~~ s/ '.' $ext //;
+say "Fn: $fn, $ext";
+          $!actions.config<output><filename> = $fn;
+        }
+say "Fn: $!actions.config()<output><filename>";
+
+        if $!actions.config<output><filepath>:!exists {
+          my Str $fn = $filename.IO.abspath;
+          my Str $bn = $filename.IO.basename;
+say "Fn: $fn $bn";
+          $fn ~~ s/ '/'? $bn //;
+          $!actions.config<output><filepath> = $fn;
+        }
       }
 
       else {
         die "Filename $filename not readable";
       }
+
+      $pr;
     }
 
     #---------------------------------------------------------------------------
-    #
-    method parse ( :$content is copy ) {
+    method !load-config (
+      Str :$config-name, Array :$locations = [], Hash :$other-config
+      --> Config::DataLang::Refine
+    ) {
+
+      my Config::DataLang::Refine $c;
+      try {
+        if ?$other-config {
+          $c .= new( :$config-name, :$locations, :$other-config);
+        }
+
+        else {
+          $c .= new( :$config-name, :$locations);
+        }
+
+        CATCH {
+#          .say;
+          $c = Nil;
+          default {
+            # Ignore file not found exception
+            if .message !~~ m/ :s Config file .* not found / {
+              .rethrow;
+            }
+          }
+        }
+
+        $c;
+      }
+    }
+
+    #---------------------------------------------------------------------------
+    method parse ( :$content is copy --> ParseResult ) {
 
       # Remove comments, trailing and leading spaces
-      #
-  #    $content ~~ s:g/<-[\\]>\#.*?$$//;
-  #    $content ~~ s/^\#.*?$$\n//;
-  #say "\nContent;\n$content\n\n";
+#      $content ~~ s:g/<-[\\]>\#.*?$$//;
+#      $content ~~ s/^\#.*?$$\n//;
+#say "\nContent;\n$content\n\n";
       $content ~~ s/^\s+//;
       $content ~~ s/\s+$//;
 
       # Get user introduced attribute information
-      #
       for self.^attributes -> $class-attr {
         given $class-attr.name {
           when '$!styles' {
             $!styles = $class-attr.get_value(self);
           }
 
-          when '$!configuration' {
-            $!configuration = $class-attr.get_value(self);
-          }
+#          when '$!configuration' {
+#            $!configuration = $class-attr.get_value(self);
+#          }
         }
       }
 
       # Parse the content. Parse can be recursively called
-      #
       return $!grammar.parse( $content, :actions($!actions));
     }
 
     #---------------------------------------------------------------------------
-    #
     method root-element ( --> XML::Element ) {
       my $doc = $!actions.get-document;
       return ?$doc ?? $doc.root !! XML::Element;
     }
 
     #---------------------------------------------------------------------------
-    #
     method Str ( --> Str ) {
       return self.get-xml-text;
     }
 
     #---------------------------------------------------------------------------
-    #
   #  method conversion:<Str> ( --> Str ) {
   #    return self.get-xml-text;
   #  }
 
     #---------------------------------------------------------------------------
     # Expect filename without extension
-    #
     method save ( Str :$filename is copy,
                   Str :$run-code,
                   XML::Document :$other-document
                 ) {
+
+      # Did not parse a file but content
+      if $!actions.config<output><filename>:!exists {
+        my Str $fn = $*PROGRAM.basename;
+        my Str $ext = $*PROGRAM.extension;
+        $fn ~~ s/ '.' $ext //;
+        $!actions.config<output><filename> = $fn;
+say "Pn: $fn, $ext";
+      }
+
+      if $!actions.config<output><filepath>:!exists {
+        my Str $fn = $*PROGRAM.abspath;
+        my Str $bn = $*PROGRAM.basename;
+say "Fn: $fn $bn";
+        $fn ~~ s/ '/'? $bn //;
+        $!actions.config<output><filepath> = $fn;
+      }
+
+
+#say "F: $filename";
       my $document = self.get-xml-text(:$other-document);
   #    my Str $document = self;
 
-      my Hash $configuration = $defaults;
-      self.gather-configuration(
-        $configuration,
-        $!configuration,
-        $!actions.config
-      );
+#      my Hash $configuration = $defaults;
+      my Hash $configuration = $!actions.config;
+#      self.gather-configuration(
+#        $configuration,
+#        $!configuration,
+#        $!actions.config
+#      );
 
   #say $configuration<output><program>.perl;
 
@@ -153,28 +279,28 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
         if $cmd.defined {
 
-  #-----
-  # Temporary solution for pipe to command
-  #
-  # If not defined or empty device name from config
-  #
-  if !?$filename {
-    $filename = $configuration<output><filename>;
-    my $fileext = $configuration<output><fileext>;
+          #-----
+          # Temporary solution for pipe to command
+          #
+          # If not defined or empty device name from config
+          #
+          if not $filename.defined {
+            $filename = $configuration<output><filename>;
+            my $fileext = $configuration<output><fileext>;
 
-    $filename ~= ".$fileext";
-  }
+            $filename ~= ".$fileext";
+          }
 
-  # If not absolute prefix the path from the config
-  #
-  if $filename !~~ m@'/'@ {
-    my $filepath = $configuration<output><filepath>;
-    $filename = "$filepath/$filename" if $filepath;
-  }
+          # If not absolute prefix the path from the config
+          #
+          if $filename !~~ m@'/'@ {
+            my $filepath = $configuration<output><filepath>;
+            $filename = "$filepath/$filename" if $filepath;
+          }
 
-  $filename = [~] $filename, '___ ___';
-  spurt( $filename, $document);
-  #-----
+          $filename = [~] $filename, '___ ___';
+          spurt( $filename, $document);
+          #-----
 
           $cmd ~~ s:g/\n/ /;
           $cmd ~~ s:g/\s+/ /;
@@ -200,7 +326,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       else {
-        if !$filename.defined {
+        if not $filename.defined {
           $filename = $configuration<output><filename>;
           my $fileext = $configuration<output><fileext>;
 
@@ -217,7 +343,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #---------------------------------------------------------------------------
-    #
     method get-xml-text ( :$other-document --> Str ) {
 
       # Get the top element name
@@ -231,7 +356,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         my $doc = $!actions.get-document;
         $root-element = ?$doc ?? $doc.root.name !! Any;
       }
-      
+
       return '' unless $root-element.defined;
 
       $root-element ~~ s/^(<-[:]>+\:)//;
@@ -242,8 +367,13 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       # previous Therefore defaults first, then from user config in roles then
       # the settings from the sxml file.
       #
-      my Hash $configuration = $defaults;
-      self.gather-configuration( $configuration, $!configuration, $!actions.config);
+#      my Hash $configuration = $defaults;
+      my Hash $configuration = $!actions.config;
+#      self.gather-configuration(
+#        $configuration,
+#        $!configuration,
+#        $!actions.config
+#      );
 
       # If there is one, try to generate the xml
       #
@@ -291,6 +421,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       return $document;
     }
 
+#`{{
     #---------------------------------------------------------------------------
     # Gather information from @hashes in the config $cfg. The config is
     # modified to containt all possible settings from the hashes. The $cfg
@@ -319,9 +450,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       return $cfg;
     }
+}}
 
     #---------------------------------------------------------------------------
-    #
     multi method get-option ( Array $hashes, Str $option --> Any ) {
       for $hashes.list -> $h {
         if $h{$option}:exists {
@@ -333,14 +464,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #---------------------------------------------------------------------------
-    #
     multi method get-option ( Str :$section = '',
                               Str :$sub-section = '',
                               Str :$option = ''
                               --> Any
                             ) {
       my Array $hashes;
-      for ( $!actions.config, $!configuration, $defaults) -> $h {
+#      for ( $!actions.config, $!configuration, $defaults) -> $h {
+      for ( $!actions.config) -> $h {
         if $h{$section}:exists {
           my $e = $h{$section};
 
@@ -383,7 +514,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 }
 
 #-------------------------------------------------------------------------------
-#
 multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) {
   return ~$x.get-xml-text;
 }
