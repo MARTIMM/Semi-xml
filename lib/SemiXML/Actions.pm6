@@ -101,10 +101,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #TODO check out
     has Hash $.config is rw = {};
 #    has Hash $.config = {};
-
 #    has Hash $config-key = {};
-    has Str $!config-path;
-    has Str $!config-value;
+#    has Str $!config-path;
+#    has Str $!config-value;
 
     has XML::Document $!xml-document;
     has Int $!current-el-idx;
@@ -275,17 +274,43 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #-----------------------------------------------------------------------------
+    method process-config-for-modules {
+ 
+      if $!config<module>:exists {
+        for $!config<module>.kv -> $key, $value {
+          if $!objects{$key}:exists {
+            say "'module/$key:  $value;' found before, ignored";
+          }
+
+          else {
+
+#say "use lib $!config<library>{$key}" if $!config<library>{$key}:exists;
+#say "require ::($value)";
+            if $!config<library>{$key}:exists {
+              my $repository = CompUnit::Repository::FileSystem.new(
+                :prefix($!config<library>{$key})
+              );
+              CompUnit::RepositoryRegistry.use-repository($repository);
+            }
+
+            require ::($value);
+            my $obj = ::($value).new;
+            $!objects{$key} = $obj;
+#say "Obj methods: ", $obj.^methods;
+          }
+        }
+      }
+    }
+
+    #-----------------------------------------------------------------------------
     # Process tags
-    #
     method !process-tag ( ) {
 
       # Check the tag type
-      #
       my $tt = $!tag-type;
       $!tag-name ~~ s/^$tt//;
 
       # Check substitutable tags starting with $.
-      #
       if $!tag-type ~~ m/^'$.'/ {
         # Get modulename
         #
@@ -311,7 +336,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       # Check method tags starting with $!
-      #
       elsif $!tag-type ~~ m/^'$!'/ {
 
         # Get the module name and remove tag type from tag string to get method
@@ -319,7 +343,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         #
         $!tag-type ~~ m/\$\!(<-[\.]>+)/;
         my $module = $/[0].Str;
-#say "Test \$!$module.$!tag-name, ", $!objects{$module}.perl;
+say "Test \$!$module.$!tag-name, ", $!objects{$module}.perl;
         if $!objects{$module}.can($!tag-name) {
 
           # Must make a copy of the tag-name to a local variable. If tag-name
@@ -329,10 +353,15 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           my $tgnm = $!tag-name;
           my $mod = $module;
           my $ats = $!attrs;
+
+          # Can happen when top level is already a method
+#          $!current-el-idx //= 0;
           my $cei = $!current-el-idx;
-#say "\nCan do \$!$mod.$tgnm in element ",
-#  $cei > 0 ?? $!el-stack[$cei - 1].name !! 'top',
-#  ', ', $!el-stack[$cei].name;
+say "M: \$!$mod.$tgnm";
+say "E: $cei, $!current-el-idx, $!el-stack";
+say "\nCan do \$!$mod.$tgnm in element ",
+  $cei > 0 ?? $!el-stack[$cei - 1].name !! 'top',
+  ', ', $!el-stack[$cei].name;
 
           $!deferred-calls[$cei] = method ( XML::Node :$content-body ) {
 #say "\nCalled \$!$mod.$tgnm";

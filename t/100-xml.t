@@ -12,38 +12,10 @@ use SemiXML;
 #   test attributes
 #-------------------------------------------------------------------------------
 # Setup
-#
 my SemiXML::Sxml $x .= new;
 isa-ok $x, 'SemiXML::Sxml', $x.^name;
 
-#`{{
-# Devise a role to add
-#
-role pink {
-  has Hash $!configuration = {
-    option => {
-      doctype => {
-#        definition => '',
-#        entities => []
-        show => 1,
-      },
-      xml-prelude => {
-        show => 1,
-        version => '1.0',
-        encoding => 'UTF-8'
-      },
-    }
-  };
-}
-}}
-
-# Add the role to the parser
-#
-#$x does pink;
-#is $x.^name, 'SemiXML::Sxml+{pink}', $x.^name;
-
 # Setup the text to parse
-#
 my Str $sx-text = q:to/EOSX/;
 $html [
   $head [
@@ -61,11 +33,23 @@ $html [
 EOSX
 
 # And parse it
-#
-$x.parse(content => $sx-text);
+$x.parse(
+  content => $sx-text,
+  config => {
+    option => {
+      doctype => {
+        show => 1,
+      },
+      xml-prelude => {
+        show => 1,
+        version => '1.0',
+        encoding => 'UTF-8'
+      },
+    }
+  }
+);
 
 # See the result
-#
 my Str $xml-text = ~$x;
 ok $xml-text ~~ ms/'<?xml' 'version="1.0"' 'encoding="UTF-8"?>'/,
    'Xml prelude found';
@@ -87,6 +71,5 @@ ok $xml-text ~~ m/'<z data_2="double \'quoted\' tests">'/, 'Class test 4';
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
 done-testing();
 exit(0);

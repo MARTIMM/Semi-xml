@@ -14,9 +14,11 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # document
     #
     rule TOP {
-      ( <.comment>* "---" <.prelude> "---" ) ** 0..1 <.document>
+#      ( <.comment>* "---" <.prelude> "---" ) ** 0..1 <.document>
+      <.document>
     }
 
+#`{{
     # The prelude is a series of configuration options looking like
     #
     # /x/y/opt:  value;
@@ -32,6 +34,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token config-key { <.identifier> }
     rule config-value { <.config-value-esc> || <-[;]>+ }
     token config-value-esc { '\;' }
+}}
 
     # A document is only a tag with its content. Defined like this there can only
     # be one toplevel document.
