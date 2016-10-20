@@ -2,13 +2,7 @@
   show          = 0
 
 [output]
-#  filepath      = '.'
   fileext       = 'html'
 
 [module]
-  list          = 'SxmlLib::Testing::TestDoc'
-
-#[dependencies]
-#  files         = [
-#    'Sxml/home.sxml', 'Sxml/crossroads.sxml', 'Sxml/about.sxml'
-#  ]
+  td            = 'SxmlLib::Testing::TestDoc'

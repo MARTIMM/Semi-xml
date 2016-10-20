@@ -1,16 +1,28 @@
-$!test-init
-  test-file=test1.t
-  title='Integer manipulations' [
-
-  $!test-doc [
-    Test the integer declaration and then assignment of a number. Test
-    if the number
+html [
+  head [
+  
   ]
 
-  $!test-code [
-    my Int $i;
-    is $i, Any, 'Uninitialized Int';
-    $i = 10;
-    is $i, 10, 'Initialized Int';
+  body [
+
+    $!td.test title='Integer manipulations' [
+
+      $!td.doc [
+        Test the integer declaration and then assignment of a number. Test
+        if the number is assignable.
+      ]
+
+      $!td.prepair [!
+        my Int $i;
+      !]
+
+      $!td.is result=$i expect=Any [Uninitialized Int]
+
+      $!td.prepair [!
+        $i = 10;
+      !]
+
+      $!td.is result=$i expect=10 [Initialized Int ]
+    ]
   ]
 ]
