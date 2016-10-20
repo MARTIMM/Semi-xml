@@ -8,3 +8,9 @@ The project is still at omega state, bugs come and go (hopefully).
 * All indents of generated documents should unindented to proper level are reduced to the minimum spacing as is done in perl6.
 
 * Top level tags cannot be a method or substitution.
+
+* Comments are not properly handled. At the moment they are removed from the grammar.
+
+* Pipes to programs can now be implemented!
+
+* Use Config::DataLang::Refine to get the info from loaded hashes.
