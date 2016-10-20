@@ -8,7 +8,7 @@ use Config::DataLang::Refine;
 #package SemiXML:ver<0.17.0>:auth<https://github.com/MARTIMM> {
 package SemiXML:auth<https://github.com/MARTIMM> {
 
-  subset ParseResult where $_ ~~ any(Match|Nil);
+  subset ParseResult is export where $_ ~~ any(Match|Nil);
 
   class Sxml {
 
@@ -18,59 +18,12 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has SemiXML::Actions $.actions;
 
     has Hash $.styles;
-#    has Hash $.configuration is rw;
-
-#TODO remove needed role adds for use of $.configuration
-
-#`{{
-    my Hash $defaults = {
-      option => {
-        doctype => {
-          show => 0,
-          definition => '',
-          entities => [],
-        },
-
-        xml-prelude => {
-          show => 0,
-          version => '1.0',
-          encoding => 'UTF-8',
-        },
-
-        http-header => {
-          show => 0,
-        },
-      },
-
-      output => {
-        # Filename of program is saved without extension
-        #
-        filepath => '.',
-        filename => 'x',
-        fileext => 'xml',
-      },
-
-      # To be set by sources and used by translater programs
-      #
-      dependencies => ''
-    };
-}}
-
-    # Calculate default filename
-    #
-  #  $*PROGRAM ~~ m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
-  #  $defaults<output><filename> = ~$/[0];
-
-  #  my @path-spec = $*SPEC.splitpath($*PROGRAM);
-  #  $defaults<output><filename> = @path-spec[2];
-  #  $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
-  #say "PS: @path-spec[]";
+    has Config::DataLang::Refine $configuration;
 
     submethod BUILD ( ) {
       $!grammar .= new;
       $!actions .= new;
 
-say "%?RESOURCES<SemiXML.toml>";
       my Str $rsrc-bn = %?RESOURCES<SemiXML.toml>.IO.basename;
       my Str $rsrc-p = %?RESOURCES<SemiXML.toml>.IO.abspath;
       my Str $rsrc-d = $rsrc-p;
@@ -80,15 +33,12 @@ say "%?RESOURCES<SemiXML.toml>";
         :config-name($rsrc-bn),
         :locations([$rsrc-d])
       );
-#say "\n$rsrc-bn, $rsrc-d, $c0.config.perl()";
 
       my Hash $other-config = ? $c0 ?? $c0.config.clone !! {};
       $c0 = self!load-config( :config-name<SemiXML.toml>, :$other-config);
-#say "\nSemiXML.toml, $c0.config.perl()";
 
       $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
-say "\nC 1: ", $!actions.config.keys;
-
+      $!actions.process-config-for-modules;
     }
 
     #---------------------------------------------------------------------------
@@ -96,7 +46,6 @@ say "\nC 1: ", $!actions.config.keys;
 
       my ParseResult $pr;
 
-#say "$filename: $filename.IO.r()";
       if $filename.IO ~~ :r {
 
         my Str $name-bn = $filename.IO.basename;
@@ -112,46 +61,29 @@ say "\nC 1: ", $!actions.config.keys;
           :locations([$name-d]),
           :$other-config
         );
-#say "\n$name-bn, $name-d, $c0.config.perl()";
 
         # Set the config in the actions
         $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
 
-say "\nC 2: ", $!actions.config.keys;
-
-        my $text = slurp($filename);
-        $pr = self.parse(:content($text));
-        die "Parse failure" if $pr ~~ Nil;
-
-        # Calculate default filename
-#        $name-bn = $*PROGRAM.basename;
-#        $name-p = $*PROGRAM.abspath;
-#        $name-e = $*PROGRAM.abspath;
-#        m/(.*?)\.<{$*PROGRAM.IO.extension}>$/;
-#        my @path-spec = $*SPEC.splitpath($*PROGRAM);
-#        $defaults<output><filename> = @path-spec[2];
-#        $defaults<output><filename> ~~ s/$*PROGRAM.IO.extension//;
-#say "PS: @path-spec[]";
-say "$name-bn, $name-p, $name-p.IO.extension()";
-
         # Did not parse a file but content
         if $!actions.config<output><filename>:!exists {
           my Str $fn = $filename.IO.basename;
-say "Fn: $fn";
           my $ext = $filename.IO.extension;
           $fn ~~ s/ '.' $ext //;
-say "Fn: $fn, $ext";
           $!actions.config<output><filename> = $fn;
         }
-say "Fn: $!actions.config()<output><filename>";
 
         if $!actions.config<output><filepath>:!exists {
           my Str $fn = $filename.IO.abspath;
           my Str $bn = $filename.IO.basename;
-say "Fn: $fn $bn";
           $fn ~~ s/ '/'? $bn //;
           $!actions.config<output><filepath> = $fn;
+          $!actions.process-config-for-modules;
         }
+
+        my $text = slurp($filename);
+        $pr = self.parse(:content($text));
+        die "Parse failure" if $pr ~~ Nil;
       }
 
       else {
@@ -193,12 +125,14 @@ say "Fn: $fn $bn";
     }
 
     #---------------------------------------------------------------------------
-    method parse ( :$content is copy --> ParseResult ) {
+    method parse ( Str :$content is copy, Hash :$config --> ParseResult ) {
+
+      if $config.defined {
+        my Config::DataLang::Refine $c;
+        $!actions.config = $c.merge-hash( $!actions.config, $config);
+      }
 
       # Remove comments, trailing and leading spaces
-#      $content ~~ s:g/<-[\\]>\#.*?$$//;
-#      $content ~~ s/^\#.*?$$\n//;
-#say "\nContent;\n$content\n\n";
       $content ~~ s/^\s+//;
       $content ~~ s/\s+$//;
 
@@ -208,10 +142,6 @@ say "Fn: $fn $bn";
           when '$!styles' {
             $!styles = $class-attr.get_value(self);
           }
-
-#          when '$!configuration' {
-#            $!configuration = $class-attr.get_value(self);
-#          }
         }
       }
 
@@ -230,10 +160,6 @@ say "Fn: $fn $bn";
       return self.get-xml-text;
     }
 
-    #---------------------------------------------------------------------------
-  #  method conversion:<Str> ( --> Str ) {
-  #    return self.get-xml-text;
-  #  }
 
     #---------------------------------------------------------------------------
     # Expect filename without extension
@@ -248,31 +174,19 @@ say "Fn: $fn $bn";
         my Str $ext = $*PROGRAM.extension;
         $fn ~~ s/ '.' $ext //;
         $!actions.config<output><filename> = $fn;
-say "Pn: $fn, $ext";
       }
 
       if $!actions.config<output><filepath>:!exists {
         my Str $fn = $*PROGRAM.abspath;
         my Str $bn = $*PROGRAM.basename;
-say "Fn: $fn $bn";
         $fn ~~ s/ '/'? $bn //;
         $!actions.config<output><filepath> = $fn;
       }
 
 
-#say "F: $filename";
       my $document = self.get-xml-text(:$other-document);
-  #    my Str $document = self;
 
-#      my Hash $configuration = $defaults;
       my Hash $configuration = $!actions.config;
-#      self.gather-configuration(
-#        $configuration,
-#        $!configuration,
-#        $!actions.config
-#      );
-
-  #say $configuration<output><program>.perl;
 
       if $run-code.defined {
         my $cmd = $configuration<output><program>{$run-code};
@@ -305,8 +219,6 @@ say "Fn: $fn $bn";
           $cmd ~~ s:g/\n/ /;
           $cmd ~~ s:g/\s+/ /;
           $cmd ~~ s/^\s*\|//;
-  #        my $program-io = IO::Pipe.to($cmd);
-  #say "IO: $program-io";
 
           # No pipe to executable at the moment so take a different route...
           #
@@ -355,8 +267,8 @@ say "Fn: $fn $bn";
       else {
         my $doc = $!actions.get-document;
         $root-element = ?$doc ?? $doc.root.name !! Any;
+say "X: ", $doc.perl;
       }
-
       return '' unless $root-element.defined;
 
       $root-element ~~ s/^(<-[:]>+\:)//;
@@ -367,13 +279,7 @@ say "Fn: $fn $bn";
       # previous Therefore defaults first, then from user config in roles then
       # the settings from the sxml file.
       #
-#      my Hash $configuration = $defaults;
       my Hash $configuration = $!actions.config;
-#      self.gather-configuration(
-#        $configuration,
-#        $!configuration,
-#        $!actions.config
-#      );
 
       # If there is one, try to generate the xml
       #
@@ -421,37 +327,6 @@ say "Fn: $fn $bn";
       return $document;
     }
 
-#`{{
-    #---------------------------------------------------------------------------
-    # Gather information from @hashes in the config $cfg. The config is
-    # modified to containt all possible settings from the hashes. The $cfg
-    # cannot be empty
-    #
-    method gather-configuration ( Hash $cfg, *@hashes --> Hash ) {
-      for @hashes -> $h {
-        for $h.kv -> $k, $v {
-          given $v {
-            when Hash {
-              if ?$cfg{$k} {
-                self.gather-configuration( $cfg{$k}, $v);
-              }
-
-              else {
-                $cfg{$k} = $v;
-              }
-            }
-
-            default {
-              $cfg{$k} = $v;
-            }
-          }
-        }
-      }
-
-      return $cfg;
-    }
-}}
-
     #---------------------------------------------------------------------------
     multi method get-option ( Array $hashes, Str $option --> Any ) {
       for $hashes.list -> $h {
@@ -470,7 +345,6 @@ say "Fn: $fn $bn";
                               --> Any
                             ) {
       my Array $hashes;
-#      for ( $!actions.config, $!configuration, $defaults) -> $h {
       for ( $!actions.config) -> $h {
         if $h{$section}:exists {
           my $e = $h{$section};

@@ -18,28 +18,11 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       <.document>
     }
 
-#`{{
-    # The prelude is a series of configuration options looking like
-    #
-    # /x/y/opt:  value;
-    #
-    rule prelude { <.config-entry>* }
-    rule config-entry {
-      <.comment>*
-      <.config-keypath> ':' <.config-value> ';'
-      <.comment>*
-    }
-
-    token config-keypath { <.config-key> ( '/' <.config-key> )* }
-    token config-key { <.identifier> }
-    rule config-value { <.config-value-esc> || <-[;]>+ }
-    token config-value-esc { '\;' }
-}}
-
     # A document is only a tag with its content. Defined like this there can only
     # be one toplevel document.
     #
-    token document { <.comment>* <.tag> <.tag-body> <.comment>* }
+#    token document { <.comment>* <.tag> <.tag-body> <.comment>* }
+    token document { <.tag> <.tag-body> }
 
     # A tag is an identifier prefixed with $. $! or $ to attach several semantics
     # to the tag.
@@ -89,7 +72,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       (  <.body2-start> ~ <.body2-end> <.body2-contents>     # Only text content
       || <.body1-start> ~ <.body1-end> <.body1-contents>     # Normal body content
       )
-      <comment>*
+#      <comment>*
     }
 
     # The content can be anything mixed with document tags except following the
@@ -99,7 +82,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token body1-contents  { <.keep-literal>? ( <.body1-text> || <.document> )* }
     token body1-start     { '[' }
     token body1-end       { ']' }
-    token body1-text      { ( <.comment> || <-[\$\]\\]> || <.body-esc> )+ }
+#    token body1-text      { ( <.comment> || <-[\$\]\\]> || <.body-esc> )+ }
+    token body1-text      { ( <-[\$\]\\]> || <.body-esc> )+ }
 
     token body2-start     { '[!' }
     token body2-contents  { <.keep-literal>? <.body2-text> }
@@ -109,7 +93,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token keep-literal    { '=' }
     token body-esc        { '\\' . }
 
-    token comment         { \n? \s* '#' <-[\n]>* \n }
+#    token comment         { \n? \s* '#' <-[\n]>* \n }
 
     # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
     # dash within the string is accepted.

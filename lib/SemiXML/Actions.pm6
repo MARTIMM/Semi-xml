@@ -306,6 +306,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # Process tags
     method !process-tag ( ) {
 
+say "PT \$.: $!tag-type";
+
       # Check the tag type
       my $tt = $!tag-type;
       $!tag-name ~~ s/^$tt//;
@@ -317,10 +319,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         $!tag-type ~~ m/\$\.(<-[\.]>+)/;
         my $module = $/[0].Str;
 
-        # Test if method exists in module
-        #
-#say "PT \$.: $!tag-type, $module, $!objects{$module}.symbols.keys()";
+say "PT \$.: $!tag-type, $module, $!objects{$module}.symbols.keys()";
 
+        # Test if method exists in module
         if $!objects{$module}.symbols{$!tag-name}:exists {
           my $s = $!objects{$module}.symbols{$!tag-name};
           $!tag-name = $s<tag-name>;
@@ -404,6 +405,7 @@ say "\nCan do \$!$mod.$tgnm in element ",
 
       else {
 
+say "Else what?? $*LINE";
       }
     }
 
@@ -424,8 +426,8 @@ say "\nCan do \$!$mod.$tgnm in element ",
                              ) {
 
       # Test if index is defined.
-      #
       my $child-element = XML::Element.new( :name($!tag-name), :attribs($!attrs));
+say "CE: ", $child-element.perl;
 
       if $!current-el-idx.defined {
         $!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
@@ -436,7 +438,6 @@ say "\nCan do \$!$mod.$tgnm in element ",
         $!el-stack[$!current-el-idx + 1] = $child-element;
 
         # Copy current 'keep literal' state.
-        #
         $!el-keep-literal[$!current-el-idx + 1] = $!el-keep-literal[$!current-el-idx];
 
         # Point to the next level in case there is another tag found in the 
@@ -447,12 +448,13 @@ say "\nCan do \$!$mod.$tgnm in element ",
       }
 
       else {
+
         # First element is a root element
-        #
         $!current-el-idx = 0;
         $!el-stack[$!current-el-idx] = $child-element;
         $!el-keep-literal[$!current-el-idx] = False;
         $!xml-document .= new($!el-stack[$!current-el-idx]);
+say "CE: ", $!xml-document.perl;
       }
     }
 
