@@ -2,6 +2,9 @@
 
 * 0.19.0
   * Replaced prelude and internal configs with Config::DataLang::Refine
+  * Roles are dropped for adding configs.
+  * Extra configs can be provided via the parse() method when there is no file involved.
+  * Method process-config-for-modules added to Actions to take care for modules found in the config. This will change later!
 * 0.18.0
   * Changed module name from Semi-xml into SemiXML. Changes reflected all files
   and other module names.
