@@ -22,16 +22,32 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # be one toplevel document.
     #
 #    token document { <.comment>* <.tag> <.tag-body> <.comment>* }
-    token document { <.tag> <.tag-body> }
+    token document { <.tag-spec> <.tag-body> }
 
-    # A tag is an identifier prefixed with $. $! or $ to attach several semantics
+    # A tag is an identifier prefixed with a symbol to attach several semantics
     # to the tag.
     #
-    # $table class=bussiness id=sect1 
-    #
+
+    rule tag-spec { <tag> <attributes> }
+
+    proto token tag {*}
+    token tag:sym<$.>   { <sym> <mod-name> '.' <meth-name> }
+    token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
+    token tag:sym<$|*>  { <sym> <tag-name> }
+    token tag:sym<$*|>  { <sym> <tag-name> }
+    token tag:sym<$**>  { <sym> <tag-name> }
+    token tag:sym<$>    { <sym> <tag-name> }
+
+    token mod-name      { <.identifier> }
+    token meth-name     { <.identifier> }
+    token tag-name      { [ <namespace> ':' ]? <element> }
+    token element       { <.identifier> }
+    token namespace     { <.identifier> }
+
+#`{{
 #    token reset-keep-literal { <?> }
 #    token tag { <.reset-keep-literal> <.tag-name> ( <.attribute> )* }
-    token tag { <.tag-name> ( <.attribute> )* }
+    token tag { <.tag-name> <.attributes> }
     token tag-name { <.tag-type> <.identifier> [ ':' <.identifier> ]**0..1 }
     token tag-type {
       ( '$.' <.identifier> '.' ) ||
@@ -39,21 +55,24 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       '$*<' || '$*>' || '$*'     ||
       '$'
     }
-
+}}
     # The tag may be followed by attributes. These are key=value constructs. The
     # key is an identifier and the value can be anything. Enclose the value in
     # quotes ' or " when there are whitespace characters in the value.
-    # 
-    token attribute { <.ws>? <.attr-key> '=' <.attr-value-spec> }
-    token attr-key { <.identifier> [ ':' <.identifier> ]**0..1 }
+    #
+    token attributes    { [<.ws>? <attribute>]* }
+    token attribute     { <attr-key> '=' <attr-value-spec> }
+    token attr-key      { [<key-ns> ':' ]? <key-name> }
+    token key-ns        { <.identifier> }
+    token key-name      { <.identifier> }
     token attr-value-spec {
-      (\' <.attr-q-value> \')  ||
-      (\" <.attr-qq-value> \") ||
-      <.attr-s-value>
+      [\' $<attr-value>=<.attr-q-value> \']  ||
+      [\" $<attr-value>=<.attr-qq-value> \"] ||
+      $<attr-value>=<.attr-s-value>
     }
-    token attr-q-value    { <-[\']>+ }
-    token attr-qq-value   { <-[\"]>+ }
-    token attr-s-value    { <-[\s]>+ }
+    token attr-q-value  { <-[\']>+ }
+    token attr-qq-value { <-[\"]>+ }
+    token attr-s-value  { <-[\s]>+ }
 
     # The tag body is anything enclosed in [...], [=...] or [-...]. The first
     # situation is the normal one of which all spaces will be reduced to one
@@ -68,6 +87,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # starting with a those characters doesn't have to be escaped when they are
     # used. Just use a space in front. Can happen in tables showing numbers.
     #
+#`{{
     token tag-body {
       <ws>?
       (  <.body2-start> ~ <.body2-end> <.body2-contents>     # Only text content
@@ -75,23 +95,38 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       )
 #      <comment>*
     }
+}}
+    token tag-body {
+      <ws>?
+      [ '[!=' ~ '!]'    <body1-contents>) ||
+        '[!' ~ '!]'     <body2-contents>) ||
+        '[=' ~ ']'      <body3-contents>) ||
+        '[' ~ ']'       <body4-contents>)
+      ]
+      <ws>?
+    }
 
     # The content can be anything mixed with document tags except following the
     # no-elements character. To use the brackets and
     # other characters in the text, the characters must be escaped.
     #
-    token body1-contents  { <.keep-literal>? ( <.body1-text> || <.document> )* }
-    token body1-start     { '[' }
-    token body1-end       { ']' }
+    rule body1-contents  { <.body2-text> }
+    rule body2-contents  { <.body2-text> }
+    rule body3-contents  { [ <.body1-text> || <.document> ]* }
+    rule body4-contents  { [ <.body1-text> || <.document> ]* }
+
+#    rule body1-contents  { <.keep-literal>? ( <.body1-text> || <.document> )* }
+#    token body1-start     { '[' }
+#    token body1-end       { ']' }
 #    token body1-text      { ( <.comment> || <-[\$\]\\]> || <.body-esc> )+ }
     token body1-text      { ( <-[\$\]\\]> || <.body-esc> )+ }
 
-    token body2-start     { '[!' }
-    token body2-contents  { <.keep-literal>? <.body2-text> }
+#    rule body2-contents  { <.keep-literal>? <.body2-text> }
+#    token body2-start     { '[!' }
+#    token body2-end       { '!]' }
     token body2-text      { .*? <?before '!]'> }
-    token body2-end       { '!]' }
 
-    token keep-literal    { '=' }
+#    token keep-literal    { '=' }
     token body-esc        { '\\' . }
 
 #    token comment         { \n? \s* '#' <-[\n]>* \n }

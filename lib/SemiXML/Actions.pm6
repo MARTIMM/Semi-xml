@@ -111,14 +111,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has Array $!deferred-calls;
     has Array $!el-keep-literal;
 
-    has Str $!tag-name;
-    has Str $!tag-type;
+#    has Str $!tag-name;
+#    has Str $!tag-type;
 
     has Hash $!attrs;
-    has Str $!attr-key;
+#    has Str $!attr-key;
 
-    has Bool $!keep-literal;
-    has Bool $!has-comment;
+#    has Bool $!keep-literal;
+#    has Bool $!has-comment;
 
 
     # Initialize some variables when init is set. Must be done when a new object
@@ -128,7 +128,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $!current-el-idx = Int;
       $!el-stack = [];
       $!deferred-calls = [];
-      $!has-comment = False;
+#      $!has-comment = False;
     }
 
 #`{{
@@ -223,6 +223,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 }}
 
+#`{{
     method tag-type ( $match ) {
       $!tag-type = ~$match;
     }
@@ -236,7 +237,48 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       $!tag-name = ~$match;
     }
+}}
+    method tag-spec ( $match ) {
 
+#      say 'T0: ', $match<tag>;
+#      say 'T1: ', $match<attributes>;
+#      say 'T2: ', $match<attributes>.elems;
+
+      my $symbol = $match<tag><sym>.Str;
+      say "type: $symbol";
+
+      if $symbol ~~ any(< $** $|* $*| $ >) {
+
+        my $tn = $match<tag><tag-name>;
+        say 'name: ' ~ $tn<namespace> if $tn<namespace>:exists;
+        say 'element: ' ~ $tn<element>;
+      }
+
+      elsif $symbol ~~ any(< $. $! >) {
+
+        say 'module name: ' ~ $match<tag><mod-name>;
+        say 'method name: ' ~ $match<tag><meth-name>;
+      }
+
+      $!attrs = {};
+      for $match<attributes>.chunks -> $as {
+        next unless $as<attribute>:exists;
+        my $a = $as<attribute>;
+        $!attrs{$a<attr-key><key-name>.Str} = [
+          ($a<attr-key><key-ns> // '').Str,
+          $a<attr-value-spec><attr-value>.Str
+        ];
+      }
+
+      say $!attrs.perl;
+    }
+
+    method tag-body ( $match ) {
+    
+      say "M: ", $match;
+    }
+
+#`{{
     method attr-key       ( $match ) { $!attr-key = ~$match; }
 
     method attr-s-value   ( $match ) { self!attr-value(~$match); }
@@ -247,19 +289,24 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $m ~~ s:g/\"/\&quot;/;
       $!attrs{$!attr-key} = $m;
     }
+}}
 
     # Before the body starts, save the tag name and create the element with
     # its attributes.
     #
 #    method reset-keep-literal ( $match )  { $!keep-literal = False; }
-    method keep-literal ( $match )        { $!keep-literal = True; }
+#    method keep-literal ( $match )        { $!keep-literal = True; }
 
-    method body1-start ( $match )         { self!process-tag(); }
-    method body1-text ( $match )          { self!process-text($match); }
+#    method body1-start ( $match )         { self!process-tag(); }
+    method body1-start ( $match )         {  }
+#    method body1-text ( $match )          { self!process-text($match); }
+    method body1-text ( $match )          {  }
     method body1-end ( $match )           { self!process-body-end(); }
 
-    method body2-start ( $match )         { self!process-tag(); }
-    method body2-text ( $match )          { self!process-text($match); }
+#    method body2-start ( $match )         { self!process-tag(); }
+    method body2-start ( $match )         {  }
+#    method body2-text ( $match )          { self!process-text($match); }
+    method body2-text ( $match )          {  }
     method body2-end ( $match )           { self!process-body-end(); }
 
     # Idea to count lines in the source
@@ -269,13 +316,13 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #  say "N-" x $/.elems;
 #    }
 
-    method comment ( $match ) {
-      $!has-comment = True;
-    }
+#    method comment ( $match ) {
+#      $!has-comment = True;
+#    }
 
     #-----------------------------------------------------------------------------
     method process-config-for-modules {
- 
+
       if $!config<module>:exists {
         for $!config<module>.kv -> $key, $value {
           if $!objects{$key}:exists {
@@ -302,6 +349,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
     }
 
+#`{{
     #-----------------------------------------------------------------------------
     # Process tags
     method !process-tag ( ) {
@@ -408,6 +456,7 @@ say "\nCan do \$!$mod.$tgnm in element ",
 say "Else what?? $*LINE";
       }
     }
+}}
 
     #---------------------------------------------------------------------------
     # Create an xml element and add its attributes. When the $!current-el-idx
@@ -418,15 +467,15 @@ say "Else what?? $*LINE";
     # appended to this last element When the block is finished (at body1-end) the
     # pointer is moved up to the parent element in the array.
     #
-    method !register-element ( Str $!tag-name,
-                               Hash $!attrs,
+    method !register-element ( Str $tag-name,
+                               Hash $attrs,
                                :$decorate = False,
                                :$decorate-left = False,
                                :$decorate-right = False
                              ) {
 
       # Test if index is defined.
-      my $child-element = XML::Element.new( :name($!tag-name), :attribs($!attrs));
+      my $child-element = XML::Element.new( :name($tag-name), :attribs($!attrs));
 say "CE: ", $child-element.perl;
 
       if $!current-el-idx.defined {
@@ -467,14 +516,17 @@ say "CE: ", $!xml-document.perl;
       # modify/remove escape characters
       #
       my $text = ~$match;
+#`{{
       if $!has-comment {
         $text ~~ s:g/ \n \s* '#' <-[\n]>* \n /\n/;
         $!has-comment = False;
       }
+}}
       $text = self!process-esc($text);
 
       my $xml;
-      $!el-keep-literal[$!current-el-idx] ||= $!keep-literal;
+#      $!el-keep-literal[$!current-el-idx] ||= $!keep-literal;
+      $!el-keep-literal[$!current-el-idx] = False;
       if $!el-keep-literal[$!current-el-idx] {
   #    if $!keep-literal {
   #say "!PRT lit: $!el-keep-literal[$!current-el-idx], {$!el-stack[$!current-el-idx].name}";
@@ -541,7 +593,7 @@ say "CE: ", $!xml-document.perl;
         };
         $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
       }
-      
+
       if $esc ~~ m/ '\\u' <xdigit>+ / {
         my $set-utf8 = sub ($m1) {
 #say "m1: $m1";
@@ -549,7 +601,7 @@ say "CE: ", $!xml-document.perl;
         };
         $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
       }
-      
+
       $esc ~~ s:g/\\//;
 #say "\n$esc\n\n";
       return $esc;
@@ -580,20 +632,17 @@ say "CE: ", $!xml-document.perl;
 #say "\nEl = $!current-el-idx\n\n", $!el-stack[$!current-el-idx].Str, "\n\n";
 
         # Remove PLACEHOLDER-ELEMENT if still available
-        #
         $!el-stack[$!current-el-idx + 1].remove
           if ?$!el-stack[$!current-el-idx + 1];
       }
 
       # Call done, now reset
-      #
       if $!current-el-idx >= 0 {
+
         # Remove method from stack
-        #
         $!deferred-calls[$!current-el-idx] = Any;
 
         # Reset the 'keep literal state'
-        #
         $!el-keep-literal[$!current-el-idx + 1] = False;
       }
     }

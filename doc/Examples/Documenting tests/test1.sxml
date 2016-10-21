@@ -1,9 +1,9 @@
-html [
-  head [
+$html [
+  $head [
   
   ]
 
-  body [
+  $body [
 
     $!td.test title='Integer manipulations' [
 

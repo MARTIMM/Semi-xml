@@ -267,7 +267,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       else {
         my $doc = $!actions.get-document;
         $root-element = ?$doc ?? $doc.root.name !! Any;
-say "X: ", $doc.perl;
       }
       return '' unless $root-element.defined;
 
