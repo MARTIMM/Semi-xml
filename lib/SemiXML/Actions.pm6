@@ -251,7 +251,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # Before the body starts, save the tag name and create the element with
     # its attributes.
     #
-    method reset-keep-literal ( $match )  { $!keep-literal = False; }
+#    method reset-keep-literal ( $match )  { $!keep-literal = False; }
     method keep-literal ( $match )        { $!keep-literal = True; }
 
     method body1-start ( $match )         { self!process-tag(); }

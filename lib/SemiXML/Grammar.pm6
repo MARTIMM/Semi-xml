@@ -29,8 +29,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #
     # $table class=bussiness id=sect1 
     #
-    token reset-keep-literal { <?> }
-    token tag { <.reset-keep-literal> <.tag-name> ( <.attribute> )* }
+#    token reset-keep-literal { <?> }
+#    token tag { <.reset-keep-literal> <.tag-name> ( <.attribute> )* }
+    token tag { <.tag-name> ( <.attribute> )* }
     token tag-name { <.tag-type> <.identifier> [ ':' <.identifier> ]**0..1 }
     token tag-type {
       ( '$.' <.identifier> '.' ) ||
