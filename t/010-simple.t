@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use SemiXML;
 
-parse('$html [ abc $a x=y [ pqr ] p534 ]');
+parse('$html a=x [ abc $a x=y [! pqr !] p534 tyu ]');
 
 
 

@@ -15,14 +15,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #
     rule TOP {
 #      ( <.comment>* "---" <.prelude> "---" ) ** 0..1 <.document>
-      <.document>
+      <document>
     }
 
     # A document is only a tag with its content. Defined like this there can only
     # be one toplevel document.
     #
 #    token document { <.comment>* <.tag> <.tag-body> <.comment>* }
-    token document { <.tag-spec> <.tag-body> }
+    token document { <tag-spec> <tag-body> }
 
     # A tag is an identifier prefixed with a symbol to attach several semantics
     # to the tag.
@@ -97,34 +97,34 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 }}
     token tag-body {
-      <ws>?
-      [ '[!=' ~ '!]'    <body1-contents>) ||
-        '[!' ~ '!]'     <body2-contents>) ||
-        '[=' ~ ']'      <body3-contents>) ||
-        '[' ~ ']'       <body4-contents>)
+      <.ws>? [
+        '[!=' ~ '!]'    <body1-contents> ||
+        '[!' ~ '!]'     <body2-contents> ||
+        '[=' ~ ']'      <body3-contents> ||
+        '[' ~ ']'       <body4-contents>
       ]
-      <ws>?
+      <.ws>?
     }
 
     # The content can be anything mixed with document tags except following the
     # no-elements character. To use the brackets and
     # other characters in the text, the characters must be escaped.
     #
-    rule body1-contents  { <.body2-text> }
-    rule body2-contents  { <.body2-text> }
-    rule body3-contents  { [ <.body1-text> || <.document> ]* }
-    rule body4-contents  { [ <.body1-text> || <.document> ]* }
+    rule body1-contents  { <body2-text> }
+    rule body2-contents  { <body2-text> }
+    rule body3-contents  { [ <body1-text> || <document> ]* }
+    rule body4-contents  { [ <body1-text> || <document> ]* }
 
 #    rule body1-contents  { <.keep-literal>? ( <.body1-text> || <.document> )* }
 #    token body1-start     { '[' }
 #    token body1-end       { ']' }
 #    token body1-text      { ( <.comment> || <-[\$\]\\]> || <.body-esc> )+ }
-    token body1-text      { ( <-[\$\]\\]> || <.body-esc> )+ }
+    token body1-text      { [<-[\$\]\\]> || <.body-esc>]+ }
 
 #    rule body2-contents  { <.keep-literal>? <.body2-text> }
 #    token body2-start     { '[!' }
 #    token body2-end       { '!]' }
-    token body2-text      { .*? <?before '!]'> }
+    token body2-text      { [.*? <?before <.ws>? '!]'>] }
 
 #    token keep-literal    { '=' }
     token body-esc        { '\\' . }

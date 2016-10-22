@@ -114,7 +114,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #    has Str $!tag-name;
 #    has Str $!tag-type;
 
-    has Hash $!attrs;
+#    has Hash $!attrs;
 #    has Str $!attr-key;
 
 #    has Bool $!keep-literal;
@@ -130,6 +130,24 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $!deferred-calls = [];
 #      $!has-comment = False;
     }
+
+    method TOP ( $match ) {
+
+      say "TOP: ", $match;
+      print "\n";
+      self!process-tag($match<document><tag-spec>);
+      self!process-body($match<document><tag-body>);
+    }
+
+    method !process-tag ( $tag ) {
+      say "\nT: ", $tag.ast.perl;
+    }
+
+    method !process-body ( $body ) {
+      say "\nB: ", $body.ast[*].perl;
+    }
+
+
 
 #`{{
     #-----------------------------------------------------------------------------
@@ -238,44 +256,182 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $!tag-name = ~$match;
     }
 }}
+
+    #-----------------------------------------------------------------------------
+    method document ( $match ) {
+
+say "Doc tag: " ~ $match<tag-spec>;
+say "Doc bdy: " ~ $match<tag-body>;
+
+#      my Array $ts = $match<tag-spec>.ast;
+say "Array: ", @($match<tag-spec>.ast).join(',');
+      ( my $tt, my $ns, my $tn, my $mod, my $mth, my $att) = @($match<tag-spec>.ast);
+      given $tt {
+        when '$' {
+          my $x = XML::Element.new( :name($tn), :attribs(%$att));
+say 'xml: ', $x;
+        }
+        
+        when '$.' {
+        }
+        
+        when '$!' {
+        }
+        
+        when '$*' {
+        }
+        
+        when '$|*' {
+        }
+        
+        when '$*|' {
+        }
+      }
+      
+#$!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
+#$!el-stack[$!current-el-idx].append($child-element);
+#$!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
+    }
+
+    #-----------------------------------------------------------------------------
     method tag-spec ( $match ) {
 
 #      say 'T0: ', $match<tag>;
 #      say 'T1: ', $match<attributes>;
 #      say 'T2: ', $match<attributes>.elems;
 
-      my $symbol = $match<tag><sym>.Str;
-      say "type: $symbol";
+      my Array $ast = [];
+
+      my Str $symbol = $match<tag><sym>.Str;
+      $ast.push: $symbol;
+say "type: $symbol";
 
       if $symbol ~~ any(< $** $|* $*| $ >) {
 
         my $tn = $match<tag><tag-name>;
-        say 'name: ' ~ $tn<namespace> if $tn<namespace>:exists;
-        say 'element: ' ~ $tn<element>;
+say 'name: ' ~ $tn<namespace> if $tn<namespace>:exists;
+say 'element: ' ~ $tn<element>;
+        $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
       }
 
       elsif $symbol ~~ any(< $. $! >) {
 
-        say 'module name: ' ~ $match<tag><mod-name>;
-        say 'method name: ' ~ $match<tag><meth-name>;
+        my $tn = $match<tag>;
+say 'module name: ' ~ $tn<mod-name>;
+say 'method name: ' ~ $tn<meth-name>;
+        $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
       }
 
-      $!attrs = {};
-      for $match<attributes>.chunks -> $as {
+      my Hash $attrs = {};
+      for $match<attributes>.caps -> $as {
         next unless $as<attribute>:exists;
         my $a = $as<attribute>;
-        $!attrs{$a<attr-key><key-name>.Str} = [
+        $attrs{$a<attr-key><key-name>.Str} = [
           ($a<attr-key><key-ns> // '').Str,
           $a<attr-value-spec><attr-value>.Str
         ];
       }
 
-      say $!attrs.perl;
+say 'Attrs: ', $attrs.perl;
+      $ast.push: $attrs;
+
+      # Set AST on node tag-name
+      $match.make($ast);
     }
 
+    #-----------------------------------------------------------------------------
     method tag-body ( $match ) {
-    
-      say "M: ", $match;
+
+#say "M: ", $match;
+      my Array $ast = [];
+      for $match.caps {
+
+        my $p = $^a.key;
+        my $v = $^a.value;
+say "P: ", $p, ' --->> ', ~$v;
+        # Text cannot have nested documents and text must be taken literally
+        if $p eq 'body1-contents' {
+
+          $ast.push: self!clean-text( $v<body2-text>.Str, :fixed);
+        }
+
+        # Text cannot have nested documents and text may be re-formatted
+        elsif $p eq 'body2-contents' {
+
+          $ast.push: self!clean-text( $v<body2-text>.Str, :!fixed);
+        }
+
+        # Text can have nested documents and text must be taken literally
+        if $p eq 'body3-contents' {
+
+#          $ast.push: self!clean-text($match<body3-contents>.Str, :fixed);
+        }
+
+        # Text can have nested documents and text may be re-formatted
+        elsif $p eq 'body4-contents' {
+
+          for $match<body4-contents>.caps {
+
+            my $p4 = $^a.key;
+            my $v4 = $^a.value;
+
+say "P b4: ", $p4, ' --->> ', ~$v4;
+
+            if $p4 eq 'body1-text' {
+say "b1txt";
+
+              $ast.push: self!clean-text( $v4.Str, :fixed);
+            }
+
+            # Text cannot have nested documents and text may be re-formatted
+            elsif $p4 eq 'document' {
+say "doc";
+            
+              my $d = $v4;
+              my $tag-ast = $d<tag-spec>.ast;
+              my $body-ast = $d<tag-body>.ast;
+              $ast.push([ $tag-ast, $body-ast]);
+            }
+#`{{
+            if $pb4 eq 'body1-text' {
+
+              $ast.push: self!clean-text($match<body1-contents>.Str, :!fixed);
+            }
+
+            elsif $pb4 eq 'document' {
+say "\nDoc: ", $b4{$pb4};
+              my $tag-ast = '';
+              my $body-ast = '';
+              for $b4<document> {
+                $tag-ast = $^a<tag-spec>.ast if $^a<tag-spec>:exists;
+                $body-ast = $^a<tag-body>.ast if $^a<tag-body>:exists;
+              }
+
+              $ast.push([ $tag-ast, $body-ast]);
+            }
+}}
+          }
+        }
+      }
+
+say "B ast: ", $ast;
+      # Set AST on node tag-body
+      $match.make($ast);
+    }
+
+    #-----------------------------------------------------------------------------
+    method !clean-text ( Str $t is copy, Bool :$fixed = False --> Str ) {
+
+      # Remove leading spaces at begin of text
+      $t ~~ s/^ \h+ // if !$fixed;
+
+      # Remove trailing spaces at every line
+      $t ~~ s:g/ \h+ $$ //;
+
+      # Substitute many spaces with one space
+      $t ~~ s:g/ \h\h+ / / if !$fixed;
+
+      $t;
     }
 
 #`{{
@@ -458,6 +614,7 @@ say "Else what?? $*LINE";
     }
 }}
 
+#`{{
     #---------------------------------------------------------------------------
     # Create an xml element and add its attributes. When the $!current-el-idx
     # is not yet defined, a new document must be created and pointers initialized.
@@ -506,6 +663,7 @@ say "CE: ", $child-element.perl;
 say "CE: ", $!xml-document.perl;
       }
     }
+}}
 
     #---------------------------------------------------------------------------
     # Process the text after finding body terminator

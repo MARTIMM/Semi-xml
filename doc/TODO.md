@@ -9,11 +9,12 @@
   * [x] Add another set of brackets which will not allow child elements. This is handy to write javascript and or stylesheets whithout the need to escape every other character like the $ and #.
   * [x] Exporting generated xml to other programs instead of file using prelude path ```output/program/<label>: <command line to run>;```. E.g. when ```output/program/chk: | xmllint --format -;``` is defined in the prelude one can run ```sxml2xml -run chk my-file.sxml```. To get the user information save() has a new named argument :$run-code which is the key as in /output/program/<run-code>
   * [ ] Define rules to define spacing around tags. Default would be to have no space at all.
-    * [x] ```$x [ ... ]```. Normal tag where all leading and trailing spaces are removed and inbetween spaces reduced to one space.
+    * [x] ```$x [ ... ]```. Normal tag where all leading and trailing spaces are removed and between words, spaces are reduced to one space.
     * [x] ```$x [! ... !]```. Body can not have tags. '$' is ignored and this character as well as ']' do not have to be escaped. Only '#' must be escaped at this moment.
-    * [x] ```[ ... ]``` and ```[! ... !]``` can have a '=' directly after the '[' or '[!'. Leading newlines and trailing spaces are removed.
+    * [x] ```[ ... ]``` and ```[! ... !]``` can have a '=' directly after the '[' or '[!'. It means that all text must
+    be kept as typed. Leading newlines and trailing spaces on all lines are still removed.
     * [x] A tag can start with '$', '$.', '$!'. Now also '$\*' is introduced which will add a space around the tag and its content.
-    * [x] Another addition '$\*<' and '$\*>' is introduced to add a space to the left or right of the tag and its content.
+    * [x] Another addition '$\*', '$|\*' and '$\*|>' is introduced to add a space to the right or left of the tag and its content.
 
 * External modules
   * [x] A methods tag content between [ ... ] is a named argument to the sub called content-body.
