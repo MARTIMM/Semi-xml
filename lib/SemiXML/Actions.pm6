@@ -93,7 +93,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
   #-----------------------------------------------------------------------------
   #
   class Actions {
-    our $debug = False;
+#    our $debug = False;
 
     # Objects hash with one predefined object for core methods
     #
@@ -106,10 +106,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #    has Str $!config-value;
 
     has XML::Document $!xml-document;
-    has Int $!current-el-idx;
-    has Array $!el-stack;
-    has Array $!deferred-calls;
-    has Array $!el-keep-literal;
+#    has Int $!current-el-idx;
+#    has Array $!el-stack;
+#    has Array $!deferred-calls;
+#    has Array $!el-keep-literal;
 
 #    has Str $!tag-name;
 #    has Str $!tag-type;
@@ -120,7 +120,12 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #    has Bool $!keep-literal;
 #    has Bool $!has-comment;
 
+     # Keep current state of affairs. Hopefully some info when parsing fails
+     has Str $.prematch;
+     has Str $.postmatch;
+     has Str $.state;
 
+#`{{
     # Initialize some variables when init is set. Must be done when a new object
     # is created: the variables are 'seen' in the other object
     #
@@ -128,12 +133,24 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $!current-el-idx = Int;
       $!el-stack = [];
       $!deferred-calls = [];
-#      $!has-comment = False;
+      $!has-comment = False;
+    }
+}}
+
+    #---------------------------------------------------------------------------
+    method init-doc ( $match ) {
+
+      self!current-state( $match, 'initializing doc');
+      state $init-to-fail =
+        XML::Element.new(:name<failed-to-parse-sxml-document>);
+      $!xml-document .= new($init-to-fail);
     }
 
+    #---------------------------------------------------------------------------
     method TOP ( $match ) {
 
-say "\nTOP: ", $match<document>.ast;
+      self!current-state( $match, 'at the top');
+#say "\nTOP: ", $match<document>.ast;
       $!xml-document .= new($match<document>.ast);
     }
 #`{{
@@ -262,37 +279,55 @@ say "\nB: ", $body.ast[2];
 
     #-----------------------------------------------------------------------------
     method document ( $match ) {
+    
+      self!current-state( $match, 'document');
 
 say "Doc tag: " ~ $match<tag-spec>;
       my XML::Element $x;
+      my XML::Element $y;
+
       ( my $tt,                 # tag type
         my $ns, my $tn,         # namespace and tag name
-        my $mod, my $mth,       # module and method
+        my $mod, my $symmth,    # module and symbol or method
         my $att                 # attributes
       ) = @($match<tag-spec>.ast);
-say "Array: $tt, $ns, $tn, $mod, $mth, {$att.kv ==> map { [~] $^a, '=>', $^b, ',' }}";
+say "Array: $tt, $ns, $tn, $mod, $symmth, {$att.kv ==> map { [~] $^a, ' => ', $^b, ', ' }}";
 
+      # Check the node type
       given $tt {
-        when any(< $ $** $|* $|* >) {
+
+        # Any normal tag
+        when any(< $ $** $*| $|* >) {
           my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
           $x .= new( :name($tag), :attribs(%$att));
+        }
 
-          for $att.keys {
-            when m/^ 'xmlns:' ( <before '='>* ) $/ {
-              my $ns-prefix = $0;
-              $x.setNamespace( $att{$_}, $0);
-            }
+        # Substitution tag
+        when '$.' {
+#          $y .= new(:name('__CONTAINER_ELEMENT__'));
+#$mod, $symmth
+          # Test if symbols Hash exists in module
+          if $!objects{$mod}.symbols{$symmth}:exists {
+            my Str $tn = $!objects{$mod}.symbols{$symmth}<tag-name>;
+            my Hash $at = $!objects{$mod}.symbols{$symmth}<attributes> // {};
+            $x .= new( :name($tn), :attribs(%$at));
           }
         }
 
-        when '$.' {
-        }
-
+        # Method tag
         when '$!' {
         }
       }
 
-say "Doc bdy: ", $match<tag-body>.ast;
+      # Check for xmlns uri definitions and set them on the current node
+      for $att.keys {
+        when m/^ 'xmlns:' ( <before '='>* ) $/ {
+          my $ns-prefix = $0;
+          $x.setNamespace( $att{$_}, $0);
+        }
+      }
+
+say "Doc bdy: ", $match<tag-body>.ast, ', ', ~$x;
       for @($match<tag-body>.ast) {
 
         # Any piece of found text
@@ -322,15 +357,12 @@ say 'xml: ', $x;
       # Set AST on node document
       $match.make($x);
 
-
-#$!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
-#$!el-stack[$!current-el-idx].append($child-element);
-#$!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
     }
 
     #-----------------------------------------------------------------------------
     method tag-spec ( $match ) {
 
+      self!current-state( $match, 'tag specification');
 #      say 'T0: ', $match<tag>;
 #      say 'T1: ', $match<attributes>;
 #      say 'T2: ', $match<attributes>.elems;
@@ -349,7 +381,15 @@ say 'element: ' ~ $tn<element>;
         $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
       }
 
-      elsif $symbol ~~ any(< $. $! >) {
+      elsif $symbol eq '$.' {
+
+        my $tn = $match<tag>;
+say 'module name: ' ~ $tn<mod-name>;
+say 'symbol name: ' ~ $tn<sym-name>;
+        $ast.push: '', '', $tn<mod-name>.Str, $tn<sym-name>.Str;
+      }
+
+      elsif $symbol eq '$!' {
 
         my $tn = $match<tag>;
 say 'module name: ' ~ $tn<mod-name>;
@@ -374,6 +414,7 @@ say 'Attrs: ', $attrs.perl;
     #-----------------------------------------------------------------------------
     method tag-body ( $match ) {
 
+      self!current-state( $match, 'tag body');
 #say "M: ", $match;
       my Array $ast = [];
       for $match.caps {
@@ -509,7 +550,7 @@ say "B ast: ", $ast;
 #    }
 
     #-----------------------------------------------------------------------------
-    method process-config-for-modules {
+    method process-config-for-modules ( ) {
 
       if $!config<module>:exists {
         for $!config<module>.kv -> $key, $value {
@@ -840,6 +881,14 @@ say "CE: ", $!xml-document.perl;
       }
     }
 }}
+
+    #---------------------------------------------------------------------------
+    method !current-state ( Match $match, Str $state ) {
+    
+      $!prematch = $match.prematch;
+      $!postmatch = $match.postmatch;
+      $!state = $state;
+    }
 
     #---------------------------------------------------------------------------
     method get-document ( --> XML::Document ) {

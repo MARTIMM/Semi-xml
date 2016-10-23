@@ -3,19 +3,22 @@ use v6.c;
 use Test;
 use SemiXML;
 
-parse('$html a=x [ abc $|*a x=y [! pqr $xc [] !] p534 tyu ]');
+my $xml = parse('$st []');
+is $xml, '<st/>', "Found $xml";
 
-
+$xml = parse('$st [ $f w [] hj ]');
 
 
 #-------------------------------------------------------------------------------
-sub parse ( Str $content ) {
+sub parse ( Str $content --> Str ) {
 
   state SemiXML::Sxml $x .= new;
   my ParseResult $r = $x.parse(:$content);
   ok $r ~~ Match, "match $content";
-say "XML doc: ", $x.get-xml-text;
-  #say "\nXML = " ~ $x;
+
+  my Str $xml = $x.get-xml-text;
+say "XML doc: ", $xml;
+  $xml;
 }
 
 
@@ -25,7 +28,9 @@ done-testing();
 exit(0);
 
 
-=finish
+
+parse('$html a=x [ abc $|*a x=y [! pqr $xc [] !] p534 tyu ]');
+
 
 parse('$html xml:lang=en [ abc p534 ]');
 parse('$svg:g a=b c="a b" [ def ]');
@@ -40,3 +45,4 @@ parse('$|*body [ ]');
 parse('$.Mod.meth a=b c="a b" [ ]');
 
 parse('$!Mod.meth a=b c="a b" [ ]');
+

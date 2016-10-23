@@ -13,9 +13,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # ---
     # document
     #
+    rule init-doc { <?> }
     rule TOP {
 #      ( <.comment>* "---" <.prelude> "---" ) ** 0..1 <.document>
-      <document>
+      <.init-doc> <document>
     }
 
     # A document is only a tag with its content. Defined like this there can only
@@ -30,7 +31,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     rule tag-spec { <tag> <attributes> }
 
     proto token tag {*}
-    token tag:sym<$.>   { <sym> <mod-name> '.' <meth-name> }
+    token tag:sym<$.>   { <sym> <mod-name> '.' <sym-name> }
     token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
     token tag:sym<$|*>  { <sym> <tag-name> }
     token tag:sym<$*|>  { <sym> <tag-name> }
@@ -38,6 +39,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token tag:sym<$>    { <sym> <tag-name> }
 
     token mod-name      { <.identifier> }
+    token sym-name      { <.identifier> }
     token meth-name     { <.identifier> }
     token tag-name      { [ <namespace> ':' ]? <element> }
     token element       { <.identifier> }
@@ -60,10 +62,13 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # quotes ' or " when there are whitespace characters in the value.
     #
     token attributes    { [<.ws>? <attribute>]* }
+
     token attribute     { <attr-key> '=' <attr-value-spec> }
+
     token attr-key      { [<.key-ns> ':' ]? <.key-name> }
     token key-ns        { <.identifier> }
     token key-name      { <.identifier> }
+
     token attr-value-spec {
       [\' $<attr-value>=<.attr-q-value> \']  ||
       [\" $<attr-value>=<.attr-qq-value> \"] ||

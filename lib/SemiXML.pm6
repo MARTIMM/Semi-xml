@@ -3,6 +3,7 @@ use XML;
 use SemiXML::Grammar;
 use SemiXML::Actions;
 use Config::DataLang::Refine;
+use Terminal::ANSIColor;
 
 #-------------------------------------------------------------------------------
 #package SemiXML:ver<0.17.0>:auth<https://github.com/MARTIMM> {
@@ -146,7 +147,23 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       # Parse the content. Parse can be recursively called
-      return $!grammar.parse( $content, :actions($!actions));
+      my Match $m = $!grammar.subparse( $content, :actions($!actions));
+
+      if $m.to != $content.chars {
+        die "Parse failure just after '$!actions.state()'\n$!actions.prematch()" ~
+            color('red') ~
+            " \x23CF $!actions.postmatch()" ~
+            color('reset');
+      }
+#`{{
+say 'M: ', $m.perl;
+say 'pre: ', $!actions.prematch;
+say 'pro: ', $!actions.postmatch;
+say "L: $content.chars()";
+say "T: $m.to()";
+say "F: $m.from()";
+}}
+      $m;
     }
 
     #---------------------------------------------------------------------------
