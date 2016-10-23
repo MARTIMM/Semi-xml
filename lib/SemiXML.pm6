@@ -149,20 +149,15 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       # Parse the content. Parse can be recursively called
       my Match $m = $!grammar.subparse( $content, :actions($!actions));
 
+      # Throw an exception when there is a parsing failure
       if $m.to != $content.chars {
-        die "Parse failure just after '$!actions.state()'\n$!actions.prematch()" ~
+        die "Parse failure just after '$!actions.state()'\n" ~
+            $!actions.prematch() ~
             color('red') ~
             " \x23CF $!actions.postmatch()" ~
             color('reset');
       }
-#`{{
-say 'M: ', $m.perl;
-say 'pre: ', $!actions.prematch;
-say 'pro: ', $!actions.postmatch;
-say "L: $content.chars()";
-say "T: $m.to()";
-say "F: $m.from()";
-}}
+
       $m;
     }
 
