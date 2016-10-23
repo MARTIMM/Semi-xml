@@ -4,9 +4,36 @@ use Test;
 use SemiXML;
 
 my $xml = parse('$st []');
-is $xml, '<st/>', "Found $xml";
+is $xml, '<st/>', "1 tag: $xml";
 
-$xml = parse('$st [ $f w [] hj ]');
+$xml = parse(Q:q@$st a1=w a2='g g' a3="h h"    [    ]@);
+like $xml, /'a1="w"'/, 'a1 attribute';
+like $xml, /'a2="g g"'/, 'a2 attribute';
+like $xml, /'a3="h h"'/, 'a2 attribute';
+
+try {
+  $xml = parse('$st [ $f w [] hj ]');
+
+  CATCH {
+    default {
+      my $m = .message;
+      $m ~~ s/\n/ /;
+      like $m, /^ "Parse failure just after 'tag specification'"/, $m;
+    }
+  }
+}
+
+$xml = parse('$t1 [ $t2 [] $t3[]]');
+is $xml, '<t1><t2/><t3/></t1>', "nested tags: $xml";
+
+$xml = parse('$t1 [ $**t2 [] $t3[]]');
+is $xml, '<t1> <t2/> <t3/></t1>', "nested tags with \$**: $xml";
+
+$xml = parse('$t1 [ $|*t2 [] $t3[]]');
+is $xml, '<t1><t2/> <t3/></t1>', "nested tags with \$|*: $xml";
+
+$xml = parse('$t1 [ $*|t2 [] $t3[]]');
+is $xml, '<t1> <t2/><t3/></t1>', "nested tags with \$*|: $xml";
 
 
 #-------------------------------------------------------------------------------
@@ -17,7 +44,6 @@ sub parse ( Str $content --> Str ) {
   ok $r ~~ Match, "match $content";
 
   my Str $xml = $x.get-xml-text;
-say "XML doc: ", $xml;
   $xml;
 }
 
