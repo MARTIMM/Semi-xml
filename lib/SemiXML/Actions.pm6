@@ -133,20 +133,23 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     method TOP ( $match ) {
 
-      say "TOP: ", $match;
-      print "\n";
+say "\nTOP: ", $match<document>.ast;
+      $!xml-document .= new($match<document>.ast);
+    }
+#`{{
+#print "\n";
       self!process-tag($match<document><tag-spec>);
       self!process-body($match<document><tag-body>);
     }
 
     method !process-tag ( $tag ) {
-      say "\nT: ", $tag.ast.perl;
+#say "\nT: ", $tag.ast.perl;
     }
 
     method !process-body ( $body ) {
-      say "\nB: ", $body.ast[*].perl;
+say "\nB: ", $body.ast[2];
     }
-
+}}
 
 
 #`{{
@@ -261,33 +264,65 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method document ( $match ) {
 
 say "Doc tag: " ~ $match<tag-spec>;
-say "Doc bdy: " ~ $match<tag-body>;
+      my XML::Element $x;
+      ( my $tt,                 # tag type
+        my $ns, my $tn,         # namespace and tag name
+        my $mod, my $mth,       # module and method
+        my $att                 # attributes
+      ) = @($match<tag-spec>.ast);
+say "Array: $tt, $ns, $tn, $mod, $mth, {$att.kv ==> map { [~] $^a, '=>', $^b, ',' }}";
 
-#      my Array $ts = $match<tag-spec>.ast;
-say "Array: ", @($match<tag-spec>.ast).join(',');
-      ( my $tt, my $ns, my $tn, my $mod, my $mth, my $att) = @($match<tag-spec>.ast);
       given $tt {
-        when '$' {
-          my $x = XML::Element.new( :name($tn), :attribs(%$att));
-say 'xml: ', $x;
+        when any(< $ $** $|* $|* >) {
+          my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
+          $x .= new( :name($tag), :attribs(%$att));
+
+          for $att.keys {
+            when m/^ 'xmlns:' ( <before '='>* ) $/ {
+              my $ns-prefix = $0;
+              $x.setNamespace( $att{$_}, $0);
+            }
+          }
         }
-        
+
         when '$.' {
         }
-        
+
         when '$!' {
         }
-        
-        when '$*' {
+      }
+
+say "Doc bdy: ", $match<tag-body>.ast;
+      for @($match<tag-body>.ast) {
+
+        # Any piece of found text
+        when Str {
+          $x.append(SemiXML::Text.new(:text($_)));
         }
-        
-        when '$|*' {
-        }
-        
-        when '$*|' {
+
+        # Nested document: [ tag ast, body ast, doc xml]
+        when Array {
+
+          # tag ast: [ tag type, namespace, tag name, module, method, attributes
+          my Array $tag-ast = $_[0];
+
+          # Test if spaces are needed before the document
+          $x.append(SemiXML::Text.new(:text(' ')))
+            if $tag-ast[0] ~~ any(< $** $*| >);
+
+          $x.append($_[2]);
+
+          # Test if spaces are needed after the document
+          $x.append(SemiXML::Text.new(:text(' ')))
+            if $tag-ast[0] ~~ any(< $** $|* >);
         }
       }
-      
+
+say 'xml: ', $x;
+      # Set AST on node document
+      $match.make($x);
+
+
 #$!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
 #$!el-stack[$!current-el-idx].append($child-element);
 #$!el-stack[$!current-el-idx].append(SemiXML::Text.new(:text(' ')))
@@ -326,10 +361,7 @@ say 'method name: ' ~ $tn<meth-name>;
       for $match<attributes>.caps -> $as {
         next unless $as<attribute>:exists;
         my $a = $as<attribute>;
-        $attrs{$a<attr-key><key-name>.Str} = [
-          ($a<attr-key><key-ns> // '').Str,
-          $a<attr-value-spec><attr-value>.Str
-        ];
+        $attrs{$a<attr-key>.Str} = $a<attr-value-spec><attr-value>.Str;
       }
 
 say 'Attrs: ', $attrs.perl;
@@ -364,7 +396,29 @@ say "P: ", $p, ' --->> ', ~$v;
         # Text can have nested documents and text must be taken literally
         if $p eq 'body3-contents' {
 
-#          $ast.push: self!clean-text($match<body3-contents>.Str, :fixed);
+          for $match<body3-contents>.caps {
+
+            my $p3 = $^a.key;
+            my $v3 = $^a.value;
+
+say "P b3: ", $p3, ' --->> ', ~$v3;
+
+            if $p3 eq 'body1-text' {
+say "b1txt";
+
+              $ast.push: self!clean-text( $v3.Str, :fixed);
+            }
+
+            # Text cannot have nested documents and text may be re-formatted
+            elsif $p3 eq 'document' {
+
+              my $d = $v3;
+say "doc: ", $d.ast;
+              my $tag-ast = $d<tag-spec>.ast;
+              my $body-ast = $d<tag-body>.ast;
+              $ast.push([ $tag-ast, $body-ast, $d.ast]);
+            }
+          }
         }
 
         # Text can have nested documents and text may be re-formatted
@@ -380,36 +434,18 @@ say "P b4: ", $p4, ' --->> ', ~$v4;
             if $p4 eq 'body1-text' {
 say "b1txt";
 
-              $ast.push: self!clean-text( $v4.Str, :fixed);
+              $ast.push: self!clean-text( $v4.Str, :!fixed);
             }
 
             # Text cannot have nested documents and text may be re-formatted
             elsif $p4 eq 'document' {
-say "doc";
-            
+
               my $d = $v4;
+say "doc: ", $d.ast;
               my $tag-ast = $d<tag-spec>.ast;
               my $body-ast = $d<tag-body>.ast;
-              $ast.push([ $tag-ast, $body-ast]);
+              $ast.push([ $tag-ast, $body-ast, $d.ast]);
             }
-#`{{
-            if $pb4 eq 'body1-text' {
-
-              $ast.push: self!clean-text($match<body1-contents>.Str, :!fixed);
-            }
-
-            elsif $pb4 eq 'document' {
-say "\nDoc: ", $b4{$pb4};
-              my $tag-ast = '';
-              my $body-ast = '';
-              for $b4<document> {
-                $tag-ast = $^a<tag-spec>.ast if $^a<tag-spec>:exists;
-                $body-ast = $^a<tag-body>.ast if $^a<tag-body>:exists;
-              }
-
-              $ast.push([ $tag-ast, $body-ast]);
-            }
-}}
           }
         }
       }
@@ -454,16 +490,12 @@ say "B ast: ", $ast;
 #    method keep-literal ( $match )        { $!keep-literal = True; }
 
 #    method body1-start ( $match )         { self!process-tag(); }
-    method body1-start ( $match )         {  }
 #    method body1-text ( $match )          { self!process-text($match); }
-    method body1-text ( $match )          {  }
-    method body1-end ( $match )           { self!process-body-end(); }
+#    method body1-end ( $match )           { self!process-body-end(); }
 
 #    method body2-start ( $match )         { self!process-tag(); }
-    method body2-start ( $match )         {  }
 #    method body2-text ( $match )          { self!process-text($match); }
-    method body2-text ( $match )          {  }
-    method body2-end ( $match )           { self!process-body-end(); }
+#    method body2-end ( $match )           { self!process-body-end(); }
 
     # Idea to count lines in the source
     #
@@ -665,6 +697,7 @@ say "CE: ", $!xml-document.perl;
     }
 }}
 
+#`{{
     #---------------------------------------------------------------------------
     # Process the text after finding body terminator
     #
@@ -674,12 +707,12 @@ say "CE: ", $!xml-document.perl;
       # modify/remove escape characters
       #
       my $text = ~$match;
-#`{{
+#`{ {
       if $!has-comment {
         $text ~~ s:g/ \n \s* '#' <-[\n]>* \n /\n/;
         $!has-comment = False;
       }
-}}
+} }
       $text = self!process-esc($text);
 
       my $xml;
@@ -764,7 +797,9 @@ say "CE: ", $!xml-document.perl;
 #say "\n$esc\n\n";
       return $esc;
     }
+}}
 
+#`{{
     #---------------------------------------------------------------------------
     # Process body ending
     #
@@ -804,6 +839,7 @@ say "CE: ", $!xml-document.perl;
         $!el-keep-literal[$!current-el-idx + 1] = False;
       }
     }
+}}
 
     #---------------------------------------------------------------------------
     method get-document ( --> XML::Document ) {

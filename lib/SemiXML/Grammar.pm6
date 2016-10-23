@@ -27,7 +27,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # A tag is an identifier prefixed with a symbol to attach several semantics
     # to the tag.
     #
-
     rule tag-spec { <tag> <attributes> }
 
     proto token tag {*}
@@ -62,7 +61,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #
     token attributes    { [<.ws>? <attribute>]* }
     token attribute     { <attr-key> '=' <attr-value-spec> }
-    token attr-key      { [<key-ns> ':' ]? <key-name> }
+    token attr-key      { [<.key-ns> ':' ]? <.key-name> }
     token key-ns        { <.identifier> }
     token key-name      { <.identifier> }
     token attr-value-spec {

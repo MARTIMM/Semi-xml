@@ -3,7 +3,7 @@ use v6.c;
 use Test;
 use SemiXML;
 
-parse('$html a=x [ abc $a x=y [! pqr !] p534 tyu ]');
+parse('$html a=x [ abc $|*a x=y [! pqr $xc [] !] p534 tyu ]');
 
 
 
@@ -14,6 +14,7 @@ sub parse ( Str $content ) {
   state SemiXML::Sxml $x .= new;
   my ParseResult $r = $x.parse(:$content);
   ok $r ~~ Match, "match $content";
+say "XML doc: ", $x.get-xml-text;
   #say "\nXML = " ~ $x;
 }
 
