@@ -1,5 +1,10 @@
 ## Changes
 
+* 0.20.0
+  * Complete rewrite of grammar and actions
+  * A primitive parse error locater is implemented.
+  * A change in tag types: $\*, $\*> and $\<* are now $\*\* $\*| and $|\* resp.
+  * Simple tests are setup in 010-simple.t testing $x $\*\*x $\*|x and $|\*x
 * 0.19.0
   * Replaced prelude and internal configs with Config::DataLang::Refine
   * Roles are dropped for adding configs.

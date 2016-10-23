@@ -153,21 +153,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #say "\nTOP: ", $match<document>.ast;
       $!xml-document .= new($match<document>.ast);
     }
-#`{{
-#print "\n";
-      self!process-tag($match<document><tag-spec>);
-      self!process-body($match<document><tag-body>);
-    }
-
-    method !process-tag ( $tag ) {
-#say "\nT: ", $tag.ast.perl;
-    }
-
-    method !process-body ( $body ) {
-say "\nB: ", $body.ast[2];
-    }
-}}
-
 
 #`{{
     #-----------------------------------------------------------------------------
@@ -282,7 +267,7 @@ say "\nB: ", $body.ast[2];
     
       self!current-state( $match, 'document');
 
-say "Doc tag: " ~ $match<tag-spec>;
+#say "Doc tag: " ~ $match<tag-spec>;
       my XML::Element $x;
       my XML::Element $y;
 
@@ -291,7 +276,7 @@ say "Doc tag: " ~ $match<tag-spec>;
         my $mod, my $symmth,    # module and symbol or method
         my $att                 # attributes
       ) = @($match<tag-spec>.ast);
-say "Array: $tt, $ns, $tn, $mod, $symmth, {$att.kv ==> map { [~] $^a, ' => ', $^b, ', ' }}";
+#say "Array: $tt, $ns, $tn, $mod, $symmth, {$att.kv ==> map { [~] $^a, ' => ', $^b, ', ' }}";
 
       # Check the node type
       given $tt {
@@ -327,7 +312,7 @@ say "Array: $tt, $ns, $tn, $mod, $symmth, {$att.kv ==> map { [~] $^a, ' => ', $^
         }
       }
 
-say "Doc bdy: ", $match<tag-body>.ast, ', ', ~$x;
+#say "Doc bdy: ", $match<tag-body>.ast, ', ', ~$x;
       for @($match<tag-body>.ast) {
 
         # Any piece of found text
@@ -353,7 +338,7 @@ say "Doc bdy: ", $match<tag-body>.ast, ', ', ~$x;
         }
       }
 
-say 'xml: ', $x;
+#say 'xml: ', $x;
       # Set AST on node document
       $match.make($x);
 
@@ -371,29 +356,29 @@ say 'xml: ', $x;
 
       my Str $symbol = $match<tag><sym>.Str;
       $ast.push: $symbol;
-say "type: $symbol";
+#say "type: $symbol";
 
       if $symbol ~~ any(< $** $|* $*| $ >) {
 
         my $tn = $match<tag><tag-name>;
-say 'name: ' ~ $tn<namespace> if $tn<namespace>:exists;
-say 'element: ' ~ $tn<element>;
+#say 'name: ' ~ $tn<namespace> if $tn<namespace>:exists;
+#say 'element: ' ~ $tn<element>;
         $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
       }
 
       elsif $symbol eq '$.' {
 
         my $tn = $match<tag>;
-say 'module name: ' ~ $tn<mod-name>;
-say 'symbol name: ' ~ $tn<sym-name>;
+#say 'module name: ' ~ $tn<mod-name>;
+#say 'symbol name: ' ~ $tn<sym-name>;
         $ast.push: '', '', $tn<mod-name>.Str, $tn<sym-name>.Str;
       }
 
       elsif $symbol eq '$!' {
 
         my $tn = $match<tag>;
-say 'module name: ' ~ $tn<mod-name>;
-say 'method name: ' ~ $tn<meth-name>;
+#say 'module name: ' ~ $tn<mod-name>;
+#say 'method name: ' ~ $tn<meth-name>;
         $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
       }
 
@@ -404,7 +389,7 @@ say 'method name: ' ~ $tn<meth-name>;
         $attrs{$a<attr-key>.Str} = $a<attr-value-spec><attr-value>.Str;
       }
 
-say 'Attrs: ', $attrs.perl;
+#say 'Attrs: ', $attrs.perl;
       $ast.push: $attrs;
 
       # Set AST on node tag-name
@@ -421,7 +406,7 @@ say 'Attrs: ', $attrs.perl;
 
         my $p = $^a.key;
         my $v = $^a.value;
-say "P: ", $p, ' --->> ', ~$v;
+#say "P: ", $p, ' --->> ', ~$v;
         # Text cannot have nested documents and text must be taken literally
         if $p eq 'body1-contents' {
 
@@ -442,10 +427,10 @@ say "P: ", $p, ' --->> ', ~$v;
             my $p3 = $^a.key;
             my $v3 = $^a.value;
 
-say "P b3: ", $p3, ' --->> ', ~$v3;
+#say "P b3: ", $p3, ' --->> ', ~$v3;
 
             if $p3 eq 'body1-text' {
-say "b1txt";
+#say "b1txt";
 
               $ast.push: self!clean-text( $v3.Str, :fixed);
             }
@@ -454,7 +439,7 @@ say "b1txt";
             elsif $p3 eq 'document' {
 
               my $d = $v3;
-say "doc: ", $d.ast;
+#say "doc: ", $d.ast;
               my $tag-ast = $d<tag-spec>.ast;
               my $body-ast = $d<tag-body>.ast;
               $ast.push([ $tag-ast, $body-ast, $d.ast]);
@@ -470,10 +455,10 @@ say "doc: ", $d.ast;
             my $p4 = $^a.key;
             my $v4 = $^a.value;
 
-say "P b4: ", $p4, ' --->> ', ~$v4;
+#say "P b4: ", $p4, ' --->> ', ~$v4;
 
             if $p4 eq 'body1-text' {
-say "b1txt";
+#say "b1txt";
 
               $ast.push: self!clean-text( $v4.Str, :!fixed);
             }
@@ -482,7 +467,7 @@ say "b1txt";
             elsif $p4 eq 'document' {
 
               my $d = $v4;
-say "doc: ", $d.ast;
+#say "doc: ", $d.ast;
               my $tag-ast = $d<tag-spec>.ast;
               my $body-ast = $d<tag-body>.ast;
               $ast.push([ $tag-ast, $body-ast, $d.ast]);
@@ -491,7 +476,7 @@ say "doc: ", $d.ast;
         }
       }
 
-say "B ast: ", $ast;
+#say "B ast: ", $ast;
       # Set AST on node tag-body
       $match.make($ast);
     }
