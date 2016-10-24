@@ -39,7 +39,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $c0 = self!load-config( :config-name<SemiXML.toml>, :$other-config);
 
       $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
-      $!actions.process-config-for-modules;
     }
 
     #---------------------------------------------------------------------------
@@ -146,6 +145,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
       }
 
+      # Check if modules needs to be instantiated in the config
+      $!actions.process-config-for-modules;
+
       # Parse the content. Parse can be recursively called
       my Match $m = $!grammar.subparse( $content, :actions($!actions));
 
@@ -153,8 +155,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       if $m.to != $content.chars {
         die "Parse failure just after '$!actions.state()'\n" ~
             $!actions.prematch() ~
+            $content.substr( $!actions.from, $!actions.to - $!actions.from) ~
             color('red') ~
-            " \x23CF $!actions.postmatch()" ~
+            "\x[23CF]$!actions.postmatch()" ~
             color('reset');
       }
 
@@ -379,6 +382,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       return Any;
     }
 
+#`{{
     #---------------------------------------------------------------------------
     # Used from plugins to find the PLACEHOLDER-ELEMENT tag in the given
     # parent node.
@@ -395,6 +399,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       return $placeholder;
     }
+}}
+
   }
 }
 

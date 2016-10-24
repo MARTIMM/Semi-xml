@@ -121,6 +121,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #    has Bool $!has-comment;
 
      # Keep current state of affairs. Hopefully some info when parsing fails
+     has Int $.from;
+     has Int $.to;
      has Str $.prematch;
      has Str $.postmatch;
      has Str $.state;
@@ -150,8 +152,47 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method TOP ( $match ) {
 
       self!current-state( $match, 'at the top');
-#say "\nTOP: ", $match<document>.ast;
-      $!xml-document .= new($match<document>.ast);
+
+      my $parent = $match<document>.ast;
+#say "\nTOP: $parent.name(), ", $parent;
+      
+      # Cleanup residue tags left from processing methods. The childnodes in
+      #'__PARENT_CONTAINER__' tags must be moved to the parent of it. There
+      # is one exception, that is when the tag is at the top. Then there may
+      # only be one tag. If there are more, an error tag is generated.
+      #
+      my $containers = $parent.getElementsByTagName('__PARENT_CONTAINER__');
+      for @$containers -> $node {
+
+        my $children = $node.nodes;
+#say "C: $children.join(',')";
+
+        # Eat from the end of the list and add just after the container element.
+        # Somehow they get lost from the array when done otherwise.
+        #
+        for @$children.reverse {
+          $node.parent.after( $node, $^a);
+        }
+
+        $node.parent.removeChild($node);
+      }
+
+      # Process top level metod container
+      if $parent.name() eq '__PARENT_CONTAINER__' {
+        if $parent.nodes == 1 {
+          $parent = $parent.nodes[0];
+        }
+
+        else {
+          my $tag-ast = $match<document><tag-spec>.ast;
+          $parent = XML::Element.new(
+            :name('method-generated-too-many-nodes'),
+            :attribs( module => $tag-ast[3], method => $tag-ast[4])
+          );
+        }
+      }
+
+      $!xml-document .= new($parent);
     }
 
 #`{{
@@ -264,12 +305,11 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     #-----------------------------------------------------------------------------
     method document ( $match ) {
-    
+
       self!current-state( $match, 'document');
 
 #say "Doc tag: " ~ $match<tag-spec>;
       my XML::Element $x;
-      my XML::Element $y;
 
       ( my $tt,                 # tag type
         my $ns, my $tn,         # namespace and tag name
@@ -283,41 +323,129 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
         # Any normal tag
         when any(< $ $** $*| $|* >) {
+
           my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
           $x .= new( :name($tag), :attribs(%$att));
         }
 
         # Substitution tag
         when '$.' {
-#          $y .= new(:name('__CONTAINER_ELEMENT__'));
-#$mod, $symmth
-          # Test if symbols Hash exists in module
-          if $!objects{$mod}.symbols{$symmth}:exists {
-            my Str $tn = $!objects{$mod}.symbols{$symmth}<tag-name>;
-            my Hash $at = $!objects{$mod}.symbols{$symmth}<attributes> // {};
-            $x .= new( :name($tn), :attribs(%$at));
+
+          my $module = $!objects{$mod} if $!objects{$mod}:exists;
+
+          # Check if module exists
+          if $module.defined {
+
+            # Test if symbols accessor exists in module
+            if $module.^can('symbols') {
+              my Str $tn = $!objects{$mod}.symbols{$symmth}<tag-name>;
+              my Hash $at = $!objects{$mod}.symbols{$symmth}<attributes> // {};
+              $x .= new( :name($tn), :attribs( |%$at, |%$att));
+            }
+
+            else {
+              $x .= new(
+                :name('undefined-method'),
+                :attribs( module => $mod, :method<symbols>)
+              );
+            }
+          }
+
+          else {
+            $x .= new(
+              :name('undefined-module'),
+              :attribs(module => $mod)
+            );
           }
         }
 
         # Method tag
         when '$!' {
+
+          my $module = $!objects{$mod} if $!objects{$mod}:exists;
+
+          # check if module exists
+          if $module.defined {
+
+            # test if symbols accessor exists in module
+            if $module.^can($symmth) {
+
+              # call user method and expect result in $y
+              $x = $module."$symmth"(
+                XML::Element.new(:name('__PARENT_CONTAINER__')),
+                $att,
+                :content-body( self!build-content-body(
+                    $match<tag-body>.ast,
+                    XML::Element.new(:name('__BODY_CONTAINER__'))
+                  )
+                )
+              );
+#say "X: $x, ", $x.nodes;
+
+#`{{
+              # move all child nodes of $y to $x
+              if $y.defined {
+say "Y: $y, ", $y.nodes;
+                $x.append($_) for $y.nodes;
+                undefine $y;
+              }
+}}
+              if not $x.defined {
+                $x .= new(
+                  :name('method-returned-no-result'),
+                  :attribs( module => $mod, method => $symmth)
+                );
+              }
+            }
+
+            else {
+              $x .= new(
+                :name('undefined-method'),
+                :attribs( module => $mod, method => $symmth)
+              );
+            }
+          }
+
+          else {
+            $x .= new(
+              :name('undefined-module'),
+              :attribs(module => $mod)
+            );
+          }
         }
       }
 
-      # Check for xmlns uri definitions and set them on the current node
-      for $att.keys {
-        when m/^ 'xmlns:' ( <before '='>* ) $/ {
-          my $ns-prefix = $0;
-          $x.setNamespace( $att{$_}, $0);
+      # For all types but methods
+      if $tt ~~ any(< $ $** $*| $|* $. >) {
+
+        # Check for xmlns uri definitions and set them on the current node
+        for $att.keys {
+          when m/^ 'xmlns:' ( <before '='>* ) $/ {
+            my $ns-prefix = $0;
+            $x.setNamespace( $att{$_}, $0);
+          }
         }
+
+        self!build-content-body( $match<tag-body>.ast, $x);
       }
 
-#say "Doc bdy: ", $match<tag-body>.ast, ', ', ~$x;
-      for @($match<tag-body>.ast) {
+#say 'xml: ', $x;
 
+      # Set AST on node document
+      $match.make($x);
+    }
+
+    #-----------------------------------------------------------------------------
+    method !build-content-body (
+      $ast, XML::Element $parent
+
+      --> XML::Element
+    ) {
+
+      for @$ast {
         # Any piece of found text
         when Str {
-          $x.append(SemiXML::Text.new(:text($_)));
+          $parent.append(SemiXML::Text.new(:text($_))) if ?$_;
         }
 
         # Nested document: [ tag ast, body ast, doc xml]
@@ -327,21 +455,25 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           my Array $tag-ast = $_[0];
 
           # Test if spaces are needed before the document
-          $x.append(SemiXML::Text.new(:text(' ')))
+          $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $*| >);
 
-          $x.append($_[2]);
+#          if $tag-ast[0] eq '$!' {
+#            $parent.append($_) for $tag-ast[2].nodes;
+#            $tag-ast[2].remove;
+#          }
+          
+#          else {
+            $parent.append($_[2]);
+#          }
 
           # Test if spaces are needed after the document
-          $x.append(SemiXML::Text.new(:text(' ')))
+          $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $|* >);
         }
       }
 
-#say 'xml: ', $x;
-      # Set AST on node document
-      $match.make($x);
-
+      $parent;
     }
 
     #-----------------------------------------------------------------------------
@@ -386,7 +518,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       for $match<attributes>.caps -> $as {
         next unless $as<attribute>:exists;
         my $a = $as<attribute>;
-        $attrs{$a<attr-key>.Str} = $a<attr-value-spec><attr-value>.Str;
+        my $av = $a<attr-value-spec><attr-value>.Str;
+        $av ~~ s:g/\"/\&quot;/;
+        $attrs{$a<attr-key>.Str} = $av;
       }
 
 #say 'Attrs: ', $attrs.perl;
@@ -493,7 +627,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       # Substitute many spaces with one space
       $t ~~ s:g/ \h\h+ / / if !$fixed;
 
-      $t;
+      self!process-esc($t);
     }
 
 #`{{
@@ -540,7 +674,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       if $!config<module>:exists {
         for $!config<module>.kv -> $key, $value {
           if $!objects{$key}:exists {
-            say "'module/$key:  $value;' found before, ignored";
+#            say "'module/$key:  $value;' found before, ignored";
           }
 
           else {
@@ -786,6 +920,7 @@ say "CE: ", $!xml-document.perl;
       $!el-stack[$!current-el-idx].append($xml) if $xml.defined;
 #say "appended $!el-stack[$!current-el-idx]" if $xml.defined;
     }
+}}
 
     #---------------------------------------------------------------------------
     # Substitute some escape characters in entities and remove the remaining
@@ -823,7 +958,6 @@ say "CE: ", $!xml-document.perl;
 #say "\n$esc\n\n";
       return $esc;
     }
-}}
 
 #`{{
     #---------------------------------------------------------------------------
@@ -869,7 +1003,9 @@ say "CE: ", $!xml-document.perl;
 
     #---------------------------------------------------------------------------
     method !current-state ( Match $match, Str $state ) {
-    
+
+      $!from = $match.from;
+      $!to = $match.to;
       $!prematch = $match.prematch;
       $!postmatch = $match.postmatch;
       $!state = $state;

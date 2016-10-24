@@ -61,11 +61,15 @@ ok $xml-text ~~ m/\<br\/\>/, 'Empty tag br found';
 
 ok $xml-text ~~ m/'<p class="green">'/, 'Class test 1';
 ok $xml-text ~~ m/'<x class="green blue">'/, 'Class test 2';
-ok $xml-text ~~ m/'<y data_1="quoted&quot;test&quot;">'/, 'Class test 3';
-ok $xml-text ~~ m/'<z data_2="double \'quoted\' tests">'/, 'Class test 4';
+like $xml-text,
+     /'<y data_1="quoted&quot;test&quot;">'/,
+     'Class test 3';
+like $xml-text,
+     / :s '<z data_2="double' "'quoted'" 'tests">'/,
+     'Class test 4';
 
 
-#say $xml-text;
+say $xml-text;
 
 
 
