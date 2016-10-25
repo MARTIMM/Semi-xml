@@ -153,12 +153,19 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       # Throw an exception when there is a parsing failure
       if $m.to != $content.chars {
-        die "Parse failure just after '$!actions.state()'\n" ~
-            $!actions.prematch() ~
-            $content.substr( $!actions.from, $!actions.to - $!actions.from) ~
-            color('red') ~
-            "\x[23CF]$!actions.postmatch()" ~
-            color('reset');
+        my Str $before = $!actions.prematch();
+        my Str $after = $!actions.postmatch();
+        my Str $current = $content.substr( $!actions.from, $!actions.to - $!actions.from);
+
+        $before ~ $current ~~ m:g/ (\n) /;
+        my Int $nth-line = $/.elems + 1;
+
+        $before ~~ s:g/ <-[\n]>* \n //;
+        $after ~~ s:g/ \n <-[\n]>* //;
+
+        die "Parse failure just after '$!actions.state()' at line $nth-line\n" ~
+            $before ~ $current ~
+            color('red') ~ "\x[23CF]$after" ~ color('reset');
       }
 
       $m;
@@ -401,6 +408,55 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 }}
 
+
+    #-----------------------------------------------------------------------------
+    sub append-element (
+      XML::Element $parent, Str $name, Hash $attributes = {}
+      --> XML::Element
+    ) is export {
+
+      my XML::Element $element .= new( :$name, :attribs(%$attributes));
+      $parent.append($element);
+say "E: $element";
+say "P: $parent";
+      $element;
+    }
+
+    #-----------------------------------------------------------------------------
+    sub insert-element (
+      XML::Element $parent, Str $name, Hash $attributes = {}
+      --> XML::Element
+    ) is export {
+
+      my XML::Element $element .= new( :$name, :attribs(%$attributes));
+      $parent.insert($element);
+
+      $element;
+    }
+
+    #-----------------------------------------------------------------------------
+    sub before-element (
+      XML::Element $node, Str $name, Hash $attributes = {}
+      --> XML::Element
+    ) is export {
+
+      my XML::Element $element .= new( :$name, :attribs(%$attributes));
+      $node.before($element);
+
+      $element;
+    }
+
+    #-----------------------------------------------------------------------------
+    sub after-element (
+      XML::Element $node, Str $name, Hash $attributes = {}
+      --> XML::Element
+    ) is export {
+
+      my XML::Element $element .= new( :$name, :attribs(%$attributes));
+      $node.after($element);
+
+      $element;
+    }
   }
 }
 
