@@ -1,28 +1,27 @@
-$html [
-  $head [
-  
+$!td.report title='Integer manipulations' test-file='t/abc.t' [
+
+  $!td.doc title='Purpose' [
+    Test the integer declaration and then assignment of a number. This test
+    is a double check of perl6 $**b[Int] to see if that type is really the number
+    we're looking for.
   ]
 
-  $body [
+  $!td.code [!=
+    use SemiXML;
 
-    $!td.test title='Integer manipulations' [
+    constant ABC = 10;
 
-      $!td.doc [
-        Test the integer declaration and then assignment of a number. Test
-        if the number is assignable.
-      ]
+    my Int $i;
+  !]
 
-      $!td.prepair [!
-        my Int $i;
-      !]
-
-      $!td.is result=$i expect=Any [Uninitialized Int]
-
-      $!td.prepair [!
-        $i = 10;
-      !]
-
-      $!td.is result=$i expect=10 [Initialized Int ]
-    ]
+  $!td.test line="ok $i ~~ Int" [
+    Declaration of an integer without an assignment of a value,
+    should result in a type value when compared.
   ]
+
+  $!td.code [!=
+    $i = ABC;
+  !]
+
+  $!td.test line="is $i, 10" [Initialized Int]
 ]

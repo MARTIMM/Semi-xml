@@ -91,7 +91,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
   }
 
   #-----------------------------------------------------------------------------
-  #
   class Actions {
 #    our $debug = False;
 

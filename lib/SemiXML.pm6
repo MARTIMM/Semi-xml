@@ -417,8 +417,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       my XML::Element $element .= new( :$name, :attribs(%$attributes));
       $parent.append($element);
-say "E: $element";
-say "P: $parent";
       $element;
     }
 
