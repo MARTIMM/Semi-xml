@@ -44,6 +44,7 @@ spurt( 't/M/m1.pm6', q:to/EOMOD/);
       my Int $nbr-nodes = $content-body.nodes.elems;
       $p.insert($_) for $content-body.nodes.reverse;
       $p.append(SemiXML::Text.new(:text("Added $nbr-nodes xml nodes")));
+
       $parent;
     }
   }

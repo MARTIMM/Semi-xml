@@ -43,7 +43,7 @@ sub parse ( Str $content --> Str ) {
   my ParseResult $r = $x.parse(:$content);
   ok $r ~~ Match, "match $content";
 
-  my Str $xml = $x.get-xml-text;
+  my Str $xml = ~$x;
   $xml;
 }
 
