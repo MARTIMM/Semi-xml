@@ -154,7 +154,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       my $parent = $match<document>.ast;
 #say "\nTOP: $parent.name(), ", $parent;
-      
+
       # Cleanup residue tags left from processing methods. The childnodes in
       #'__PARENT_CONTAINER__' tags must be moved to the parent of it. There
       # is one exception, that is when the tag is at the top. Then there may
@@ -190,6 +190,33 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           );
         }
       }
+
+      # Conversion to xml escapes is done as late as possible
+      my Sub $after-math = sub ( XML::Element $x ) {
+
+        # Process attributes to escape special chars
+        my %a = $x.attribs;
+        for %a.kv -> $k, $v {
+          $x.set( $k, self!process-esc($v));
+        }
+
+        # Process body text to escape special chars
+        for $x.nodes -> $node {
+          if $node ~~ any( SemiXML::Text, XML::Text) {
+            my Str $s = self!process-esc(~$node);
+  say $s;
+            $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
+          }
+
+          elsif $node ~~ XML::Element {
+            $after-math($node);
+          }
+        }
+      }
+
+      $after-math($parent);
+
+
 
       $!xml-document .= new($parent);
     }
@@ -324,6 +351,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         when any(< $ $** $*| $|* >) {
 
           my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
+
           $x .= new( :name($tag), :attribs(%$att));
         }
 
@@ -430,6 +458,7 @@ say "Y: $y, ", $y.nodes;
 
 #say 'xml: ', $x;
 
+
       # Set AST on node document
       $match.make($x);
     }
@@ -461,7 +490,7 @@ say "Y: $y, ", $y.nodes;
 #            $parent.append($_) for $tag-ast[2].nodes;
 #            $tag-ast[2].remove;
 #          }
-          
+
 #          else {
             $parent.append($_[2]);
 #          }
@@ -518,8 +547,9 @@ say "Y: $y, ", $y.nodes;
         next unless $as<attribute>:exists;
         my $a = $as<attribute>;
         my $av = $a<attr-value-spec><attr-value>.Str;
-        $av ~~ s:g/\"/\&quot;/;
+#        $av ~~ s:g/\"/\&quot;/;
         $attrs{$a<attr-key>.Str} = $av;
+#        $attrs{$a<attr-key>.Str} = self!process-esc($av);
       }
 
 #say 'Attrs: ', $attrs.perl;
@@ -618,15 +648,16 @@ say "Y: $y, ", $y.nodes;
     method !clean-text ( Str $t is copy, Bool :$fixed = False --> Str ) {
 
       # Remove leading spaces at begin of text
-      $t ~~ s/^ \h+ // if !$fixed;
+      $t ~~ s/^ \h+ // unless $fixed;
 
       # Remove trailing spaces at every line
       $t ~~ s:g/ \h+ $$ //;
 
       # Substitute many spaces with one space
-      $t ~~ s:g/ \h\h+ / / if !$fixed;
+      $t ~~ s:g/ \h\h+ / / unless $fixed;
 
-      self!process-esc($t);
+#      self!process-esc($t) unless $fixed;
+      $t;
     }
 
 #`{{
@@ -933,6 +964,7 @@ say "CE: ", $!xml-document.perl;
       $esc ~~ s:g/\\\s/\&nbsp;/;
       $esc ~~ s:g/\</\&lt;/;
       $esc ~~ s:g/\>/\&gt;/;
+      $esc ~~ s:g/\"/\&quot;/;
 
       # Remove rest of the backslashes unless followed by hex numbers prefixed
       # by an 'x'

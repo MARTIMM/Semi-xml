@@ -10,7 +10,6 @@ $!td.report title='Integer manipulations' test-file='t/abc.t' [
     use SemiXML;
 
     constant ABC = 10;
-
     my Int $i;
   !]
 
@@ -19,9 +18,24 @@ $!td.report title='Integer manipulations' test-file='t/abc.t' [
     should result in a type value when compared.
   ]
 
+  $!td.test line="nok $i ~~ Int" [opposite test should fail]
+
   $!td.code [!=
     $i = ABC;
   !]
 
   $!td.test line="is $i, 10" [Initialized Int]
+  $!td.test line="is $i, 11" [Integer is 10 not 11]
+
+  $!td.test line="like $i.Str, /'not 10, but text'/" [test some text]
+
+  $!td.code [!=
+    for ^10 {
+  !]
+
+  $!td.test line='  ok $^a < 5' [test a series of numbers against 5]
+
+  $!td.code append=1 [!=
+    }
+  !]
 ]
