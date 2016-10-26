@@ -1,0 +1,10 @@
+# Special settings when generating reports using TestDoc module
+#
+[option.doctype]
+  show          = 0
+
+[output]
+  fileext       = 'html'
+
+[module]
+  td            = 'SxmlLib::Testing::TestDoc'

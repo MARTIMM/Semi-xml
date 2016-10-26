@@ -6,9 +6,14 @@ pre.test-block-code {
   color:                #00501e;
   background-color:     #eaefea;
   font-family:          FreeMono;
+  font-size:            11pt;
   box-shadow:           6px 6px 4px #aaafaa;
   border-radius:        4px;
   page-break-inside:    avoid;
+}
+
+pre.hide {
+  display:              none;
 }
 
 table {
@@ -29,19 +34,29 @@ table.test-table {
   padding:              0;
 }
 
-/*
-table.test-table tr td {
-  height:               18pt;
+table.test-table tr {
+  margin:               0;
+  padding:              0;
 }
-*/
 
 td.check-mark {
-  width:                10pt;
+  width:                68px;
   font-size:            10pt;
+  margin:               0;
+  padding:              0;
+}
+
+td.smaller-check-mark {
+  width:                33px;
+  font-size:            10pt;
+  margin:               0;
+  padding:              0;
 }
 
 td.test-comment {
   font-size:            10pt;
+  margin:               0;
+  padding:              0;
 }
 
 .green {
@@ -50,6 +65,10 @@ td.test-comment {
 
 .red {
   color:                #aa0000;
+}
+
+.purple {
+  color:                #aa00aa;
 }
 
 h1.title {
@@ -66,7 +85,7 @@ h1.title {
   background-position:  7px 0px;
   background-size:      45px;
   box-shadow:           10px 10px 5px #a0b060;
-  border-radius:        7px;
+  border-radius:        4px;
 }
 
 a {
@@ -109,10 +128,10 @@ code {
   left:                 0;
   padding-right:        3px;
   background-color:     #c0e472;
-  font-size:            0.7em;
+  font-size:            7pt;
   text-align:           right;
-  box-shadow:           10px 10px 5px #a0b060;
-  border-radius:        7px;
+  box-shadow:           6px 6px 4px #a0b060;
+  border-radius:        4px;
   border-width:         1px;
   border-style:         solid;
   border-color:         #006000;
