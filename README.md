@@ -48,11 +48,11 @@ This second form looks much more airy and better to read. There are also some ot
 * As mentoned above it has better reading capabilities.
 * You don't need to write the xml endtags because of nesting.
 * Attribute values do not need quoting when there are no spaces in the value.
-* A tag is introduced by the '$' to support simple parsing. This translates just to the XML tagname. E.g. $html [] becomes <html></html>.
+* A tag is introduced by the '$' to support simple parsing. This translates just to the XML tagname. E.g. $html [] becomes <html/>.
 * Additional symbols following the '$' changes its intent.
   * '$.' to provide simple substitution and adding extra attributes.
   * '$!' is used to call a method from an external module to insert new or change existing content. When the rules for substitution or the methods are not found then the tag will be as if no '.' or '!' is used.
-  * '$\*', '$\*<' and '$\*>' provides for spacing around the tag and its body.
+  * '$\*\*', '$\*|' and '$|\*' provides for spacing around the tag and its body.
 
 ## Ideas and Todo
 

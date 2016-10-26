@@ -1,26 +1,24 @@
 
 * Parser and actions.
-  * [ ] Rethinking the parser grammar.
+  * [x] Rethinking the parser grammar.
   * [x] Parser is a class. Styles can be templated and added in the form of a role. The same information can be supplied in the prelude of the source. For all settings, defaults are provided when possible.
-  * [ ] Xml Namespaces
+  * [x] Xml Namespaces
   * [ ] Doctype entities
   * [ ] '#' commenting should be improved using grammar instead of overall removal
-  * [ ] Better error messages when parser fails.
+  * [x] Better error messages when parser fails.
   * [x] Add another set of brackets which will not allow child elements. This is handy to write javascript and or stylesheets whithout the need to escape every other character like the $ and #.
   * [x] Exporting generated xml to other programs instead of file using prelude path ```output/program/<label>: <command line to run>;```. E.g. when ```output/program/chk: | xmllint --format -;``` is defined in the prelude one can run ```sxml2xml -run chk my-file.sxml```. To get the user information save() has a new named argument :$run-code which is the key as in /output/program/<run-code>
-  * [ ] Define rules to define spacing around tags. Default would be to have no space at all.
+  * [x] Define rules to define spacing around tags. Default would be to have no space at all.
     * [x] ```$x [ ... ]```. Normal tag where all leading and trailing spaces are removed and between words, spaces are reduced to one space.
-    * [x] ```$x [! ... !]```. Body can not have tags. '$' is ignored and this character as well as ']' do not have to be escaped. Only '#' must be escaped at this moment.
+    * [x] ```$x [! ... !]```. Body can not have tags. '$' is ignored and this character as well as ']' do not have to be escaped.
     * [x] ```[ ... ]``` and ```[! ... !]``` can have a '=' directly after the '[' or '[!'. It means that all text must
     be kept as typed. Leading newlines and trailing spaces on all lines are still removed.
-    * [x] A tag can start with '$', '$.', '$!'. Now also '$\*' is introduced which will add a space around the tag and its content.
-    * [x] Another addition '$\*', '$|\*' and '$\*|>' is introduced to add a space to the right or left of the tag and its content.
+    * [x] Tags '$\*\*', '$|\*' and '$\*|>' is introduced to add a space to the right or left of the tag and its content.
 
 * External modules
   * [x] A methods tag content between [ ... ] is a named argument to the sub called content-body.
   * [x] Library paths to find modules are provided
   * [x] Can be introduced via source prelude
-  * [ ] Can be introduced via role
   * [ ] Can be introduced via defaults
   * [x] ```$.tagname <attrs> [<body>]``` for tag name substitution and attribute additions.
   * [x] ```$!tagname <attrs> [<body>]``` for insertion of tags and body using attributes as arguments to subs/methods.
