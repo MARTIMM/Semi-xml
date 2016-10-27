@@ -72,11 +72,13 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token attr-value-spec {
       [\' $<attr-value>=<.attr-q-value> \']  ||
       [\" $<attr-value>=<.attr-qq-value> \"] ||
+      [\^ $<attr-value>=<.attr-pw-value> \^] ||
       $<attr-value>=<.attr-s-value>
     }
-    token attr-q-value  { <-[\']>+ }
-    token attr-qq-value { <-[\"]>+ }
-    token attr-s-value  { <-[\s]>+ }
+    token attr-q-value  { [ <.escape-char> || <-[\']> ]+ }
+    token attr-qq-value { [ <.escape-char> || <-[\"]> ]+ }
+    token attr-pw-value { [ <.escape-char> || <-[\^]> ]+ }
+    token attr-s-value  { [ <.escape-char> || <-[\s]> ]+ }
 
     # The tag body is anything enclosed in [...], [=...] or [-...]. The first
     # situation is the normal one of which all spaces will be reduced to one
@@ -122,8 +124,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #    rule body1-contents  { <.keep-literal>? ( <.body1-text> || <.document> )* }
 #    token body1-start     { '[' }
 #    token body1-end       { ']' }
-#    token body1-text      { ( <.comment> || <-[\$\]\\]> || <.body-esc> )+ }
-    token body1-text      { [<-[\$\]\\]> || <.body-esc>]+ }
+#    token body1-text      { ( <.comment> || <-[\$\]\\]> || <.escape-char> )+ }
+    token body1-text      { [ <.escape-char> || <-[\$\]\\]> ]+ }
 
 #    rule body2-contents  { <.keep-literal>? <.body2-text> }
 #    token body2-start     { '[!' }
@@ -131,7 +133,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token body2-text      { [.*? <?before <.ws>? '!]'>] }
 
 #    token keep-literal    { '=' }
-    token body-esc        { '\\' . }
+    token escape-char        { '\\' . }
 
 #    token comment         { \n? \s* '#' <-[\n]>* \n }
 
