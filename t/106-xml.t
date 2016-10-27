@@ -10,18 +10,23 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
----
-option/debug:                           1;
-output/fileext:                         html;
-
-module/list:                            SxmlLib::Html::List;
----
 $html [
   $body [
     $!list.dir-list header=2,3 directory=t ref-attr=data_href id=ldir0001 []
   ]
 ]
 EOSX
+
+#-------------------------------------------------------------------------------
+my Hash $config = {
+  module => {
+    list => 'SxmlLib::Html::List'
+  },
+  
+  output => {
+    fileext => 'html'
+  }
+};
 
 #-------------------------------------------------------------------------------
 # Parse
@@ -36,7 +41,7 @@ spurt( 't/Grammars/Error messages.html', q:to/EOSXML/);
 EOSXML
 
 my SemiXML::Sxml $x .= new;
-$x.parse-file(:$filename);
+$x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 #say $xml-text;
@@ -48,11 +53,10 @@ ok $xml-text ~~ m/'<li><a href="" data_href="t/106-xml.t">xml</a></li>'/,
    'Ref to t/106-xml.t using ref-attr'
    ;
 
-unlink $filename;
-
-unlink 't/Grammars/Debugging grammar rules.html';
-unlink 't/Grammars/Error messages.html';
-rmdir 't/Grammars';
+#unlink $filename;
+#unlink 't/Grammars/Debugging grammar rules.html';
+#unlink 't/Grammars/Error messages.html';
+#rmdir 't/Grammars';
 
 #-------------------------------------------------------------------------------
 # Cleanup

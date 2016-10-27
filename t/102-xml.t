@@ -10,18 +10,6 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-#!bin/sxml2xml.pl6
-#
----
-option/doctype/show:                    1;              # Default 0
-
-option/xml-prelude/show:                1;              # Default 0
-option/xml-prelude/version:             1.1;            # Default 1.0
-option/xml-prelude/encoding:            UTF-8;          # Default UTF-8
-
-output/filename:                        t/some-file;    # Default current file
-output/fileext:                         html;           # Default xml
----
 $html [
   $body [
     $h1 [ Data from file ]
@@ -35,10 +23,28 @@ $html [
 ]
 EOSX
 
+my Hash $config = {
+  option => {
+    doctype => {
+      show => 1,                        # Default 0
+    },
+
+    xml-prelude => {
+      show => 1,                        # Default 0
+      version => 1.1,                   # Default 1.0
+      encoding => 'UTF-8',              # Default UTF-8
+    }
+  },
+
+  output => {
+    filename => 't/some-file',          # Default current file
+    fileext => 'html',                  # Default xml
+  }
+}
+
 # Parse
-#
 my SemiXML::Sxml $x .= new;
-$x.parse-file(:$filename);
+$x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
