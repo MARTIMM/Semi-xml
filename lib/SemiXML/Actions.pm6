@@ -204,7 +204,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         for $x.nodes -> $node {
           if $node ~~ any( SemiXML::Text, XML::Text) {
             my Str $s = self!process-esc(~$node);
-  say $s;
+#say $s;
             $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
           }
 

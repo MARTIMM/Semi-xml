@@ -69,7 +69,7 @@ like $xml-text,
      'Class test 4';
 
 
-say $xml-text;
+#say $xml-text;
 
 
 
