@@ -187,6 +187,7 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
+#TODO attribute save=$xml
   method code (
     XML::Element $parent,
     Hash $attrs,
@@ -224,6 +225,7 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
+#TODO attribute todo=1 to prefix with a todo test, generate a different checkmarker
   method test (
     XML::Element $parent,
     Hash $attrs,
