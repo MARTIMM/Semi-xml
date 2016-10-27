@@ -132,7 +132,8 @@ say "TC: $test-code";
         $td.append(SemiXML::Text.new(:text("$ok-c "))) if $ok-c > 1;
 
         my $comment-td = $node.nextSibling;
-        $comment-td.set( 'class', 'green test-comment') if ?$comment-td;
+#        $comment-td.set( 'class', 'green test-comment') if ?$comment-td;
+        $comment-td.set( 'class', 'test-comment') if ?$comment-td;
       }
 
       if $nok-c {
@@ -147,13 +148,14 @@ say "TC: $test-code";
         $td.append(SemiXML::Text.new(:text("$nok-c"))) if $nok-c > 1;
 
         my $comment-td = $node.nextSibling;
-        if $ok-td-exists {
-          $comment-td.set( 'class', 'purple test-comment') if ?$comment-td;
-        }
-
-        else {
-          $comment-td.set( 'class', 'red test-comment') if ?$comment-td;
-        }
+        $comment-td.set( 'class', 'test-comment') if ?$comment-td;
+#        if $ok-td-exists {
+#          $comment-td.set( 'class', 'purple test-comment') if ?$comment-td;
+#        }
+#
+#        else {
+#          $comment-td.set( 'class', 'red test-comment') if ?$comment-td;
+#        }
       }
 
       # if neither --> todo
@@ -233,13 +235,18 @@ say "'$l'";
 
     self!test-table( $parent, $attrs, :$content-body);
 
-    my Str $code-text = ($attrs<line> // '') ~ ", 'T{$!test-count++}';\n";
+    my Int $test-code = $!test-count++;
+    my Str $code-text = ($attrs<line> // '') ~ ", 'T$test-code';\n";
 say "CT: $code-text";
     $!test-file-content ~= $code-text;
 
-#    if $attrs<viz>:!exists or $attrs<viz> ne 'hide' {
-      $last-defined-pre.append(SemiXML::Text.new(:text($code-text)));
-#    }
+    $last-defined-pre.append(SemiXML::Text.new(
+        :text(($attrs<line> // '') ~ ", '")
+      )
+    );
+    my XML::Element $b = append-element( $last-defined-pre, 'b');
+    $b.append(SemiXML::Text.new(:text("T$test-code")));
+    $last-defined-pre.append(SemiXML::Text.new(:text("';\n")));
 
     $parent;
   }
@@ -300,9 +307,8 @@ say "CT: $code-text";
     $td.insert($_) for $content-body.nodes.reverse;
 
     # Prefix the comment with the test code
-#    if $attrs<viz>:!exists or $attrs<viz> ne 'hide' {
-      $td.insert(SemiXML::Text.new(:text("T$!test-count: ")));
-#    }
+    my XML::Element $b = insert-element( $td, 'b');
+    $b.insert(SemiXML::Text.new(:text("T$!test-count: ")));
   }
 }
 
