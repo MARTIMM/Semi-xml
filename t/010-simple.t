@@ -11,7 +11,7 @@ like $xml, /'a1="w"'/, 'a1 attribute';
 like $xml, /'a2="g g"'/, 'a2 attribute';
 like $xml, /'a3="h h"'/, 'a2 attribute';
 
-dies-ok { $xml = parse('$st [ $f w [] hj ]'); }, 'Parse failure';
+#dies-ok { $xml = parse('$st [ $f w [] hj ]'); }, 'Parse failure';
 
 try {
   $xml = parse('$st [ $f w [] hj ]');
