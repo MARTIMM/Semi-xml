@@ -13,13 +13,10 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
----
-output/fileext: html;
----
 $html [
   $body [
     $h1 [Tests for comments etc]
-    
+
     $!SxmlCore.comment [comment text]
     $!SxmlCore.comment [comment text $!SxmlCore.date []]
     $!SxmlCore.comment [comment text $p [data in section] $br []]
@@ -36,10 +33,17 @@ $html [
 EOSX
 
 #-------------------------------------------------------------------------------
+my Hash $config = {
+  output => {
+    fileext => 'html'
+  }
+};
+
+#-------------------------------------------------------------------------------
 # Parse
 #
 my SemiXML::Sxml $x .= new;
-$x.parse-file(:$filename);
+$x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 #say $xml-text;
