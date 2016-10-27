@@ -46,6 +46,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
                 ) {
 
       $parent.append(XML::Text.new(:text(Date.today().Str)));
+      $parent;
     }
 
     # $!SxmlCore.date-time []
@@ -60,6 +61,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $date-time ~~ s/'+'/ +/ unless $attrs<iso>:exists;
       my $txt-e = XML::Text.new(:text($date-time));
       $parent.append($txt-e);
+      $parent;
     }
 
     # $!SxmlCore.comment []
@@ -69,6 +71,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
                      XML::Node :$content-body
                    ) {
       $parent.append(XML::Comment.new(:data([~] $content-body.nodes)));
+      $parent;
     }
 
     # $!SxmlCore.cdata []
@@ -78,6 +81,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
                    XML::Node :$content-body
                  ) {
       $parent.append(XML::CDATA.new(:data([~] $content-body.nodes)));
+      $parent;
     }
 
     # $!SxmlCore.pi []
@@ -87,6 +91,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
                 XML::Node :$content-body
               ) {
       $parent.append(XML::PI.new(:data([~] $content-body.nodes)));
+      $parent;
     }
   }
 
