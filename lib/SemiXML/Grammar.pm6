@@ -3,6 +3,7 @@ use v6.c;
 
 package SemiXML:auth<https://github.com/MARTIMM> {
 
+#TODO comments
   grammar Grammar {
 
     rule init-doc { <?> }

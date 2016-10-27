@@ -91,6 +91,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
   }
 
   #-----------------------------------------------------------------------------
+#TODO comments
   class Actions {
 
     # Objects hash with one predefined object for core methods
@@ -461,13 +462,13 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method !clean-text ( Str $t is copy, Bool :$fixed = False --> Str ) {
 
       # Remove leading spaces at begin of text
-      $t ~~ s/^ \h+ // unless $fixed;
+      $t ~~ s/^ \s+ // unless $fixed;
 
       # Remove trailing spaces at every line
       $t ~~ s:g/ \h+ $$ //;
 
       # Substitute many spaces with one space
-      $t ~~ s:g/ \h\h+ / / unless $fixed;
+      $t ~~ s:g/ \s\s+ / / unless $fixed;
 
       $t;
     }
