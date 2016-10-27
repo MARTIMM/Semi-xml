@@ -59,7 +59,6 @@ class Testing::TestDoc {
     $!test-file-content ~= "\n\ndone-testing;\n";
     my $test-file = $attrs<test-file> // ($*TMPDIR.Str ~ '/perl6-test.t');
 
-say "$test-file, $!test-file-content";
     spurt( $test-file, $!test-file-content);
 
     # Run the test and get the result contents
@@ -79,7 +78,6 @@ say "R: $line";
       my Str $test-code = $0.Str if ? $/;
 
       if ?$test-code {
-say "TC: $test-code";
         if $line ~~ m:s/^ 'ok' / {
 
           if $test-results{$test-code} {
@@ -212,7 +210,6 @@ say "TC: $test-code";
     my XML::Element $hook = append-element( $last-defined-pre, 'hook');
     for $content-body.nodes.reverse {
       my $l = ~$^a;
-say "'$l'";
       $l ~~ s:g/^^ $indent //;
       $hook.after(SemiXML::Text.new(:text("$l\n")));
     }
@@ -237,7 +234,6 @@ say "'$l'";
 
     my Int $test-code = $!test-count++;
     my Str $code-text = ($attrs<line> // '') ~ ", 'T$test-code';\n";
-say "CT: $code-text";
     $!test-file-content ~= $code-text;
 
     $last-defined-pre.append(SemiXML::Text.new(

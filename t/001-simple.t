@@ -10,10 +10,9 @@ use Test;
       $x.parse(:$content);
       ~$x;
     }
-
-    my $xml = parse('$st []');
+my $xml = parse('$st []');
 is $xml, '<st/>', 'T0';
-my $xml = parse('$st [ abc ]');
+$xml = parse('$st [ abc ]');
 is $xml, '<st>abc</st>', 'T1';
 $xml = parse(Q:q@$st a1=w a2='g g' a3="h h" [ ]@);
 like $xml, /'a1="w"'/, 'T2';

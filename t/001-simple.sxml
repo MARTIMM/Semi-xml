@@ -23,13 +23,11 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-simple.t' [
   !]
 
   $!td.doc [ First a few tests to generate top level elements ]
-  $!td.code save=$xml [!=
-    my $xml = parse('$st []');
-  !]
+  $!td.code save=$xml [!my $xml = parse('$st []');!]
 
   $!td.test line="is $xml, '<st/>'" [ The element generated is $*|code[<st/>]. ]
 
-  $!td.code append=1 [!my $xml = parse('$st [ abc ]');!]
+  $!td.code append=1 [!$xml = parse('$st [ abc ]');!]
 
   $!td.test line="is $xml, '<st>abc</st>'" [
     The element generated is $*|code[<st>abc</st>].
