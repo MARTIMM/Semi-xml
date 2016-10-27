@@ -5,24 +5,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
   grammar Grammar {
 
-    # A complete document looks like the following of which the prelude an dashes
-    # are optional
-    #
-    # ---
-    # prelude
-    # ---
-    # document
-    #
     rule init-doc { <?> }
     rule TOP {
-#      ( <.comment>* "---" <.prelude> "---" ) ** 0..1 <.document>
       <.init-doc> <document>
     }
 
-    # A document is only a tag with its content. Defined like this there can only
-    # be one toplevel document.
+    # A document is only a tag with its content. Defined like this there can
+    # only be one toplevel document.
     #
-#    token document { <.comment>* <.tag> <.tag-body> <.comment>* }
     token document { <tag-spec> <tag-body> }
 
     # A tag is an identifier prefixed with a symbol to attach several semantics
@@ -45,18 +35,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token element       { <.identifier> }
     token namespace     { <.identifier> }
 
-#`{{
-#    token reset-keep-literal { <?> }
-#    token tag { <.reset-keep-literal> <.tag-name> ( <.attribute> )* }
-    token tag { <.tag-name> <.attributes> }
-    token tag-name { <.tag-type> <.identifier> [ ':' <.identifier> ]**0..1 }
-    token tag-type {
-      ( '$.' <.identifier> '.' ) ||
-      ( '$!' <.identifier> '.' ) ||
-      '$*<' || '$*>' || '$*'     ||
-      '$'
-    }
-}}
     # The tag may be followed by attributes. These are key=value constructs. The
     # key is an identifier and the value can be anything. Enclose the value in
     # quotes ' or " when there are whitespace characters in the value.
@@ -80,28 +58,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token attr-pw-value { [ <.escape-char> || <-[\^]> ]+ }
     token attr-s-value  { [ <.escape-char> || <-[\s]> ]+ }
 
-    # The tag body is anything enclosed in [...], [=...] or [-...]. The first
-    # situation is the normal one of which all spaces will be reduced to one
-    # space and leading and trailing spaces are removed. The second form is
-    # used to save spacing as is. The third will not accept any child elements
-    # so the $ sign is free to use without escaping it. Useful to insert
-    # javascript code. ] and # still needs to be escaped when needed. To keep the
-    # content of [- ...] also as is written write [+ ...].
-    #
-    # Changed from rule into token because of body character '[' followed up with
-    # optional '+', '-' and '=' may not be separated by a space. Then content
-    # starting with a those characters doesn't have to be escaped when they are
-    # used. Just use a space in front. Can happen in tables showing numbers.
-    #
-#`{{
-    token tag-body {
-      <ws>?
-      (  <.body2-start> ~ <.body2-end> <.body2-contents>     # Only text content
-      || <.body1-start> ~ <.body1-end> <.body1-contents>     # Normal body content
-      )
-#      <comment>*
-    }
-}}
     token tag-body {
       <.ws>? [
         '[!=' ~ '!]'    <body1-contents> ||
@@ -121,21 +77,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     rule body3-contents  { [ <body1-text> || <document> ]* }
     rule body4-contents  { [ <body1-text> || <document> ]* }
 
-#    rule body1-contents  { <.keep-literal>? ( <.body1-text> || <.document> )* }
-#    token body1-start     { '[' }
-#    token body1-end       { ']' }
-#    token body1-text      { ( <.comment> || <-[\$\]\\]> || <.escape-char> )+ }
     token body1-text      { [ <.escape-char> || <-[\$\]\\]> ]+ }
-
-#    rule body2-contents  { <.keep-literal>? <.body2-text> }
-#    token body2-start     { '[!' }
-#    token body2-end       { '!]' }
     token body2-text      { [.*? <?before <.ws>? '!]'>] }
 
-#    token keep-literal    { '=' }
     token escape-char        { '\\' . }
-
-#    token comment         { \n? \s* '#' <-[\n]>* \n }
 
     # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
     # dash within the string is accepted.
