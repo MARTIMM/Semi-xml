@@ -42,7 +42,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #---------------------------------------------------------------------------
-    method parse-file ( Str :$filename --> ParseResult ) {
+    method parse-file ( Str :$filename, Hash :$config --> ParseResult ) {
 
       my ParseResult $pr;
 
@@ -65,7 +65,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         # Set the config in the actions
         $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
 
-        # Did not parse a file but content
         if $!actions.config<output><filename>:!exists {
           my Str $fn = $filename.IO.basename;
           my $ext = $filename.IO.extension;
@@ -78,11 +77,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           my Str $bn = $filename.IO.basename;
           $fn ~~ s/ '/'? $bn //;
           $!actions.config<output><filepath> = $fn;
-          $!actions.process-config-for-modules;
         }
 
         my $text = slurp($filename);
-        $pr = self.parse(:content($text));
+        $pr = self.parse( :content($text), :$config);
         die "Parse failure" if $pr ~~ Nil;
       }
 
