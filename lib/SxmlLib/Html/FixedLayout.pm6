@@ -13,7 +13,7 @@ package SxmlLib:auth<https://github.com/MARTIMM> {
     #
     # path=<file>
     # start=<stop-mark>   Start is an optional marker to start selecting text.
-    #                     Strat and stop overides the defaults mentioned above.
+    #                     Start and stop overides the defaults mentioned above.
     # stop=<stop-mark>    Stop is an optional marker to stop selecting text
     # keep-literal=<0/1>  Substitute < > characters with &lt; and &gr;
     # fix-indent=<n>      Remove some space in front of every line.

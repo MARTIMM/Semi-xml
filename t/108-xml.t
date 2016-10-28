@@ -50,13 +50,13 @@ my Str $xml-text = ~$x;
 
 my $d = Date.today();
 ok $xml-text ~~ m/'<!--comment text-->'/, 'Check comments';
-ok $xml-text ~~ m/'<!--comment text' \d**4\-\d\d\-\d\d '-->'/,
+like $xml-text, / :s '<!--comment text' \d**4 '-' \d\d '-' \d\d '-->'/,
    'Check comments with other method';
 ok $xml-text ~~ m/'<!--comment text<p>data in section</p><br/>-->'/,
    'Check comments with embedded tags';
 
 ok $xml-text ~~ m/'<![CDATA[cdata text]]>'/, 'Check cdata';
-ok $xml-text ~~ m/'<![CDATA[cdata text' \d**4\-\d\d\-\d\d']]>'/,
+like $xml-text, / :s '<![CDATA[cdata text' \d**4 '-' \d\d '-' \d\d ']]>'/,
    'Check cdata with other method';
 ok $xml-text ~~ m/'<![CDATA[cdata text<p>data in section</p><br/>]]>'/,
    'Check cdata with embedded tags';
@@ -64,7 +64,6 @@ ok $xml-text ~~ m/'<![CDATA[cdata text<p>data in section</p><br/>]]>'/,
 ok $xml-text ~~ m/'<?perl6 instruction text?>'/, 'Check pi data';
 
 unlink $filename;
-
 
 #-------------------------------------------------------------------------------
 # Cleanup

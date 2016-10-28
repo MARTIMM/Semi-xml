@@ -5,13 +5,17 @@
 
 ## Description
 
-Package to generate xml from an easier readable and writable description plus,
-because it is written in perl 6, the possibility to insert xml from other
+Package to generate XML from an easier readable and writable description plus,
+because it is written in Perl 6, the possibility to insert XML from other
 sources such as files, text, code , variables etc.
+
+## Versions of PERL
+
+* Perl6 version v6.c
 
 ## Introduction
 
-I'm a lazy bum, so writing xml is too exhausting. instead of writing;
+I'm a lazy bum, so writing XML is too exhausting. instead of writing;
 
 ```
 <html>
