@@ -1,11 +1,5 @@
 $!td.report title='Integer manipulations' test-file='t/abc.t' [
 
-  $!td.doc title='Purpose' [
-    Test the integer declaration and then assignment of a number. This test
-    is a double check of perl6 $**b[Int] to see if that type is really the number
-    we're looking for.
-  ]
-
   $!td.code [!=
     use SemiXML;
 

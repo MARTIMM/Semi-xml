@@ -175,18 +175,6 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
-  method doc (
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Element :$content-body
-  ) {
-
-    self!insert-title-and-text( $parent, $content-body, $attrs<title>//'', 'h2');
-
-    $parent;
-  }
-
-  #-----------------------------------------------------------------------------
 #TODO attribute save=$xml
   method code (
     XML::Element $parent,
@@ -265,27 +253,6 @@ say "R: $line";
       $head, 'link',
       { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
     );
-  }
-
-  #-----------------------------------------------------------------------------
-  method !insert-title-and-text (
-    XML::Element $parent,
-    XML::Element $container,
-    Str $title = '', Str $title-type = ''
-  ) {
-
-    my XML::Element $hook .= new(:name<hook>);
-    $parent.insert($hook);
-
-    if ?$title {
-      my XML::Element $h .= new(:name($title-type));
-      $h.insert(SemiXML::Text.new(:text($title)));
-      $parent.before( $hook, $h);
-    }
-
-    $parent.after( $hook, $_) for $container.nodes.reverse;
-
-    $parent.removeChild($hook);
   }
 
   #-----------------------------------------------------------------------------

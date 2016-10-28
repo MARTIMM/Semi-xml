@@ -1,12 +1,13 @@
 $!td.report title='Basic SemiXML tests' test-file='t/001-simple.t' [
 
-  $!td.doc title='introduction' [
+  $h1 [introduction]
+  $p [
     SemiXML is a library which translates an equally named language into XML.
     There are several syntactic constructs which look very much the same as the
     XML language.
   ]
 
-  $!td.doc [
+  $p [
     We need to write a convenience routine to call the parser several times from
     the tests. This way we keep the tests simple.
   ]
@@ -22,7 +23,7 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-simple.t' [
     }
   !]
 
-  $!td.doc [ First a few tests to generate top level elements ]
+  $p [ First a few tests to generate top level elements ]
   $!td.code save=$xml [!my $xml = parse('$st []');!]
 
   $!td.test line="is $xml, '<st/>'" [ The element generated is $*|code[<st/>]. ]
