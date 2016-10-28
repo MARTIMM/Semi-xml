@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing http-header
@@ -8,16 +8,7 @@ use Semi-xml;
 #-------------------------------------------------------------------------------
 # Setup
 #
-my $sxml-text = q:to/EOSX/;
----
-option/http-header/show:                1;
-option/http-header/content-type:        text/html;
-option/http-header/content-language:    en;
-
-option/xml-prelude/show:                1;
-
-option/doctype/show:                    1;
----
+my $content = q:to/EOSX/;
 $html [
   $body [
     $h1 [burp]
@@ -27,8 +18,27 @@ $html [
 EOSX
 
 #-------------------------------------------------------------------------------
-my Semi-xml::Sxml $x .= new;
-$x.parse(:content($sxml-text));
+my Hash $config = {
+  option => {
+    http-header => {
+      show => 1,
+      content-type => 'text/html',
+      content-language => 'en'
+    },
+
+    doctype => {
+      show => 1,                        # Default 0
+    },
+
+    xml-prelude => {
+      show => 1,                        # Default 0
+    }
+  },
+}
+
+#-------------------------------------------------------------------------------
+my SemiXML::Sxml $x .= new;
+$x.parse( :$content, :$config);
 
 my Str $xml-text = ~$x;
 #say $xml-text;

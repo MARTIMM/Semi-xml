@@ -1,0 +1,34 @@
+[ dependencies ]
+#  file          = [ ]
+
+
+[ module ]
+
+
+[ option ]
+  debug         = false
+
+[ option.doctype ]
+  show          = false
+  definition    = ''
+  entities      = [ ]
+
+[ option.http-header ]
+  show          = false
+
+[ option.xml-prelude ]
+  show          = false
+  version       = '1.0'
+  encoding      = 'UTF-8'
+
+
+[ output ]
+#  filepath      = '.'
+#  filename      = 'x'
+  fileext       = 'xml'
+
+[ output.program ]
+#  c1 = 'wkhtml2pdf - %f'
+
+
+#TODO [ styles ]

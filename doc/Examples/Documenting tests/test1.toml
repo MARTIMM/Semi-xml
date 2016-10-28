@@ -1,0 +1,8 @@
+[option.doctype]
+  show          = 0
+
+[output]
+  fileext       = 'html'
+
+[module]
+  td            = 'SxmlLib::Testing::TestDoc'

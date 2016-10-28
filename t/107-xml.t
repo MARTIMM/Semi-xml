@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -12,30 +12,34 @@ use Semi-xml;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
----
-output/fileext: mxml;
----
 $top [
   $!SxmlCore.date []
   $!SxmlCore.date year=1957 month=6 day=26 []
   $!SxmlCore.date year=1957 day=26 []
   $!SxmlCore.date year=1957 month=6 []
   $!SxmlCore.date year=1957 []
-  $*A []
-  $*X [$!SxmlCore.date []]
-  $*Y [$!SxmlCore.date-time iso=1 []]
-  $*Z [$!SxmlCore.date-time iso=1 timezone=960 []]
+  $**A []
+  $**X [$!SxmlCore.date []]
+  $**Y [$!SxmlCore.date-time iso=1 []]
+  $**Z [$!SxmlCore.date-time iso=1 timezone=960 []]
 ]
 EOSX
 
 #-------------------------------------------------------------------------------
+my Hash $config = {
+  output => {
+    fileext => 'html'
+  }
+};
+
+#-------------------------------------------------------------------------------
 # Parse
 #
-my Semi-xml::Sxml $x .= new;
-$x.parse-file(:$filename);
+my SemiXML::Sxml $x .= new;
+$x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 diag "Some tests can go wrong on the split second at midnight";
 my $d = Date.today().Str;
@@ -65,8 +69,6 @@ ok $xml-text ~~ m/ '<Z>'
                    /,
   'Check iso date, time and timezone of 960 sec';
 
-is $x.get-option( :section('output'), :option('fileext')), 'mxml', 'Check fileext option';
-is $x.get-option( :section('output'), :option('filepath')), '.', 'Check filepath option';
 unlink $filename;
 
 

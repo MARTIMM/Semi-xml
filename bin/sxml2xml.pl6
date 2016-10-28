@@ -1,12 +1,7 @@
 #!/usr/bin/env perl6
 #
-use v6;
-
-#BEGIN {
-#  @*INC.unshift('/home/marcel/Languages/Perl6/Projects/Semi-xml/lib');
-#}
-
-use Semi-xml;
+use v6.c;
+use SemiXML;
 
 # Allow switches after positionals. Pinched from an older panda version. Now
 # it is possible to make the sxml file executable with the path of this
@@ -16,14 +11,14 @@ my @a = grep( /^ <-[-]>/, @*ARGS);
 @*ARGS = (|grep( /^ '-'/, @*ARGS), |@a);
 
 #-------------------------------------------------------------------------------
-#
+#`{{
 role sxml-role {
   has Hash $.user-configuration = { output => { } };
 }
+}}
 
 #-------------------------------------------------------------------------------
 #= sxml2xml -run run-code filename.sxml
-#
 sub MAIN ( Str $filename, Str :$run ) {
 
   my $dep = process-sxml( $filename, :$run);
@@ -40,21 +35,19 @@ sub MAIN ( Str $filename, Str :$run ) {
 }
 
 #-------------------------------------------------------------------------------
-#
 sub process-sxml ( Str:D $filename, Str :$run ) {
 
-  my Semi-xml::Sxml $x .= new(:init);
-  $x does sxml-role;
+  my SemiXML::Sxml $x .= new(:init);
+#  $x does sxml-role;
 
   # Split filename in its parts
-  #
-  my @path-spec = $*SPEC.splitpath($filename);
-  $x.configuration<output><filepath> = @path-spec[1];
-  $x.configuration<output><filename> = @path-spec[2];
+#say $*SPEC;
+#  my @path-spec = $*SPEC.splitpath($filename);
+#  $x.configuration<output><filepath> = @path-spec[1];
+#  $x.configuration<output><filename> = @path-spec[2];
 
   # Drop extension
-  #
-  $x.configuration<output><filename> ~~ s/\.<-[\.]>+$//;
+#  $x.configuration<output><filename> ~~ s/\.<-[\.]>+$//;
 
   if $filename.IO ~~ :r {
     my $X = $x.parse-file(:$filename);

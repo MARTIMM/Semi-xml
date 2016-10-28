@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -10,12 +10,6 @@ use Semi-xml;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
----
-output/fileext:                         html;
-
-#library/file:                           .;
-module/file:                            SxmlLib::File;
----
 $html [
   $body [
     $h1 [First chapter]
@@ -38,10 +32,21 @@ $p [
 EOSXML
 
 #-------------------------------------------------------------------------------
+my Hash $config = {
+  module => {
+    file => 'SxmlLib::File'
+  },
+  
+  output => {
+    fileext => 'html'
+  }
+};
+
+#-------------------------------------------------------------------------------
 # Parse
 #
-my Semi-xml::Sxml $x .= new;
-$x.parse-file(:$filename);
+my SemiXML::Sxml $x .= new;
+$x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 #say "\nXml: $xml-text";

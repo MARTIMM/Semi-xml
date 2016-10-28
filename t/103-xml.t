@@ -1,31 +1,18 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
 #   Test $tag [ ... ]   Normal content
 #   Test $tag [! ... !] Text only no child elements
-#   Test $*tag [ ... ] Spacing around tags
+#   Test $*!tag [ ... ] Spacing around tags
 #
 #-------------------------------------------------------------------------------
 # Setup
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-#!bin/sxml2xml.pl6
-#
----
-option/doctype/show:                    1;              # Default 0
-
-option/xml-prelude/show:                1;              # Default 0
-option/xml-prelude/version:             1.1;            # Default 1.0
-option/xml-prelude/encoding:            UTF-8;          # Default UTF-8
-
-output/filename:                        103-xml;        # Default 'x'
-output/filepath:                        t;              # Default path '.'
-output/fileext:                         html;           # Default xml
----
 $html [
   $head [
     $style type=text/css [=
@@ -45,10 +32,9 @@ $html [
     $table [
       $tr [
         $th[ header ]
-        $td[ data at $*<a href='http://example.com/' []
+        $td[ data at $*|a href='http://example.com/' []
           $p [
-            jhghjasdjhg asdhajh a $b [kjsdhfkj]sdjhkjh
-            $*<u [kjdshkjh $*<b [hg]].
+            bla bla $b [bla] bla $*|u [bla $b [bla]].
           ]
         ]
       ]
@@ -57,13 +43,34 @@ $html [
 ]
 EOSX
 
+#-------------------------------------------------------------------------------
+my Hash $config = {
+  option => {
+    doctype => {
+      show => 1,                        # Default 0
+    },
+
+    xml-prelude => {
+      show => 1,                        # Default 0
+      version => 1.1,                   # Default 1.0
+      encoding => 'UTF-8',              # Default UTF-8
+    }
+  },
+
+  output => {
+    filename => '103-xml',              # Default current file
+    filepath => 't',                    # Default path '.'
+    fileext => 'html',                  # Default xml
+  }
+}
+
 # Parse
 #
-my Semi-xml::Sxml $x .= new;
-$x.parse-file(:$filename);
+my SemiXML::Sxml $x .= new;
+$x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
@@ -88,9 +95,8 @@ ok $xml-text ~~ ms/'data at <a href="http://example.com/"/><p>'/,
    "Testing \$* tag"
    ;
 
-ok $xml-text ~~ ms/'a<b>kjsdhfkj</b>sdjhkjh <u>kjdshkjh <b>hg</b></u>.</p>'/,
-   'Check part of result spacing tag $*<'
-   ;
+like $xml-text, / :s "bla<b>bla</b>bla <u>bla<b>bla</b></u>."/,
+     'Check part of result spacing tag $*|';
 
 
 unlink $filename;

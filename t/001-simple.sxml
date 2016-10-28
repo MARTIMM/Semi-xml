@@ -1,0 +1,41 @@
+$!td.report title='Basic SemiXML tests' test-file='t/001-simple.t' [
+
+  $!td.doc title='introduction' [
+    SemiXML is a library which translates an equally named language into XML.
+    There are several syntactic constructs which look very much the same as the
+    XML language.
+  ]
+
+  $!td.doc [
+    We need to write a convenience routine to call the parser several times from
+    the tests. This way we keep the tests simple.
+  ]
+
+  $!td.code [!=
+    use SemiXML;
+
+    sub parse ( Str $content --> Str ) {
+
+      state SemiXML::Sxml $x .= new;
+      $x.parse(:$content);
+      ~$x;
+    }
+  !]
+
+  $!td.doc [ First a few tests to generate top level elements ]
+  $!td.code save=$xml [!my $xml = parse('$st []');!]
+
+  $!td.test line="is $xml, '<st/>'" [ The element generated is $*|code[<st/>]. ]
+
+  $!td.code append=1 [!$xml = parse('$st [ abc ]');!]
+
+  $!td.test line="is $xml, '<st>abc</st>'" [
+    The element generated is $*|code[<st>abc</st>].
+  ]
+
+  $!td.code [!$xml = parse(Q:q@$st a1=w a2='g g' a3="h h" [ ]@);!]
+
+  $!td.test line=^like $xml, /'a1="w"'/^ [a1="w" attribute]
+  $!td.test line=^like $xml, /'a2="g g"'/^ [a2="g g" attribute]
+  $!td.test line=^like $xml, /'a3="h h"'/^ [a3="h h" attribute]
+]

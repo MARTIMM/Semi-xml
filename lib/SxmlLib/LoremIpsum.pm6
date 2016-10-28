@@ -1,12 +1,12 @@
 use v6.c;
 
-use Semi-xml;
+use SemiXML;
 #use XML;
 
 # Not yet available for perl 6
 #use Text::Lorem;
 
-# Package cannot be placed in Semi-xml/Lib and named File.pm6. Evaluation seems
+# Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
 # to fail not finding the symbol &File when doing so.
 #
 package SxmlLib:auth<https://github.com/MARTIMM> {

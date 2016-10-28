@@ -1,47 +1,21 @@
 use v6.c;
 
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
 #   Role add to parser class
-#   Translation of smi-xml text
+#   Translation of SemiXML text
 #   Control of output via role
 #   Result to text
 #   test attributes
 #-------------------------------------------------------------------------------
 # Setup
-#
-my Semi-xml::Sxml $x .= new;
-isa-ok $x, 'Semi-xml::Sxml', $x.^name;
-
-# Devise a role to add
-#
-role pink {
-  has Hash $!configuration = {
-    option => {
-      doctype => {
-#        definition => '',
-#        entities => []
-        show => 1,
-      },
-      xml-prelude => {
-        show => 1,
-        version => '1.0',
-        encoding => 'UTF-8'
-      },
-    }
-  };
-}
-
-# Add the role to the parser
-#
-$x does pink;
-is $x.^name, 'Semi-xml::Sxml+{pink}', $x.^name;
+my SemiXML::Sxml $x .= new;
+isa-ok $x, 'SemiXML::Sxml', $x.^name;
 
 # Setup the text to parse
-#
 my Str $sx-text = q:to/EOSX/;
 $html [
   $head [
@@ -59,11 +33,23 @@ $html [
 EOSX
 
 # And parse it
-#
-$x.parse(content => $sx-text);
+$x.parse(
+  content => $sx-text,
+  config => {
+    option => {
+      doctype => {
+        show => 1,
+      },
+      xml-prelude => {
+        show => 1,
+        version => '1.0',
+        encoding => 'UTF-8'
+      },
+    }
+  }
+);
 
 # See the result
-#
 my Str $xml-text = ~$x;
 ok $xml-text ~~ ms/'<?xml' 'version="1.0"' 'encoding="UTF-8"?>'/,
    'Xml prelude found';
@@ -75,8 +61,12 @@ ok $xml-text ~~ m/\<br\/\>/, 'Empty tag br found';
 
 ok $xml-text ~~ m/'<p class="green">'/, 'Class test 1';
 ok $xml-text ~~ m/'<x class="green blue">'/, 'Class test 2';
-ok $xml-text ~~ m/'<y data_1="quoted&quot;test&quot;">'/, 'Class test 3';
-ok $xml-text ~~ m/'<z data_2="double \'quoted\' tests">'/, 'Class test 4';
+like $xml-text,
+     /'<y data_1="quoted&quot;test&quot;">'/,
+     'Class test 3';
+like $xml-text,
+     / :s '<z data_2="double' "'quoted'" 'tests">'/,
+     'Class test 4';
 
 
 #say $xml-text;
@@ -85,6 +75,5 @@ ok $xml-text ~~ m/'<z data_2="double \'quoted\' tests">'/, 'Class test 4';
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
 done-testing();
 exit(0);

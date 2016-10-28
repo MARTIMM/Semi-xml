@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use Semi-xml;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -11,18 +11,6 @@ use Semi-xml;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-#!bin/sxml2xml.pl6
-#
----
-
-output/fileext:                         html;
-option/debug:                           1;
-
-library/m1:                             t;
-module/m1:                              M::m1;
-module/file:                            SxmlLib::File;
-
----
 $html [
   $head [
     $style type=text/css [=
@@ -44,13 +32,29 @@ $html [
 EOSX
 
 #-------------------------------------------------------------------------------
+my Hash $config = {
+  library => {
+    m1 => 't'
+  },
+  
+  module => {
+    m1 => 'M::m1',
+    file => 'SxmlLib::File'
+  },
+  
+  output => {
+    fileext => 'html',                  # Default xml
+  }
+}
+
+#-------------------------------------------------------------------------------
 # Prepare directory and module to load
 #
 mkdir('t/M');
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
 #use XML;
-#use Semi-xml::Actions;
-use Semi-xml;
+#use SemiXML::Actions;
+use SemiXML;
 
 class M::m1 {
   has Hash $.symbols = {
@@ -69,8 +73,8 @@ EOMOD
 #-------------------------------------------------------------------------------
 # Parse
 #
-my Semi-xml::Sxml $x .= new;
-$x.parse-file(:$filename);
+my SemiXML::Sxml $x .= new;
+$x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 say $xml-text;
