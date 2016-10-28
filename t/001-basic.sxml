@@ -1,4 +1,4 @@
-$!td.report title='Basic SemiXML tests' test-file='t/001-simple.t' [
+$!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
 
   $h1 [introduction]
   $p [
