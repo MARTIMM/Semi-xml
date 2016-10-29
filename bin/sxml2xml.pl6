@@ -11,13 +11,6 @@ my @a = grep( /^ <-[-]>/, @*ARGS);
 @*ARGS = (|grep( /^ '-'/, @*ARGS), |@a);
 
 #-------------------------------------------------------------------------------
-#`{{
-role sxml-role {
-  has Hash $.user-configuration = { output => { } };
-}
-}}
-
-#-------------------------------------------------------------------------------
 #= sxml2xml -run run-code filename.sxml
 sub MAIN ( Str $filename, Str :$run ) {
 
@@ -35,10 +28,9 @@ sub MAIN ( Str $filename, Str :$run ) {
 }
 
 #-------------------------------------------------------------------------------
-sub process-sxml ( Str:D $filename, Str :$run ) {
+sub process-sxml ( Str:D $filename is copy, Str :$run ) {
 
   my SemiXML::Sxml $x .= new(:init);
-#  $x does sxml-role;
 
   # Split filename in its parts
 #say $*SPEC;
@@ -51,7 +43,8 @@ sub process-sxml ( Str:D $filename, Str :$run ) {
 
   if $filename.IO ~~ :r {
     my $X = $x.parse-file(:$filename);
-    $x.save(:run-code($run));
+    $filename ~~ s/ '.' $filename.IO.extention //.
+    $x.save( :run-code($run), :$filename);
     my $deps = $x.get-option( :section('dependencies'), :option('files')) // '';
     return $deps;
   }

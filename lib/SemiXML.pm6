@@ -188,31 +188,53 @@ package SemiXML:auth<https://github.com/MARTIMM> {
                   XML::Document :$other-document
                 ) {
 
-      # Did not parse a file but content
-      if $!actions.config<output><filename>:!exists {
+      my Hash $configuration = $!actions.config;
+
+      # Did not parse a file but content or filename not defined. In that case
+      # take the name of the program and remove extention
+      #
+      if $configuration<output><filename>:!exists {
         my Str $fn = $*PROGRAM.basename;
         my Str $ext = $*PROGRAM.extension;
         $fn ~~ s/ '.' $ext //;
-        $!actions.config<output><filename> = $fn;
+        $configuration<output><filename> = $fn;
       }
 
-      if $!actions.config<output><filepath>:!exists {
+      # When the path is not defined, take the one of the program
+      if $configuration<output><filepath>:!exists {
         my Str $fn = $*PROGRAM.abspath;
         my Str $bn = $*PROGRAM.basename;
         $fn ~~ s/ '/'? $bn //;
-        $!actions.config<output><filepath> = $fn;
+        $configuration<output><filepath> = $fn;
       }
 
+      # Set the filename
+      $filename = $configuration<output><filename> if not $filename.defined;
+      $filename ~= "." ~ $configuration<output><fileext>;
 
+      # If not absolute prefix the path from the config
+      if $filename !~~ m/^ '/' / {
+        my $filepath = $configuration<output><filepath>;
+        $filename = "$filepath/$filename" if $filepath;
+      }
+
+      # Get the document text
       my $document = self.get-xml-text(:$other-document);
 
-      my Hash $configuration = $!actions.config;
-
+      # If a run code is defined, use that code as a key to find the program
+      # to send the result to.
+      #
       if $run-code.defined {
         my $cmd = $configuration<output><program>{$run-code};
 
         if $cmd.defined {
 
+say "P: $filename";
+          $cmd ~~ s/ '%of' /$filename/;
+say "P: $cmd";
+          my Proc $p = shell $cmd, :in;
+          $p.in.print($document);
+#`{{
           #-----
           # Temporary solution for pipe to command
           #
@@ -246,30 +268,17 @@ package SemiXML:auth<https://github.com/MARTIMM> {
   say "Cmd: cat $filename | $cmd";
           shell("cat '$filename' | $cmd");
           unlink $filename;
+}}
         }
 
         else {
-          $filename = $configuration<output><filename>;
-          my $fileext = $configuration<output><fileext>;
-          $filename ~= ".$fileext";
 
           say "Code '$run-code' to select command not found, Choosen to dump to $filename";
         }
       }
 
       else {
-        if not $filename.defined {
-          $filename = $configuration<output><filename>;
-          my $fileext = $configuration<output><fileext>;
-
-          $filename ~= ".$fileext";
-        }
-
-        if $filename !~~ m@'/'@ {
-          my $filepath = $configuration<output><filepath>;
-          $filename = "$filepath/$filename" if $filepath;
-        }
-
+say "W: $filename";
         spurt( $filename, $document);
       }
     }
