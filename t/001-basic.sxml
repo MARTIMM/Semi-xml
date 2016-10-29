@@ -1,6 +1,9 @@
 $!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
 
-  $h1 [introduction]
+  $h1 [ Testing the basic use of SemiXML ]
+
+  $h2 [ Introduction ]
+
   $p [
     SemiXML is a library which translates an equally named language into XML.
     There are several syntactic constructs which look very much the same as the
@@ -23,6 +26,8 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
     }
   !]
 
+  $h2 [ Plain top level elements ]
+
   $p [ First a few tests to generate top level elements ]
   $!td.code save=$xml [!my $xml = parse('$st []');!]
 
@@ -39,4 +44,20 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
   $!td.test line=^like $xml, /'a1="w"'/^ [a1="w" attribute]
   $!td.test line=^like $xml, /'a2="g g"'/^ [a2="g g" attribute]
   $!td.test line=^like $xml, /'a3="h h"'/^ [a3="h h" attribute]
+
+  $!td.test line="dies-ok { $xml = parse('$st [ $f w [] hj ]'); }" [
+    Elementary parse failures are trapped. Here the first attribute $**b[w] to
+    element $**b[f] is unfinished. Unfortunately the location where the error
+    exactly happens is not always accurate.
+  ]
+
+  $h2 [ Basic nesting ]
+
+  $p [ Nesting is done by specifying other tags in the body of a tag. ]
+
+  $!td.code [!$xml = parse('$t1 [ $t2 [] $t3[]]');!]
+  $!td.test line="is $xml, '<t1><t2/><t3/></t1>'" [
+    t2 and t3 are the nested tags
+  ]
+
 ]
