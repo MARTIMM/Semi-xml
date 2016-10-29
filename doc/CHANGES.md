@@ -1,5 +1,7 @@
 ## Changes
 
+* 0.21.0
+  * Refitted the piping to external commands
 * 0.20.0
   * Complete rewrite of grammar and actions
   * A primitive parse error locater is implemented.
