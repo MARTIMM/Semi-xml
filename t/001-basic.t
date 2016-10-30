@@ -21,6 +21,12 @@ like $xml, /'a3="h h"'/, 'T4';
 dies-ok { $xml = parse('$st [ $f w [] hj ]'); }, 'T5';
 $xml = parse('$t1 [ $t2 [] $t3[]]');
 is $xml, '<t1><t2/><t3/></t1>', 'T6';
+$xml = parse('$t1 [ $**t2 [] $t3[]]');
+is $xml, '<t1> <t2/> <t3/></t1>', 'T7';
+$xml = parse('$t1 [ $|*t2 [] $t3[]]');
+is $xml, '<t1><t2/> <t3/></t1>', 'T8';
+$xml = parse('$t1 [ $*|t2 [] $t3[]]');
+is $xml, '<t1> <t2/><t3/></t1>', 'T9';
 
 
 done-testing;

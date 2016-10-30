@@ -60,4 +60,18 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
     t2 and t3 are the nested tags
   ]
 
+  $!td.code [!$xml = parse('$t1 [ $**t2 [] $t3[]]');!]
+  $!td.test line="is $xml, '<t1> <t2/> <t3/></t1>'" [
+    nested tags with spaces around element t2 using \$**
+  ]
+
+  $!td.code append=1 [!$xml = parse('$t1 [ $|*t2 [] $t3[]]');!]
+  $!td.test line="is $xml, '<t1><t2/> <t3/></t1>'" [
+    nested tags with a space on the right of t2 with \$|*
+  ]
+
+  $!td.code append=1 [!$xml = parse('$t1 [ $*|t2 [] $t3[]]');!]
+  $!td.test line="is $xml, '<t1> <t2/><t3/></t1>'" [
+    nested tags with a space on the left of t2 done with \$*|
+  ]
 ]
