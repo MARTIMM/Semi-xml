@@ -1,7 +1,7 @@
 # SemiXML
 
 [![Build Status](https://travis-ci.org/MARTIMM/Semi-xml.svg?branch=master)](https://travis-ci.org/MARTIMM/Semi-xml)
-[![License](http://martimm.github.io/Semi-xml/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
+[![License](http://martimm.github.io/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
 
 ## Description
 
