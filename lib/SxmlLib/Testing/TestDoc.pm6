@@ -21,6 +21,7 @@ class Testing::TestDoc {
 
   state Str $indent;
   has XML::Element $last-defined-pre;
+  has Hash $!test-results;
 
   #-----------------------------------------------------------------------------
   method report (
@@ -45,7 +46,7 @@ class Testing::TestDoc {
       my XML::Element $h1 = before-element(
         $hook, 'h1', { id => '___top', class => 'title'}
       );
-      $h1.insert(SemiXML::Text.new(:text($attrs<title>)));
+      insert-element( $h1, :text($attrs<title>));
     }
 
     # fill body with results
@@ -66,48 +67,30 @@ class Testing::TestDoc {
                  '--rules=seq=*', $test-file, :out;
 
     # Store the data in a hash
-    my Hash $test-results = {};
+    $!test-results = {};
     my @lines = $p.out.lines;
     loop ( my $l = 0; $l < @lines.elems; $l++) {
       my $line = @lines[$l];
 
 say "R: $line";
 
-      # Get the test code if there is one
-      $line ~~ m/ '-' \s* (.*) $/;
+      # get the test code if there is one
+      $line ~~ m/ '-' \s* ('T' \d+) /;
       my Str $test-code = $0.Str if ? $/;
+      my Any $ok = $line ~~ m:s/^ 'ok' /
+                   ?? True
+                   !! ( $line ~~ m:s/^ 'not' 'ok' /
+                        ?? False
+                        !! Any
+                      );
+      self!set-test-results( $test-code, $ok);
 
-      if ?$test-code {
-        if $line ~~ m:s/^ 'ok' / {
-
-          if $test-results{$test-code} {
-            $test-results{$test-code}[0]++;
-          }
-
-          else {
-            $test-results{$test-code} = [ 1, 0];
-          }
-        }
-
-        elsif $line ~~ m:s/^ 'not' 'ok' / {
-
-          if $test-results{$test-code} {
-            $test-results{$test-code}[1]++;
-          }
-
-          else {
-            $test-results{$test-code} = [ 0, 1];
-          }
-        }
+      # check todo
+      if $line ~~ m/'# TODO' \s* ('T' \d+) $/ {
+        $test-code = $0.Str if ? $/;
+        self!set-test-results( $test-code, $ok);
       }
-
-      else {
-
-      }
-#say $test-code, ', ', $test-results{$test-code} if $test-code;
     }
-
-#say $test-results.perl;
 
     # run tests and store in result file
     # read result file and map to a Hash
@@ -116,47 +99,31 @@ say "R: $line";
     for @$containers.reverse -> $node {
       my Str $test-code = $node.attribs<test-code>.Str;
 
-      ( my Int $ok-c, my Int $nok-c) = @($test-results{$test-code} // [ 0, 0]);
+      ( my Int $ok-c, my Int $nok-c) = @($!test-results{$test-code} // [ 0, 0]);
 
 # empty check box &#9744;
-
-#say $test-code, ', ', $test-results{$test-code}, ", $ok-c, $nok-c";
-
       my XML::Element $td;
       if $ok-c {
-        my SemiXML::Text $check-mark .= new(:text('&#10004;'));
         $td = before-element( $node, 'td', {class => 'check-mark green'} );
-        $td.append($check-mark);
-        $td.append(SemiXML::Text.new(:text("$ok-c "))) if $ok-c > 1;
+        append-element( $td, :text('&#10004;'));
+        append-element( $td, :text("$ok-c ")) if $ok-c > 1;
 
         my $comment-td = $node.nextSibling;
-#        $comment-td.set( 'class', 'green test-comment') if ?$comment-td;
         $comment-td.set( 'class', 'test-comment') if ?$comment-td;
       }
 
       if $nok-c {
-        my SemiXML::Text $check-mark .= new(:text('&#10008;'));
-
         my Bool $ok-td-exists = $td.defined;
         $td.set( 'class', 'smaller-check-mark green') if $ok-td-exists;
 
         $td = before-element( $node, 'td', {class => 'check-mark red'});
         $td.set( 'class', 'smaller-check-mark red') if $ok-td-exists;
-        $td.append($check-mark);
-        $td.append(SemiXML::Text.new(:text("$nok-c"))) if $nok-c > 1;
+        append-element( $td, :text('&#10008;'));
+        append-element( $td, :text("$nok-c")) if $nok-c > 1;
 
         my $comment-td = $node.nextSibling;
         $comment-td.set( 'class', 'test-comment') if ?$comment-td;
-#        if $ok-td-exists {
-#          $comment-td.set( 'class', 'purple test-comment') if ?$comment-td;
-#        }
-#
-#        else {
-#          $comment-td.set( 'class', 'red test-comment') if ?$comment-td;
-#        }
       }
-
-      # if neither --> todo
 
       $node.remove;
     }
@@ -175,15 +142,31 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
-  method doc (
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Element :$content-body
-  ) {
+  method !set-test-results ( Str $test-code, Any $ok ) {
 
-    self!insert-title-and-text( $parent, $content-body, $attrs<title>//'', 'h2');
+    return unless ?$test-code and $ok.defined and $ok ~~ Bool;
 
-    $parent;
+    if $ok {
+
+      if $!test-results{$test-code} {
+        $!test-results{$test-code}[0]++;
+      }
+
+      else {
+        $!test-results{$test-code} = [ 1, 0];
+      }
+    }
+
+    else {
+
+      if $!test-results{$test-code} {
+        $!test-results{$test-code}[1]++;
+      }
+
+      else {
+        $!test-results{$test-code} = [ 0, 1];
+      }
+    }
   }
 
   #-----------------------------------------------------------------------------
@@ -235,16 +218,44 @@ say "R: $line";
     self!test-table( $parent, $attrs, :$content-body);
 
     my Int $test-code = $!test-count++;
-    my Str $code-text = ($attrs<line> // '') ~ ", 'T$test-code';\n";
-    $!test-file-content ~= $code-text;
 
-    $last-defined-pre.append(SemiXML::Text.new(
-        :text(($attrs<line> // '') ~ ", '")
-      )
-    );
-    my XML::Element $b = append-element( $last-defined-pre, 'b');
-    $b.append(SemiXML::Text.new(:text("T$test-code")));
-    $last-defined-pre.append(SemiXML::Text.new(:text("';\n")));
+    my Int $nbr-todo;
+    my Str $code-text = ($attrs<line> // '');
+    if $code-text ~~ m/^ todo/ {
+      if $code-text ~~ m/ (\d+) $/ {
+        $nbr-todo = $0.Str.Int;
+      }
+
+      else {
+        $nbr-todo = 1;
+      }
+
+      $code-text = "todo 'T$test-code', $nbr-todo;\n";
+      $!test-file-content ~= $code-text;
+
+      append-element( $last-defined-pre, :text("todo '"));
+      my XML::Element $b = append-element( $last-defined-pre, 'b');
+      append-element( $b, :text("T$test-code"));
+      append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
+    }
+
+    elsif ? $code-text {
+
+      $code-text ~= ",";
+      my $line = $code-text;
+      $code-text ~= " 'T$test-code';\n";
+      $!test-file-content ~= $code-text;
+
+  #    my $line = $attrs<line> // '';
+  #    $line ~= "," unless $line ~~ m/^ todo/;
+      $line ~= " '";
+
+      append-element( $last-defined-pre, :text($line));
+      my XML::Element $b = append-element( $last-defined-pre, 'b');
+      append-element( $b, :text("T$test-code"));
+      append-element( $last-defined-pre, :text("';\n"));
+    }
+
 
     $parent;
   }
@@ -265,27 +276,6 @@ say "R: $line";
       $head, 'link',
       { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
     );
-  }
-
-  #-----------------------------------------------------------------------------
-  method !insert-title-and-text (
-    XML::Element $parent,
-    XML::Element $container,
-    Str $title = '', Str $title-type = ''
-  ) {
-
-    my XML::Element $hook .= new(:name<hook>);
-    $parent.insert($hook);
-
-    if ?$title {
-      my XML::Element $h .= new(:name($title-type));
-      $h.insert(SemiXML::Text.new(:text($title)));
-      $parent.before( $hook, $h);
-    }
-
-    $parent.after( $hook, $_) for $container.nodes.reverse;
-
-    $parent.removeChild($hook);
   }
 
   #-----------------------------------------------------------------------------

@@ -38,7 +38,8 @@ my Hash $config = {
   },
 
   output => {
-    filename => 't/some-file',          # Default current file
+    filename => 'some-file',            # Default current file
+    filepath => 't',
     fileext => 'html',                  # Default xml
   }
 }
@@ -59,9 +60,9 @@ unlink $filename;
 
 # Write xml out to file. Filename explicitly set.
 #
-$filename ~~ s/\.sxml/.xml/;
+$filename ~~ s/\.sxml//;
 $x.save(:$filename);
-ok $filename.IO ~~ :e, "File $filename written";
+ok "$filename.html".IO ~~ :e, "File $filename written";
 
 unlink $filename;
 
@@ -73,19 +74,6 @@ ok $filename.IO ~~ :e, "File $filename written";
 
 unlink $filename;
 
-#`{{
-role pink {
-  has Hash $!configuration = {
-    output => {
-      filename => 't/another',
-      fileext => 'html'
-    }
-  };
-}
-
-$x does pink;
-}}
-
 $filename = 't/another.html';
 $x.save;
 ok $filename.IO ~~ :!e, "File $filename not written";
@@ -95,9 +83,7 @@ ok $filename.IO ~~ :e, "File $filename written instead";
 
 unlink $filename;
 
-
 #-------------------------------------------------------------------------------
 # Cleanup
-#
 done-testing();
 exit(0);

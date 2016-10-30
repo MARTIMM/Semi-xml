@@ -6,5 +6,8 @@
 [output]
   fileext       = 'html'
 
+[output.program]
+  pdf           = 'wkhtmltopdf - %of.pdf'
+
 [module]
   td            = 'SxmlLib::Testing::TestDoc'

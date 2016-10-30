@@ -188,89 +188,68 @@ package SemiXML:auth<https://github.com/MARTIMM> {
                   XML::Document :$other-document
                 ) {
 
-      # Did not parse a file but content
-      if $!actions.config<output><filename>:!exists {
+      my Hash $configuration = $!actions.config;
+
+      # Did not parse a file but content or filename not defined. In that case
+      # take the name of the program and remove extention
+      #
+      if $configuration<output><filename>:!exists {
         my Str $fn = $*PROGRAM.basename;
         my Str $ext = $*PROGRAM.extension;
         $fn ~~ s/ '.' $ext //;
-        $!actions.config<output><filename> = $fn;
+        $configuration<output><filename> = $fn;
       }
 
-      if $!actions.config<output><filepath>:!exists {
+      # When the path is not defined, take the one of the program
+      if $configuration<output><filepath>:!exists {
         my Str $fn = $*PROGRAM.abspath;
         my Str $bn = $*PROGRAM.basename;
         $fn ~~ s/ '/'? $bn //;
-        $!actions.config<output><filepath> = $fn;
+        $configuration<output><filepath> = $fn;
       }
 
+      # Set the filename
+      $filename = $filename.IO.basename if $filename.defined;
+      $filename = $configuration<output><filename> unless $filename.defined;
+      $filename ~= "." ~ $configuration<output><fileext>;
 
+      # If not absolute prefix the path from the config
+      if $filename !~~ m/^ '/' / {
+        my $filepath = $configuration<output><filepath>;
+        $filename = "$filepath/$filename" if $filepath;
+      }
+
+      # Get the document text
       my $document = self.get-xml-text(:$other-document);
 
-      my Hash $configuration = $!actions.config;
-
+      # If a run code is defined, use that code as a key to find the program
+      # to send the result to.
+      #
       if $run-code.defined {
         my $cmd = $configuration<output><program>{$run-code};
 
         if $cmd.defined {
 
-          #-----
-          # Temporary solution for pipe to command
-          #
-          # If not defined or empty device name from config
-          #
-          if not $filename.defined {
-            $filename = $configuration<output><filename>;
-            my $fileext = $configuration<output><fileext>;
+        # Drop the extention again. Let it be provided by the command
+        my Str $ext = $filename.IO.extension;
+        $filename ~~ s/ '.' $ext //;
 
-            $filename ~= ".$fileext";
-          }
-
-          # If not absolute prefix the path from the config
-          #
-          if $filename !~~ m@'/'@ {
-            my $filepath = $configuration<output><filepath>;
-            $filename = "$filepath/$filename" if $filepath;
-          }
-
-          $filename = [~] $filename, '___ ___';
-          spurt( $filename, $document);
-          #-----
-
-          $cmd ~~ s:g/\n/ /;
-          $cmd ~~ s:g/\s+/ /;
-          $cmd ~~ s/^\s*\|//;
-
-          # No pipe to executable at the moment so take a different route...
-          #
-  #        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
-  say "Cmd: cat $filename | $cmd";
-          shell("cat '$filename' | $cmd");
-          unlink $filename;
+          $cmd ~~ s/ '%of' /'$filename'/;
+          say "Sent file to program: $cmd";
+          my Proc $p = shell "$cmd 2> '{$run-code}-command.log'", :in;
+          $p.in.print($document);
         }
 
         else {
-          $filename = $configuration<output><filename>;
-          my $fileext = $configuration<output><fileext>;
-          $filename ~= ".$fileext";
 
           say "Code '$run-code' to select command not found, Choosen to dump to $filename";
         }
       }
 
       else {
-        if not $filename.defined {
-          $filename = $configuration<output><filename>;
-          my $fileext = $configuration<output><fileext>;
-
-          $filename ~= ".$fileext";
-        }
-
-        if $filename !~~ m@'/'@ {
-          my $filepath = $configuration<output><filepath>;
-          $filename = "$filepath/$filename" if $filepath;
-        }
 
         spurt( $filename, $document);
+        say "Saved file in $filename";
       }
     }
 
@@ -387,70 +366,83 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       return Any;
     }
 
-#`{{
-    #---------------------------------------------------------------------------
-    # Used from plugins to find the PLACEHOLDER-ELEMENT tag in the given
-    # parent node.
-    #
-    method find-placeholder ( XML::Element $parent --> XML::Element ) {
-
-      my XML::Node $placeholder;
-      for $parent.nodes -> $node {
-        if $node ~~ XML::Element and $node.name eq 'PLACEHOLDER-ELEMENT' {
-          $placeholder = $node;
-          last;
-        }
-      }
-
-      return $placeholder;
-    }
-}}
-
-
     #-----------------------------------------------------------------------------
     sub append-element (
-      XML::Element $parent, Str $name, Hash $attributes = {}
-      --> XML::Element
+      XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
+      --> XML::Node
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
+      my XML::Node $element;
+
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
       $parent.append($element);
       $element;
     }
 
     #-----------------------------------------------------------------------------
     sub insert-element (
-      XML::Element $parent, Str $name, Hash $attributes = {}
-      --> XML::Element
+      XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
+      --> XML::Node
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
-      $parent.insert($element);
+      my XML::Node $element;
 
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
+      $parent.insert($element);
       $element;
     }
 
     #-----------------------------------------------------------------------------
     sub before-element (
-      XML::Element $node, Str $name, Hash $attributes = {}
+      XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
       --> XML::Element
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
-      $node.before($element);
+      my XML::Node $element;
 
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
+      $node.before($element);
       $element;
     }
 
     #-----------------------------------------------------------------------------
     sub after-element (
-      XML::Element $node, Str $name, Hash $attributes = {}
+      XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
       --> XML::Element
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
-      $node.after($element);
+      my XML::Node $element;
 
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
+      $node.after($element);
       $element;
     }
   }

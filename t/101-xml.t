@@ -39,11 +39,10 @@ ok $xml-text ~~ ms/Data from file/, 'Section text found';
 
 unlink $filename;
 
-# Write xml out to file
-#
-$filename ~~ s/\.sxml/.xml/;
+# Write xml out to file. Default extention is .xml
+$filename ~~ s/\.sxml//;
 $x.save(:$filename);
-ok $filename.IO ~~ :e, "File written";
+ok "$filename.xml".IO ~~ :e, "File written";
 
 unlink $filename;
 

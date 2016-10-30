@@ -77,12 +77,11 @@ h1.title {
   border-color:         #006000;
   height:               40px;
   font-size:            2em;
-  padding-left:         2.1em;
-  padding-top:          2px;
+  padding:              2px 0 5px 2.1em;
   background-color:     #c0e472;
   background-image:     url("https://docs.perl6.org/images/Camelia.svg");
   background-repeat:    no-repeat;
-  background-position:  7px 0px;
+  background-position:  7px 4px;
   background-size:      45px;
   box-shadow:           10px 10px 5px #a0b060;
   border-radius:        4px;

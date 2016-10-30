@@ -4,5 +4,6 @@
 *.html
 *.xml
 *.xsl
+*.log
 spellTmp*
 Old/*

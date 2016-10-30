@@ -24,8 +24,9 @@
     "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
     "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6",
 
+    "SxmlLib::Testing::TestDoc":        "lib/SxmlLib/Testing/TestDoc.pm6",
     "sxml2xml":                         "bin/sxml2xml.pl6"
   },
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.20.0"
+  "version": "v0.21.0.2"
 }

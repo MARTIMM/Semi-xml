@@ -1,30 +1,51 @@
-$!td.report title='Integer manipulations' test-file='t/abc.t' [
+$!td.report title='Integer manipulations' [
 
-  $!td.doc title='Purpose' [
-    Test the integer declaration and then assignment of a number. This test
-    is a double check of perl6 $**b[Int] to see if that type is really the number
-    we're looking for.
+  $h1 [The Perl 6 integer test report]
+  
+  $p [
+    The integer is in perl the most important type so we need to do our best
+    to test it thoroughly. First we declare a constant to be used later and an
+    integer without a value.
   ]
 
   $!td.code [!=
-    use SemiXML;
-
     constant ABC = 10;
     my Int $i;
   !]
 
-  $!td.test line="ok $i ~~ Int" [
+  $!td.test line="nok $i.defined" [
     Declaration of an integer without an assignment of a value,
-    should result in a type value when compared.
+    should result in an undefinedness.
   ]
 
-  $!td.test line="nok $i ~~ Int" [opposite test should fail]
+  $!td.test line="ok $i ~~ Int" [
+    But when defined or not, its type value can be compared.
+  ]
+
+  $!td.test line="todo" [
+    Someday we might make this not fail when wormwhole modules are installed
+  ]
+  $!td.test line="ok $i !~~ Int" [The opposite test should fail]
+  $!td.test line="ok $i ~~ Cool" [
+    Also inherited classes should be compared
+    successfully.
+  ]
+
+  $h3 [Operations]
+  
+  $p [Next a few tests to see if operations can be applied to the integer]
 
   $!td.code [!=
     $i = ABC;
   !]
 
-  $!td.test line="is $i, 10" [Initialized Int]
+  $!td.test line="is $i, 10" [
+    Initialize Int with the constant seems to have done well
+  ]
+
+  $!td.test line="todo 2" [
+    Incredible tests which will be true in the not so distant future
+  ]
   $!td.test line="is $i, 11" [Integer is 10 not 11]
 
   $!td.test line="like $i.Str, /'not 10, but text'/" [test some text]
@@ -35,7 +56,5 @@ $!td.report title='Integer manipulations' test-file='t/abc.t' [
 
   $!td.test line='  ok $^a < 5' [test a series of numbers against 5]
 
-  $!td.code append=1 [!=
-    }
-  !]
+  $!td.code append=1 [!=}!]
 ]
