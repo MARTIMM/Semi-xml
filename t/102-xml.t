@@ -83,9 +83,7 @@ ok $filename.IO ~~ :e, "File $filename written instead";
 
 unlink $filename;
 
-
 #-------------------------------------------------------------------------------
 # Cleanup
-#
 done-testing();
 exit(0);
