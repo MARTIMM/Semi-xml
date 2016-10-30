@@ -233,7 +233,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         my Str $ext = $filename.IO.extension;
         $filename ~~ s/ '.' $ext //;
 
-          $cmd ~~ s/ '%of' /$filename/;
+          $cmd ~~ s/ '%of' /'$filename'/;
+          say "Sent file to program: $cmd";
           my Proc $p = shell "$cmd 2> '{$run-code}-command.log'", :in;
           $p.in.print($document);
         }
@@ -247,6 +248,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       else {
 
         spurt( $filename, $document);
+        say "Saved file in $filename";
       }
     }
 
@@ -363,70 +365,83 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       return Any;
     }
 
-#`{{
-    #---------------------------------------------------------------------------
-    # Used from plugins to find the PLACEHOLDER-ELEMENT tag in the given
-    # parent node.
-    #
-    method find-placeholder ( XML::Element $parent --> XML::Element ) {
-
-      my XML::Node $placeholder;
-      for $parent.nodes -> $node {
-        if $node ~~ XML::Element and $node.name eq 'PLACEHOLDER-ELEMENT' {
-          $placeholder = $node;
-          last;
-        }
-      }
-
-      return $placeholder;
-    }
-}}
-
-
     #-----------------------------------------------------------------------------
     sub append-element (
-      XML::Element $parent, Str $name, Hash $attributes = {}
-      --> XML::Element
+      XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
+      --> XML::Node
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
+      my XML::Node $element;
+
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
       $parent.append($element);
       $element;
     }
 
     #-----------------------------------------------------------------------------
     sub insert-element (
-      XML::Element $parent, Str $name, Hash $attributes = {}
-      --> XML::Element
+      XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
+      --> XML::Node
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
-      $parent.insert($element);
+      my XML::Node $element;
 
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
+      $parent.insert($element);
       $element;
     }
 
     #-----------------------------------------------------------------------------
     sub before-element (
-      XML::Element $node, Str $name, Hash $attributes = {}
+      XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
       --> XML::Element
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
-      $node.before($element);
+      my XML::Node $element;
 
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
+      $node.before($element);
       $element;
     }
 
     #-----------------------------------------------------------------------------
     sub after-element (
-      XML::Element $node, Str $name, Hash $attributes = {}
+      XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
       --> XML::Element
     ) is export {
 
-      my XML::Element $element .= new( :$name, :attribs(%$attributes));
-      $node.after($element);
+      my XML::Node $element;
 
+      if ? $text {
+        $element = SemiXML::Text.new(:$text);
+      }
+
+      else {
+        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      }
+
+      $node.after($element);
       $element;
     }
   }
