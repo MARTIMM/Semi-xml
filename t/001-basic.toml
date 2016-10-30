@@ -7,7 +7,6 @@
   fileext       = 'html'
 
 [output.program]
-  xpdf           = 'wkhtmltopdf - x.pdf'
   pdf           = 'wkhtmltopdf - %of.pdf'
 
   fileext       = 'pdf'

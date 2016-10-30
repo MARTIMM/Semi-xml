@@ -43,7 +43,7 @@ sub process-sxml ( Str:D $filename is copy, Str :$run ) {
 
   if $filename.IO ~~ :r {
     my $X = $x.parse-file(:$filename);
-    $filename ~~ s/ '.' $filename.IO.extention //.
+    $filename ~~ s/ '.' $filename.IO.extention //;
     $x.save( :run-code($run), :$filename);
     my $deps = $x.get-option( :section('dependencies'), :option('files')) // '';
     return $deps;

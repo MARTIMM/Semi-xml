@@ -229,46 +229,13 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
         if $cmd.defined {
 
-say "P: $filename";
+        # Drop the extention again. Let it be provided by the command
+        my Str $ext = $filename.IO.extension;
+        $filename ~~ s/ '.' $ext //;
+
           $cmd ~~ s/ '%of' /$filename/;
-say "P: $cmd";
-          my Proc $p = shell $cmd, :in;
+          my Proc $p = shell "$cmd 2> '{$run-code}-command.log'", :in;
           $p.in.print($document);
-#`{{
-          #-----
-          # Temporary solution for pipe to command
-          #
-          # If not defined or empty device name from config
-          #
-          if not $filename.defined {
-            $filename = $configuration<output><filename>;
-            my $fileext = $configuration<output><fileext>;
-
-            $filename ~= ".$fileext";
-          }
-
-          # If not absolute prefix the path from the config
-          #
-          if $filename !~~ m@'/'@ {
-            my $filepath = $configuration<output><filepath>;
-            $filename = "$filepath/$filename" if $filepath;
-          }
-
-          $filename = [~] $filename, '___ ___';
-          spurt( $filename, $document);
-          #-----
-
-          $cmd ~~ s:g/\n/ /;
-          $cmd ~~ s:g/\s+/ /;
-          $cmd ~~ s/^\s*\|//;
-
-          # No pipe to executable at the moment so take a different route...
-          #
-  #        spurt( '.-temp-file-to-store-command-.sh', "cat $filename | $cmd");
-  say "Cmd: cat $filename | $cmd";
-          shell("cat '$filename' | $cmd");
-          unlink $filename;
-}}
         }
 
         else {
@@ -278,7 +245,7 @@ say "P: $cmd";
       }
 
       else {
-say "W: $filename";
+
         spurt( $filename, $document);
       }
     }
