@@ -9,7 +9,5 @@
 [output.program]
   pdf           = 'wkhtmltopdf - %of.pdf'
 
-  fileext       = 'pdf'
-
 [module]
   td            = 'SxmlLib::Testing::TestDoc'
