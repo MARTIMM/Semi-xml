@@ -209,7 +209,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       # Set the filename
-      $filename = $configuration<output><filename> if not $filename.defined;
+      $filename = $filename.IO.basename if $filename.defined;
+      $filename = $configuration<output><filename> unless $filename.defined;
       $filename ~= "." ~ $configuration<output><fileext>;
 
       # If not absolute prefix the path from the config
