@@ -133,10 +133,10 @@ say "R: $line";
 
     my XML::Element $div = append-element( $body, 'div', {class => 'footer'});
 
-    $div.append(SemiXML::Text.new(:text(
+    append-element( $div, :text(
 #      "Generated using SemiXML::ver\(), SxmlLib::Testing::TestDoc, XML";
       "Generated using SemiXML, SxmlLib::Testing::TestDoc, XML";
-    )));
+    ));
 
     $parent;
   }
@@ -195,7 +195,7 @@ say "R: $line";
     for $content-body.nodes.reverse {
       my $l = ~$^a;
       $l ~~ s:g/^^ $indent //;
-      $hook.after(SemiXML::Text.new(:text("$l\n")));
+      after-element( $hook, :text("$l\n"));
     }
 
     $hook.remove;
@@ -265,14 +265,14 @@ say "R: $line";
 
     if $attrs<title> {
       my XML::Element $title = append-element( $head, 'title');
-      $title.insert(SemiXML::Text.new(:text($attrs<title>)));
+      insert-element( $title, :text($attrs<title>));
     }
 
     my XML::Element $meta = append-element(
       $head, 'meta', {charset => 'UTF-8'}
     );
 
-    my XML::Element $link = append-element(
+    append-element(
       $head, 'link',
       { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
     );
@@ -296,7 +296,7 @@ say "R: $line";
 
     # Prefix the comment with the test code
     my XML::Element $b = insert-element( $td, 'b');
-    $b.insert(SemiXML::Text.new(:text("T$!test-count: ")));
+    insert-element( $b, :text("T$!test-count: "));
   }
 }
 
