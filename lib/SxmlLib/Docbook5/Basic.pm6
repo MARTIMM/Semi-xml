@@ -11,7 +11,6 @@ class Docbook5::Basic {
   has Hash $.symbols = {
 
     # $.m.book []
-    #
     book => {
       tag-name => 'book',
       attributes => {
@@ -24,7 +23,6 @@ class Docbook5::Basic {
     },
 
     # $.m.article []
-    #
     article => {
       tag-name => 'article',
       attributes => {
@@ -38,10 +36,12 @@ class Docbook5::Basic {
   };
 
   #-----------------------------------------------------------------------------
-  method Xarticle ( XML::Element $parent,
-                   Hash $attrs is copy,
-                   XML::Node :$content-body
-                 ) {
+#TODO do we need this?
+  method Xarticle (
+    XML::Element $parent,
+    Hash $attrs is copy,
+    XML::Node :$content-body
+  ) {
 
   }
 
@@ -54,10 +54,11 @@ class Docbook5::Basic {
   # Content
   #   $para [] blocks used to describe abstract
   #
-  method info ( XML::Element $parent,
-                Hash $attrs is copy,
-                XML::Element :$content-body
-              ) {
+  method info (
+    XML::Element $parent,
+    Hash $attrs is copy,
+    XML::Element :$content-body
+  ) {
 
     my $firstname = $attrs<firstname>;
     my $surname = $attrs<surname>;
@@ -73,12 +74,12 @@ class Docbook5::Basic {
 
         if $firstname.defined {
           my XML::Element $f = append-element( $personname, 'firstname');
-          $f.append(XML::Text.new(:text($firstname)));
+          append-element( $f, :text($firstname));
         }
 
         if $surname.defined {
           my XML::Element $s = append-element( $personname, 'surname');
-          $s.append(XML::Text.new(:text($surname)));
+          append-element( $s, :text($surname));
         }
       }
     }
@@ -91,12 +92,12 @@ class Docbook5::Basic {
       my XML::Element $address = append-element( $info, 'address');
       if $city.defined {
         my XML::Element $c = append-element( $address, 'city');
-        $c.append(XML::Text.new(:text($city)));
+        append-element( $c, :text($city));
       }
 
       if $country.defined {
         my XML::Element $c = append-element( $address, 'country');
-        $c.append(XML::Text.new(:text($country)));
+        append-element( $c, :text($country));
       }
     }
 
@@ -107,17 +108,17 @@ class Docbook5::Basic {
 
       if $copy-year.defined {
         my XML::Element $c = append-element( $copyright, 'year');
-        $c.append(XML::Text.new(:text($copy-year)));
+        append-element( $c, :text($copy-year));
       }
 
       if $copy-holder.defined {
         my XML::Element $c = append-element( $copyright, 'holder');
-        $c.append(XML::Text.new(:text($copy-holder)));
+        append-element( $c, :text($copy-holder));
       }
     }
 
     my XML::Element $date = append-element( $info, 'date');
-    $date.append(XML::Text.new(:text(Date.today().Str)));
+    append-element( $date, :text(Date.today().Str));
 
     my XML::Element $abstract = append-element( $info, 'abstract');
     $abstract.insert($_) for $content-body.nodes.reverse;
