@@ -101,7 +101,6 @@ say "R: $line";
 
       ( my Int $ok-c, my Int $nok-c) = @($!test-results{$test-code} // [ 0, 0]);
 
-# empty check box &#9744;
       my XML::Element $td;
       if $ok-c {
         $td = before-element( $node, 'td', {class => 'check-mark green'} );
@@ -133,10 +132,9 @@ say "R: $line";
 
     my XML::Element $div = append-element( $body, 'div', {class => 'footer'});
 
-    append-element( $div, :text(
-#      "Generated using SemiXML::ver\(), SxmlLib::Testing::TestDoc, XML";
-      "Generated using SemiXML, SxmlLib::Testing::TestDoc, XML";
-    ));
+    append-element(
+      $div, :text("Generated using SemiXML, SxmlLib::Testing::TestDoc, XML")
+    );
 
     $parent;
   }
@@ -246,8 +244,6 @@ say "R: $line";
       $code-text ~= " 'T$test-code';\n";
       $!test-file-content ~= $code-text;
 
-  #    my $line = $attrs<line> // '';
-  #    $line ~= "," unless $line ~~ m/^ todo/;
       $line ~= " '";
 
       append-element( $last-defined-pre, :text($line));
@@ -255,7 +251,6 @@ say "R: $line";
       append-element( $b, :text("T$test-code"));
       append-element( $last-defined-pre, :text("';\n"));
     }
-
 
     $parent;
   }
