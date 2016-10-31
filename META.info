@@ -4,7 +4,8 @@
   ],
   "depends": [
     "XML",
-    "Config::DataLang::Refine"
+    "Config::DataLang::Refine",
+    "Terminal::ANSIColor"
   ],
   "license": "The Artistic License 2.0",
   "description": "Semi xml parser",
@@ -28,5 +29,5 @@
     "sxml2xml":                         "bin/sxml2xml.pl6"
   },
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.21.0.2"
+  "version": "v0.21.0.3"
 }
