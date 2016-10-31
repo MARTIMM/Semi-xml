@@ -409,7 +409,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #-----------------------------------------------------------------------------
     sub before-element (
       XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
-      --> XML::Element
+      --> XML::Node
     ) is export {
 
       my XML::Node $element;
@@ -429,7 +429,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #-----------------------------------------------------------------------------
     sub after-element (
       XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
-      --> XML::Element
+      --> XML::Node
     ) is export {
 
       my XML::Node $element;
