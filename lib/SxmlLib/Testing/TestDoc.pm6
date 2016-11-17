@@ -21,6 +21,11 @@ class Testing::TestDoc {
 
   state Str $indent;
   has XML::Element $last-defined-pre;
+
+  # Storage of test results. Key is the test code which is like T##. The value
+  # is an Array of which the 1st element is the success count and the 2nd the
+  # failure count. These are counts so it can be used to do tests in a loop.
+  #
   has Hash $!test-results;
 
   #-----------------------------------------------------------------------------
@@ -207,6 +212,13 @@ say "R: $line";
     }
 
     $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method todo ( ) {
+
+    # generate todo tests.
+    # use todo counter. is set here. in mehod test it counts down.
   }
 
   #-----------------------------------------------------------------------------
