@@ -180,7 +180,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       return self.get-xml-text;
     }
 
-
     #---------------------------------------------------------------------------
     # Expect filename without extension
     method save ( Str :$filename is copy,
@@ -191,7 +190,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Hash $configuration = $!actions.config;
 
       # Did not parse a file but content or filename not defined. In that case
-      # take the name of the program and remove extention
+      # take the name of the program and remove extension
       #
       if $configuration<output><filename>:!exists {
         my Str $fn = $*PROGRAM.basename;
@@ -204,13 +203,17 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       if $configuration<output><filepath>:!exists {
         my Str $fn = $*PROGRAM.abspath;
         my Str $bn = $*PROGRAM.basename;
-        $fn ~~ s/ '/'? $bn //;
+        $fn ~~ s/ ('/'||\\)? $bn //;
         $configuration<output><filepath> = $fn;
       }
 
       # Set the filename
       $filename = $filename.IO.basename if $filename.defined;
       $filename = $configuration<output><filename> unless $filename.defined;
+
+      # substitute extension
+      my Str $ext = $filename.IO.extension;
+      $filename ~~ s/ '.' $ext //;
       $filename ~= "." ~ $configuration<output><fileext>;
 
       # If not absolute prefix the path from the config
