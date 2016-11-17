@@ -62,12 +62,14 @@ class Testing::TestDoc {
 
     spurt( $test-file, $!test-file-content);
 
-    # Run the test and get the result contents
-    my Proc $p = run 'prove', '-e', 'perl6', '-vm',
+    # Run the test using prove and get the result contents through a pipe
+    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
                  '--rules=seq=*', $test-file, :out;
 
-    # Store the data in a hash
+    # store the data in a hash
     $!test-results = {};
+
+    # read lines from pipe from testing command
     my @lines = $p.out.lines;
     loop ( my $l = 0; $l < @lines.elems; $l++) {
       my $line = @lines[$l];
@@ -130,12 +132,14 @@ say "R: $line";
     # remove hook
     $body.removeChild($hook);
 
+    # Add footer to the end of the report
     my XML::Element $div = append-element( $body, 'div', {class => 'footer'});
 
     append-element(
       $div, :text("Generated using SemiXML, SxmlLib::Testing::TestDoc, XML")
     );
 
+    # return parent
     $parent;
   }
 

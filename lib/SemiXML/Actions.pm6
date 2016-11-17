@@ -339,7 +339,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
             # test if symbols accessor exists in module
             if $module.^can($symmth) {
 
-              # call user method and expect result in $y
+              # call user method and expect result in $x
               $x = $module."$symmth"(
                 XML::Element.new(:name('__PARENT_CONTAINER__')),
                 $att,
@@ -367,10 +367,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           }
 
           else {
-            $x .= new(
-              :name('undefined-module'),
-              :attribs(module => $mod)
-            );
+            $x .= new( :name('undefined-module'), :attribs(module => $mod));
           }
         }
       }
