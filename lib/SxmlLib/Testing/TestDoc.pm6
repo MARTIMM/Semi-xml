@@ -34,6 +34,7 @@ class Testing::TestDoc {
   has Hash $!test-results;
 
   has Hash $!test-metrics;
+  has Array $!all-metrics = [];
 
   #-----------------------------------------------------------------------------
   method report (
@@ -175,6 +176,23 @@ say "R: $line";
     # remove hook
     $body.removeChild($hook);
 
+    self!save-metrics( $test-file, $attrs);
+    self!display-summary($body);
+
+    # Add footer to the end of the report
+    my XML::Element $div = append-element( $body, 'div', {class => 'footer'});
+
+    append-element(
+      $div, :text("Generated using SemiXML, SxmlLib::Testing::TestDoc, XML")
+    );
+
+    # return parent
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !save-metrics ( Str $test-file, Hash $attrs ) {
+
     # Gather metric data and write to metric file. Run summary to show.
     my $metric-file = $test-file;
     $metric-file ~~ s/ '.t' $/.t-metric/;
@@ -188,24 +206,86 @@ say "R: $line";
     $metric-text ~= "Distro:$*DISTRO.name():$*DISTRO.version():$*DISTRO.release():$*DISTRO.is-win()\n";
     $metric-text ~= "VM:$*VM.name():$*VM.version()\n";
 
-    $metric-text ~= "T:$!test-metrics<T>[0]:$!test-metrics<T>[1]\n";
-    $metric-text ~= "B:$!test-metrics<B>[0]:$!test-metrics<B>[1]\n";
-    $metric-text ~= "D:$!test-metrics<D>[0]:$!test-metrics<D>[1]\n";
-    $metric-text ~= "S:$!test-metrics<S>[0]:$!test-metrics<S>[1]\n";
+    my Int $total =
+      [+] |@($!test-metrics<T>), |@($!test-metrics<B>),
+          |@($!test-metrics<D>), |@($!test-metrics<S>);
+
+    $metric-text ~= "Total: $total\n";
+    
+    # Gather also in an array
+    # total, T-ok, T-nok, T-total, T%ok, T%nok, %ok, %nok, B-ok, B-nok, ...
+    # Start T on [1..7], B on [8..14], D on [15..21], S on [22..28]
+    $!all-metrics = [$total];
+
+    my Int $ts = [+] @($!test-metrics<T>);
+    $!all-metrics.push: $!test-metrics<T>[0],
+                        $!test-metrics<T>[1],
+                        $ts,
+                        $!test-metrics<T>[0] * 100.0/$ts,
+                        $!test-metrics<T>[1] * 100.0/$ts,
+                        $!test-metrics<T>[0] * 100.0/$total,
+                        $!test-metrics<T>[1] * 100.0/$total;
+    $metric-text ~= ("T", $!all-metrics[1..7]>>.fmt('%.2f')).join(':') ~ "\n";
+
+    $ts = [+] @($!test-metrics<B>);
+    $!all-metrics.push: $!test-metrics<B>[0],
+                        $!test-metrics<B>[1],
+                        $ts,
+                        $!test-metrics<B>[0] * 100.0/$ts,
+                        $!test-metrics<B>[1] * 100.0/$ts,
+                        $!test-metrics<B>[0] * 100.0/$total,
+                        $!test-metrics<B>[1] * 100.0/$total;
+    $metric-text ~= ("B", $!all-metrics[8..14]>>.fmt('%.2f')).join(':') ~ "\n";
+
+    $ts = [+] @($!test-metrics<D>);
+    $!all-metrics.push: $!test-metrics<D>[0],
+                        $!test-metrics<D>[1],
+                        $ts,
+                        $!test-metrics<D>[0] * 100.0/$ts,
+                        $!test-metrics<D>[1] * 100.0/$ts,
+                        $!test-metrics<D>[0] * 100.0/$total,
+                        $!test-metrics<D>[1] * 100.0/$total;
+    $metric-text ~= ("D", $!all-metrics[15..21]>>.fmt('%.2f')).join(':') ~ "\n";
+
+    $ts = [+] @($!test-metrics<S>);
+    $!all-metrics.push: $!test-metrics<S>[0],
+                        $!test-metrics<S>[1],
+                        $ts,
+                        $!test-metrics<S>[0] * 100.0/$ts,
+                        $!test-metrics<S>[1] * 100.0/$ts,
+                        $!test-metrics<S>[0] * 100.0/$total,
+                        $!test-metrics<S>[1] * 100.0/$total;
+    $metric-text ~= ("S", $!all-metrics[22..28]>>.fmt('%.2f')).join(':') ~ "\n";
 
     spurt( $metric-file, $metric-text);
+  }
 
+  #-----------------------------------------------------------------------------
+  method !display-summary ( XML::Element $body ) {
 
-
-    # Add footer to the end of the report
-    my XML::Element $div = append-element( $body, 'div', {class => 'footer'});
-
-    append-element(
-      $div, :text("Generated using SemiXML, SxmlLib::Testing::TestDoc, XML")
+    my XML::Element $svg = append-element(
+      $body, 'svg', {
+        width => '100', height => '100',                # transform => 'rotate(-90)',
+        background => '#444', border-radius => '50%'
+      }
     );
 
-    # return parent
-    $parent;
+    $svg.setNamespace("http://www.w3.org/2000/svg");
+
+    my $radius = 30;
+    my $circ = 2 * pi * $radius;
+
+    # Tests(T) total percentage ok
+    my $total-ok = $!all-metrics[6];
+    $total-ok * $circ /100.0;
+
+    my XML::Element $circle = append-element(
+      $svg, 'circle', {
+        fill => '#444', stroke => 'yellowgreen', stroke-width => '30',
+        r => $radius.Str, cx => '50', cy => '50',
+        stroke-dasharray => "$total-ok $circ"
+      }
+    );
   }
 
   #-----------------------------------------------------------------------------
