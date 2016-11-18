@@ -22,8 +22,13 @@ like $i.Str, /'not 10, but text'/, 'D8';
 
     for ^11 {
 todo 'D10', 11;
-  ok $^a > 8, 'D11';
+ok $^a > 8, 'D11';
 }
+
+    my Int $i2 = 20304;
+todo 'B12', 2;
+is $i2, 20304, 'B13';
+is $i2 - 20305, 1, 'B14';
 
 
 done-testing;

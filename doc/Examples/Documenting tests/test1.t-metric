@@ -1,0 +1,9 @@
+Title:Integer manipulations
+Class:Int
+Label:Int-test
+Kernel:linux:4.7.10.100.fc.23.x.86._.64
+Distro:fedora:23.Workstation.Edition:23:False
+VM:moar:2016.10.37.gf.769569
+T:11:3
+B:1:1
+D:2:12

@@ -9,9 +9,12 @@ class Testing::TestDoc {
 
   # The test counter is used to generate a description messages with each test
   # like 'T##'. This is also stored in the element _CHECK_MARK_ with a
-  # 'test-code' attribute. For todo entries this is D##.
+  # 'test-code' attribute. For todo entries this is D##, B## for bug issue tests
+  # S## for skipped test.
+  #
   has Int $!test-count = 0;
   has Int $!todo-count = 0;
+  has Int $!bug-count = 0;
 
   # Initialize the test file with a few lines
   has Str $!test-file-content = Q:to/EOINIT/;
@@ -29,6 +32,8 @@ class Testing::TestDoc {
   # a loop.
   #
   has Hash $!test-results;
+
+  has Hash $!test-metrics;
 
   #-----------------------------------------------------------------------------
   method report (
@@ -76,6 +81,9 @@ class Testing::TestDoc {
     # store the data in a hash
     $!test-results = {};
 
+    # metrics
+    $!test-metrics = { T => [0,0], D => [0,0], B => [0,0], S => [0,0]};
+
     # read lines from pipe from testing command
     my @lines = $p.out.lines;
     loop ( my $l = 0; $l < @lines.elems; $l++) {
@@ -84,7 +92,7 @@ class Testing::TestDoc {
 say "R: $line";
 
       # get the test code if there is one
-      $line ~~ m/ '-' \s* (<[TD]> \d+) /;
+      $line ~~ m/ '-' \s* (<[TDB]> \d+) /;
       my Str $test-code = $0.Str if ? $/;
       my Any $ok = $line ~~ m:s/^ 'ok' /
                    ?? True
@@ -92,14 +100,19 @@ say "R: $line";
                         ?? False
                         !! Any
                       );
-#      self!set-test-results( $test-code, $ok);
 
       # check todo code
       if $line ~~ m/'# TODO' \s* ('D' \d+) $/ {
         my Str $test-code2 = $0.Str if ? $/;
-        self!set-test-results( $test-code2, $ok);
+        self!set-test-results( $test-code2, $ok, :!metric);
 
-#        $test-code ~~ s/ 'T' /D/;
+        self!set-test-results( $test-code, $ok);
+      }
+
+      elsif $line ~~ m/'# TODO' \s* ('B' \d+) $/ {
+        my Str $test-code2 = $0.Str if ? $/;
+        self!set-test-results( $test-code2, $ok, :!metric);
+
         self!set-test-results( $test-code, $ok);
       }
 
@@ -121,7 +134,11 @@ say "R: $line";
       if $ok-c {
         $td = before-element( $node, 'td', {class => 'check-mark green'} );
         if $test-code ~~ m/^ 'D' / {
-          append-element( $td, :text('&#128402;'));
+          append-element( $td, :text('&#128459;'));
+        }
+
+        elsif $test-code ~~ m/^ 'B' / {
+          append-element( $td, :text('&#128459;'));
         }
 
         else {
@@ -141,6 +158,10 @@ say "R: $line";
           append-element( $td, :text('&#128462;'));
         }
 
+        elsif $test-code ~~ m/^ 'B' / {
+          append-element( $td, :text('&#128027;'));
+        }
+
         else {
           append-element( $td, :text('&#10008;'));
         }
@@ -154,6 +175,28 @@ say "R: $line";
     # remove hook
     $body.removeChild($hook);
 
+    # Gather metric data and write to metric file. Run summary to show.
+    my $metric-file = $test-file;
+    $metric-file ~~ s/ '.t' $/.t-metric/;
+    my Str $metric-text = '';
+
+    $metric-text ~= "Title:{$attrs<title> // '-'}\n";
+    $metric-text ~= "Class:{$attrs<class> // '-'}\n";
+    $metric-text ~= "Label:{$attrs<label> // '-'}\n";
+
+    $metric-text ~= "Kernel:$*KERNEL.name():$*KERNEL.version()\n";
+    $metric-text ~= "Distro:$*DISTRO.name():$*DISTRO.version():$*DISTRO.release():$*DISTRO.is-win()\n";
+    $metric-text ~= "VM:$*VM.name():$*VM.version()\n";
+
+    $metric-text ~= "T:$!test-metrics<T>[0]:$!test-metrics<T>[1]\n";
+    $metric-text ~= "B:$!test-metrics<B>[0]:$!test-metrics<B>[1]\n";
+    $metric-text ~= "D:$!test-metrics<D>[0]:$!test-metrics<D>[1]\n";
+    $metric-text ~= "S:$!test-metrics<S>[0]:$!test-metrics<S>[1]\n";
+
+    spurt( $metric-file, $metric-text);
+
+
+
     # Add footer to the end of the report
     my XML::Element $div = append-element( $body, 'div', {class => 'footer'});
 
@@ -166,11 +209,15 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
-  method !set-test-results ( Str $test-code, Any $ok ) {
+  method !set-test-results ( Str $test-code, Any $ok, Bool :$metric = True ) {
 
     return unless ?$test-code and $ok.defined and $ok ~~ Bool;
 
+    my Str $test-type = $test-code;
+    $test-type ~~ s/\d+ $//;
+    
     if $ok {
+      $!test-metrics{$test-type}[0]++ if $metric;
 
       if $!test-results{$test-code} {
         $!test-results{$test-code}[0]++;
@@ -182,6 +229,7 @@ say "R: $line";
     }
 
     else {
+      $!test-metrics{$test-type}[1]++ if $metric;
 
       if $!test-results{$test-code} {
         $!test-results{$test-code}[1]++;
@@ -261,12 +309,18 @@ say "R: $line";
       self!todo-table( $parent, $attrs, :$content-body);
     }
 
+    elsif $!bug-count {
+      self!bug-table( $parent, $attrs, :$content-body);
+    }
+
     else {
       self!test-table( $parent, $attrs, :$content-body);
     }
 
     my Int $test-code = $!test-count++;
-    my Str $test-code-text = ($!todo-count ?? 'D' !! 'T') ~ $test-code;
+    my Str $test-code-text = (
+       $!todo-count ?? 'D' !! ($!bug-count ?? 'B' !! 'T')
+    ) ~ $test-code;
 
     my Int $nbr-todo;
     my Str $code-text = ($attrs<line> // '');
@@ -336,14 +390,15 @@ say "R: $line";
     XML::Element :$content-body
   ) {
 
-    # generate todo tests.
-    # use todo counter. is set here. in method test it counts down.
-
+    die 'Cannot have todo here when still todo or bug lines are active'
+      if $!todo-count or $!bug-count;
 
     my Int $test-code = $!test-count++;
 
     my Int $nbr-todo = $attrs<n>:exists ?? $attrs<n>.Int !! 1;
     $!todo-count = $nbr-todo;
+    my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-todo;
+    $!todo-count = $test-lines;
     self!todo-table(
       $parent, $attrs, :$content-body,
       :todo, :todo-count($nbr-todo)
@@ -351,17 +406,17 @@ say "R: $line";
 
     my Str $code-text = "todo 'D$test-code', $nbr-todo;\n";
     $!test-file-content ~= $code-text;
-#`{{}}
+#`{{
     append-element( $last-defined-pre, :text("todo '"));
     my XML::Element $b = append-element( $last-defined-pre, 'b');
     append-element( $b, :text("D$test-code"));
     append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
-
+}}
     $parent;
   }
 
   #-----------------------------------------------------------------------------
-  method !todo-table ( 
+  method !todo-table (
     XML::Element $parent,
     Hash $attrs,
     XML::Element :$content-body,
@@ -374,7 +429,6 @@ say "R: $line";
     );
 
     my XML::Element $tr = append-element( $table, 'tr');
-say "append check mark TODO$!test-count";
 
     # When handling todo, only show the comments and count of todo
     if $todo {
@@ -397,11 +451,88 @@ say "append check mark TODO$!test-count";
       $t = "Next $todo-count tests are todo tests: " if $todo-count > 1;
       insert-element( $b, :text($t));
     }
-    
+
     else {
       # Prefix the comment with the test code
       my XML::Element $b = insert-element( $td, 'b');
       insert-element( $b, :text("D$!test-count: "));
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method bug (
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body
+  ) {
+
+    die 'Cannot have bug here when still todo or bug lines are active'
+      if $!todo-count or $!bug-count;
+
+    my Int $test-code = $!test-count++;
+
+    my Int $nbr-bugs = $attrs<n>:exists ?? $attrs<n>.Int !! 1;
+    my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-bugs;
+    $!bug-count = $test-lines;
+say "BC: $!bug-count";
+    self!bug-table(
+      $parent, $attrs, :$content-body,
+      :bug, :$nbr-bugs
+    );
+
+    my Str $code-text = "todo 'B$test-code', $nbr-bugs;\n";
+    $!test-file-content ~= $code-text;
+#`{{
+    append-element( $last-defined-pre, :text("todo '"));
+    my XML::Element $b = append-element( $last-defined-pre, 'b');
+    append-element( $b, :text("B$test-code"));
+    append-element( $last-defined-pre, :text("', $nbr-bugs;\n"));
+}}
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !bug-table ( 
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body,
+    Bool :$bug = False,
+    Int :$nbr-bugs = 1
+  ) {
+
+    my XML::Element $table = append-element(
+      $parent, 'table', {class => 'test-table'}
+    );
+
+    my XML::Element $tr = append-element( $table, 'tr');
+say "append check mark B$!test-count";
+
+    # When handling todo, only show the comments and count of todo
+    if $bug {
+      append-element( $tr, 'td', {class => 'check-mark'});
+    }
+
+    # Test entries come here when todo counter is not zero
+    else {
+      append-element( $tr, '_CHECK_MARK_', {test-code => "B$!test-count"});
+    }
+
+    my XML::Element $td = append-element( $tr, 'td');
+    $td.insert($_) for $content-body.nodes.reverse;
+    $td.set( 'class', 'test-comment');
+
+    if $bug {
+      my XML::Element $b = insert-element( $td, 'b');
+      my Str $t;
+      $t = 'Next test is a bug issue test: ' if $nbr-bugs == 1;
+      $t = "Next $nbr-bugs tests are bug issue tests: " if $nbr-bugs > 1;
+      insert-element( $b, :text($t));
+    }
+
+    else {
+      # Prefix the comment with the test code
+      my XML::Element $b = insert-element( $td, 'b');
+      insert-element( $b, :text("B$!test-count: "));
     }
   }
 }

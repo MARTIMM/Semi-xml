@@ -1,4 +1,5 @@
 $!td.report title='Integer manipulations'
+            class='Int' label='Int-test'
             test-file='doc/Examples/Documenting tests/test1.t' [
 
   $h1 [The Perl 6 integer test report]
@@ -64,8 +65,15 @@ $!td.report title='Integer manipulations'
     for ^11 {
   !]
 
-  $!td.todo n=11 [Should make todos with this test]
-  $!td.test line='  ok $^a > 8' [test a series of numbers against 8]
+  $!td.todo n=11 tl=1 [Should make todos with this test]
+  $!td.test line='ok $^a > 8' [test a series of numbers against 8]
 
   $!td.code append=1 [!=}!]
+
+  $!td.code [!=
+    my Int $i2 = 20304;
+  !]
+  $!td.bug n=2 [Mentioned a few bugs from the issues list on github ]
+  $!td.test line='is $i2, 20304' [ok, for now]
+  $!td.test line='is $i2 - 20305, 1' [not ok]
 ]
