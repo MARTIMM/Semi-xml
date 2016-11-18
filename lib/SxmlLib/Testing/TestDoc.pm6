@@ -9,8 +9,9 @@ class Testing::TestDoc {
 
   # The test counter is used to generate a description messages with each test
   # like 'T##'. This is also stored in the element _CHECK_MARK_ with a
-  # 'test-code' attribute.
+  # 'test-code' attribute. For todo entries this is D##.
   has Int $!test-count = 0;
+  has Int $!todo-count = 0;
 
   # Initialize the test file with a few lines
   has Str $!test-file-content = Q:to/EOINIT/;
@@ -22,9 +23,10 @@ class Testing::TestDoc {
   state Str $indent;
   has XML::Element $last-defined-pre;
 
-  # Storage of test results. Key is the test code which is like T##. The value
-  # is an Array of which the 1st element is the success count and the 2nd the
-  # failure count. These are counts so it can be used to do tests in a loop.
+  # Storage of test results. Key is the test code which is like T##/D##. The
+  # value is an Array of which the 1st element is the success count and the
+  # 2nd the failure count. These are counts so it can be used to do tests in
+  # a loop.
   #
   has Hash $!test-results;
 
@@ -82,7 +84,7 @@ class Testing::TestDoc {
 say "R: $line";
 
       # get the test code if there is one
-      $line ~~ m/ '-' \s* ('T' \d+) /;
+      $line ~~ m/ '-' \s* (<[TD]> \d+) /;
       my Str $test-code = $0.Str if ? $/;
       my Any $ok = $line ~~ m:s/^ 'ok' /
                    ?? True
@@ -90,11 +92,18 @@ say "R: $line";
                         ?? False
                         !! Any
                       );
-      self!set-test-results( $test-code, $ok);
+#      self!set-test-results( $test-code, $ok);
 
-      # check todo
-      if $line ~~ m/'# TODO' \s* ('T' \d+) $/ {
-        $test-code = $0.Str if ? $/;
+      # check todo code
+      if $line ~~ m/'# TODO' \s* ('D' \d+) $/ {
+        my Str $test-code2 = $0.Str if ? $/;
+        self!set-test-results( $test-code2, $ok);
+
+#        $test-code ~~ s/ 'T' /D/;
+        self!set-test-results( $test-code, $ok);
+      }
+
+      else {
         self!set-test-results( $test-code, $ok);
       }
     }
@@ -111,7 +120,14 @@ say "R: $line";
       my XML::Element $td;
       if $ok-c {
         $td = before-element( $node, 'td', {class => 'check-mark green'} );
-        append-element( $td, :text('&#10004;'));
+        if $test-code ~~ m/^ 'D' / {
+          append-element( $td, :text('&#128402;'));
+        }
+
+        else {
+          append-element( $td, :text('&#10004;'));
+        }
+
         append-element( $td, :text("$ok-c ")) if $ok-c > 1;
 
         my $comment-td = $node.nextSibling;
@@ -124,7 +140,14 @@ say "R: $line";
 
         $td = before-element( $node, 'td', {class => 'check-mark red'});
         $td.set( 'class', 'smaller-check-mark red') if $ok-td-exists;
-        append-element( $td, :text('&#10008;'));
+        if $test-code ~~ m/^ 'D' / {
+          append-element( $td, :text('&#128462;'));
+        }
+
+        else {
+          append-element( $td, :text('&#10008;'));
+        }
+
         append-element( $td, :text("$nok-c")) if $nok-c > 1;
 
         my $comment-td = $node.nextSibling;
@@ -177,6 +200,24 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
+  method !setup-head ( XML::Element $head, Hash $attrs ) {
+
+    if $attrs<title> {
+      my XML::Element $title = append-element( $head, 'title');
+      insert-element( $title, :text($attrs<title>));
+    }
+
+    my XML::Element $meta = append-element(
+      $head, 'meta', {charset => 'UTF-8'}
+    );
+
+    append-element(
+      $head, 'link',
+      { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
+    );
+  }
+
+  #-----------------------------------------------------------------------------
 #TODO attribute save=$xml
   method code (
     XML::Element $parent,
@@ -215,13 +256,6 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
-  method todo ( ) {
-
-    # generate todo tests.
-    # use todo counter. is set here. in mehod test it counts down.
-  }
-
-  #-----------------------------------------------------------------------------
 #TODO attribute todo=1 to prefix with a todo test, generate a different checkmarker
   method test (
     XML::Element $parent,
@@ -229,9 +263,16 @@ say "R: $line";
     XML::Element :$content-body
   ) {
 
-    self!test-table( $parent, $attrs, :$content-body);
+    if $!todo-count {
+      self!todo-table( $parent, $attrs, :$content-body);
+    }
+
+    else {
+      self!test-table( $parent, $attrs, :$content-body);
+    }
 
     my Int $test-code = $!test-count++;
+    my Str $test-code-text = ($!todo-count ?? 'D' !! 'T') ~ $test-code;
 
     my Int $nbr-todo;
     my Str $code-text = ($attrs<line> // '');
@@ -244,12 +285,12 @@ say "R: $line";
         $nbr-todo = 1;
       }
 
-      $code-text = "todo 'T$test-code', $nbr-todo;\n";
+      $code-text = "todo '$test-code-text', $nbr-todo;\n";
       $!test-file-content ~= $code-text;
 
       append-element( $last-defined-pre, :text("todo '"));
       my XML::Element $b = append-element( $last-defined-pre, 'b');
-      append-element( $b, :text("T$test-code"));
+      append-element( $b, :text($test-code-text));
       append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
     }
 
@@ -257,36 +298,19 @@ say "R: $line";
 
       $code-text ~= ",";
       my $line = $code-text;
-      $code-text ~= " 'T$test-code';\n";
+      $code-text ~= " '$test-code-text';\n";
       $!test-file-content ~= $code-text;
 
       $line ~= " '";
 
       append-element( $last-defined-pre, :text($line));
       my XML::Element $b = append-element( $last-defined-pre, 'b');
-      append-element( $b, :text("T$test-code"));
+      append-element( $b, :text($test-code-text));
       append-element( $last-defined-pre, :text("';\n"));
     }
 
+    $!todo-count-- if $!todo-count > 0;
     $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  method !setup-head ( XML::Element $head, Hash $attrs ) {
-
-    if $attrs<title> {
-      my XML::Element $title = append-element( $head, 'title');
-      insert-element( $title, :text($attrs<title>));
-    }
-
-    my XML::Element $meta = append-element(
-      $head, 'meta', {charset => 'UTF-8'}
-    );
-
-    append-element(
-      $head, 'link',
-      { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
-    );
   }
 
   #-----------------------------------------------------------------------------
@@ -308,6 +332,82 @@ say "R: $line";
     # Prefix the comment with the test code
     my XML::Element $b = insert-element( $td, 'b');
     insert-element( $b, :text("T$!test-count: "));
+  }
+
+  #-----------------------------------------------------------------------------
+  method todo (
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body
+  ) {
+
+    # generate todo tests.
+    # use todo counter. is set here. in method test it counts down.
+
+
+    my Int $test-code = $!test-count++;
+
+    my Int $nbr-todo = $attrs<n>:exists ?? $attrs<n>.Int !! 1;
+    $!todo-count = $nbr-todo;
+    self!todo-table(
+      $parent, $attrs, :$content-body,
+      :todo, :todo-count($nbr-todo)
+    );
+
+    my Str $code-text = "todo 'D$test-code', $nbr-todo;\n";
+    $!test-file-content ~= $code-text;
+#`{{}}
+    append-element( $last-defined-pre, :text("todo '"));
+    my XML::Element $b = append-element( $last-defined-pre, 'b');
+    append-element( $b, :text("D$test-code"));
+    append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
+
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !todo-table ( 
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body,
+    Bool :$todo = False,
+    Int :$todo-count = 1
+  ) {
+
+    my XML::Element $table = append-element(
+      $parent, 'table', {class => 'test-table'}
+    );
+
+    my XML::Element $tr = append-element( $table, 'tr');
+say "append check mark TODO$!test-count";
+
+    # When handling todo, only show the comments and count of todo
+    if $todo {
+      append-element( $tr, 'td', {class => 'check-mark'});
+    }
+
+    # Test entries come here when todo counter is not zero
+    else {
+      append-element( $tr, '_CHECK_MARK_', {test-code => "D$!test-count"});
+    }
+
+    my XML::Element $td = append-element( $tr, 'td');
+    $td.insert($_) for $content-body.nodes.reverse;
+    $td.set( 'class', 'test-comment');
+
+    if $todo {
+      my XML::Element $b = insert-element( $td, 'b');
+      my Str $t;
+      $t = 'Next test is a todo test: ' if $todo-count == 1;
+      $t = "Next $todo-count tests are todo tests: " if $todo-count > 1;
+      insert-element( $b, :text($t));
+    }
+    
+    else {
+      # Prefix the comment with the test code
+      my XML::Element $b = insert-element( $td, 'b');
+      insert-element( $b, :text("D$!test-count: "));
+    }
   }
 }
 

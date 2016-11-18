@@ -23,9 +23,10 @@ $!td.report title='Integer manipulations'
     But when defined or not, its type value can be compared.
   ]
 
-  $!td.test line="todo" [
+  $!td.todo n=1 [
     Someday we might make this not fail when wormwhole modules are installed
   ]
+
   $!td.test line="ok $i !~~ Int" [The opposite test should fail]
   $!td.test line="ok $i ~~ Cool" [
     Also inherited classes should be compared
@@ -44,7 +45,7 @@ $!td.report title='Integer manipulations'
     Initialize Int with the constant seems to have done well
   ]
 
-  $!td.test line="todo 2" [
+  $!td.todo n=2 [
     Incredible tests which will be true in the not so distant future
   ]
   $!td.test line="is $i, 11" [Integer is 10 not 11]
@@ -55,7 +56,16 @@ $!td.report title='Integer manipulations'
     for ^10 {
   !]
 
-  $!td.test line='  ok $^a < 7' [test a series of numbers against 5]
+  $!td.test line='  ok $^a < 7' [test a series of numbers against 7]
+
+  $!td.code append=1 [!=}!]
+
+  $!td.code [!=
+    for ^11 {
+  !]
+
+  $!td.todo n=11 [Should make todos with this test]
+  $!td.test line='  ok $^a > 8' [test a series of numbers against 8]
 
   $!td.code append=1 [!=}!]
 ]

@@ -41,14 +41,14 @@ table.test-table tr {
 
 td.check-mark {
   width:                68px;
-  font-size:            10pt;
+  font-size:            11pt;
   margin:               0;
   padding:              0;
 }
 
 td.smaller-check-mark {
   width:                33px;
-  font-size:            10pt;
+  font-size:            11pt;
   margin:               0;
   padding:              0;
 }
@@ -65,6 +65,10 @@ td.test-comment {
 
 .red {
   color:                #aa0000;
+}
+
+.orange {
+  color:                #bb8800;
 }
 
 .purple {
