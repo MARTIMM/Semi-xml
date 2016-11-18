@@ -129,9 +129,6 @@ say "R: $line";
         }
 
         append-element( $td, :text("$ok-c ")) if $ok-c > 1;
-
-        my $comment-td = $node.nextSibling;
-        $comment-td.set( 'class', 'test-comment') if ?$comment-td;
       }
 
       if $nok-c {
@@ -149,9 +146,6 @@ say "R: $line";
         }
 
         append-element( $td, :text("$nok-c")) if $nok-c > 1;
-
-        my $comment-td = $node.nextSibling;
-        $comment-td.set( 'class', 'test-comment') if ?$comment-td;
       }
 
       $node.remove;
@@ -328,6 +322,7 @@ say "R: $line";
     append-element( $tr, '_CHECK_MARK_', {test-code => "T$!test-count"});
     my XML::Element $td = append-element( $tr, 'td');
     $td.insert($_) for $content-body.nodes.reverse;
+    $td.set( 'class', 'test-comment');
 
     # Prefix the comment with the test code
     my XML::Element $b = insert-element( $td, 'b');
