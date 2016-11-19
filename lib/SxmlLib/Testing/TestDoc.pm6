@@ -263,29 +263,69 @@ say "R: $line";
   #-----------------------------------------------------------------------------
   method !display-summary ( XML::Element $body ) {
 
+    # See also https://www.smashingmagazine.com/2015/07/designing-simple-pie-charts-with-css/
+    #          https://css-tricks.com/how-to-make-charts-with-svg/
+    #
+    my XML::Element $table = append-element( $body, 'table');
+    my XML::Element $tr = append-element( $table, 'tr');
+    my XML::Element $th = append-element( $tr, 'th');
+    append-element( $th, :text('Normal tests'));
+    $th = append-element( $tr, 'th');
+    append-element( $th, :text('Bug issues'));
+    $th = append-element( $tr, 'th');
+    append-element( $th, :text('Todo tests'));
+    $th = append-element( $tr, 'th');
+    append-element( $th, :text('Skipped tests'));
+
+    $tr = append-element( $table, 'tr');
+
+    self!simple-pie( $tr, $!all-metrics[3], $!all-metrics[4]);
+    self!simple-pie( $tr, $!all-metrics[10], $!all-metrics[11]);
+    self!simple-pie( $tr, $!all-metrics[17], $!all-metrics[18]);
+    self!simple-pie( $tr, $!all-metrics[24], $!all-metrics[25]);
+  }
+
+  #-----------------------------------------------------------------------------
+  method !simple-pie ( XML::Element $parent, $ntests, Rat $metric ) {
+
+    my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
-      $body, 'svg', {
-        width => '100', height => '100',                # transform => 'rotate(-90)',
-        background => '#444', border-radius => '50%'
+      $td, 'svg', {
+        transform => 'rotate(-90) translate(-100)'
       }
     );
-
     $svg.setNamespace("http://www.w3.org/2000/svg");
 
-    my $radius = 30;
-    my $circ = 2 * pi * $radius;
+    # Using percentage as circumverence, the radius should be
+    my Num $radius = 50e0;
+    my Num $circ = 2.0 * pi * $radius;
 
-    # Tests(T) total percentage ok
-    my $total-ok = $!all-metrics[6];
-    $total-ok * $circ /100.0;
+    if $ntests {
 
-    my XML::Element $circle = append-element(
-      $svg, 'circle', {
-        fill => '#444', stroke => 'yellowgreen', stroke-width => '30',
-        r => $radius.Str, cx => '50', cy => '50',
-        stroke-dasharray => "$total-ok $circ"
-      }
-    );
+      # Tests(T) total percentage ok
+      my Num $total-ok = $metric * $circ / 100.0;
+
+  say "RCT: $radius, $circ, $total-ok";
+
+      my XML::Element $circle = append-element(
+        $svg, 'circle', {
+          class => 'test',
+          r => "$radius", cx => "$radius", cy => "$radius",
+          stroke-dasharray => "$total-ok $circ"
+        }
+      );
+    }
+    
+    else {
+    
+      my XML::Element $circle = append-element(
+        $parent, 'empty', {
+          class => 'test',
+          r => "$radius", cx => "$radius", cy => "$radius",
+          stroke-dasharray => "0 $circ"
+        }
+      );
+    }
   }
 
   #-----------------------------------------------------------------------------

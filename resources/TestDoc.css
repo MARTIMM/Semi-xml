@@ -140,3 +140,36 @@ code {
   border-color:         #006000;
 }
 
+/* SVG Elements */
+svg {
+  width:                100px;
+  height:               100px;
+/*
+  transform:            rotate(-90) translate(-100);
+  background:           yellowgreen;
+*/
+  border-radius:        50%;
+}
+
+circle.test {
+  fill:                 #df0000;
+  stroke:               #23cf4f;
+  stroke-width:         100;
+/*
+  stroke-dasharray:     0 158;
+  animation:            fillup 5s linear infinite;
+*/
+}
+
+circle.todo {
+  fill:                 #df9000;
+  stroke:               #23cf4f;
+  stroke-width:         100;
+}
+
+circle.empty {
+  fill:                 white;
+  stroke:               black;
+  stroke-width:         5;
+}
+
