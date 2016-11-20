@@ -211,7 +211,7 @@ say "R: $line";
           |@($!test-metrics<D>), |@($!test-metrics<S>);
 
     $metric-text ~= "Total: $total\n";
-    
+
     # Gather also in an array
     # total, T-ok, T-nok, T-total, T%ok, T%nok, %ok, %nok, B-ok, B-nok, ...
     # Start T on [1..7], B on [8..14], D on [15..21], S on [22..28]
@@ -248,14 +248,8 @@ say "R: $line";
     $metric-text ~= ("D", $!all-metrics[15..21]>>.fmt('%.2f')).join(':') ~ "\n";
 
     $ts = [+] @($!test-metrics<S>);
-    $!all-metrics.push: $!test-metrics<S>[0],
-                        $!test-metrics<S>[1],
-                        $ts,
-                        $!test-metrics<S>[0] * 100.0/$ts,
-                        $!test-metrics<S>[1] * 100.0/$ts,
-                        $!test-metrics<S>[0] * 100.0/$total,
-                        $!test-metrics<S>[1] * 100.0/$total;
-    $metric-text ~= ("S", $!all-metrics[22..28]>>.fmt('%.2f')).join(':') ~ "\n";
+    $!all-metrics.push: $ts, $ts * 100.0/$total;
+    $metric-text ~= ("S", $!all-metrics[22..23]>>.fmt('%.2f')).join(':') ~ "\n";
 
     spurt( $metric-file, $metric-text);
   }
@@ -282,7 +276,7 @@ say "R: $line";
     self!simple-pie( $tr, $!all-metrics[3], $!all-metrics[4]);
     self!simple-pie( $tr, $!all-metrics[10], $!all-metrics[11]);
     self!simple-pie( $tr, $!all-metrics[17], $!all-metrics[18]);
-    self!simple-pie( $tr, $!all-metrics[24], $!all-metrics[25]);
+    self!simple-pie( $tr, $!all-metrics[22], $!all-metrics[23]);
   }
 
   #-----------------------------------------------------------------------------
@@ -315,14 +309,14 @@ say "R: $line";
         }
       );
     }
-    
+
     else {
-    
+
       my XML::Element $circle = append-element(
-        $parent, 'empty', {
-          class => 'test',
+        $svg, 'circle', {
+          class => 'empty',
           r => "$radius", cx => "$radius", cy => "$radius",
-          stroke-dasharray => "0 $circ"
+#          stroke-dasharray => "0 $circ"
         }
       );
     }
@@ -335,7 +329,7 @@ say "R: $line";
 
     my Str $test-type = $test-code;
     $test-type ~~ s/\d+ $//;
-    
+
     if $ok {
       $!test-metrics{$test-type}[0]++ if $metric;
 

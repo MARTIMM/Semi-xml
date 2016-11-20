@@ -142,8 +142,8 @@ code {
 
 /* SVG Elements */
 svg {
-  width:                100px;
-  height:               100px;
+  width:                100;
+  height:               100;
 /*
   transform:            rotate(-90) translate(-100);
   background:           yellowgreen;
@@ -151,6 +151,7 @@ svg {
   border-radius:        50%;
 }
 
+/* For tests and bug issues */
 circle.test {
   fill:                 #df0000;
   stroke:               #23cf4f;
@@ -161,15 +162,24 @@ circle.test {
 */
 }
 
+/* For todo tests */
 circle.todo {
   fill:                 #df9000;
   stroke:               #23cf4f;
   stroke-width:         100;
 }
 
+/* Skipped tests */
+circle.skip {
+  fill:                 white;
+  stroke:               black;
+  stroke-width:         25;
+}
+
+/* When there are no tests in a specific catagory */
 circle.empty {
   fill:                 white;
   stroke:               black;
-  stroke-width:         5;
+  stroke-width:         25;
 }
 
