@@ -1,0 +1,15 @@
+$html [
+  $head [
+    $link rel=stylesheet href=file:///home/marcel/Languages/Perl6/Projects/Semi-xml/doc/Examples/Svg/svg.css []
+  ]
+
+  $body [
+    $svg viewport='0 0 100 100' [
+      $path class=p1 d='M 50 50 L 10 10 L 90 10 Z' []
+    ]
+
+    $svg viewport='0 0 100 100' [
+      $path class=p2 d='M 50 50 L 50 10 A 40 40 0 0 1 90 50 Z' []
+    ]
+  ]
+]
