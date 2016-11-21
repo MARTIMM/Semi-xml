@@ -17,10 +17,11 @@
 * External modules
   * [x] A methods tag content between [ ... ] is a named argument to the sub called content-body.
   * [x] Library paths to find modules are provided
-  * [x] Can be introduced via source prelude
+  * [x] Are introduced via toml config file
   * [x] ```$.tagname <attrs> [<body>]``` for tag name substitution and attribute additions.
   * [x] ```$!tagname <attrs> [<body>]``` for insertion of tags and body using attributes as arguments to subs/methods.
   * [ ] A module should be accessable from within another perl6 sxml module. Problem of registration.
+  * [ ] Get information from SemiXML e.g. current processed filename.
 
 * Now modules can be used from sxml, the following libs might come in handy
   * SxmlLib::File - File and link handling.
@@ -49,12 +50,10 @@
 
 * Items needed in program sxml2xml
   * [x] Generate a http header!
-  * [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the
-        sxml2xml program will not bother (yet).
+  * [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the sxml2xml program will not bother (yet).
   * [x] Dependencies on other files
   * [ ] Partial parsing of prelude or document.
-  * [ ] Store internal representation back into sxml. This cannot be dynamic for
-        the moment.
+  * [ ] Store internal representation back into sxml. This cannot be dynamic for the moment.
 
 * [x] Simplify syntax by removing the prelude and move the options into a config file using TOML. Using module Config::DataLang::Refine searching for options files is as follows;
   * First read program resource version of SemiXML.toml
