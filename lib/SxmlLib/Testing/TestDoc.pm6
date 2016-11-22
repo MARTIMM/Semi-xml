@@ -273,30 +273,27 @@ say "R: $line";
 
     $tr = append-element( $table, 'tr');
 
-    self!simple-pie( $tr, $!all-metrics[3], $!all-metrics[4]);
-    self!simple-pie( $tr, $!all-metrics[10], $!all-metrics[11]);
-    self!simple-pie( $tr, $!all-metrics[17], $!all-metrics[18]);
-#    self!simple-pie( $tr, $!all-metrics[22], $!all-metrics[23]);
+    self!simple-pie( $tr, $!all-metrics[3], $!all-metrics[4], 'test');
+    self!simple-pie( $tr, $!all-metrics[10], $!all-metrics[11], 'bug');
+    self!simple-pie( $tr, $!all-metrics[17], $!all-metrics[18], 'todo');
+    self!simple-pie( $tr, $!all-metrics[22], $!all-metrics[23], 'skip');
   }
 
   #-----------------------------------------------------------------------------
-  method !simple-pie ( XML::Element $parent, $ntests, Rat $metric ) {
-
+  method !simple-pie (
+    XML::Element $parent, $ntests, Rat $metric, Str $class
+  ) {
 
     my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
-      $td, 'svg', {
-        width => '100', height => '100',
-        viewport => '-50 -50 50 50',
-#        transform => 'rotate(-90) translate(-100)'
-      }
+      $td, 'svg', { width => '100', height => '100'}
     );
     $svg.setNamespace("http://www.w3.org/2000/svg");
 
     # Using percentage as circumverence, the radius should be
-    my Num $radius = 48e0;
+    my Int $center = 50;
+    my Int $radius = 47;
     my Num $circ = 2.0 * pi * $radius;
-#say "RC: $radius, $circ";
 
     if $ntests {
       # Transform total percentage ok into angle.
@@ -304,14 +301,66 @@ say "R: $line";
       my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
 say "MT: $metric, $total-ok";
 
-      my $new-x = $radius + $radius * sin $total-ok;
-      my $new-y = $radius - $radius * cos $total-ok;
+      my $new-x = $center + $radius * sin $total-ok;
+      my $new-y = $center - $radius * cos $total-ok;
+say "XY: $new-x, $new-y";
+
+      my XML::Element $path = append-element(
+        $svg, 'path', {
+          class => $class,
+          d => [~] "M $center $center l 0 -$radius",
+                   "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+                   "z"
+#          d => [~] "M $radius $radius", "L $radius 0",
+#                   "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+#                   "z"
+        }
+      );
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !summary-pie (
+    XML::Element $parent, $ntests, Rat $metric, Str $class
+  ) {
+
+    my XML::Element $td = append-element( $parent, 'td');
+    my XML::Element $svg = append-element(
+      $td, 'svg', {
+        width => '100', height => '100',
+#        viewport => '-50 -50 100 100',
+#        transform => 'rotate(-90) translate(-100)'
+      }
+    );
+    $svg.setNamespace("http://www.w3.org/2000/svg");
+
+    # Using percentage as circumverence, the radius should be
+    my Int $center = 50;
+    my Int $radius = 47;
+    my Num $circ = 2.0 * pi * $radius;
+#say "RC: $radius, $circ";
+
+#`{{
+    my XML::Element $g = append-element(
+      $svg, 'g',
+#       { transform => "rotate(10)",}
+#       { transform => "translate($center,$center)",}
+    );
+}}
+    if $ntests {
+      # Transform total percentage ok into angle.
+      my Num $total-ok = $metric * 2.0 * pi / 100.0;
+      my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
+say "MT: $metric, $total-ok";
+
+      my $new-x = $center + $radius * sin $total-ok;
+      my $new-y = $center - $radius * cos $total-ok;
 say "XY: $new-x, $new-y";
 
       my XML::Element $path = append-element(
         $svg, 'path', {
           class => 'ok-path',
-          d => [~] "M 0 0 L $radius 0",
+          d => [~] "M $center $center l 0 -$radius",
                    "A $radius $radius 0 $large-angle 1 $new-x $new-y",
                    "z"
 #          d => [~] "M $radius $radius", "L $radius 0",

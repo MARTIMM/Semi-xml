@@ -151,46 +151,26 @@ svg {
 */
 }
 
-/* For tests and bug issues */
-circle.test {
-  fill:                 #df0000;
-  stroke:               #23cf4f;
-  stroke-width:         100;
-/*
-  stroke-dasharray:     0 158;
-  animation:            fillup 5s linear infinite;
-*/
+path.test {
+  fill:                 #0a0;
+  stroke:               black;
+  stroke-width:         2;
 }
 
-/* For todo tests */
-circle.todo {
-  fill:                 #df9000;
-  stroke:               #23cf4f;
-  stroke-width:         100;
+path.bug {
+  fill:                 #0a0;
+  stroke:               black;
+  stroke-width:         2;
 }
 
-/* Skipped tests */
-circle.skip {
+path.todo {
+  fill:                 #0a0;
+  stroke:               black;
+  stroke-width:         2;
+}
+
+path.skip {
   fill:                 white;
   stroke:               black;
-  stroke-width:         3;
-}
-
-/* When there are no tests in a specific catagory */
-circle.empty {
-  fill:                 white;
-  stroke:               black;
-  stroke-width:         3;
-}
-
-path.init {
-  fill:                 white;
-  stroke:               white;
-  stroke-width:         0;
-}
-
-path.ok-path {
-  fill:                 #00a0b0;
-  stroke:               #000085;
   stroke-width:         2;
 }
