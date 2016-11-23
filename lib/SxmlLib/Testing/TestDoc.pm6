@@ -334,8 +334,8 @@ say "R: $line";
       my Num $total-ok = $ok * 2.0 * pi / $ntests;
       my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
 
-      my $new-x = $center + $radius * sin $total-ok;
-      my $new-y = $center - $radius * cos $total-ok;
+      my Num $new-x = $center + $radius * sin $total-ok;
+      my Num $new-y = $center - $radius * cos $total-ok;
 
       append-element(
         $svg, 'path', {
@@ -354,7 +354,7 @@ say "R: $line";
       $new-y = $center - $radius * cos $total-nok;
 
       # Calculate rotation
-      my $rot = $total-ok * 360.0 / (2 * pi);
+      my Num $rot = $total-ok * 360.0 / (2 * pi);
       my XML::Element $g = append-element(
         $svg, 'g', { transform => "rotate( $rot, $center, $center)" }
       );
@@ -413,7 +413,7 @@ say "R: $line";
 
       # total tests ok + not ok
       $t = append-element(
-        $g, 'text', { class => 'legend', x => '20', y => '45'}
+        $g, 'text', { class => 'legend', x => '20', y => '40'}
       );
       append-element( $t, :text("$ntests"));
     }
@@ -429,7 +429,7 @@ say "R: $line";
     my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
       $td, 'svg', {
-        width => '100', height => '100',
+        width => '150', height => '100',
 #        viewport => '-50 -50 100 100',
 #        transform => 'rotate(-90) translate(-100)'
       }
@@ -449,17 +449,206 @@ say "R: $line";
     my $new-x = $center + $radius * sin $total-ok;
     my $new-y = $center - $radius * cos $total-ok;
 
-    my XML::Element $path = append-element(
+    append-element(
       $svg, 'path', {
-        class => 'ok-path',
+        class => 'test-ok',
         d => [~] "M $center $center l 0 -$radius",
                  "A $radius $radius 0 $large-angle 1 $new-x $new-y",
                  "z"
-#          d => [~] "M $radius $radius", "L $radius 0",
-#                   "A $radius $radius 0 $large-angle 1 $new-x $new-y",
-#                   "z"
       }
     );
+
+
+    # not ok tests
+    # Calculate rotation
+    my Num $curr-angle = $total-ok;
+    my Num $rot = $curr-angle * 360.0 / (2 * pi);
+    my XML::Element $g = append-element(
+      $svg, 'g', { transform => "rotate( $rot, $center, $center)" }
+    );
+
+    my Num $a-nok = $test-nok * 2.0 * pi / $total;
+    $large-angle = $a-nok >= pi ?? 1 !! 0;
+
+    $new-x = $center + $radius * sin $a-nok;
+    $new-y = $center - $radius * cos $a-nok;
+
+    append-element(
+      $g, 'path', {
+        class => 'test-nok',
+        d => [~] "M $center $center l 0 -$radius",
+                 "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+                 "z"
+      }
+    );
+
+
+    # not ok bug
+    # Calculate rotation
+    $curr-angle += $a-nok;
+    $rot = $curr-angle * 360.0 / (2 * pi);
+    $g = append-element(
+      $svg, 'g', { transform => "rotate( $rot, $center, $center)" }
+    );
+
+    $a-nok = $bug-nok * 2.0 * pi / $total;
+    $large-angle = $a-nok >= pi ?? 1 !! 0;
+
+    $new-x = $center + $radius * sin $a-nok;
+    $new-y = $center - $radius * cos $a-nok;
+
+    append-element(
+      $g, 'path', {
+        class => 'bug-nok',
+        d => [~] "M $center $center l 0 -$radius",
+                 "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+                 "z"
+      }
+    );
+
+
+    # not ok todo
+    # Calculate rotation
+    $curr-angle += $a-nok;
+    $rot = $curr-angle * 360.0 / (2 * pi);
+    $g = append-element(
+      $svg, 'g', { transform => "rotate( $rot, $center, $center)" }
+    );
+
+    $a-nok = $todo-nok * 2.0 * pi / $total;
+    $large-angle = $a-nok >= pi ?? 1 !! 0;
+
+    $new-x = $center + $radius * sin $a-nok;
+    $new-y = $center - $radius * cos $a-nok;
+
+    append-element(
+      $g, 'path', {
+        class => 'todo-nok',
+        d => [~] "M $center $center l 0 -$radius",
+                 "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+                 "z"
+      }
+    );
+
+
+    # skipped
+    # Calculate rotation
+    $curr-angle += $a-nok;
+    $rot = $curr-angle * 360.0 / (2 * pi);
+    $g = append-element(
+      $svg, 'g', { transform => "rotate( $rot, $center, $center)" }
+    );
+
+    my Num $a-skip = $skip * 2.0 * pi / $total;
+    $large-angle = $a-skip >= pi ?? 1 !! 0;
+
+    $new-x = $center + $radius * sin $a-skip;
+    $new-y = $center - $radius * cos $a-skip;
+
+    append-element(
+      $g, 'path', {
+        class => 'skip',
+        d => [~] "M $center $center l 0 -$radius",
+                 "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+                 "z"
+      }
+    );
+
+
+
+    # Legend
+    my $rect-x = 2 * $center;
+    my $rect-y = 5;
+    $g = append-element(
+      $svg, 'g', { transform => "translate($rect-x,$rect-y)" }
+    );
+
+    # ok rectangle
+    append-element(
+      $g, 'rect', {
+        class => 'test-ok',
+        x => '0', y => '0',
+        width => '15', height => '10'
+      }
+    );
+
+    # not ok test rectangle
+    append-element(
+      $g, 'rect', {
+        class => 'test-nok',
+        x => '0', y => '15',
+        width => '15', height => '10'
+      }
+    );
+
+    # not ok bug rectangle
+    append-element(
+      $g, 'rect', {
+        class => 'bug-nok',
+        x => '0', y => '30',
+        width => '15', height => '10'
+      }
+    );
+
+    # not ok todo rectangle
+    append-element(
+      $g, 'rect', {
+        class => 'todo-nok',
+        x => '0', y => '45',
+        width => '15', height => '10'
+      }
+    );
+
+    # skip rectangle
+    append-element(
+      $g, 'rect', {
+        class => 'skip',
+        x => '0', y => '60',
+        width => '15', height => '10'
+      }
+    );
+
+
+    # total ok count
+    my XML::Element $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '10'}
+    );
+    append-element( $t, :text("$all-ok"));
+
+    # test not ok count
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '25'}
+    );
+    append-element( $t, :text("$test-nok"));
+
+    # bug not ok count
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '40'}
+    );
+    append-element( $t, :text("$bug-nok"));
+
+    # todo not ok count
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '55'}
+    );
+    append-element( $t, :text("$todo-nok"));
+
+    # skip count
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '70'}
+    );
+    append-element( $t, :text("$skip"));
+
+    # draw a line
+    append-element(
+      $g, 'path', { class => 'line', d => 'M 0 73 H 40' }
+    );
+
+    # total tests ok + not ok
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '85'}
+    );
+    append-element( $t, :text("$total"));
   }
 
   #-----------------------------------------------------------------------------

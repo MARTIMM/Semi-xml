@@ -22,7 +22,7 @@ like $i.Str, /'not 10, but text'/, 'D8';
 
     for ^11 {
 todo 'D10', 11;
-ok $^a > 8, 'D11';
+  ok $^a > 8, 'D11';
 }
 
     my Int $i2 = 20304;
