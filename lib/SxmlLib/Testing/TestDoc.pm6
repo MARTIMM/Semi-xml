@@ -331,9 +331,9 @@ say "R: $line";
       # my Num $total-ok = $metric * 2.0 * pi / 100.0;
 
       # Same calculations but a bit faster
-      my Num $total-ok = $ok * 2.0 * pi / $ntests;
+      my Num $total-ok = ($ok - 5e-100) * 2.0 * pi / $ntests;
       my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
-
+say "TA: $total-ok, $large-angle";
       my Num $new-x = $center + $radius * sin $total-ok;
       my Num $new-y = $center - $radius * cos $total-ok;
 

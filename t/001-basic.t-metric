@@ -1,0 +1,16 @@
+Package:-
+Module:-
+Class:-
+Distribution:-
+Label:-
+OS-Kernel:linux:4.7.10.100.fc.23.x.86._.64
+OS-Distro:fedora:23.Workstation.Edition:23:False
+Perl:Perl 6:6.c
+Compiler:rakudo:2016.10.249.gb.84158.c
+VM:moar:2016.10.37.gf.769569
+Title:Basic SemiXML tests
+Total: 10
+T:10.00 0.00 10.00 100.00 0.00 100.00 0.00
+B:0.00 0.00 0.00 NaN NaN 0.00 0.00
+D:0.00 0.00 0.00 NaN NaN 0.00 0.00
+S:0.00 0.00
