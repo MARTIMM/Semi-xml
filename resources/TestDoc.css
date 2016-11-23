@@ -151,26 +151,55 @@ svg {
 */
 }
 
-path.test {
+/* Used for path and rectangles */
+.test-ok {
   fill:                 #0a0;
   stroke:               black;
-  stroke-width:         2;
+  stroke-width:         1;
 }
 
-path.bug {
+.test-nok {
+  fill:                 #a00;
+  stroke:               black;
+  stroke-width:         1;
+}
+
+.bug-ok {
   fill:                 #0a0;
   stroke:               black;
-  stroke-width:         2;
+  stroke-width:         1;
 }
 
-path.todo {
+.bug-nok {
+  fill:                 #f00;
+  stroke:               black;
+  stroke-width:         1;
+}
+
+.todo-ok {
   fill:                 #0a0;
   stroke:               black;
-  stroke-width:         2;
+  stroke-width:         1;
 }
 
-path.skip {
+.todo-nok {
+  fill:                 #e60;
+  stroke:               black;
+  stroke-width:         1;
+}
+
+
+.skip {
   fill:                 white;
   stroke:               black;
+  stroke-width:         1;
+}
+
+path.line {
+  stroke:               black;
   stroke-width:         2;
+}
+
+text.legend {
+  font-size:            11;
 }

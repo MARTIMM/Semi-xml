@@ -198,18 +198,28 @@ say "R: $line";
     $metric-file ~~ s/ '.t' $/.t-metric/;
     my Str $metric-text = '';
 
-    $metric-text ~= "Title:{$attrs<title> // '-'}\n";
+    $metric-text ~= "Package:{$attrs<pack> // '-'}\n";
+    $metric-text ~= "Module:{$attrs<mod> // '-'}\n";
     $metric-text ~= "Class:{$attrs<class> // '-'}\n";
+    $metric-text ~= "Distribution:{$attrs<dist> // '-'}\n";
     $metric-text ~= "Label:{$attrs<label> // '-'}\n";
 
-    $metric-text ~= "Kernel:$*KERNEL.name():$*KERNEL.version()\n";
-    $metric-text ~= "Distro:$*DISTRO.name():$*DISTRO.version():$*DISTRO.release():$*DISTRO.is-win()\n";
+    $metric-text ~= "OS-Kernel:$*KERNEL.name():$*KERNEL.version()\n";
+    $metric-text ~= "OS-Distro:$*DISTRO.name():$*DISTRO.version():$*DISTRO.release():$*DISTRO.is-win()\n";
+    $metric-text ~= "Perl:$*PERL.name():$*PERL.version()\n";
+    my $c = $*PERL.compiler();
+    $metric-text ~= "Compiler:$c.name():$c.version()\n";
     $metric-text ~= "VM:$*VM.name():$*VM.version()\n";
+
+#    $metric-text ~= "Package:{$?PACKAGE//'-'}\n";
+#    $metric-text ~= "Module:{$?MODULE//'-'}\n";
+#    $metric-text ~= "Class:{$?CLASS//'-'}\n";
 
     my Int $total =
       [+] |@($!test-metrics<T>), |@($!test-metrics<B>),
           |@($!test-metrics<D>), |@($!test-metrics<S>);
 
+    $metric-text ~= "Title:{$attrs<title> // '-'}\n";
     $metric-text ~= "Total: $total\n";
 
     # Gather also in an array
@@ -247,7 +257,7 @@ say "R: $line";
                         $!test-metrics<D>[1] * 100.0/$total;
     $metric-text ~= ("D", $!all-metrics[15..21]>>.fmt('%.2f')).join(':') ~ "\n";
 
-    $ts = [+] @($!test-metrics<S>);
+    $ts = $!test-metrics<S>[0];
     $!all-metrics.push: $ts, $ts * 100.0/$total;
     $metric-text ~= ("S", $!all-metrics[22..23]>>.fmt('%.2f')).join(':') ~ "\n";
 
@@ -269,24 +279,44 @@ say "R: $line";
     $th = append-element( $tr, 'th');
     append-element( $th, :text('Todo tests'));
     $th = append-element( $tr, 'th');
-    append-element( $th, :text('Skipped tests'));
+    append-element( $th, :text('Summary'));
 
     $tr = append-element( $table, 'tr');
 
-    self!simple-pie( $tr, $!all-metrics[3], $!all-metrics[4], 'test');
-    self!simple-pie( $tr, $!all-metrics[10], $!all-metrics[11], 'bug');
-    self!simple-pie( $tr, $!all-metrics[17], $!all-metrics[18], 'todo');
-    self!simple-pie( $tr, $!all-metrics[22], $!all-metrics[23], 'skip');
+    self!simple-pie(
+      $tr, $!all-metrics[1], $!all-metrics[2], $!all-metrics[3], 'test'
+    );
+
+    self!simple-pie(
+      $tr, $!all-metrics[8], $!all-metrics[9], $!all-metrics[10], 'bug'
+    );
+
+    self!simple-pie(
+      $tr, $!all-metrics[15], $!all-metrics[16], $!all-metrics[17], 'todo'
+    );
+
+
+
+    self!summary-pie(
+      $tr, $!all-metrics[0],
+      ([+] $!all-metrics[1], $!all-metrics[8], $!all-metrics[15]),
+      $!all-metrics[2], $!all-metrics[9], $!all-metrics[16],
+      $!all-metrics[22]
+    );
   }
 
   #-----------------------------------------------------------------------------
   method !simple-pie (
-    XML::Element $parent, $ntests, Rat $metric, Str $class
+    XML::Element $parent, Int $ok, Int $nok, Int $ntests, Str $class
   ) {
 
+    # Setup a table data field with svg element in it
     my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
-      $td, 'svg', { width => '100', height => '100'}
+      $td, 'svg', {
+        width => '150', height => '100',
+#        viewport => '-50 -50 100 100'
+      }
     );
     $svg.setNamespace("http://www.w3.org/2000/svg");
 
@@ -297,33 +327,105 @@ say "R: $line";
 
     if $ntests {
       # Transform total percentage ok into angle.
-      my Num $total-ok = $metric * 2.0 * pi / 100.0;
+      # my Num $metric = $ok * 100.0 / $ntests;
+      # my Num $total-ok = $metric * 2.0 * pi / 100.0;
+
+      # Same calculations but a bit faster
+      my Num $total-ok = $ok * 2.0 * pi / $ntests;
       my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
-say "MT: $metric, $total-ok";
 
       my $new-x = $center + $radius * sin $total-ok;
       my $new-y = $center - $radius * cos $total-ok;
-say "XY: $new-x, $new-y";
 
-      my XML::Element $path = append-element(
+      append-element(
         $svg, 'path', {
-          class => $class,
+          class => $class ~ '-ok',
           d => [~] "M $center $center l 0 -$radius",
                    "A $radius $radius 0 $large-angle 1 $new-x $new-y",
                    "z"
-#          d => [~] "M $radius $radius", "L $radius 0",
-#                   "A $radius $radius 0 $large-angle 1 $new-x $new-y",
-#                   "z"
         }
       );
+
+      # Now the not ok part
+      my Num $total-nok = $nok * 2.0 * pi / $ntests;
+      $large-angle = $total-nok >= pi ?? 1 !! 0;
+
+      $new-x = $center + $radius * sin $total-nok;
+      $new-y = $center - $radius * cos $total-nok;
+
+      # Calculate rotation
+      my $rot = $total-ok * 360.0 / (2 * pi);
+      my XML::Element $g = append-element(
+        $svg, 'g', { transform => "rotate( $rot, $center, $center)" }
+      );
+
+      append-element(
+        $g, 'path', {
+          class => $class ~ '-nok',
+          d => [~] "M $center $center l 0 -$radius",
+                   "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+                   "z"
+        }
+      );
+
+      # Legend
+      my $rect-x = 2 * $center;
+      my $rect-y = 5;
+      $g = append-element(
+        $svg, 'g', { transform => "translate($rect-x,$rect-y)" }
+      );
+
+      # ok rectangle
+      append-element(
+        $g, 'rect', {
+          class => $class ~ '-ok',
+          x => '0', y => '0',
+          width => '15', height => '10'
+        }
+      );
+
+      # not ok rectangle
+      append-element(
+        $g, 'rect', {
+          class => $class ~ '-nok',
+          x => '0', y => '15',
+          width => '15', height => '10'
+        }
+      );
+
+
+      # ok count
+      my XML::Element $t = append-element(
+        $g, 'text', { class => 'legend', x => '20', y => '10'}
+      );
+      append-element( $t, :text("$ok"));
+
+      # not ok count
+      $t = append-element(
+        $g, 'text', { class => 'legend', x => '20', y => '25'}
+      );
+      append-element( $t, :text("$nok"));
+
+      # draw a line
+      append-element(
+        $g, 'path', { class => 'line', d => 'M 0 28 H 40' }
+      );
+
+      # total tests ok + not ok
+      $t = append-element(
+        $g, 'text', { class => 'legend', x => '20', y => '45'}
+      );
+      append-element( $t, :text("$ntests"));
     }
   }
 
   #-----------------------------------------------------------------------------
   method !summary-pie (
-    XML::Element $parent, $ntests, Rat $metric, Str $class
+    XML::Element $parent, Int $total, Int $all-ok,
+    Int $test-nok, Int $bug-nok, Int $todo-nok, Int $skip
   ) {
 
+    # Setup a table data field with svg element in it
     my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
       $td, 'svg', {
@@ -338,66 +440,26 @@ say "XY: $new-x, $new-y";
     my Int $center = 50;
     my Int $radius = 47;
     my Num $circ = 2.0 * pi * $radius;
-#say "RC: $radius, $circ";
 
-#`{{
-    my XML::Element $g = append-element(
-      $svg, 'g',
-#       { transform => "rotate(10)",}
-#       { transform => "translate($center,$center)",}
-    );
-}}
-    if $ntests {
-      # Transform total percentage ok into angle.
-      my Num $total-ok = $metric * 2.0 * pi / 100.0;
-      my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
-say "MT: $metric, $total-ok";
+    # total ok
+    # Transform total percentage ok into angle.
+    my Num $total-ok = $all-ok * 2.0 * pi / $total;
+    my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
 
-      my $new-x = $center + $radius * sin $total-ok;
-      my $new-y = $center - $radius * cos $total-ok;
-say "XY: $new-x, $new-y";
+    my $new-x = $center + $radius * sin $total-ok;
+    my $new-y = $center - $radius * cos $total-ok;
 
-      my XML::Element $path = append-element(
-        $svg, 'path', {
-          class => 'ok-path',
-          d => [~] "M $center $center l 0 -$radius",
-                   "A $radius $radius 0 $large-angle 1 $new-x $new-y",
-                   "z"
+    my XML::Element $path = append-element(
+      $svg, 'path', {
+        class => 'ok-path',
+        d => [~] "M $center $center l 0 -$radius",
+                 "A $radius $radius 0 $large-angle 1 $new-x $new-y",
+                 "z"
 #          d => [~] "M $radius $radius", "L $radius 0",
 #                   "A $radius $radius 0 $large-angle 1 $new-x $new-y",
 #                   "z"
-        }
-      );
-    }
-
-#`{{
-    if $ntests {
-
-      # Tests(T) total percentage ok
-      my Num $total-ok = $metric * $circ / 100.0;
-
-  say "RCT: $radius, $circ, $total-ok";
-
-      my XML::Element $circle = append-element(
-        $svg, 'circle', {
-          class => 'test',
-          r => "$radius", cx => "$radius", cy => "$radius",
-          stroke-dasharray => "$total-ok $circ"
-        }
-      );
-    }
-
-    else {
-
-      my XML::Element $circle = append-element(
-        $svg, 'circle', {
-          class => 'empty',
-          r => "$radius", cx => "$radius", cy => "$radius",
-#          stroke-dasharray => "0 $circ"
-        }
-      );
-    }
-}}
+      }
+    );
   }
 
   #-----------------------------------------------------------------------------
