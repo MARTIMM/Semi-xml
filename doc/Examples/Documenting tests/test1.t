@@ -12,23 +12,29 @@ ok $i ~~ Cool, 'T4';
 
     $i = ABC;
 is $i, 10, 'T5';
-todo 'D6', 2;
-is $i, 11, 'D7';
-like $i.Str, /'not 10, but text'/, 'D8';
+
+    if ?"We are not stupid" {
+skip 'S6', 2;
+  ok 10 < 7, 'S7';
+  ok 11 < 7, 'S8';
+}
+todo 'D9', 2;
+is $i, 11, 'D10';
+like $i.Str, /'not 10, but text'/, 'D11';
 
     for ^10 {
-  ok $^a < 7, 'T9';
+  ok $^a < 7, 'T12';
 }
 
     for ^11 {
-todo 'D10', 11;
-  ok $^a > 8, 'D11';
+todo 'D13', 11;
+  ok $^a > 8, 'D14';
 }
 
     my Int $i2 = 20304;
-todo 'B12', 2;
-is $i2, 20304, 'B13';
-is $i2 - 20305, 1, 'B14';
+todo 'B15', 2;
+is $i2, 20304, 'B16';
+is $i2 - 20305, 1, 'B17';
 
 
 done-testing;

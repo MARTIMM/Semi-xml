@@ -16,7 +16,7 @@ pre.hide {
   display:              none;
 }
 
-pre {
+pre.example {
   border-width:         2px;
   border-style:         solid;
   border-color:         #a06000;

@@ -46,12 +46,25 @@ $!td.report title='Integer manipulations'
     Initialize Int with the constant seems to have done well
   ]
 
+
+  $!td.code [!=
+    if ?"We are not stupid" {
+  !]
+  $!td.skip n=2 [
+    Next 2 lines we need to skip because these are stupid tests
+  ]
+  $!td.test line='  ok 10 < 7' [10 not smaller than 7]
+  $!td.test line='  ok 11 < 7' [neither is 11]
+  $!td.code append=1 [!=}!]
+
+
+
   $!td.todo n=2 [
     Incredible tests which will be true in the not so distant future
   ]
   $!td.test line="is $i, 11" [Integer is 10 not 11]
-
   $!td.test line="like $i.Str, /'not 10, but text'/" [test some text]
+
 
   $!td.code [!=
     for ^10 {

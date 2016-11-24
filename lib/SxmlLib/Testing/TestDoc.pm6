@@ -15,6 +15,7 @@ class Testing::TestDoc {
   has Int $!test-count = 0;
   has Int $!todo-count = 0;
   has Int $!bug-count = 0;
+  has Int $!skip-count = 0;
 
   # Initialize the test file with a few lines
   has Str $!test-file-content = Q:to/EOINIT/;
@@ -75,7 +76,7 @@ class Testing::TestDoc {
 
     spurt( $test-file, $!test-file-content);
 
-    # Run the test using prove and get the result contents through a pipe
+    # Run the tests using prove and get the result contents through a pipe
     my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
                  '--rules=seq=*', $test-file, :out;
 
@@ -93,7 +94,7 @@ class Testing::TestDoc {
 say "R: $line";
 
       # get the test code if there is one
-      $line ~~ m/ '-' \s* (<[TDB]> \d+) /;
+      $line ~~ m/ '-' \s* (<[TDBS]> \d+) /;
       my Str $test-code = $0.Str if ? $/;
       my Any $ok = $line ~~ m:s/^ 'ok' /
                    ?? True
@@ -110,7 +111,16 @@ say "R: $line";
         self!set-test-results( $test-code, $ok);
       }
 
+      # check bug issue code
       elsif $line ~~ m/'# TODO' \s* ('B' \d+) $/ {
+        my Str $test-code2 = $0.Str if ? $/;
+        self!set-test-results( $test-code2, $ok, :!metric);
+
+        self!set-test-results( $test-code, $ok);
+      }
+
+      # check skip code
+      elsif $line ~~ m/'# SKIP' \s* ('S' \d+) $/ {
         my Str $test-code2 = $0.Str if ? $/;
         self!set-test-results( $test-code2, $ok, :!metric);
 
@@ -122,9 +132,7 @@ say "R: $line";
       }
     }
 
-    # run tests and store in result file
-    # read result file and map to a Hash
-    #
+    # search for special elements left and modify these
     my $containers = $parent.getElementsByTagName('_CHECK_MARK_');
     for @$containers.reverse -> $node {
       my Str $test-code = $node.attribs<test-code>.Str;
@@ -140,6 +148,10 @@ say "R: $line";
 
         elsif $test-code ~~ m/^ 'B' / {
           append-element( $td, :text('&#128459;'));
+        }
+
+        elsif $test-code ~~ m/^ 'S' / {
+          append-element( $td, :text('&#x1F648;'));
         }
 
         else {
@@ -161,6 +173,10 @@ say "R: $line";
 
         elsif $test-code ~~ m/^ 'B' / {
           append-element( $td, :text('&#128027;'));
+        }
+
+        elsif $test-code ~~ m/^ 'S' / {
+          append-element( $td, :text('&#x1F648;'));
         }
 
         else {
@@ -733,6 +749,39 @@ say "R: $line";
   }
 
   #-----------------------------------------------------------------------------
+  # Save code in pre block with initial indent removed
+  method pre (
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body
+  ) {
+
+    my XML::Element $pre = append-element(
+      $parent, 'pre',
+      {:class<example>}
+    );
+
+    my Str $i;
+    $i = ($content-body.nodes[0] // '').Str;
+    $i ~~ s/^ \n? (\s+) .* $/$0/;
+
+    my XML::Element $hook = append-element( $pre, 'hook');
+    for $content-body.nodes.reverse {
+      my $l = ~$^a;
+      $l ~~ s:g/^^ $i //;
+      after-element( $hook, :text("$l\n"));
+    }
+
+    $hook.remove;
+
+    if $attrs<viz>:exists and $attrs<viz> eq 'hide' {
+      $last-defined-pre.set( 'class', 'hide');
+    }
+
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
 #TODO attribute save=$xml
   method code (
     XML::Element $parent,
@@ -791,11 +840,13 @@ say "R: $line";
     }
 
     my Int $test-code = $!test-count++;
+say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
     my Str $test-code-text = (
-       $!todo-count ?? 'D' !! ($!bug-count ?? 'B' !! 'T')
+       $!todo-count ?? 'D' !! ($!bug-count ?? 'B' !! ($!skip-count ?? 'S' !! 'T'))
     ) ~ $test-code;
 
     my Int $nbr-todo;
+    my Int $nbr-skip;
     my Str $code-text = ($attrs<line> // '');
     if $code-text ~~ m/^ todo/ {
       if $code-text ~~ m/ (\d+) $/ {
@@ -831,6 +882,8 @@ say "R: $line";
     }
 
     $!todo-count-- if $!todo-count > 0;
+    $!bug-count-- if $!bug-count > 0;
+    $!skip-count-- if $!skip-count > 0;
     $parent;
   }
 
@@ -864,7 +917,7 @@ say "R: $line";
   ) {
 
     die 'Cannot have todo here when still todo or bug lines are active'
-      if $!todo-count or $!bug-count;
+      if $!todo-count or $!bug-count or $!skip-count;
 
     my Int $test-code = $!test-count++;
 
@@ -940,7 +993,7 @@ say "R: $line";
   ) {
 
     die 'Cannot have bug here when still todo or bug lines are active'
-      if $!todo-count or $!bug-count;
+      if $!todo-count or $!bug-count or $!skip-count;
 
     my Int $test-code = $!test-count++;
 
@@ -978,7 +1031,6 @@ say "BC: $!bug-count";
     );
 
     my XML::Element $tr = append-element( $table, 'tr');
-say "append check mark B$!test-count";
 
     # When handling todo, only show the comments and count of todo
     if $bug {
@@ -1006,6 +1058,77 @@ say "append check mark B$!test-count";
       # Prefix the comment with the test code
       my XML::Element $b = insert-element( $td, 'b');
       insert-element( $b, :text("B$!test-count: "));
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method skip (
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body
+  ) {
+
+    die 'Cannot have skip here when still todo or bug lines are active'
+      if $!todo-count or $!bug-count or $!skip-count;
+
+    my Int $test-code = $!test-count++;
+
+    my Int $nbr-skip = $attrs<n>:exists ?? $attrs<n>.Int !! 1;
+    $!skip-count = $nbr-skip;
+    my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-skip;
+    $!skip-count = $test-lines;
+    self!skip-table(
+      $parent, $attrs, :$content-body,
+      :skip, :skip-count($nbr-skip)
+    );
+
+    my Str $code-text = "skip 'S$test-code', $nbr-skip;\n";
+    $!test-file-content ~= $code-text;
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !skip-table (
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body,
+    Bool :$skip = False,
+    Int :$skip-count = 1
+  ) {
+
+    my XML::Element $table = append-element(
+      $parent, 'table', {class => 'test-table'}
+    );
+
+    my XML::Element $tr = append-element( $table, 'tr');
+say "append check mark S$!test-count";
+
+    # When handling todo, only show the comments and count of todo
+    if $skip {
+      append-element( $tr, 'td', {class => 'check-mark'});
+    }
+
+    # Test entries come here when todo counter is not zero
+    else {
+      append-element( $tr, '_CHECK_MARK_', {test-code => "S$!test-count"});
+    }
+
+    my XML::Element $td = append-element( $tr, 'td');
+    $td.insert($_) for $content-body.nodes.reverse;
+    $td.set( 'class', 'test-comment');
+
+    if $skip {
+      my XML::Element $b = insert-element( $td, 'b');
+      my Str $t;
+      $t = 'Next test is a todo test: ' if $skip-count == 1;
+      $t = "Next $skip-count tests are skip tests: " if $skip-count > 1;
+      insert-element( $b, :text($t));
+    }
+
+    else {
+      # Prefix the comment with the test code
+      my XML::Element $b = insert-element( $td, 'b');
+      insert-element( $b, :text("S$!test-count: "));
     }
   }
 }

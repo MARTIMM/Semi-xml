@@ -11,7 +11,7 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
     structure at the top level,
   ]
 
-  $pre [!=
+  $!td.pre [!=
     A one liner
 
     $st [ ]
