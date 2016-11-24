@@ -196,8 +196,11 @@ say "R: $line";
     # Gather metric data and write to metric file. Run summary to show.
     my $metric-file = $test-file;
     $metric-file ~~ s/ '.t' $/.t-metric/;
-    my Str $metric-text = '';
 
+    my $c = $*PERL.compiler();
+    $metric-file ~= "-$*DISTRO.name()-$*DISTRO.version()-$c.name()-$*VM.name()";
+
+    my Str $metric-text = '';
     $metric-text ~= "Package:{$attrs<pack> // '-'}\n";
     $metric-text ~= "Module:{$attrs<mod> // '-'}\n";
     $metric-text ~= "Class:{$attrs<class> // '-'}\n";
@@ -207,7 +210,6 @@ say "R: $line";
     $metric-text ~= "OS-Kernel:$*KERNEL.name():$*KERNEL.version()\n";
     $metric-text ~= "OS-Distro:$*DISTRO.name():$*DISTRO.version():$*DISTRO.release():$*DISTRO.is-win()\n";
     $metric-text ~= "Perl:$*PERL.name():$*PERL.version()\n";
-    my $c = $*PERL.compiler();
     $metric-text ~= "Compiler:$c.name():$c.version()\n";
     $metric-text ~= "VM:$*VM.name():$*VM.version()\n";
 
@@ -327,15 +329,18 @@ say "R: $line";
 
     if $ntests {
       # Transform total percentage ok into angle.
-      # my Num $metric = $ok * 100.0 / $ntests;
-      # my Num $total-ok = $metric * 2.0 * pi / 100.0;
-
-      # Same calculations but a bit faster
-      my Num $total-ok = ($ok - 5e-100) * 2.0 * pi / $ntests;
+      my Num $total-ok = $ok * 2.0 * pi / $ntests;
       my Int $large-angle = $total-ok >= pi ?? 1 !! 0;
-say "TA: $total-ok, $large-angle";
+
       my Num $new-x = $center + $radius * sin $total-ok;
       my Num $new-y = $center - $radius * cos $total-ok;
+
+      # Recalculate x when $ok == $ntests, a full circle must be drawn
+      # but it doesn't whithout a bit tinkering
+      if $ok and $new-x =~= $center and $new-y =~= $center - $radius.Num {
+        $new-x -= 1e-2;
+        $large-angle = 1;
+      }
 
       append-element(
         $svg, 'path', {
@@ -352,6 +357,10 @@ say "TA: $total-ok, $large-angle";
 
       $new-x = $center + $radius * sin $total-nok;
       $new-y = $center - $radius * cos $total-nok;
+      if $nok and $new-x =~= $center and $new-y =~= $center - $radius.Num {
+        $new-x -= 1e-2;
+        $large-angle = 1;
+      }
 
       # Calculate rotation
       my Num $rot = $total-ok * 360.0 / (2 * pi);
@@ -367,56 +376,57 @@ say "TA: $total-ok, $large-angle";
                    "z"
         }
       );
-
-      # Legend
-      my $rect-x = 2 * $center;
-      my $rect-y = 5;
-      $g = append-element(
-        $svg, 'g', { transform => "translate($rect-x,$rect-y)" }
-      );
-
-      # ok rectangle
-      append-element(
-        $g, 'rect', {
-          class => $class ~ '-ok',
-          x => '0', y => '0',
-          width => '15', height => '10'
-        }
-      );
-
-      # not ok rectangle
-      append-element(
-        $g, 'rect', {
-          class => $class ~ '-nok',
-          x => '0', y => '15',
-          width => '15', height => '10'
-        }
-      );
-
-
-      # ok count
-      my XML::Element $t = append-element(
-        $g, 'text', { class => 'legend', x => '20', y => '10'}
-      );
-      append-element( $t, :text("$ok"));
-
-      # not ok count
-      $t = append-element(
-        $g, 'text', { class => 'legend', x => '20', y => '25'}
-      );
-      append-element( $t, :text("$nok"));
-
-      # draw a line
-      append-element(
-        $g, 'path', { class => 'line', d => 'M 0 28 H 40' }
-      );
-
-      # total tests ok + not ok
-      $t = append-element(
-        $g, 'text', { class => 'legend', x => '20', y => '40'}
-      );
-      append-element( $t, :text("$ntests"));
     }
+
+
+    # Legend
+    my $rect-x = 2 * $center;
+    my $rect-y = 5;
+    my XML::Element $g = append-element(
+      $svg, 'g', { transform => "translate($rect-x,$rect-y)" }
+    );
+
+    # ok rectangle
+    append-element(
+      $g, 'rect', {
+        class => $class ~ '-ok',
+        x => '0', y => '0',
+        width => '15', height => '10'
+      }
+    );
+
+    # not ok rectangle
+    append-element(
+      $g, 'rect', {
+        class => $class ~ '-nok',
+        x => '0', y => '15',
+        width => '15', height => '10'
+      }
+    );
+
+
+    # ok count
+    my XML::Element $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '10'}
+    );
+    append-element( $t, :text("$ok"));
+
+    # not ok count
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '25'}
+    );
+    append-element( $t, :text("$nok"));
+
+    # draw a line
+    append-element(
+      $g, 'path', { class => 'line', d => 'M 0 28 H 40' }
+    );
+
+    # total tests ok + not ok
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '20', y => '40'}
+    );
+    append-element( $t, :text("$ntests"));
   }
 
   #-----------------------------------------------------------------------------
@@ -448,6 +458,10 @@ say "TA: $total-ok, $large-angle";
 
     my $new-x = $center + $radius * sin $total-ok;
     my $new-y = $center - $radius * cos $total-ok;
+    if $all-ok and $new-x =~= $center and $new-y =~= $center - $radius.Num {
+      $new-x -= 1e-2;
+      $large-angle = 1;
+    }
 
     append-element(
       $svg, 'path', {
@@ -472,6 +486,10 @@ say "TA: $total-ok, $large-angle";
 
     $new-x = $center + $radius * sin $a-nok;
     $new-y = $center - $radius * cos $a-nok;
+    if $test-nok and $new-x =~= $center and $new-y =~= $center - $radius.Num {
+      $new-x -= 1e-2;
+      $large-angle = 1;
+    }
 
     append-element(
       $g, 'path', {
@@ -496,6 +514,10 @@ say "TA: $total-ok, $large-angle";
 
     $new-x = $center + $radius * sin $a-nok;
     $new-y = $center - $radius * cos $a-nok;
+    if $bug-nok and $new-x =~= $center and $new-y =~= $center - $radius.Num {
+      $new-x -= 1e-2;
+      $large-angle = 1;
+    }
 
     append-element(
       $g, 'path', {
@@ -520,6 +542,10 @@ say "TA: $total-ok, $large-angle";
 
     $new-x = $center + $radius * sin $a-nok;
     $new-y = $center - $radius * cos $a-nok;
+    if $todo-nok and $new-x =~= $center and $new-y =~= $center - $radius.Num {
+      $new-x -= 1e-2;
+      $large-angle = 1;
+    }
 
     append-element(
       $g, 'path', {
@@ -544,6 +570,10 @@ say "TA: $total-ok, $large-angle";
 
     $new-x = $center + $radius * sin $a-skip;
     $new-y = $center - $radius * cos $a-skip;
+    if $skip and $new-x =~= $center and $new-y =~= $center - $radius.Num {
+      $new-x -= 1e-2;
+      $large-angle = 1;
+    }
 
     append-element(
       $g, 'path', {

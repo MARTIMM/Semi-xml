@@ -7,8 +7,19 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
   $p [
     SemiXML is a library which translates an equally named language into XML.
     There are several syntactic constructs which look very much the same as the
-    XML language.
+    XML language. What we are going to test here is the simple
+    structure at the top level,
   ]
+
+  $pre [!=
+    A one liner
+
+    $st [ ]
+
+    This should translate into
+
+    <st/>
+  !]
 
   $p [
     We need to write a convenience routine to call the parser several times from

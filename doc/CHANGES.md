@@ -1,5 +1,7 @@
 ## Changes
 
+* 0.22.0
+  * Added module to make test reports. It gives the possibility to describe the tests and define them as well as run them. The results are shown at the end of the generated document and also written into a metric file. This will be used to make a summary report.
 * 0.21.0
   * Refitted the piping to external commands
 * 0.20.0
