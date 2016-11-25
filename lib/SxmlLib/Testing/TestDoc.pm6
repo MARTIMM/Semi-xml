@@ -192,9 +192,9 @@ say "TSkip: $test-code, $test-code2";
 
         $td = before-element( $node, 'td', {class => 'check-mark red'});
         $td.set( 'class', 'smaller-check-mark red') if $ok-td-exists;
-        if $test-code ~~ m/^ 'S' / {
+#        if $test-code ~~ m/^ 'S' / {
           append-element( $td, :text('&#x1F648;'));
-        }
+#        }
       }
 
       $node.remove;
@@ -844,6 +844,10 @@ say "TSkip: $test-code, $test-code2";
 
     elsif $!bug-count {
       self!bug-table( $parent, $attrs, :$content-body);
+    }
+
+    elsif $!skip-count {
+      self!skip-table( $parent, $attrs, :$content-body);
     }
 
     else {
