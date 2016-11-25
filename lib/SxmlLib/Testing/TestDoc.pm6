@@ -124,10 +124,7 @@ say "R: $line";
       # check skip code
       elsif $line ~~ m/'# SKIP' \s* ('S' \d+) $/ {
         my Str $test-code2 = $0.Str if ? $/;
-say "TSkip: $test-code, $test-code2";
         self!set-test-results( $test-code2, $ok, :metric);
-
-#        self!set-test-results( $test-code, $ok);
       }
 
       else {
@@ -153,10 +150,6 @@ say "TSkip: $test-code, $test-code2";
           append-element( $td, :text('&#128459;'));
         }
 
-#        elsif $test-code ~~ m/^ 'S' / {
-#          append-element( $td, :text('&#x1F648;'));
-#        }
-
         else {
           append-element( $td, :text('&#10004;'));
         }
@@ -178,10 +171,6 @@ say "TSkip: $test-code, $test-code2";
           append-element( $td, :text('&#128027;'));
         }
 
-#        elsif $test-code ~~ m/^ 'S' / {
-#          append-element( $td, :text('&#x1F648;'));
-#        }
-
         else {
           append-element( $td, :text('&#10008;'));
         }
@@ -196,9 +185,7 @@ say "TSkip: $test-code, $test-code2";
 
         $td = before-element( $node, 'td', {class => 'check-mark red'});
         $td.set( 'class', 'smaller-check-mark red') if $ok-td-exists;
-#        if $test-code ~~ m/^ 'S' / {
-          append-element( $td, :text('&#x1F648;'));
-#        }
+        append-element( $td, :text('&#x1F648;'));
       }
 
       $node.remove;
@@ -232,10 +219,10 @@ say "TSkip: $test-code, $test-code2";
     $metric-file ~= "-$*DISTRO.name()-$*DISTRO.version()-$c.name()-$*VM.name()";
 
     my Str $metric-text = '';
-    $metric-text ~= "Package:{$attrs<pack> // '-'}\n";
-    $metric-text ~= "Module:{$attrs<mod> // '-'}\n";
+    $metric-text ~= "Package:{$attrs<package> // '-'}\n";
+    $metric-text ~= "Module:{$attrs<module> // '-'}\n";
     $metric-text ~= "Class:{$attrs<class> // '-'}\n";
-    $metric-text ~= "Distribution:{$attrs<dist> // '-'}\n";
+    $metric-text ~= "Distribution:{$attrs<distribution> // '-'}\n";
     $metric-text ~= "Label:{$attrs<label> // '-'}\n";
 
     $metric-text ~= "OS-Kernel:$*KERNEL.name():$*KERNEL.version()\n";
@@ -243,10 +230,6 @@ say "TSkip: $test-code, $test-code2";
     $metric-text ~= "Perl:$*PERL.name():$*PERL.version()\n";
     $metric-text ~= "Compiler:$c.name():$c.version()\n";
     $metric-text ~= "VM:$*VM.name():$*VM.version()\n";
-
-#    $metric-text ~= "Package:{$?PACKAGE//'-'}\n";
-#    $metric-text ~= "Module:{$?MODULE//'-'}\n";
-#    $metric-text ~= "Class:{$?CLASS//'-'}\n";
 
     my Int $total =
       [+] |@($!test-metrics<T>), |@($!test-metrics<B>),
@@ -348,7 +331,6 @@ say "TSkip: $test-code, $test-code2";
     my XML::Element $svg = append-element(
       $td, 'svg', {
         width => '150', height => '100',
-#        viewport => '-50 -50 100 100'
       }
     );
     $svg.setNamespace("http://www.w3.org/2000/svg");
@@ -471,8 +453,6 @@ say "TSkip: $test-code, $test-code2";
     my XML::Element $svg = append-element(
       $td, 'svg', {
         width => '200', height => '100',
-#        viewport => '-50 -50 100 100',
-#        transform => 'rotate(-90) translate(-100)'
       }
     );
     $svg.setNamespace("http://www.w3.org/2000/svg");
@@ -833,7 +813,6 @@ say "TSkip: $test-code, $test-code2";
   }
 
   #-----------------------------------------------------------------------------
-#TODO attribute save=$xml
   method code (
     XML::Element $parent,
     Hash $attrs,
@@ -894,7 +873,6 @@ say "TSkip: $test-code, $test-code2";
     }
 
     my Int $test-code = $!test-count++;
-say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
     my Str $test-code-text = (
        $!todo-count ?? 'D'
                     !! ($!bug-count ?? 'B'
@@ -991,7 +969,6 @@ say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
     my Int $nbr-bugs = $attrs<n>:exists ?? $attrs<n>.Int !! 1;
     my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-bugs;
     $!bug-count = $test-lines;
-say "BC: $!bug-count";
     self!make-table(
       $parent, $attrs, :$content-body,
       :start, :start-count($nbr-bugs), :ttype(Bug)
@@ -1063,7 +1040,6 @@ say "BC: $!bug-count";
     );
 
     my XML::Element $tr = append-element( $table, 'tr');
-say "append check mark $tcode$!test-count";
 
     # When starting with test type, only show the comments and start count
     if $start {
@@ -1084,22 +1060,22 @@ say "append check mark $tcode$!test-count";
     if $start {
       my Str $t;
       given $ttype {
-        
+
         # No need for special text on tests
         # when Test { }
-        
+
         when Todo {
           $t = 'Next test is a todo test: ' if $start-count == 1;
           $t = "Next $start-count tests are todo tests: " if $start-count > 1;
           insert-element( $b, :text($t));
         }
-        
+
         when Bug {
           $t = 'Next test is a bug issue test: ' if $start-count == 1;
           $t = "Next $start-count tests are bug issue tests: " if $start-count > 1;
           insert-element( $b, :text($t));
         }
-        
+
         when Skip {
           $t = 'Next test is a skip test: ' if $start-count == 1;
           $t = "Next $start-count tests are skipped tests: " if $start-count > 1;
