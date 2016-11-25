@@ -93,8 +93,8 @@ class Testing::TestDoc {
 
 say "R: $line";
 
-      # get the test code if there is one
-      $line ~~ m/ '-' \s* (<[TDBS]> \d+) /;
+      # get the test code if there is one. only for tests and todo(also bugs)
+      $line ~~ m/ '-' \s* (<[TDB]> \d+) /;
       my Str $test-code = $0.Str if ? $/;
       my Any $ok = $line ~~ m:s/^ 'ok' /
                    ?? True
@@ -122,9 +122,10 @@ say "R: $line";
       # check skip code
       elsif $line ~~ m/'# SKIP' \s* ('S' \d+) $/ {
         my Str $test-code2 = $0.Str if ? $/;
-        self!set-test-results( $test-code2, $ok, :!metric);
+say "TSkip: $test-code, $test-code2";
+        self!set-test-results( $test-code2, $ok, :metric);
 
-        self!set-test-results( $test-code, $ok);
+#        self!set-test-results( $test-code, $ok);
       }
 
       else {
@@ -150,9 +151,9 @@ say "R: $line";
           append-element( $td, :text('&#128459;'));
         }
 
-        elsif $test-code ~~ m/^ 'S' / {
-          append-element( $td, :text('&#x1F648;'));
-        }
+#        elsif $test-code ~~ m/^ 'S' / {
+#          append-element( $td, :text('&#x1F648;'));
+#        }
 
         else {
           append-element( $td, :text('&#10004;'));
@@ -175,15 +176,25 @@ say "R: $line";
           append-element( $td, :text('&#128027;'));
         }
 
-        elsif $test-code ~~ m/^ 'S' / {
-          append-element( $td, :text('&#x1F648;'));
-        }
+#        elsif $test-code ~~ m/^ 'S' / {
+#          append-element( $td, :text('&#x1F648;'));
+#        }
 
         else {
           append-element( $td, :text('&#10008;'));
         }
+      }
 
-        append-element( $td, :text("$nok-c")) if $nok-c > 1;
+      # Skipped tests
+      if not $ok-c and not $nok-c {
+        my Bool $ok-td-exists = $td.defined;
+        $td.set( 'class', 'smaller-check-mark green') if $ok-td-exists;
+
+        $td = before-element( $node, 'td', {class => 'check-mark red'});
+        $td.set( 'class', 'smaller-check-mark red') if $ok-td-exists;
+        if $test-code ~~ m/^ 'S' / {
+          append-element( $td, :text('&#x1F648;'));
+        }
       }
 
       $node.remove;
@@ -932,12 +943,12 @@ say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
 
     my Str $code-text = "todo 'D$test-code', $nbr-todo;\n";
     $!test-file-content ~= $code-text;
-#`{{
+
     append-element( $last-defined-pre, :text("todo '"));
     my XML::Element $b = append-element( $last-defined-pre, 'b');
     append-element( $b, :text("D$test-code"));
     append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
-}}
+
     $parent;
   }
 
@@ -1008,12 +1019,12 @@ say "BC: $!bug-count";
 
     my Str $code-text = "todo 'B$test-code', $nbr-bugs;\n";
     $!test-file-content ~= $code-text;
-#`{{
+
     append-element( $last-defined-pre, :text("todo '"));
     my XML::Element $b = append-element( $last-defined-pre, 'b');
     append-element( $b, :text("B$test-code"));
     append-element( $last-defined-pre, :text("', $nbr-bugs;\n"));
-}}
+
     $parent;
   }
 
@@ -1084,6 +1095,12 @@ say "BC: $!bug-count";
 
     my Str $code-text = "skip 'S$test-code', $nbr-skip;\n";
     $!test-file-content ~= $code-text;
+
+    append-element( $last-defined-pre, :text("skip '"));
+    my XML::Element $b = append-element( $last-defined-pre, 'b');
+    append-element( $b, :text("S$test-code"));
+    append-element( $last-defined-pre, :text("', $nbr-skip;\n"));
+
     $parent;
   }
 
@@ -1120,8 +1137,8 @@ say "append check mark S$!test-count";
     if $skip {
       my XML::Element $b = insert-element( $td, 'b');
       my Str $t;
-      $t = 'Next test is a todo test: ' if $skip-count == 1;
-      $t = "Next $skip-count tests are skip tests: " if $skip-count > 1;
+      $t = 'Next test is a skip test: ' if $skip-count == 1;
+      $t = "Next $skip-count tests are skipped tests: " if $skip-count > 1;
       insert-element( $b, :text($t));
     }
 

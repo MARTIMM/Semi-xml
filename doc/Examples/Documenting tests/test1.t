@@ -15,8 +15,10 @@ is $i, 10, 'T5';
 
     if ?"We are not stupid" {
 skip 'S6', 2;
+
+  } else {
   ok 10 < 7, 'S7';
-  ok 11 < 7, 'S8';
+  ok 11 / 0, 'S8';
 }
 todo 'D9', 2;
 is $i, 11, 'D10';
