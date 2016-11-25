@@ -7,6 +7,8 @@ unit package SxmlLib:auth<https://github.com/MARTIMM>;
 #-------------------------------------------------------------------------------
 class Testing::TestDoc {
 
+  enum TestType <Test Todo Bug Skip>;
+
   # The test counter is used to generate a description messages with each test
   # like 'T##'. This is also stored in the element _CHECK_MARK_ with a
   # 'test-code' attribute. For todo entries this is D##, B## for bug issue tests
@@ -183,6 +185,8 @@ say "TSkip: $test-code, $test-code2";
         else {
           append-element( $td, :text('&#10008;'));
         }
+
+        append-element( $td, :text("$ok-c ")) if $nok-c > 1;
       }
 
       # Skipped tests
@@ -466,7 +470,7 @@ say "TSkip: $test-code, $test-code2";
     my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
       $td, 'svg', {
-        width => '150', height => '100',
+        width => '200', height => '100',
 #        viewport => '-50 -50 100 100',
 #        transform => 'rotate(-90) translate(-100)'
       }
@@ -672,11 +676,23 @@ say "TSkip: $test-code, $test-code2";
     );
     append-element( $t, :text("$all-ok"));
 
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '40', y => '10'}
+    );
+    append-element( $t, :text<Ok>);
+
+
     # test not ok count
     $t = append-element(
       $g, 'text', { class => 'legend', x => '20', y => '25'}
     );
     append-element( $t, :text("$test-nok"));
+
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '40', y => '25'}
+    );
+    append-element( $t, :text<Tests>);
+
 
     # bug not ok count
     $t = append-element(
@@ -684,17 +700,35 @@ say "TSkip: $test-code, $test-code2";
     );
     append-element( $t, :text("$bug-nok"));
 
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '40', y => '40'}
+    );
+    append-element( $t, :text<Bugs>);
+
+
     # todo not ok count
     $t = append-element(
       $g, 'text', { class => 'legend', x => '20', y => '55'}
     );
     append-element( $t, :text("$todo-nok"));
 
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '40', y => '55'}
+    );
+    append-element( $t, :text<Todo>);
+
+
     # skip count
     $t = append-element(
       $g, 'text', { class => 'legend', x => '20', y => '70'}
     );
     append-element( $t, :text("$skip"));
+
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '40', y => '70'}
+    );
+    append-element( $t, :text<Skip>);
+
 
     # draw a line
     append-element(
@@ -706,6 +740,12 @@ say "TSkip: $test-code, $test-code2";
       $g, 'text', { class => 'legend', x => '20', y => '85'}
     );
     append-element( $t, :text("$total"));
+
+    $t = append-element(
+      $g, 'text', { class => 'legend', x => '40', y => '85'}
+    );
+    append-element( $t, :text<Total>);
+
   }
 
   #-----------------------------------------------------------------------------
@@ -831,7 +871,6 @@ say "TSkip: $test-code, $test-code2";
   }
 
   #-----------------------------------------------------------------------------
-#TODO attribute todo=1 to prefix with a todo test, generate a different checkmarker
   method test (
     XML::Element $parent,
     Hash $attrs,
@@ -839,25 +878,28 @@ say "TSkip: $test-code, $test-code2";
   ) {
 
     if $!todo-count {
-      self!todo-table( $parent, $attrs, :$content-body);
+      self!make-table( $parent, $attrs, :$content-body, :ttype(Todo));
     }
 
     elsif $!bug-count {
-      self!bug-table( $parent, $attrs, :$content-body);
+      self!make-table( $parent, $attrs, :$content-body, :ttype(Bug));
     }
 
     elsif $!skip-count {
-      self!skip-table( $parent, $attrs, :$content-body);
+      self!make-table( $parent, $attrs, :$content-body, :ttype(Skip));
     }
 
     else {
-      self!test-table( $parent, $attrs, :$content-body);
+      self!make-table( $parent, $attrs, :$content-body, :ttype(Test));
     }
 
     my Int $test-code = $!test-count++;
 say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
     my Str $test-code-text = (
-       $!todo-count ?? 'D' !! ($!bug-count ?? 'B' !! ($!skip-count ?? 'S' !! 'T'))
+       $!todo-count ?? 'D'
+                    !! ($!bug-count ?? 'B'
+                    !!   ($!skip-count ?? 'S' !! 'T')
+                       )
     ) ~ $test-code;
 
     my Int $nbr-todo;
@@ -903,28 +945,6 @@ say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
   }
 
   #-----------------------------------------------------------------------------
-  method !test-table ( 
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Element :$content-body
-  ) {
-
-    my XML::Element $table = append-element(
-      $parent, 'table', {class => 'test-table'}
-    );
-
-    my XML::Element $tr = append-element( $table, 'tr');
-    append-element( $tr, '_CHECK_MARK_', {test-code => "T$!test-count"});
-    my XML::Element $td = append-element( $tr, 'td');
-    $td.insert($_) for $content-body.nodes.reverse;
-    $td.set( 'class', 'test-comment');
-
-    # Prefix the comment with the test code
-    my XML::Element $b = insert-element( $td, 'b');
-    insert-element( $b, :text("T$!test-count: "));
-  }
-
-  #-----------------------------------------------------------------------------
   method todo (
     XML::Element $parent,
     Hash $attrs,
@@ -940,9 +960,9 @@ say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
     $!todo-count = $nbr-todo;
     my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-todo;
     $!todo-count = $test-lines;
-    self!todo-table(
+    self!make-table(
       $parent, $attrs, :$content-body,
-      :todo, :todo-count($nbr-todo)
+      :start, :start-count($nbr-todo), :ttype(Todo)
     );
 
     my Str $code-text = "todo 'D$test-code', $nbr-todo;\n";
@@ -954,50 +974,6 @@ say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
     append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
 
     $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  method !todo-table (
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Element :$content-body,
-    Bool :$todo = False,
-    Int :$todo-count = 1
-  ) {
-
-    my XML::Element $table = append-element(
-      $parent, 'table', {class => 'test-table'}
-    );
-
-    my XML::Element $tr = append-element( $table, 'tr');
-
-    # When handling todo, only show the comments and count of todo
-    if $todo {
-      append-element( $tr, 'td', {class => 'check-mark'});
-    }
-
-    # Test entries come here when todo counter is not zero
-    else {
-      append-element( $tr, '_CHECK_MARK_', {test-code => "D$!test-count"});
-    }
-
-    my XML::Element $td = append-element( $tr, 'td');
-    $td.insert($_) for $content-body.nodes.reverse;
-    $td.set( 'class', 'test-comment');
-
-    if $todo {
-      my XML::Element $b = insert-element( $td, 'b');
-      my Str $t;
-      $t = 'Next test is a todo test: ' if $todo-count == 1;
-      $t = "Next $todo-count tests are todo tests: " if $todo-count > 1;
-      insert-element( $b, :text($t));
-    }
-
-    else {
-      # Prefix the comment with the test code
-      my XML::Element $b = insert-element( $td, 'b');
-      insert-element( $b, :text("D$!test-count: "));
-    }
   }
 
   #-----------------------------------------------------------------------------
@@ -1016,9 +992,9 @@ say "TC: $test-code, $!todo-count, $!bug-count, $!skip-count";
     my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-bugs;
     $!bug-count = $test-lines;
 say "BC: $!bug-count";
-    self!bug-table(
+    self!make-table(
       $parent, $attrs, :$content-body,
-      :bug, :$nbr-bugs
+      :start, :start-count($nbr-bugs), :ttype(Bug)
     );
 
     my Str $code-text = "todo 'B$test-code', $nbr-bugs;\n";
@@ -1030,50 +1006,6 @@ say "BC: $!bug-count";
     append-element( $last-defined-pre, :text("', $nbr-bugs;\n"));
 
     $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  method !bug-table ( 
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Element :$content-body,
-    Bool :$bug = False,
-    Int :$nbr-bugs = 1
-  ) {
-
-    my XML::Element $table = append-element(
-      $parent, 'table', {class => 'test-table'}
-    );
-
-    my XML::Element $tr = append-element( $table, 'tr');
-
-    # When handling todo, only show the comments and count of todo
-    if $bug {
-      append-element( $tr, 'td', {class => 'check-mark'});
-    }
-
-    # Test entries come here when todo counter is not zero
-    else {
-      append-element( $tr, '_CHECK_MARK_', {test-code => "B$!test-count"});
-    }
-
-    my XML::Element $td = append-element( $tr, 'td');
-    $td.insert($_) for $content-body.nodes.reverse;
-    $td.set( 'class', 'test-comment');
-
-    if $bug {
-      my XML::Element $b = insert-element( $td, 'b');
-      my Str $t;
-      $t = 'Next test is a bug issue test: ' if $nbr-bugs == 1;
-      $t = "Next $nbr-bugs tests are bug issue tests: " if $nbr-bugs > 1;
-      insert-element( $b, :text($t));
-    }
-
-    else {
-      # Prefix the comment with the test code
-      my XML::Element $b = insert-element( $td, 'b');
-      insert-element( $b, :text("B$!test-count: "));
-    }
   }
 
   #-----------------------------------------------------------------------------
@@ -1092,9 +1024,9 @@ say "BC: $!bug-count";
     $!skip-count = $nbr-skip;
     my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-skip;
     $!skip-count = $test-lines;
-    self!skip-table(
+    self!make-table(
       $parent, $attrs, :$content-body,
-      :skip, :skip-count($nbr-skip)
+      :start, :start-count($nbr-skip), :ttype(Skip)
     );
 
     my Str $code-text = "skip 'S$test-code', $nbr-skip;\n";
@@ -1109,47 +1041,76 @@ say "BC: $!bug-count";
   }
 
   #-----------------------------------------------------------------------------
-  method !skip-table (
+  method !make-table (
     XML::Element $parent,
     Hash $attrs,
     XML::Element :$content-body,
-    Bool :$skip = False,
-    Int :$skip-count = 1
+    Bool :$start = False,
+    Int :$start-count = 1,
+    TestType :$ttype
   ) {
+
+    my Str $tcode;
+    given $ttype {
+      when Test { $tcode = 'T'; }
+      when Todo { $tcode = 'D'; }
+      when Bug { $tcode = 'B'; }
+      when Skip { $tcode = 'S'; }
+    }
 
     my XML::Element $table = append-element(
       $parent, 'table', {class => 'test-table'}
     );
 
     my XML::Element $tr = append-element( $table, 'tr');
-say "append check mark S$!test-count";
+say "append check mark $tcode$!test-count";
 
-    # When handling todo, only show the comments and count of todo
-    if $skip {
+    # When starting with test type, only show the comments and start count
+    if $start {
       append-element( $tr, 'td', {class => 'check-mark'});
     }
 
     # Test entries come here when todo counter is not zero
     else {
-      append-element( $tr, '_CHECK_MARK_', {test-code => "S$!test-count"});
+      append-element( $tr, '_CHECK_MARK_', {test-code => "$tcode$!test-count"});
     }
 
     my XML::Element $td = append-element( $tr, 'td');
     $td.insert($_) for $content-body.nodes.reverse;
     $td.set( 'class', 'test-comment');
 
-    if $skip {
-      my XML::Element $b = insert-element( $td, 'b');
+    # Bold test code characters in front of test comment
+    my XML::Element $b = insert-element( $td, 'b');
+    if $start {
       my Str $t;
-      $t = 'Next test is a skip test: ' if $skip-count == 1;
-      $t = "Next $skip-count tests are skipped tests: " if $skip-count > 1;
-      insert-element( $b, :text($t));
+      given $ttype {
+        
+        # No need for special text on tests
+        # when Test { }
+        
+        when Todo {
+          $t = 'Next test is a todo test: ' if $start-count == 1;
+          $t = "Next $start-count tests are todo tests: " if $start-count > 1;
+          insert-element( $b, :text($t));
+        }
+        
+        when Bug {
+          $t = 'Next test is a bug issue test: ' if $start-count == 1;
+          $t = "Next $start-count tests are bug issue tests: " if $start-count > 1;
+          insert-element( $b, :text($t));
+        }
+        
+        when Skip {
+          $t = 'Next test is a skip test: ' if $start-count == 1;
+          $t = "Next $start-count tests are skipped tests: " if $start-count > 1;
+          insert-element( $b, :text($t));
+        }
+      }
     }
 
     else {
       # Prefix the comment with the test code
-      my XML::Element $b = insert-element( $td, 'b');
-      insert-element( $b, :text("S$!test-count: "));
+      insert-element( $b, :text("$tcode$!test-count: "));
     }
   }
 }
