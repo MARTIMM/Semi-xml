@@ -1,0 +1,13 @@
+$!td.report title='code nesting'
+            test-file='doc/Examples/Documenting tests/test2.t' [
+
+  $p [
+    Ok, new test possibilities ahead ...
+  ]
+  
+  $!td.code [=
+    my Int \$x = 10;
+    $!td.test line='ok $x ~~ Int' [ Type is integer ]
+    $!td.test line='is $x, 10' [ x is 10 ]
+  ]
+]

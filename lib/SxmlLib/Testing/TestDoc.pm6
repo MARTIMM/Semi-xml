@@ -27,7 +27,7 @@ class Testing::TestDoc {
     EOINIT
 
   state Str $indent;
-  has XML::Element $last-defined-pre;
+  has XML::Element $!last-defined-pre;
 
   # Storage of test results. Key is the test code which is like T##/D##. The
   # value is an Array of which the 1st element is the success count and the
@@ -806,7 +806,7 @@ say "R: $line";
     $hook.remove;
 
     if $attrs<viz>:exists and $attrs<viz> eq 'hide' {
-      $last-defined-pre.set( 'class', 'hide');
+      $!last-defined-pre.set( 'class', 'hide');
     }
 
     $parent;
@@ -819,10 +819,10 @@ say "R: $line";
     XML::Element :$content-body
   ) {
 
-    $last-defined-pre = append-element(
+    $!last-defined-pre = append-element(
       $parent, 'pre',
       {:class<test-block-code>}
-    ) if not $last-defined-pre.defined or $attrs<append>:!exists;
+    ) if not $!last-defined-pre.defined or $attrs<append>:!exists;
 
     if not ?$indent {
       $indent = ($content-body.nodes[0] // '').Str;
@@ -833,7 +833,7 @@ say "R: $line";
       $!test-file-content ~= "$node\n";
     }
 
-    my XML::Element $hook = append-element( $last-defined-pre, 'hook');
+    my XML::Element $hook = append-element( $!last-defined-pre, 'hook');
     for $content-body.nodes.reverse {
       my $l = ~$^a;
       $l ~~ s:g/^^ $indent //;
@@ -843,7 +843,7 @@ say "R: $line";
     $hook.remove;
 
     if $attrs<viz>:exists and $attrs<viz> eq 'hide' {
-      $last-defined-pre.set( 'class', 'hide');
+      $!last-defined-pre.set( 'class', 'hide');
     }
 
     $parent;
@@ -855,30 +855,36 @@ say "R: $line";
     Hash $attrs,
     XML::Element :$content-body
   ) {
-
+#`{{
+    $!last-defined-pre = append-element(
+      $parent, 'pre',
+      {:class<test-block-code>}
+    ) unless $!last-defined-pre.defined;
+}}
+    my Int $test-code = $!test-count++;
+    my Str $test-code-text;
     if $!todo-count {
       self!make-table( $parent, $attrs, :$content-body, :ttype(Todo));
+      $test-code-text = 'D';
     }
 
     elsif $!bug-count {
       self!make-table( $parent, $attrs, :$content-body, :ttype(Bug));
+      $test-code-text = 'B';
     }
 
     elsif $!skip-count {
       self!make-table( $parent, $attrs, :$content-body, :ttype(Skip));
+      $test-code-text = 'S';
     }
 
     else {
       self!make-table( $parent, $attrs, :$content-body, :ttype(Test));
+      $test-code-text = 'T';
     }
 
-    my Int $test-code = $!test-count++;
-    my Str $test-code-text = (
-       $!todo-count ?? 'D'
-                    !! ($!bug-count ?? 'B'
-                    !!   ($!skip-count ?? 'S' !! 'T')
-                       )
-    ) ~ $test-code;
+    $test-code-text ~= $test-code;
+
 
     my Int $nbr-todo;
     my Int $nbr-skip;
@@ -895,10 +901,10 @@ say "R: $line";
       $code-text = "todo '$test-code-text', $nbr-todo;\n";
       $!test-file-content ~= $code-text;
 
-      append-element( $last-defined-pre, :text("todo '"));
-      my XML::Element $b = append-element( $last-defined-pre, 'b');
+      append-element( $!last-defined-pre, :text("todo '"));
+      my XML::Element $b = append-element( $!last-defined-pre, 'b');
       append-element( $b, :text($test-code-text));
-      append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
+      append-element( $!last-defined-pre, :text("', $nbr-todo;\n"));
     }
 
     elsif ? $code-text {
@@ -910,10 +916,10 @@ say "R: $line";
 
       $line ~= " '";
 
-      append-element( $last-defined-pre, :text($line));
-      my XML::Element $b = append-element( $last-defined-pre, 'b');
+      append-element( $!last-defined-pre, :text($line));
+      my XML::Element $b = append-element( $!last-defined-pre, 'b');
       append-element( $b, :text($test-code-text));
-      append-element( $last-defined-pre, :text("';\n"));
+      append-element( $!last-defined-pre, :text("';\n"));
     }
 
     $!todo-count-- if $!todo-count > 0;
@@ -946,10 +952,10 @@ say "R: $line";
     my Str $code-text = "todo 'D$test-code', $nbr-todo;\n";
     $!test-file-content ~= $code-text;
 
-    append-element( $last-defined-pre, :text("todo '"));
-    my XML::Element $b = append-element( $last-defined-pre, 'b');
+    append-element( $!last-defined-pre, :text("todo '"));
+    my XML::Element $b = append-element( $!last-defined-pre, 'b');
     append-element( $b, :text("D$test-code"));
-    append-element( $last-defined-pre, :text("', $nbr-todo;\n"));
+    append-element( $!last-defined-pre, :text("', $nbr-todo;\n"));
 
     $parent;
   }
@@ -977,10 +983,10 @@ say "R: $line";
     my Str $code-text = "todo 'B$test-code', $nbr-bugs;\n";
     $!test-file-content ~= $code-text;
 
-    append-element( $last-defined-pre, :text("todo '"));
-    my XML::Element $b = append-element( $last-defined-pre, 'b');
+    append-element( $!last-defined-pre, :text("todo '"));
+    my XML::Element $b = append-element( $!last-defined-pre, 'b');
     append-element( $b, :text("B$test-code"));
-    append-element( $last-defined-pre, :text("', $nbr-bugs;\n"));
+    append-element( $!last-defined-pre, :text("', $nbr-bugs;\n"));
 
     $parent;
   }
@@ -1009,10 +1015,10 @@ say "R: $line";
     my Str $code-text = "skip 'S$test-code', $nbr-skip;\n";
     $!test-file-content ~= $code-text;
 
-    append-element( $last-defined-pre, :text("skip '"));
-    my XML::Element $b = append-element( $last-defined-pre, 'b');
+    append-element( $!last-defined-pre, :text("skip '"));
+    my XML::Element $b = append-element( $!last-defined-pre, 'b');
     append-element( $b, :text("S$test-code"));
-    append-element( $last-defined-pre, :text("', $nbr-skip;\n"));
+    append-element( $!last-defined-pre, :text("', $nbr-skip;\n"));
 
     $parent;
   }

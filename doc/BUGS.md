@@ -14,3 +14,5 @@ The project is still at omega state, bugs come and go (hopefully).
 * Pipes to programs can now be implemented!
 
 * Use Config::DataLang::Refine to get the info from loaded hashes.
+
+* Since the new changes, nested commands $!x.y1 [ $!x.z [ ]] will not work.
