@@ -9,8 +9,8 @@ Perl:Perl 6:6.c
 Compiler:rakudo:2016.10.249.gb.84158.c
 VM:moar:2016.10.37.gf.769569
 Title:code nesting
-Total: 0
-T:0.00 0.00 0.00 NaN NaN NaN NaN
-B:0.00 0.00 0.00 NaN NaN NaN NaN
-D:0.00 0.00 0.00 NaN NaN NaN NaN
-S:0.00 NaN
+Total: 2
+T:2.00 0.00 2.00 100.00 0.00 100.00 0.00
+B:0.00 0.00 0.00 NaN NaN 0.00 0.00
+D:0.00 0.00 0.00 NaN NaN 0.00 0.00
+S:0.00 0.00

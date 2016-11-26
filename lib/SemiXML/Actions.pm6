@@ -186,12 +186,19 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has Hash $.config is rw = {};
     has XML::Document $!xml-document;
 
-     # Keep current state of affairs. Hopefully some info when parsing fails
-     has Int $.from;
-     has Int $.to;
-     has Str $.prematch;
-     has Str $.postmatch;
-     has Str $.state;
+    # Keep current state of affairs. Hopefully some info when parsing fails
+    has Int $.from;
+    has Int $.to;
+    has Str $.prematch;
+    has Str $.postmatch;
+    has Str $.state;
+
+    # Save a list of tags from root to deepest level. This is possible because
+    # body is processed later than tag-spec. The names are the element name,
+    # method name or symbol name. The xml namesspace and module name are not
+    # added because these can be any name defined by the user.
+    #
+    has Array $!tag-list = [];
 
     #---------------------------------------------------------------------------
     method init-doc ( $match ) {
@@ -279,6 +286,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       self!current-state( $match, 'document');
 
+      # This level is done so drop an element tag from the list
+      $!tag-list.pop;
+
       my XML::Element $x;
 
       ( my $tt,                 # tag type
@@ -349,7 +359,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
                     $match<tag-body>.ast,
                     XML::Element.new(:name('__BODY_CONTAINER__'))
                   )
-                )
+                ),
+                :$!tag-list
               );
 
               if not $x.defined {
@@ -431,6 +442,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       self!current-state( $match, 'tag specification');
 
+      # Name of element or method to be saved in array $!tag-list on $!level
+      my Str $tag-name;
+
       my Array $ast = [];
 
       my Str $symbol = $match<tag><sym>.Str;
@@ -440,19 +454,25 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
         my $tn = $match<tag><tag-name>;
         $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
+        $tag-name = $tn<element>.Str;
       }
 
       elsif $symbol eq '$.' {
 
         my $tn = $match<tag>;
         $ast.push: '', '', $tn<mod-name>.Str, $tn<sym-name>.Str;
+        $tag-name = $tn<sym-name>.Str;
       }
 
       elsif $symbol eq '$!' {
 
         my $tn = $match<tag>;
         $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
+        $tag-name = $tn<meth-name>.Str;
       }
+
+      # Add to the list
+      $!tag-list.push($tag-name);
 
       my Hash $attrs = {};
       for $match<attributes>.caps -> $as {

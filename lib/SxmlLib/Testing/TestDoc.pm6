@@ -26,6 +26,8 @@ class Testing::TestDoc {
 
     EOINIT
 
+  has Str $!delayed-code = '';
+
   state Str $indent;
   has XML::Element $!last-defined-pre;
 
@@ -829,8 +831,15 @@ say "R: $line";
       $indent ~~ s/^ \n? (\s+) .* $/$0/;
     }
 
+    # only text nodes are copied to the test file
     for $content-body.nodes -> $node {
-      $!test-file-content ~= "$node\n";
+      $!test-file-content ~= "$node\n" unless $node ~~ XML::Element;
+    }
+
+    # append delayed code
+    if ? $!delayed-code {
+      $!test-file-content ~= "\n$!delayed-code\n";
+      $!delayed-code = '';
     }
 
     my XML::Element $hook = append-element( $!last-defined-pre, 'hook');
@@ -853,14 +862,25 @@ say "R: $line";
   method test (
     XML::Element $parent,
     Hash $attrs,
-    XML::Element :$content-body
+    XML::Element :$content-body,
+    Array :$tag-list
   ) {
-#`{{
+
+    say "P: ", $tag-list.join(', ');
+    my Bool $nested-in-code = False;
+    for @$tag-list {
+      when 'code' {
+        $nested-in-code = True;
+        last;
+      }
+    }
+
     $!last-defined-pre = append-element(
       $parent, 'pre',
       {:class<test-block-code>}
     ) unless $!last-defined-pre.defined;
-}}
+
+
     my Int $test-code = $!test-count++;
     my Str $test-code-text;
     if $!todo-count {
@@ -885,7 +905,6 @@ say "R: $line";
 
     $test-code-text ~= $test-code;
 
-
     my Int $nbr-todo;
     my Int $nbr-skip;
     my Str $code-text = ($attrs<line> // '');
@@ -898,8 +917,15 @@ say "R: $line";
         $nbr-todo = 1;
       }
 
+      # when nested, do not add to the code directly but add to delayed.
       $code-text = "todo '$test-code-text', $nbr-todo;\n";
-      $!test-file-content ~= $code-text;
+      if $nested-in-code {
+        $!delayed-code ~= $code-text;
+      }
+
+      else {
+        $!test-file-content ~= $code-text;
+      }
 
       append-element( $!last-defined-pre, :text("todo '"));
       my XML::Element $b = append-element( $!last-defined-pre, 'b');
@@ -912,7 +938,13 @@ say "R: $line";
       $code-text ~= ",";
       my $line = $code-text;
       $code-text ~= " '$test-code-text';\n";
-      $!test-file-content ~= $code-text;
+      if $nested-in-code {
+        $!delayed-code ~= $code-text;
+      }
+
+      else {
+        $!test-file-content ~= $code-text;
+      }
 
       $line ~= " '";
 
@@ -932,8 +964,17 @@ say "R: $line";
   method todo (
     XML::Element $parent,
     Hash $attrs,
-    XML::Element :$content-body
+    XML::Element :$content-body,
+    Array :$tag-list
   ) {
+
+    my Bool $nested-in-code = False;
+    for @$tag-list {
+      when 'code' {
+        $nested-in-code = True;
+        last;
+      }
+    }
 
     die 'Cannot have todo here when still todo or bug lines are active'
       if $!todo-count or $!bug-count or $!skip-count;
@@ -950,7 +991,13 @@ say "R: $line";
     );
 
     my Str $code-text = "todo 'D$test-code', $nbr-todo;\n";
-    $!test-file-content ~= $code-text;
+    if $nested-in-code {
+      $!delayed-code ~= $code-text;
+    }
+
+    else {
+      $!test-file-content ~= $code-text;
+    }
 
     append-element( $!last-defined-pre, :text("todo '"));
     my XML::Element $b = append-element( $!last-defined-pre, 'b');
@@ -964,11 +1011,20 @@ say "R: $line";
   method bug (
     XML::Element $parent,
     Hash $attrs,
-    XML::Element :$content-body
+    XML::Element :$content-body,
+    Array :$tag-list
   ) {
 
     die 'Cannot have bug here when still todo or bug lines are active'
       if $!todo-count or $!bug-count or $!skip-count;
+
+    my Bool $nested-in-code = False;
+    for @$tag-list {
+      when 'code' {
+        $nested-in-code = True;
+        last;
+      }
+    }
 
     my Int $test-code = $!test-count++;
 
@@ -981,7 +1037,13 @@ say "R: $line";
     );
 
     my Str $code-text = "todo 'B$test-code', $nbr-bugs;\n";
-    $!test-file-content ~= $code-text;
+    if $nested-in-code {
+      $!delayed-code ~= $code-text;
+    }
+
+    else {
+      $!test-file-content ~= $code-text;
+    }
 
     append-element( $!last-defined-pre, :text("todo '"));
     my XML::Element $b = append-element( $!last-defined-pre, 'b');
@@ -995,11 +1057,20 @@ say "R: $line";
   method skip (
     XML::Element $parent,
     Hash $attrs,
-    XML::Element :$content-body
+    XML::Element :$content-body,
+    Array :$tag-list
   ) {
 
     die 'Cannot have skip here when still todo or bug lines are active'
       if $!todo-count or $!bug-count or $!skip-count;
+
+    my Bool $nested-in-code = False;
+    for @$tag-list {
+      when 'code' {
+        $nested-in-code = True;
+        last;
+      }
+    }
 
     my Int $test-code = $!test-count++;
 
@@ -1013,7 +1084,13 @@ say "R: $line";
     );
 
     my Str $code-text = "skip 'S$test-code', $nbr-skip;\n";
-    $!test-file-content ~= $code-text;
+    if $nested-in-code {
+      $!delayed-code ~= $code-text;
+    }
+
+    else {
+      $!test-file-content ~= $code-text;
+    }
 
     append-element( $!last-defined-pre, :text("skip '"));
     my XML::Element $b = append-element( $!last-defined-pre, 'b');

@@ -4,7 +4,7 @@ $!td.report title='code nesting'
   $p [
     Ok, new test possibilities ahead ...
   ]
-  
+
   $!td.code [=
     my Int \$x = 10;
     $!td.test line='ok $x ~~ Int' [ Type is integer ]
