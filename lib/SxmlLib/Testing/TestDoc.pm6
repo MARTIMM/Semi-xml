@@ -843,10 +843,25 @@ say "R: $line";
     }
 
     my XML::Element $hook = append-element( $!last-defined-pre, 'hook');
-    for $content-body.nodes.reverse {
-      my $l = ~$^a;
-      $l ~~ s:g/^^ $indent //;
-      after-element( $hook, :text("$l\n"));
+    for $content-body.nodes.reverse -> $node {
+      
+      # Check if there are generated elements inside, if so, copy child elements
+      if $node ~~ XML::Element {
+#`{{
+        for $node.nodes.reverse -> $child-node {
+          my $l = $child-node.Str;
+          $l ~~ s:g/^^ $indent //;
+          after-element( $hook, :text("$l\n"));
+        }
+}}
+        $parent.append($node);
+      }
+      
+      else {
+        my $l = ~$node;
+        $l ~~ s:g/^^ $indent //;
+        after-element( $hook, :text("$l\n"));
+      }
     }
 
     $hook.remove;
