@@ -254,6 +254,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
 
         # Process body text to escape special chars
+#`{{
         for $x.nodes -> $node {
           if $node ~~ any( SemiXML::Text, XML::Text) {
             my Str $s = self!process-esc(~$node);
@@ -264,6 +265,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
             $after-math($node);
           }
         }
+}}
       }
 
       $after-math($parent);
@@ -553,6 +555,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       # Substitute many spaces with one space
       $t ~~ s:g/ \s\s+ / / unless $fixed;
 
+      $t = self!process-esc($t);
       $t;
     }
 
@@ -611,7 +614,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
       }
 
-      $esc ~~ s:g/\\//;
+      $esc ~~ s:g/'\\'//;
 
       return $esc;
     }
