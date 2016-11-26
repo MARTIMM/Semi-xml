@@ -257,7 +257,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         # Process attributes to escape special chars
         my %a = $x.attribs;
         for %a.kv -> $k, $v {
-          $x.set( $k, self!process-esc($v));
+          $x.set( $k, self!process-esc( $v, :is-attr));
         }
 
         # Process body text to escape special chars
@@ -605,15 +605,15 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # Substitute some escape characters in entities and remove the remaining
     # backslashes.
     #
-    method !process-esc ( Str $esc is copy --> Str ) {
+    method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
 
       # Entity must be known in the xml result!
       #
       $esc ~~ s:g/\\\\/\&\#x5C;/;
-      $esc ~~ s:g/\\\s/\&nbsp;/;
-      $esc ~~ s:g/\</\&lt;/;
-      $esc ~~ s:g/\>/\&gt;/;
-      $esc ~~ s:g/\"/\&quot;/;
+      $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
+      $esc ~~ s:g/<-[\\]>\</\&lt;/;
+      $esc ~~ s:g/<-[\\]>\>/\&gt;/;
+      $esc ~~ s:g/\"/\&quot;/ if $is-attr;
 
       # Remove rest of the backslashes unless followed by hex numbers prefixed
       # by an 'x'
