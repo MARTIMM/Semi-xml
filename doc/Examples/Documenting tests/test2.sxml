@@ -8,6 +8,15 @@ $!td.report title='code nesting'
   $!td.code [=
     my Int \$x = 10;
     $!td.test line='ok $x ~~ Int' [ Type is integer ]
-    $!td.test line='is $x, 10' [ x is 10 ]
+    $!td.test line='is $x, 10' [! $x is 10 !]
+  ]
+
+  $h3 [Forward we go]
+  $p [jdsg  jsgfjgh sdjhgjsdgf ]
+  
+  $!td.code [=
+    my Int \$y = 10;
+    $!td.test line='ok $y ~~ Int' [ Works too for another Int ]
+    $!td.test line='is $y, 10' [! $y is 10 !]
   ]
 ]

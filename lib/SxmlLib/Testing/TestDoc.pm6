@@ -27,6 +27,11 @@ class Testing::TestDoc {
     EOINIT
 
   has Str $!delayed-code = '';
+  has XML::Element $!delayed-xml = XML::Element.new('<__Delayed__/>');
+
+  # !!!!!
+  has Array $!xml-elements = [];
+  has Array $!code-pieces = [];
 
   state Str $indent;
   has XML::Element $!last-defined-pre;
@@ -846,15 +851,17 @@ say "R: $line";
     for $content-body.nodes.reverse -> $node {
       
       # Check if there are generated elements inside, if so, copy child elements
-      if $node ~~ XML::Element {
-#`{{
-        for $node.nodes.reverse -> $child-node {
-          my $l = $child-node.Str;
-          $l ~~ s:g/^^ $indent //;
-          after-element( $hook, :text("$l\n"));
+say "Node: ", $node.WHAT;
+say "Name: " ~ $node;
+      if $node ~~ XML::Element and $node.name eq '__PARENT_CONTAINER__' {
+        if $node.nodes[0].^can('text') and $node.nodes[0].text ~~ m/^ \d+ $/ {
+          $hook.after($!xml-elements[$node.nodes[0].text.Int]);
         }
-}}
-        $parent.append($node);
+        
+        # ignore and copy only, could be other parts
+        else {
+          $hook.after($node);
+        }
       }
       
       else {
@@ -899,22 +906,30 @@ say "R: $line";
     my Int $test-code = $!test-count++;
     my Str $test-code-text;
     if $!todo-count {
-      self!make-table( $parent, $attrs, :$content-body, :ttype(Todo));
+      self!make-table(
+        $parent, $attrs, :$content-body, :ttype(Todo), :$nested-in-code
+      );
       $test-code-text = 'D';
     }
 
     elsif $!bug-count {
-      self!make-table( $parent, $attrs, :$content-body, :ttype(Bug));
+      self!make-table(
+        $parent, $attrs, :$content-body, :ttype(Bug), :$nested-in-code
+      );
       $test-code-text = 'B';
     }
 
     elsif $!skip-count {
-      self!make-table( $parent, $attrs, :$content-body, :ttype(Skip));
+      self!make-table(
+        $parent, $attrs, :$content-body, :ttype(Skip), :$nested-in-code
+      );
       $test-code-text = 'S';
     }
 
     else {
-      self!make-table( $parent, $attrs, :$content-body, :ttype(Test));
+      self!make-table(
+        $parent, $attrs, :$content-body, :ttype(Test), :$nested-in-code
+      );
       $test-code-text = 'T';
     }
 
@@ -934,18 +949,21 @@ say "R: $line";
 
       # when nested, do not add to the code directly but add to delayed.
       $code-text = "todo '$test-code-text', $nbr-todo;\n";
+      my XML::Node $xn;
       if $nested-in-code {
         $!delayed-code ~= $code-text;
+        $xn = $!delayed-xml;
       }
 
       else {
         $!test-file-content ~= $code-text;
+        $xn = $!last-defined-pre;
       }
 
-      append-element( $!last-defined-pre, :text("todo '"));
-      my XML::Element $b = append-element( $!last-defined-pre, 'b');
+      append-element( $xn, :text("todo '"));
+      my XML::Element $b = append-element( $xn, 'b');
       append-element( $b, :text($test-code-text));
-      append-element( $!last-defined-pre, :text("', $nbr-todo;\n"));
+      append-element( $xn, :text("', $nbr-todo;\n"));
     }
 
     elsif ? $code-text {
@@ -953,20 +971,23 @@ say "R: $line";
       $code-text ~= ",";
       my $line = $code-text;
       $code-text ~= " '$test-code-text';\n";
+      my XML::Node $xn;
       if $nested-in-code {
         $!delayed-code ~= $code-text;
+        $xn = $!delayed-xml;
       }
 
       else {
         $!test-file-content ~= $code-text;
+        $xn = $!last-defined-pre;
       }
 
       $line ~= " '";
 
-      append-element( $!last-defined-pre, :text($line));
-      my XML::Element $b = append-element( $!last-defined-pre, 'b');
+      append-element( $xn, :text($line));
+      my XML::Element $b = append-element( $xn, 'b');
       append-element( $b, :text($test-code-text));
-      append-element( $!last-defined-pre, :text("';\n"));
+      append-element( $xn, :text("';\n"));
     }
 
     $!todo-count-- if $!todo-count > 0;
@@ -1006,18 +1027,21 @@ say "R: $line";
     );
 
     my Str $code-text = "todo 'D$test-code', $nbr-todo;\n";
+    my XML::Node $xn;
     if $nested-in-code {
       $!delayed-code ~= $code-text;
+      $xn = $!delayed-xml;
     }
 
     else {
       $!test-file-content ~= $code-text;
+      $xn = $!last-defined-pre;
     }
 
-    append-element( $!last-defined-pre, :text("todo '"));
-    my XML::Element $b = append-element( $!last-defined-pre, 'b');
+    append-element( $xn, :text("todo '"));
+    my XML::Element $b = append-element( $xn, 'b');
     append-element( $b, :text("D$test-code"));
-    append-element( $!last-defined-pre, :text("', $nbr-todo;\n"));
+    append-element( $xn, :text("', $nbr-todo;\n"));
 
     $parent;
   }
@@ -1052,18 +1076,21 @@ say "R: $line";
     );
 
     my Str $code-text = "todo 'B$test-code', $nbr-bugs;\n";
+    my XML::Node $xn;
     if $nested-in-code {
       $!delayed-code ~= $code-text;
+      $xn = $!delayed-xml;
     }
 
     else {
       $!test-file-content ~= $code-text;
+      $xn = $!last-defined-pre;
     }
 
-    append-element( $!last-defined-pre, :text("todo '"));
-    my XML::Element $b = append-element( $!last-defined-pre, 'b');
+    append-element( $xn, :text("todo '"));
+    my XML::Element $b = append-element( $xn, 'b');
     append-element( $b, :text("B$test-code"));
-    append-element( $!last-defined-pre, :text("', $nbr-bugs;\n"));
+    append-element( $xn, :text("', $nbr-bugs;\n"));
 
     $parent;
   }
@@ -1099,22 +1126,99 @@ say "R: $line";
     );
 
     my Str $code-text = "skip 'S$test-code', $nbr-skip;\n";
+    my XML::Node $xn;
     if $nested-in-code {
       $!delayed-code ~= $code-text;
+      $xn = $!delayed-xml;
     }
 
     else {
       $!test-file-content ~= $code-text;
+      $xn = $!last-defined-pre;
     }
 
-    append-element( $!last-defined-pre, :text("skip '"));
-    my XML::Element $b = append-element( $!last-defined-pre, 'b');
+    append-element( $xn, :text("skip '"));
+    my XML::Element $b = append-element( $xn, 'b');
     append-element( $b, :text("S$test-code"));
-    append-element( $!last-defined-pre, :text("', $nbr-skip;\n"));
+    append-element( $xn, :text("', $nbr-skip;\n"));
 
     $parent;
   }
 
+#`{{
+  #-----------------------------------------------------------------------------
+  method !process-statement (
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Element :$content-body,
+    Array :$tag-list,
+    TestType :$ttype
+  ) {
+
+    if not Test {
+      my Str $txt = '';
+      given $ttype {
+        when Todo { $txt = 'todo'; }
+        when Bug { $txt = 'bug'; }
+        when Skip { $txt = 'skip'; }
+      }
+
+      die "Cannot have $txt here when still todo, bug or skip lines are active"
+        if $!todo-count or $!bug-count or $!skip-count;
+    }
+
+    my Bool $nested-in-code = False;
+    for @$tag-list {
+      when 'code' {
+        $nested-in-code = True;
+        last;
+      }
+    }
+
+
+    my Int $test-code = $!test-count++;
+
+    my Int $nbr-stmnts = $attrs<n>:exists ?? $attrs<n>.Int !! 1;
+    my Int $test-lines = $attrs<tl>:exists ?? $attrs<tl>.Int !! $nbr-stmnts;
+    given $ttype {
+      when Todo { $!todo-count = $test-lines; }
+      when Bug { $!bug-count = $test-lines; }
+      when Skip { $!skip-count = $test-lines; }
+    }
+
+    self!make-table(
+      $parent, $attrs, :$content-body,
+      :start, :start-count($nbr-stmnts), :$ttype
+    );
+
+    if not Test {
+      my Str $txt = '';
+      given $ttype {
+        when Todo { $txt = 'todo'; }
+        when Bug { $txt = 'todo'; }
+        when Skip { $txt = 'skip'; }
+      }
+    }
+    my Str $code-text = "skip 'S$test-code', $nbr-skip;\n";
+    my XML::Node $xn;
+    if $nested-in-code {
+      $!delayed-code ~= $code-text;
+      $xn = $!delayed-xml;
+    }
+
+    else {
+      $!test-file-content ~= $code-text;
+      $xn = $!last-defined-pre;
+    }
+
+    append-element( $xn, :text("skip '"));
+    my XML::Element $b = append-element( $xn, 'b');
+    append-element( $b, :text("S$test-code"));
+    append-element( $xn, :text("', $nbr-skip;\n"));
+
+    $parent;
+  }
+}}
   #-----------------------------------------------------------------------------
   method !make-table (
     XML::Element $parent,
@@ -1122,7 +1226,8 @@ say "R: $line";
     XML::Element :$content-body,
     Bool :$start = False,
     Int :$start-count = 1,
-    TestType :$ttype
+    TestType :$ttype,
+    Bool :$nested-in-code
   ) {
 
     my Str $tcode;
@@ -1133,8 +1238,25 @@ say "R: $line";
       when Skip { $tcode = 'S'; }
     }
 
+    my XML::Element $p;
+    if $nested-in-code {
+      $p .= new;
+      $!xml-elements.push($p);
+
+#      my $t = append-element( $parent, "$ttype");
+#      append-element( $t, :text($!xml-elements.end.Str));
+#say "Save loc: $t";
+      append-element( $parent, :text($!xml-elements.end.Str));
+say "Save loc: $parent";
+    }
+    
+    else {
+      $p = $parent;
+    }
+
+
     my XML::Element $table = append-element(
-      $parent, 'table', {class => 'test-table'}
+      $p, 'table', {class => 'test-table'}
     );
 
     my XML::Element $tr = append-element( $table, 'tr');
