@@ -1,0 +1,36 @@
+@startuml
+
+'-------------------------------------------------------------------------------
+'Classes
+'-------------------------------------------------------------------------------
+participant "SemiXML::Actions" as act
+
+
+'-------------------------------------------------------------------------------
+'Actions
+'-------------------------------------------------------------------------------
+act -> Report : initialize
+
+act -> Test : add test 1
+act -> Test : add test 2
+
+
+
+act -> Code : add code 1
+loop over Code lines
+
+alt perl6 code
+Report <- Code : store code
+Report <- Code : store Code XML
+else test line
+Code <- Test : get test data
+Report <- Code : store code
+Report <- Code : store Code XML
+Report <- Code : store Report XML
+end
+
+end
+
+
+
+@enduml

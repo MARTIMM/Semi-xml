@@ -2,14 +2,14 @@
 
 class Report
 
-class CodePiece
+class Code
 
-class ReportPiece
+class Test
 
 
 
-Report "1" *-- "*" CodePiece
-Report "1" *-- "*" ReportPiece
+Report "1" o-- "*" Code
+Report "1" o-- "*" Test
 
 
 
