@@ -8,8 +8,8 @@ $!report.overview
 
   $!code.add [=
     my Int \$x = 10;
-    $!test.add line='ok $x ~~ Int' [ Type is integer ]
-    $!test.add line='is $x, 10' [! $x is 10 !]
+    $!test.add t='ok $x ~~ Int' [ Type $b[is] integer ]
+    $!test.add t='is $x, 10' [! $x is 10 !]
   ]
 
   $h3 [Forward we go]
@@ -17,7 +17,7 @@ $!report.overview
 
   $!code.add [=
     my Int \$y = 10;
-    $!test.add line='ok $y ~~ Int' [ Works too for another Int ]
-    $!test.add line='is $y, 10' [! $y is 10 !]
+    $!test.add t='ok $y ~~ Int' [ Works too for another Int ]
+    $!test.add t='is $y, 10' [! $y is 10 !]
   ]
 ]
