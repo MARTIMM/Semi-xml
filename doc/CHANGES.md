@@ -2,6 +2,9 @@
 
 * 0.23.0
   * Dropped the use of $.mod.symbol-access. There is less to none use for it.
+  * Add optional initializing() method to sxml modules ($!) with the attributes and SemiXML::Sxml object. These are called as soon as the tag and attributes are parsed. Later when the body is parsed the call to the method of that module is called.
+  * Add get-sxml-object('class name') to Actions class
+  * Add get-sxml-object handle in SemiXML::Sxml to call method.
 * 0.22.0
   * Added module to make test reports. It gives the possibility to describe the tests and define them as well as run them. The results are shown at the end of the generated document and also written into a metric file. This will be used to make a summary report.
 * 0.21.0

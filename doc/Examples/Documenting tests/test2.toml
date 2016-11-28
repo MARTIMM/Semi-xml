@@ -8,4 +8,6 @@
   pdf           = 'wkhtmltopdf - %of.pdf'
 
 [module]
-  td            = 'SxmlLib::Testing::TestDoc'
+  report        = 'SxmlLib::Testing::Report'
+  test          = 'SxmlLib::Testing::Test'
+  code          = 'SxmlLib::Testing::Code'

@@ -178,8 +178,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #TODO comments
   class Actions {
 
+    # Caller SemiXML::Sxml object
+    has $!sxml-obj;
+
     # Objects hash with one predefined object for core methods
-    #
     has Hash $.objects = { SxmlCore => SemiXML::SxmlCore.new() };
     has Hash $.config is rw = {};
     has XML::Document $!xml-document;
@@ -197,6 +199,11 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # added because these can be any name defined by the user.
     #
     has Array $!tag-list = [];
+
+    #---------------------------------------------------------------------------
+    submethod BUILD ( :$sxml-obj ) {
+      $!sxml-obj = $sxml-obj;
+    }
 
     #---------------------------------------------------------------------------
     method init-doc ( $match ) {
@@ -314,44 +321,35 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         when '$!' {
 
           # Get the module if it exists
-          my $module = $!objects{$mod} if $!objects{$mod}:exists;
+          my $module = self!can-method( $mod, $meth, :!optional);
 
-          # check it
-          if $module.defined {
+          # When module and/or method is not found an error is generated in the
+          # form of XML.
+          if $module ~~ XML::Element {
+            $x = $module;
+          }
 
-            # test if symbols accessor exists in module
-            if $module.^can($meth) {
+          # Otherwise it is the module on which method can be called
+          else {
 
-              # call user method and expect result in $x
-              $x = $module."$meth"(
-                XML::Element.new(:name('__PARENT_CONTAINER__')),
-                $att,
-                :content-body( self!build-content-body(
-                    $match<tag-body>.ast,
-                    XML::Element.new(:name('__BODY_CONTAINER__'))
-                  )
-                ),
-                :$!tag-list
-              );
+            # call user method and expect result in $x
+            $x = $module."$meth"(
+              XML::Element.new(:name('__PARENT_CONTAINER__')),
+              $att,
+              :content-body( self!build-content-body(
+                  $match<tag-body>.ast,
+                  XML::Element.new(:name('__BODY_CONTAINER__'))
+                )
+              ),
+              :$!tag-list
+            );
 
-              if not $x.defined {
-                $x .= new(
-                  :name('method-returned-no-result'),
-                  :attribs( module => $mod, method => $meth)
-                );
-              }
-            }
-
-            else {
+            if not $x.defined {
               $x .= new(
-                :name('undefined-method'),
+                :name('method-returned-no-result'),
                 :attribs( module => $mod, method => $meth)
               );
             }
-          }
-
-          else {
-            $x .= new( :name('undefined-module'), :attribs(module => $mod));
           }
         }
       }
@@ -421,6 +419,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Str $symbol = $match<tag><sym>.Str;
       $ast.push: $symbol;
 
+      my Hash $attrs = {};
+      for $match<attributes>.caps -> $as {
+        next unless $as<attribute>:exists;
+        my $a = $as<attribute>;
+        my $av = $a<attr-value-spec><attr-value>.Str;
+        $attrs{$a<attr-key>.Str} = $av;
+      }
+
       if $symbol ~~ any(< $** $|* $*| $ >) {
 
         my $tn = $match<tag><tag-name>;
@@ -433,23 +439,62 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         my $tn = $match<tag>;
         $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
         $tag-name = $tn<meth-name>.Str;
+
+
+        # Check if there is a method initialize in the module. If so call it
+        # with the found attributes.
+        my $module = self!can-method( $tn<mod-name>.Str, 'initialize');
+        $module.initialize( $!sxml-obj, $attrs) if $module;
       }
 
       # Add to the list
       $!tag-list.push($tag-name);
 
-      my Hash $attrs = {};
-      for $match<attributes>.caps -> $as {
-        next unless $as<attribute>:exists;
-        my $a = $as<attribute>;
-        my $av = $a<attr-value-spec><attr-value>.Str;
-        $attrs{$a<attr-key>.Str} = $av;
-      }
-
       $ast.push: $attrs;
 
       # Set AST on node tag-name
       $match.make($ast);
+    }
+
+    #---------------------------------------------------------------------------
+    # Return object if module and method is found. Otherwise return Any
+    method !can-method ( Str $mod-name, $meth-name, Bool :$optional = True ) {
+
+      my XML::Element $x;
+
+      my $module = $!objects{$mod-name} if $!objects{$mod-name}:exists;
+
+      if $module.defined {
+        if $module.^can($meth-name) {
+          $module;
+        }
+
+        else {
+          $x .= new(
+            :name('undefined-method'),
+            :attribs( module => $mod-name, method => $meth-name)
+          ) unless $optional;
+        }
+      }
+
+      else {
+        $x .= new( :name('undefined-module'), :attribs(module => $mod-name))
+          unless $optional;
+      }
+    }
+
+    #---------------------------------------------------------------------------
+    method get-sxml-object ( Str $class-name ) {
+
+      my $object;
+      for $!objects.keys -> $ok {
+        if $!objects{$ok}.^name eq $class-name {
+          $object = $!objects{$ok};
+          last;
+        }
+      }
+      
+      $object;
     }
 
     #---------------------------------------------------------------------------

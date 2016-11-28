@@ -16,14 +16,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     our $debug = False;
 
     has SemiXML::Grammar $!grammar;
-    has SemiXML::Actions $.actions;
+    has SemiXML::Actions $.actions handles <get-sxml-object>;
 
     has Hash $.styles;
     has Config::DataLang::Refine $configuration;
 
     submethod BUILD ( ) {
       $!grammar .= new;
-      $!actions .= new;
+      $!actions .= new(:sxml-obj(self));
 
       my Str $rsrc-bn = %?RESOURCES<SemiXML.toml>.IO.basename;
       my Str $rsrc-p = %?RESOURCES<SemiXML.toml>.IO.abspath;

@@ -1,22 +1,23 @@
-$!td.report title='code nesting'
-            test-file='doc/Examples/Documenting tests/test2.t' [
+$!report.overview
+    title='code nesting'
+    test-file='doc/Examples/Documenting tests/test2.t' [
 
   $p [
     Ok, new test possibilities ahead ...
   ]
 
-  $!td.code [=
+  $!code.add [=
     my Int \$x = 10;
-    $!td.test line='ok $x ~~ Int' [ Type is integer ]
-    $!td.test line='is $x, 10' [! $x is 10 !]
+    $!test.add line='ok $x ~~ Int' [ Type is integer ]
+    $!test.add line='is $x, 10' [! $x is 10 !]
   ]
 
   $h3 [Forward we go]
   $p [jdsg  jsgfjgh sdjhgjsdgf ]
-  
-  $!td.code [=
+
+  $!code.add [=
     my Int \$y = 10;
-    $!td.test line='ok $y ~~ Int' [ Works too for another Int ]
-    $!td.test line='is $y, 10' [! $y is 10 !]
+    $!test.add line='ok $y ~~ Int' [ Works too for another Int ]
+    $!test.add line='is $y, 10' [! $y is 10 !]
   ]
 ]
