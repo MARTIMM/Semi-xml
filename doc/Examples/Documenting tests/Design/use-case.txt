@@ -1,5 +1,8 @@
 @startuml
 
+'-------------------------------------------------------------------------------
+'Use cases
+'-------------------------------------------------------------------------------
 usecase report as "generate report
 --
 Gather all code and test it
@@ -24,6 +27,9 @@ usecase txt_metrics as "text
 Generated metrics from test result"
 
 
+'-------------------------------------------------------------------------------
+'Actors
+'-------------------------------------------------------------------------------
 actor :General test\nstatement: as test <<SemiXML>>
 actor :Todo statement: as todo <<SemiXML>>
 actor :Bug statement: as bug <<SemiXML>>
@@ -31,6 +37,9 @@ actor :Skip statement: as skip <<SemiXML>>
 actor :extra code: as cextra <<SemiXML>>
 
 
+'-------------------------------------------------------------------------------
+'Connectioms
+'-------------------------------------------------------------------------------
 cextra <|-- test
 test <|-- todo
 test <|-- skip
