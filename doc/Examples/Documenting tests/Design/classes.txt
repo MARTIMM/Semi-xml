@@ -1,0 +1,19 @@
+@startuml
+
+class Report
+
+class CodePiece
+
+class ReportPiece
+
+
+
+Report "1" *-- "*" CodePiece
+Report "1" *-- "*" ReportPiece
+
+
+
+
+
+
+@enduml
