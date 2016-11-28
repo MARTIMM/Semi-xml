@@ -22,7 +22,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     rule tag-spec { <tag> <attributes> }
 
     proto token tag {*}
-    token tag:sym<$.>   { <sym> <mod-name> '.' <sym-name> }
     token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
     token tag:sym<$|*>  { <sym> <tag-name> }
     token tag:sym<$*|>  { <sym> <tag-name> }

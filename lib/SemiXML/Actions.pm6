@@ -36,8 +36,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
   #
   class SxmlCore {
 
-    has Hash $.symbols = {};
-
     # $!SxmlCore.date year=nn month=nn day=nn []
     #
     method date ( XML::Element $parent,
@@ -267,21 +265,19 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
 
         # Process body text to escape special chars
-#`{{
         for $x.nodes -> $node {
           if $node ~~ any( SemiXML::Text, XML::Text) {
-            my Str $s = self!process-esc(~$node);
-            $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
+#            my Str $s = self!process-esc(~$node);
+#            $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
           }
 
           elsif $node ~~ XML::Element {
             $after-math($node);
           }
         }
-}}
       }
 
-      $after-math($parent);
+      &$after-math($parent);
 
       # Return the completed report
       $!xml-document .= new($parent);
@@ -299,7 +295,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       ( my $tt,                 # tag type
         my $ns, my $tn,         # namespace and tag name
-        my $mod, my $symmth,    # module and symbol or method
+        my $mod, my $meth,      # module and method
         my $att                 # attributes
       ) = @($match<tag-spec>.ast);
 
@@ -314,37 +310,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           $x .= new( :name($tag), :attribs(%$att));
         }
 
-        # Substitution tag
-        when '$.' {
-
-          my $module = $!objects{$mod} if $!objects{$mod}:exists;
-
-          # Check if module exists
-          if $module.defined {
-
-            # Test if symbols accessor exists in module
-            if $module.^can('symbols') {
-              my Str $tn = $!objects{$mod}.symbols{$symmth}<tag-name>;
-              my Hash $at = $!objects{$mod}.symbols{$symmth}<attributes> // {};
-              $x .= new( :name($tn), :attribs( |%$at, |%$att));
-            }
-
-            else {
-              $x .= new(
-                :name('undefined-method'),
-                :attribs( module => $mod, :method<symbols>)
-              );
-            }
-          }
-
-          else {
-            $x .= new(
-              :name('undefined-module'),
-              :attribs(module => $mod)
-            );
-          }
-        }
-
         # Method tag
         when '$!' {
 
@@ -355,10 +320,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           if $module.defined {
 
             # test if symbols accessor exists in module
-            if $module.^can($symmth) {
+            if $module.^can($meth) {
 
               # call user method and expect result in $x
-              $x = $module."$symmth"(
+              $x = $module."$meth"(
                 XML::Element.new(:name('__PARENT_CONTAINER__')),
                 $att,
                 :content-body( self!build-content-body(
@@ -372,7 +337,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
               if not $x.defined {
                 $x .= new(
                   :name('method-returned-no-result'),
-                  :attribs( module => $mod, method => $symmth)
+                  :attribs( module => $mod, method => $meth)
                 );
               }
             }
@@ -380,7 +345,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
             else {
               $x .= new(
                 :name('undefined-method'),
-                :attribs( module => $mod, method => $symmth)
+                :attribs( module => $mod, method => $meth)
               );
             }
           }
@@ -392,7 +357,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       # For all types but methods
-      if $tt ~~ any(< $ $** $*| $|* $. >) {
+      if $tt ~~ any(< $ $** $*| $|* >) {
 
         # Check for xmlns uri definitions and set them on the current node
         for $att.keys {
@@ -461,13 +426,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         my $tn = $match<tag><tag-name>;
         $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
         $tag-name = $tn<element>.Str;
-      }
-
-      elsif $symbol eq '$.' {
-
-        my $tn = $match<tag>;
-        $ast.push: '', '', $tn<mod-name>.Str, $tn<sym-name>.Str;
-        $tag-name = $tn<sym-name>.Str;
       }
 
       elsif $symbol eq '$!' {
@@ -582,7 +540,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $t ~~ s:g/ \s\s+ / / unless $fixed;
 
       $t = self!process-esc($t);
-      $t;
     }
 
     #---------------------------------------------------------------------------
@@ -614,7 +571,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
 
       # Entity must be known in the xml result!
-      #
       $esc ~~ s:g/\\\\/\&\#x5C;/;
       $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
       $esc ~~ s:g/<-[\\]>\</\&lt;/;
