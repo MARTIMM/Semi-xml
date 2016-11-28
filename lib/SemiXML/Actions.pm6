@@ -237,8 +237,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       # Process top level method container
-      if $parent.name() eq '__PARENT_CONTAINER__' {
-        if $parent.nodes == 1 {
+      if $parent.name eq '__PARENT_CONTAINER__' {
+        if +$parent.nodes == 0 {
+          # No nodes generated
+          $parent = XML::Element.new;
+        }
+
+        elsif +$parent.nodes == 1 {
+          # One node generated
           $parent = $parent.nodes[0];
         }
 
