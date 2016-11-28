@@ -134,15 +134,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $content ~~ s/^\s+//;
       $content ~~ s/\s+$//;
 
-      # Get user introduced attribute information
-      for self.^attributes -> $class-attr {
-        given $class-attr.name {
-          when '$!styles' {
-            $!styles = $class-attr.get_value(self);
-          }
-        }
-      }
-
       # Check if modules needs to be instantiated in the config
       $!actions.process-config-for-modules;
 
