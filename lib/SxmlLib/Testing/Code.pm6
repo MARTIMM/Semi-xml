@@ -4,11 +4,11 @@ use SemiXML;
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
-my Array $xml-parts = [ ];
-my Array $code-parts = [ ];
-
 #-------------------------------------------------------------------------------
 class Code {
+
+  has Array $!parts = [ ];
+  has Int $!count = 0;
 
   has $!test-obj;
 
@@ -30,8 +30,23 @@ print "\n";
     --> XML::Node
   ) {
   
-say "C: $parent";
-say "B: ", ~$content-body;
+#say "C: $parent";
+#say "B: ", ~$content-body;
+
+    $!parts.push: { code => $content-body, };
+
+    my XML::Element $c = append-element( $parent, 'code');
+    append-element( $c, :text($!count.Str));
+
+#say $!parts.elems;
+    $!count++;
     $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
+  method get-code-part ( Int $entry --> XML::Element ) {
+
+    $!parts[$entry]<code>;
   }
 }

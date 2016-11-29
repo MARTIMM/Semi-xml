@@ -222,7 +222,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my $parent = $match<document>.ast;
 
       # Cleanup residue tags left from processing methods. The childnodes in
-      #'__PARENT_CONTAINER__' tags must be moved to the parent of it. There
+      # '__PARENT_CONTAINER__' tags must be moved to the parent of it. There
       # is one exception, that is when the tag is at the top. Then there may
       # only be one tag. If there are more, an error tag is generated.
       #
@@ -238,6 +238,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           $node.parent.after( $node, $^a);
         }
 
+        # Remove the now empty element
         $node.parent.removeChild($node);
       }
 
@@ -261,7 +262,26 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           );
         }
       }
+#`{{
+      # Do the same for leftover BODY_CONTAINERs
+      $containers = $parent.getElementsByTagName('__BODY_CONTAINER__');
+      for @$containers -> $node {
 
+        my $children = $node.nodes;
+
+        # Eat from the end of the list and add just after the container element.
+        # Somehow they get lost from the array when done otherwise.
+        #
+        for @$children.reverse {
+          $node.parent.after( $node, $^a);
+        }
+
+        # Remove the now empty element
+        $node.parent.removeChild($node);
+      }
+say "\nTOP:\n$parent";
+say "\n";
+}}
       # Conversion to xml escapes is done as late as possible
       my Sub $after-math = sub ( XML::Element $x ) {
 
@@ -338,7 +358,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
               $att,
               :content-body( self!build-content-body(
                   $match<tag-body>.ast,
-                  XML::Element.new(:name('__BODY_CONTAINER__'))
+#                  XML::Element.new(:name('__BODY_CONTAINER__'))
+                  XML::Element.new(:name('__PARENT_CONTAINER__'))
                 )
               ),
               :$!tag-list
@@ -380,6 +401,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     ) {
 
       for @$ast {
+#say "\nAst";
+#.say;
         # Any piece of found text
         when Str {
           $parent.append(SemiXML::Text.new(:text($_))) if ?$_;

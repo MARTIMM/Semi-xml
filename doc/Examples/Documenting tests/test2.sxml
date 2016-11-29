@@ -1,10 +1,8 @@
-$!report.overview
-    title='code nesting'
+$!report.run
+    title='Code Nesting'
     test-file='doc/Examples/Documenting tests/test2.t' [
 
-  $p [
-    Ok, new test possibilities ahead ...
-  ]
+  $p [ Ok, new test possibilities ahead ... ]
 
   $!code.add [=
     my Int \$x = 10;
@@ -12,8 +10,8 @@ $!report.overview
     $!test.add t='is $x, 10' [! $x is 10 !]
   ]
 
-  $h3 [Forward we go]
-  $p [jdsg  jsgfjgh sdjhgjsdgf ]
+  $h3 [ Forward we go ]
+  $p [ jdsg  jsgfjgh sdjhgjsdgf ]
 
   $!code.add [=
     my Int \$y = 10;
