@@ -9,5 +9,7 @@
 
 [module]
   report        = 'SxmlLib::Testing::Report'
-  test          = 'SxmlLib::Testing::Test'
   code          = 'SxmlLib::Testing::Code'
+  test          = 'SxmlLib::Testing::Test'
+  todo          = 'SxmlLib::Testing::Todo'
+  lorem         = 'SxmlLib::LoremIpsum'

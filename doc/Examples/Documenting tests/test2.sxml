@@ -2,20 +2,22 @@ $!report.run
     title='Code Nesting'
     test-file='doc/Examples/Documenting tests/test2.t' [
 
-  $p [ Ok, new test possibilities ahead ... ]
+  $h2 [ $!lorem.sentence [] ]
+  $p [ $!lorem.samuel-ipsum [] ]
 
   $!code.add [=
     my Int \$x = 10;
-    $!test.add t='ok $x ~~ Int' [ Type $b[is] integer ]
-    $!test.add t='is $x, 10' [! $x is 10 !]
+    $!test.add t='ok $x ~~ Int' [ $!lorem.sentences n=3 [] ]
+    $!todo.add n=1 [ $!lorem.cupcake-ipsum [] ]
+    $!test.add t='is $x, 10' [ $!lorem.sentences n=3 [] ]
   ]
 
-  $h3 [ Forward we go ]
-  $p [ jdsg  jsgfjgh sdjhgjsdgf ]
+  $h3 [ $!lorem.sentence [] ]
+  $!lorem.paragraph n=2 []
 
   $!code.add [=
     my Int \$y = 10;
-    $!test.add t='ok $y ~~ Int' [ Works too for another Int ]
-    $!test.add t='is $y, 10' [! $y is 10 !]
+    $!test.add t='ok $y ~~ Int' [ $!lorem.sentences n=3 [] ]
+    $!test.add t='is $y, 10' [ $!lorem.veggie-ipsum [] ]
   ]
 ]

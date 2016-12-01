@@ -1,5 +1,6 @@
 use v6.c;
 use SemiXML;
+use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
@@ -10,6 +11,7 @@ class Code {
   has Array $!parts = [ ];
   has Int $!count = 0;
 
+#`{{
   has $!test-obj;
 
   #-----------------------------------------------------------------------------
@@ -21,6 +23,7 @@ print "\n";
 
     $!test-obj = $sxml.get-sxml-object('SxmlLib::Testing::Test');
   }
+}}
 
   #-----------------------------------------------------------------------------
   method add (
