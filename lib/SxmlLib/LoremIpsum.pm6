@@ -1,28 +1,44 @@
 use v6.c;
 
 use SemiXML;
-#use XML;
 
-# Not yet available for perl 6
-#use Text::Lorem;
-
-# Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
-# to fail not finding the symbol &File when doing so.
-#
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 class LoremIpsum {
-  has Hash $.symbols = {};
+  has Str $!perl5-lorem = Q:to/EOIPSUM/;
+        alias consequatur aut perferendis sit voluptatem accusantium doloremque
+        aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto
+        beatae vitae dicta sunt explicabo. aspernatur aut odit aut fugit, sed
+        quia consequuntur magni dolores eos qui ratione voluptatem sequi
+        nesciunt. Neque dolorem ipsum quia dolor sit amet, consectetur, adipisci
+        velit, sed quia non numquam eius modi tempora incidunt ut labore et
+        dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis
+        nostrum exercitationem ullam corporis Nemo enim ipsam voluptatem quia
+        voluptas sit suscipit laboriosam, nisi ut aliquid ex ea commodi
+        consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate
+        velit esse quam nihil molestiae  et iusto odio dignissimos ducimus qui
+        blanditiis praesentium laudantium, totam rem voluptatum deleniti atque
+        corrupti quos dolores et quas molestias excepturi sint occaecati
+        cupiditate non provident, Sed ut perspiciatis unde omnis iste natus
+        error similique sunt in culpa qui officia deserunt mollitia animi, id
+        est laborum et dolorum fuga. Et harum quidem rerum facilis est et
+        expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi
+        optio cumque nihil impedit quo porro quisquam est, qui minus id quod
+        maxime placeat facere possimus, omnis voluptas assumenda est, omnis
+        dolor repellendus. Temporibus autem quibusdam et aut consequatur, vel
+        illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et
+        accusamus officiis debitis aut rerum necessitatibus saepe eveniet ut et
+        voluptates repudiandae sint et molestiae non recusandae. Itaque earum
+        rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus
+        maiores doloribus asperiores repellat.
+        EOIPSUM
+
+  has Int $!lorem-length = $!perl5-lorem.chars;
 
   #-----------------------------------------------------------------------------
-  method show ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+  method standard1500 ( XML::Element $parent, Hash $attrs --> XML::Element ) {
 
-    my $type = $attrs<type> // 'sentence';
-    my $size = $attrs<size> // 1;
-    my $ipsum;
-
-    if $type eq 'standard-1500' {
-      $ipsum = Q:to/EOIPSUM/;
+    my Str $ipsum = Q:to/EOIPSUM/;
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
         eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
         ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -31,10 +47,18 @@ class LoremIpsum {
         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
         culpa qui officia deserunt mollit anim id est laborum.
         EOIPSUM
-    }
 
-    elsif $type eq 'Cicero-45BC-1.10.32' {
-      $ipsum = Q:to/EOIPSUM/;
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method cicero45bc (
+    XML::Element $parent,
+    Hash $attrs --> XML::Element
+  ) {
+
+    my Str $ipsum = Q:to/EOIPSUM/;
         Sed ut perspiciatis unde omnis iste natus error sit voluptatem
         accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
         quae ab illo inventore veritatis et quasi architecto beatae vitae
@@ -50,87 +74,87 @@ class LoremIpsum {
         consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla
         pariatur?
         EOIPSUM
-    }
 
-    elsif $type eq 'Cicero-45BC-1.10.33' {
-      $ipsum = Q:to/EOIPSUM/;
-        Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-        accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-        quae ab illo inventore veritatis et quasi architecto beatae vitae
-        dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
-        aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
-        eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est,
-        qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit,
-        sed quia non numquam eius modi tempora incidunt ut labore et dolore
-        magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis
-        nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut
-        aliquid ex ea commodi consequatur? Quis autem vel eum iure
-        reprehenderit qui in ea voluptate velit esse quam nihil molestiae
-        consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla
-        pariatur?
-        EOIPSUM
-    }
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
 
-    elsif $type eq 'paragraphs' {
-#        my $tl = Text::Lorem->new;
-#        $ipsum = $tl->paragraphs($size);
-      $ipsum = "Paragraphs not yet implemented";
-    }
+  #-----------------------------------------------------------------------------
+  method cupcake-ipsum ( XML::Element $parent, Hash $attrs --> XML::Element ) {
 
-    elsif $type eq 'sentences' {
-#        my $tl = Text::Lorem->new;
-#        $ipsum = $tl->sentences($size);
-      $ipsum = "Sentences not yet implemented";
-    }
-
-    elsif $type eq 'words' {
-#        my $tl = Text::Lorem->new;
-#        $ipsum = $tl->words($size);
-      $ipsum = "Words not yet implemented";
-    }
-
-    elsif $type eq 'cupcake-ipsum' {
-      $ipsum = Q:to/EOIPSUM/;
+    my Str $ipsum = Q:to/EOIPSUM/;
         Cupcake ipsum dolor sit. Amet I love liquorice jujubes pudding
         croissant I love pudding. Apple pie macaroon toffee jujubes pie tart
         cookie applicake caramels. Halvah macaroon I love lollipop. Wypas I
         love pudding brownie cheesecake tart jelly-o. Bear claw cookie
         chocolate bar jujubes toffee.
         EOIPSUM
-    }
 
-    elsif $type eq 'samuel-l-ipsum' {
-      $ipsum = Q:to/EOIPSUM/;
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method samuel-ipsum (
+    XML::Element $parent,
+    Hash $attrs --> XML::Element
+  ) {
+
+    my Str $ipsum = Q:to/EOIPSUM/;
         Now that there is the Tec-9, a crappy spray gun from South Miami.
         This gun is advertised as the most popular gun in American crime. Do
         you believe that shit? It actually says that in the little book that
         comes with it: the most popular gun in American crime. Like they're
         actually proud of that shit.
         EOIPSUM
-    }
 
-    elsif $type eq 'bacon-ipsum' {
-      $ipsum = Q:to/EOIPSUM/;
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method bacon-ipsum (
+    XML::Element $parent,
+    Hash $attrs --> XML::Element
+  ) {
+
+    my Str $ipsum = Q:to/EOIPSUM/;
         Bacon ipsum dolor sit amet salami jowl corned beef, andouille flank
         tongue ball tip kielbasa pastrami tri-tip meatloaf short loin beef
         biltong. Cow bresaola ground round strip steak fatback meatball
         shoulder leberkas pastrami sausage corned beef t-bone pork belly
         drumstick.
         EOIPSUM
-    }
 
-    elsif $type eq 'tuna-ipsum' {
-      $ipsum = Q:to/EOIPSUM/;
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method tuna-ipsum (
+    XML::Element $parent,
+    Hash $attrs --> XML::Element
+  ) {
+
+    my Str $ipsum = Q:to/EOIPSUM/;
         Moonfish, steelhead, lamprey southern flounder tadpole fish sculpin
         bigeye, blue-redstripe danio collared dogfish. Smalleye squaretail
         goldfish arowana butterflyfish pipefish wolf-herring jewel tetra,
         shiner; gibberfish red velvetfish. Thornyhead yellowfin pike
         threadsail ayu cutlassfish.
         EOIPSUM
-    }
 
-    elsif $type eq 'veggie-ipsum' {
-      $ipsum = Q:to/EOIPSUM/;
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method veggie-ipsum (
+    XML::Element $parent,
+    Hash $attrs --> XML::Element
+  ) {
+
+    my Str $ipsum = Q:to/EOIPSUM/;
         Veggies sunt bona vobis, proinde vos postulo esse magis grape pea
         sprouts horseradish courgette maize spinach prairie turnip jicama
         coriander quandong gourd broccoli seakale gumbo. Parsley corn
@@ -138,10 +162,18 @@ class LoremIpsum {
         prairie turnip j\N{U+00ED}cama coriander quandong burdock avocado
         sea lettuce. Garbanzo tigernut earthnut pea fennel.
         EOIPSUM
-    }
 
-    elsif $type eq 'cheese-ipsum' {
-      $ipsum = Q:to/EOIPSUM/;
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method cheese-ipsum (
+    XML::Element $parent,
+    Hash $attrs --> XML::Element
+  ) {
+
+    my Str $ipsum = Q:to/EOIPSUM/;
         I love cheese, especially airedale queso. Cheese and biscuits
         halloumi cauliflower cheese cottage cheese swiss boursin fondue
         caerphilly. Cow port-salut camembert de normandie macaroni cheese
@@ -149,15 +181,91 @@ class LoremIpsum {
         boursin squirty cheese jarlsberg blue castello caerphilly chalk
         and cheese. Lancashire.
         EOIPSUM
-    }
-
-    else {
-      $ipsum = "Type $type not supported";
-    }
 
     $parent.append(XML::Text.new(:text($ipsum)));
     $parent;
   }
+
+  #-----------------------------------------------------------------------------
+  # Generate words by calling make-words
+  method words (XML::Element $parent, Hash $attrs --> XML::Element ) {
+
+    # get the number of words
+    my Int $nbr-words = ($attrs<n> // 1).Int;
+
+    my Str $ipsum;
+    $ipsum ~= self!make-word ~ ' ' for ^$nbr-words;
+
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Generate a sentence using words from the text
+  method sentence ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+
+    $parent.append(XML::Text.new(:text(self!make-sentence)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Generate sentences by calling sentence a few times
+  method sentences ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+
+    # get the number of sentences
+    my Int $nbr-sentences = ($attrs<n> // 1).Int;
+
+    # use that point to get some words from the text
+    my Str $ipsum = '';
+    $ipsum ~= self!make-sentence ~ '. ' for ^$nbr-sentences;
+
+    $parent.append(XML::Text.new(:text($ipsum)));
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Generate sentences by calling sentence a few times
+  method paragraph ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+
+    # get the number of sentences
+    my Int $nbr-paragraphs = ($attrs<n> // 1).Int;
+
+    my XML::Element $p;
+
+    # use that point to get some words from the text
+    for ^$nbr-paragraphs {
+      my Str $ipsum = '';
+      $ipsum ~= self!make-sentence ~ '. ' for ^(4 + (4.rand.Int));
+      $p = append-element( $parent, 'p');
+      append-element( $p, :text($ipsum));
+    }
+
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
+  method !make-sentence ( --> Str ) {
+
+    # get some point in the first half of the text and find the next space
+    my Int $start = $!perl5-lorem.index( ' ', ($!lorem-length/2).rand.Int);
+
+    # use that point to get some words from the text
+    my Str $ipsum = $!perl5-lorem.substr($start).comb(
+      /\w+/, 4 + 6.rand.Int
+    ).join(' ').tc;
+
+    $ipsum;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !make-word ( --> Str ) {
+
+    # get some point in the first half of the text and find the next space
+    my Int $start1 = $!perl5-lorem.index( ' ', ($!lorem-length - 20).rand.Int);
+    my Int $start2 = $!perl5-lorem.index( ' ', $start1 + 1);
+
+    # use the points to get a words from the text
+    $!perl5-lorem.substr( $start1, $start2 - $start1);
+  }
 }
-
-
