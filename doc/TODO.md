@@ -14,6 +14,10 @@
     be kept as typed. Leading newlines (on the whole text) and trailing spaces (on every line) are still removed.
     * [x] Tags '$\*\*', '$|\*' and '$\*|>' is introduced to add a space to the right or left of the tag and its content.
 
+* Grammar extensions;
+  * Empty elements are always like ```$xyz a=b []``` having an empty bracket pair. Might be possible to write just ```$xyz a=b |```
+  * At the moment there is only one content block per element specification like ```$abc [some text]```. Might be possible to have more blocks like ```$abc [some text] [!protected text!] [and some more]```
+
 * External modules
   * [x] A methods tag content between [ ... ] is a named argument to the sub called content-body.
   * [x] Library paths to find modules are provided
@@ -22,6 +26,7 @@
   * [x] ```$!tagname <attrs> [<body>]``` for insertion of tags and body using attributes as arguments to subs/methods.
   * [ ] A module should be accessable from within another perl6 sxml module. Problem of registration.
   * [ ] Get information from SemiXML e.g. current processed filename.
+  * [ ] Perl test reports using prove
 
 * Now modules can be used from sxml, the following libs might come in handy
   * SxmlLib::File - File and link handling.
