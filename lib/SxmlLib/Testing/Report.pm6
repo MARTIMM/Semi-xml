@@ -582,47 +582,16 @@ say "TR: $test-code, $ok-c, $nok-c";
       $svg, 'g', { transform => "translate($rect-x,$rect-y)" }
     );
 
-    # ok rectangle
-    append-element(
-      $g, 'rect', {
-        class => $class ~ '-ok',
-        x => '0', y => '0',
-        width => '15', height => '10'
-      }
-    );
-
-    # not ok rectangle
-    append-element(
-      $g, 'rect', {
-        class => $class ~ '-nok',
-        x => '0', y => '15',
-        width => '15', height => '10'
-      }
-    );
-
-
-    # ok count
-    my XML::Element $t = append-element(
-      $g, 'text', { class => 'legend', x => '20', y => '10'}
-    );
-    append-element( $t, :text("$ok"));
-
-    # not ok count
-    $t = append-element(
-      $g, 'text', { class => 'legend', x => '20', y => '25'}
-    );
-    append-element( $t, :text("$nok"));
+    # colored rectangles with count and text
+    self!rectangle( $g, $class ~ '-ok', 0, 0, $ok);
+    self!rectangle( $g, $class ~ '-nok', 0, 15, $nok);
 
     # draw a line
     append-element(
       $g, 'path', { class => 'line', d => 'M 0 28 H 40' }
     );
 
-    # total tests ok + not ok
-    $t = append-element(
-      $g, 'text', { class => 'legend', x => '20', y => '40'}
-    );
-    append-element( $t, :text("$ntests"));
+    self!rectangle( $g, '', 0, 30, $ntests, :!rectangle);
   }
 
   #-----------------------------------------------------------------------------
@@ -778,8 +747,6 @@ say "TR: $test-code, $ok-c, $nok-c";
       }
     );
 
-
-
     # Legend
     my $rect-x = 2 * $center;
     my $rect-y = 5;
@@ -796,37 +763,33 @@ say "TR: $test-code, $ok-c, $nok-c";
 
     # draw a line
     append-element(
-      $g, 'path', { class => 'line', d => 'M 0 73 H 40' }
+      $g, 'path', { class => 'line', d => 'M 0 73 H 80' }
     );
 
-    # total tests ok + not ok
-    my XML::Element $t = append-element(
-      $g, 'text', { class => 'legend', x => '20', y => '85'}
-    );
-    append-element( $t, :text("$total"));
-
-    $t = append-element(
-      $g, 'text', { class => 'legend', x => '40', y => '85'}
-    );
-    append-element( $t, :text<Total>);
+    self!rectangle( $g, '', 0, 75, $total, :text<Total>, :!rectangle);
   }
 
   #-----------------------------------------------------------------------------
   method !rectangle (
-    XML::Element $g, Str $class, Int $x, Int $y, Int $count, Str :$text
+    XML::Element $g, Str $class, Int $x, Int $y, Int $count, Str :$text,
+    Bool :$rectangle = True
   ) {
-    append-element(
-      $g, 'rect', {
-        class => $class,
-        x => $x.Str, y => $y.Str,
-        width => '15', height => '10'
-      }
-    );
+
+    if $rectangle {
+      append-element(
+        $g, 'rect', {
+          class => $class,
+          x => $x.Str, y => $y.Str,
+          width => '15', height => '10'
+        }
+      );
+    }
 
     my XML::Element $t = append-element(
       $g, 'text', { class => 'legend', x => ($x + 20).Str, y => ($y + 10).Str}
     );
-    append-element( $t, :text($count.fmt('%2d')));
+
+    append-element( $t, :text("$count"));
 
     if ? $text {
       $t = append-element(
