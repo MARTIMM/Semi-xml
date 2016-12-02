@@ -8,8 +8,6 @@ unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 #-------------------------------------------------------------------------------
 class Todo {
 
-  has Array $!parts = [];
-
   #-----------------------------------------------------------------------------
   method add (
     XML::Element $parent, Hash $attrs,
@@ -24,9 +22,6 @@ class Todo {
                  ?? $attrs<tl>.Int
                  !! ($attrs<n>:exists ?? $attrs<n>.Int !! 1);
 
-#say "T: ", ~$parent;
-#say "B: ", ~$content-body;
-
 say "todo: $attrs<n>, 'D$count'";
     $parts.push: {
       comment => $content-body,
@@ -37,7 +32,7 @@ say "todo: $attrs<n>, 'D$count'";
     };
 
     my XML::Element $c = append-element( $parent, 'todo');
-    append-element( $c, :text($count.Str));
+    append-element( $c, :text("$count"));
 
     $parent;
   }

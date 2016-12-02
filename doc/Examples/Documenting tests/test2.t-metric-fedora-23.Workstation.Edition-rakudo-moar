@@ -9,8 +9,8 @@ OS-Distro:fedora:23.Workstation.Edition:23:False
 Perl:Perl 6:6.c
 Compiler:rakudo:2016.10.249.gb.84158.c
 VM:moar:2016.10.37.gf.769569
-Total: 5
-T:2.00 0.00 2.00
-B:0.00 0.00 0.00
+Total: 12
+T:3.00 1.00 4.00
+B:5.00 0.00 5.00
 D:2.00 1.00 3.00
 S:0.00

@@ -6,7 +6,7 @@ use SxmlLib::Testing::Testing;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 #-------------------------------------------------------------------------------
-class Test {
+class Skip {
 
   #-----------------------------------------------------------------------------
   method add (
@@ -18,20 +18,21 @@ class Test {
 
     my Int $count = $SxmlLib::Testing::count++;
     my Array $parts := $SxmlLib::Testing::parts;
+    my Int $test-lines = $attrs<tl>:exists
+                 ?? $attrs<tl>.Int
+                 !! ($attrs<n>:exists ?? $attrs<n>.Int !! 1);
 
-#say "T: ", ~$parent;
-#say "B: ", ~$content-body;
-
-say "test: $attrs<t>, 'T$count'";
+say "bug: $attrs<n>, 'B$count'";
     $parts.push: {
       comment => $content-body,
-      code => "$attrs<t>, ",
+      code => "bug 'B$count', $test-lines;",
+      lines => $test-lines,
       count => $count,
-      label => 'T'
+      label => 'B'
     };
 
-    my XML::Element $c = append-element( $parent, 'test');
-    append-element( $c, :text($count.Str));
+    my XML::Element $c = append-element( $parent, 'bug');
+    append-element( $c, :text("$count"));
 
     $parent;
   }
@@ -40,9 +41,11 @@ say "test: $attrs<t>, 'T$count'";
   #-----------------------------------------------------------------------------
   method make-table ( Int $entry --> XML::Element ) {
 
-say "make table test entry $entry";
+say "make table bug entry $entry";
     my Array $parts := $SxmlLib::Testing::parts;
-    my Str $test-label = $parts[$entry]<label> ~ $parts[$entry]<count>;
+    my Int $count = $parts[$entry]<count>;
+    my Int $lines = $parts[$entry]<lines>;
+    my Str $test-label = "$parts[$entry]<label>$count";
 
     my XML::Element $table .= new(:name<table>);
     $table.set( 'class', 'test-table');
@@ -50,22 +53,32 @@ say "make table test entry $entry";
     # table of one row
     my XML::Element $tr = append-element( $table, 'tr');
 
-    # First data field cannot yet be filled in. Place a findable mark in it
-    # with the type label and count
-    my XML::Element $cm = append-element( $tr, '__CHECK_MARK__');
-    $cm.set( 'test-code', $test-label);
-
-    # Second data field
+    # first data field is not filled in.
     my XML::Element $td = append-element( $tr, 'td');
+
+    # second data field
+    $td = append-element( $tr, 'td');
+    $td.set( 'class', 'check-mark');
     $td.insert($_) for $parts[$entry]<comment>.nodes.reverse;
     $td.set( 'class', 'test-comment');
 
     # Bold test code characters in front of test comment
     my XML::Element $b = insert-element( $td, 'b');
+    my Str $t;
+    if $lines > 1 {
+      $t = "Next $lines tests (B{$entry+1}-{$entry+$lines}) are bug issue tests: ";
+    }
+
+    else {
+      $t = "Next B{$entry+1} test is a bug issue test: ";
+    }
+    insert-element( $b, :text($t));
+
+#   insert-element( $b, :text('Next B## tests are bug issue tests: '));
+#   insert-element( $b, :text('Next S## tests are skipped tests: '));
 
     # Prefix the comment with the test code
-    insert-element( $b, :text("$test-label: "));
-
+#    insert-element( $b, :text("$test-label: "));
     $table;
   }
 
@@ -73,36 +86,10 @@ say "make table test entry $entry";
   method get-code-text ( Int $entry --> Str ) {
 
     my Array $parts := $SxmlLib::Testing::parts;
-    my Str $code = $parts[$entry]<code>;
-    given $SxmlLib::Testing::current-type {
-      when TestCmd {
-        $code ~= "'T$parts[$entry]<count>';";
-        $parts[$entry]<label> = 'T';
-      }
+    $SxmlLib::Testing::current-type = BugCmd;
+    $SxmlLib::Testing::type-count = $parts[$entry]<lines>;
 
-      when TodoCmd {
-        $code ~= "'D$parts[$entry]<count>';";
-        $parts[$entry]<label> = 'D';
-      }
-
-      when BugCmd {
-        $code ~= "'B$parts[$entry]<count>';";
-        $parts[$entry]<label> = 'B';
-      }
-
-      when SkipCmd {
-        $code ~= "'S$parts[$entry]<count>';";
-        $parts[$entry]<label> = 'S';
-      }
-    }
-
-    # lower type counter and reset to TestCmd if 0
-    if $SxmlLib::Testing::type-count {
-      $SxmlLib::Testing::type-count--;
-      $SxmlLib::Testing::current-type = TestCmd
-        unless $SxmlLib::Testing::type-count
-    }
-
-    $code;
+    $parts[$entry]<code>;
   }
 }
+

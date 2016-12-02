@@ -12,4 +12,6 @@
   code          = 'SxmlLib::Testing::Code'
   test          = 'SxmlLib::Testing::Test'
   todo          = 'SxmlLib::Testing::Todo'
+  bug           = 'SxmlLib::Testing::Bug'
+  skip          = 'SxmlLib::Testing::Skip'
   lorem         = 'SxmlLib::LoremIpsum'

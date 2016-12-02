@@ -26,7 +26,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     token tag:sym<$|*>  { <sym> <tag-name> }
     token tag:sym<$*|>  { <sym> <tag-name> }
     token tag:sym<$**>  { <sym> <tag-name> }
-    token tag:sym<$>    { <sym> <tag-name> }
+    token tag:sym<$|>   { <sym> <tag-name> }
 
     token mod-name      { <.identifier> }
     token sym-name      { <.identifier> }
@@ -39,7 +39,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # key is an identifier and the value can be anything. Enclose the value in
     # quotes ' or " when there are whitespace characters in the value.
     #
-    token attributes    { [<.ws>? <attribute>]* }
+    token attributes    { [ <.ws>? <attribute> ]* }
 
     token attribute     { <attr-key> '=' <attr-value-spec> }
 
@@ -77,8 +77,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     rule body3-contents  { [ <body1-text> || <document> ]* }
     rule body4-contents  { [ <body1-text> || <document> ]* }
 
-    token body1-text      { [ <.escape-char> || <-[\$\]\\]> ]+ }
-    token body2-text      { [.*? <?before <.ws>? '!]'>] }
+    token body1-text      {
+      [ <.escape-char> || <-[\$\]\\]> || '$' <?before <-[!|*]>> ]+
+    }
+    token body2-text      { [ .*? <?before <.ws>? '!]'> ] }
 
     token escape-char        { '\\' . }
 

@@ -15,5 +15,16 @@ todo 'D4', 2;
 is $y, 10, 'D5';
 is $y, 11, 'D6';
 
+    my Int $z = 5;
+    for ^$z -> $t {
+
+todo 'B7', 1;
+ok $t < $z, 'B8';
+}
+
+
+is $z, 5, 'T9';
+is $z, 6, 'T10';
+
 
 done-testing;

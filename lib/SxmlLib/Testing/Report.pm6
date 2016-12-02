@@ -13,6 +13,8 @@ class Report {
   has $!code-obj;
   has $!test-obj;
   has $!todo-obj;
+  has $!bug-obj;
+  has $!skip-obj;
 
   has XML::Element $!report-doc;
   has XML::Element $!body;
@@ -47,6 +49,8 @@ print "\n";
     $!code-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Code');
     $!test-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Test');
     $!todo-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Todo');
+    $!bug-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Bug');
+    $!skip-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Skip');
 
     self!setup-report-doc($attrs);
   }
@@ -207,13 +211,47 @@ say "test $tentry, $code-text";
               my Str $code-text = ~$!todo-obj.get-code-text($tentry);
 say "todo $tentry, $code-text";
 
-              # Add todo to the <pre> block
+              # add todo to the <pre> block
               append-element( $pre, :text("$code-text\n"));
-
-              # and to the test program
 
               # add todo text after the <pre> and before the <hook>
               $hook.before($!todo-obj.make-table($tentry));
+
+              # and to the test program
+              $!test-program ~= "$code-text\n";
+            }
+
+            elsif $x and $x.name eq 'bug' {
+
+              # get test entry number 
+              my Int $tentry = ([~] $code-node[0].nodes).Int;
+              my Str $code-text = ~$!bug-obj.get-code-text($tentry);
+say "bug issue $tentry, $code-text";
+
+              # add bug issue to the <pre> block
+              append-element( $pre, :text("$code-text\n"));
+
+              # add bug text after the <pre> and before the <hook>
+              $hook.before($!bug-obj.make-table($tentry));
+
+              # and to the test program
+              $!test-program ~= "$code-text\n";
+            }
+
+            elsif $x and $x.name eq 'skip' {
+
+              # get test entry number 
+              my Int $tentry = ([~] $code-node[0].nodes).Int;
+              my Str $code-text = ~$!skip-obj.get-code-text($tentry);
+say "skip $tentry, $code-text";
+
+              # add skip to the <pre> block
+              append-element( $pre, :text("$code-text\n"));
+
+              # add bug text after the <pre> and before the <hook>
+              $hook.before($!skip-obj.make-table($tentry));
+
+              # and to the test program
               $!test-program ~= "$code-text\n";
             }
           }
@@ -230,6 +268,8 @@ say "todo $tentry, $code-text";
       }
     }
 
+say "Hook: ", $hook.WHAT;
+say "Body: ", ~$!report-doc;
     $hook.remove;
   }
 

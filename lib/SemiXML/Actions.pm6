@@ -294,8 +294,8 @@ say "\n";
         # Process body text to escape special chars
         for $x.nodes -> $node {
           if $node ~~ any( SemiXML::Text, XML::Text) {
-#            my Str $s = self!process-esc(~$node);
-#            $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
+            my Str $s = self!process-esc(~$node);
+            $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
           }
 
           elsif $node ~~ XML::Element {
@@ -330,7 +330,7 @@ say "\n";
       given $tt {
 
         # Any normal tag
-        when any(< $ $** $*| $|* >) {
+        when any(< $| $** $*| $|* >) {
 
           my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
 
@@ -376,7 +376,7 @@ say "\n";
       }
 
       # For all types but methods
-      if $tt ~~ any(< $ $** $*| $|* >) {
+      if $tt ~~ any(< $| $** $*| $|* >) {
 
         # Check for xmlns uri definitions and set them on the current node
         for $att.keys {
@@ -441,6 +441,7 @@ say "\n";
 
       my Str $symbol = $match<tag><sym>.Str;
       $ast.push: $symbol;
+say "Tag symbol: $symbol";
 
       my Hash $attrs = {};
       for $match<attributes>.caps -> $as {
@@ -450,7 +451,7 @@ say "\n";
         $attrs{$a<attr-key>.Str} = $av;
       }
 
-      if $symbol ~~ any(< $** $|* $*| $ >) {
+      if $symbol ~~ any(< $** $|* $*| $| >) {
 
         my $tn = $match<tag><tag-name>;
         $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
@@ -472,38 +473,12 @@ say "\n";
 
       # Add to the list
       $!tag-list.push($tag-name);
+say "Tag name: $tag-name";
 
       $ast.push: $attrs;
 
       # Set AST on node tag-name
       $match.make($ast);
-    }
-
-    #---------------------------------------------------------------------------
-    # Return object if module and method is found. Otherwise return Any
-    method !can-method ( Str $mod-name, $meth-name, Bool :$optional = True ) {
-
-      my XML::Element $x;
-
-      my $module = $!objects{$mod-name} if $!objects{$mod-name}:exists;
-
-      if $module.defined {
-        if $module.^can($meth-name) {
-          $module;
-        }
-
-        else {
-          $x .= new(
-            :name('undefined-method'),
-            :attribs( module => $mod-name, method => $meth-name)
-          ) unless $optional;
-        }
-      }
-
-      else {
-        $x .= new( :name('undefined-module'), :attribs(module => $mod-name))
-          unless $optional;
-      }
     }
 
     #---------------------------------------------------------------------------
@@ -582,6 +557,33 @@ say "\n";
     }
 
     #---------------------------------------------------------------------------
+    # Return object if module and method is found. Otherwise return Any
+    method !can-method ( Str $mod-name, $meth-name, Bool :$optional = True ) {
+
+      my XML::Element $x;
+
+      my $module = $!objects{$mod-name} if $!objects{$mod-name}:exists;
+
+      if $module.defined {
+        if $module.^can($meth-name) {
+          $module;
+        }
+
+        else {
+          $x .= new(
+            :name('undefined-method'),
+            :attribs( module => $mod-name, method => $meth-name)
+          ) unless $optional;
+        }
+      }
+
+      else {
+        $x .= new( :name('undefined-module'), :attribs(module => $mod-name))
+          unless $optional;
+      }
+    }
+
+    #---------------------------------------------------------------------------
     method !clean-text ( Str $t is copy, Bool :$fixed = False --> Str ) {
 
       # Remove leading spaces at begin of text
@@ -593,7 +595,8 @@ say "\n";
       # Substitute many spaces with one space
       $t ~~ s:g/ \s\s+ / / unless $fixed;
 
-      $t = self!process-esc($t);
+#      $t = self!process-esc($t);
+      $t;
     }
 
     #---------------------------------------------------------------------------
@@ -605,8 +608,8 @@ say "\n";
       # Entity must be known in the xml result!
       $esc ~~ s:g/\\\\/\&\#x5C;/;
       $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
-      $esc ~~ s:g/<-[\\]>\</\&lt;/;
-      $esc ~~ s:g/<-[\\]>\>/\&gt;/;
+      $esc ~~ s:g/<-[\\]>\</\&lt;/ unless $is-attr;
+      $esc ~~ s:g/<-[\\]>\>/\&gt;/ unless $is-attr;
       $esc ~~ s:g/\"/\&quot;/ if $is-attr;
 
       # Remove rest of the backslashes unless followed by hex numbers prefixed
