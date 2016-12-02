@@ -30,7 +30,7 @@ class Todo {
 say "todo: $attrs<n>, 'D$count'";
     $parts.push: {
       comment => $content-body,
-      code => "todo D$count, $test-lines",
+      code => "todo 'D$count', $test-lines;",
       lines => $test-lines,
       count => $count,
       label => 'D'
@@ -83,7 +83,6 @@ say "make table todo entry $entry";
 
     # Prefix the comment with the test code
 #    insert-element( $b, :text("$test-label: "));
-say "todo table: ", ~$table;
     $table;
   }
 

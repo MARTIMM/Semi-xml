@@ -507,20 +507,6 @@ say "\n";
     }
 
     #---------------------------------------------------------------------------
-    method get-sxml-object ( Str $class-name ) {
-
-      my $object;
-      for $!objects.keys -> $ok {
-        if $!objects{$ok}.^name eq $class-name {
-          $object = $!objects{$ok};
-          last;
-        }
-      }
-      
-      $object;
-    }
-
-    #---------------------------------------------------------------------------
     method tag-body ( $match ) {
 
       self!current-state( $match, 'tag body');
@@ -611,28 +597,6 @@ say "\n";
     }
 
     #---------------------------------------------------------------------------
-    method process-config-for-modules ( ) {
-
-      if $!config<module>:exists {
-        for $!config<module>.kv -> $key, $value {
-          if $!objects{$key}:!exists {
-            if $!config<library>{$key}:exists {
-
-              my $repository = CompUnit::Repository::FileSystem.new(
-                :prefix($!config<library>{$key})
-              );
-              CompUnit::RepositoryRegistry.use-repository($repository);
-            }
-
-            require ::($value);
-            my $obj = ::($value).new;
-            $!objects{$key} = $obj;
-          }
-        }
-      }
-    }
-
-    #---------------------------------------------------------------------------
     # Substitute some escape characters in entities and remove the remaining
     # backslashes.
     #
@@ -680,8 +644,51 @@ say "\n";
     }
 
     #---------------------------------------------------------------------------
+    method process-config-for-modules ( ) {
+
+      if $!config<module>:exists {
+        for $!config<module>.kv -> $key, $value {
+          if $!objects{$key}:!exists {
+            if $!config<library>{$key}:exists {
+
+              my $repository = CompUnit::Repository::FileSystem.new(
+                :prefix($!config<library>{$key})
+              );
+              CompUnit::RepositoryRegistry.use-repository($repository);
+            }
+
+            require ::($value);
+            my $obj = ::($value).new;
+            $!objects{$key} = $obj;
+          }
+        }
+      }
+    }
+
+    #---------------------------------------------------------------------------
+    method get-current-filename ( --> Str ) {
+
+      return $!config<output><filepath> ~ '/' ~ $!config<output><filename>;
+    }
+
+    #---------------------------------------------------------------------------
     method get-document ( --> XML::Document ) {
+
       return $!xml-document;
+    }
+
+    #---------------------------------------------------------------------------
+    method get-sxml-object ( Str $class-name ) {
+
+      my $object;
+      for $!objects.keys -> $ok {
+        if $!objects{$ok}.^name eq $class-name {
+          $object = $!objects{$ok};
+          last;
+        }
+      }
+      
+      $object;
     }
   }
 }

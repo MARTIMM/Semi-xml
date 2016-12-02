@@ -16,7 +16,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     our $debug = False;
 
     has SemiXML::Grammar $!grammar;
-    has SemiXML::Actions $.actions handles <get-sxml-object>;
+    has SemiXML::Actions $.actions handles <
+      get-sxml-object get-current-filename
+    >;
 
     has Hash $.styles;
     has Config::DataLang::Refine $configuration;

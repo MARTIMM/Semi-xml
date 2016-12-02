@@ -66,7 +66,6 @@ say "make table test entry $entry";
     # Prefix the comment with the test code
     insert-element( $b, :text("$test-label: "));
 
-say "test table: ", ~$table;
     $table;
   }
 
@@ -76,8 +75,13 @@ say "test table: ", ~$table;
     my Array $parts := $SxmlLib::Testing::parts;
     my Str $code = $parts[$entry]<code>;
     given $SxmlLib::Testing::current-type {
+      when TestCmd {
+        $code ~= "'T$parts[$entry]<count>';";
+        $parts[$entry]<label> = 'T';
+      }
+
       when TodoCmd {
-        $code ~= "'D$parts[$entry]<count>'";
+        $code ~= "'D$parts[$entry]<count>';";
         $parts[$entry]<label> = 'D';
       }
     }
