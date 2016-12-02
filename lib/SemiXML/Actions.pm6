@@ -262,26 +262,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           );
         }
       }
-#`{{
-      # Do the same for leftover BODY_CONTAINERs
-      $containers = $parent.getElementsByTagName('__BODY_CONTAINER__');
-      for @$containers -> $node {
 
-        my $children = $node.nodes;
-
-        # Eat from the end of the list and add just after the container element.
-        # Somehow they get lost from the array when done otherwise.
-        #
-        for @$children.reverse {
-          $node.parent.after( $node, $^a);
-        }
-
-        # Remove the now empty element
-        $node.parent.removeChild($node);
-      }
-say "\nTOP:\n$parent";
-say "\n";
-}}
       # Conversion to xml escapes is done as late as possible
       my Sub $after-math = sub ( XML::Element $x ) {
 
