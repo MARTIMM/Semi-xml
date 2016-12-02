@@ -49,6 +49,7 @@ say "todo: $attrs<n>, 'D$count'";
 say "make table todo entry $entry";
     my Array $parts := $SxmlLib::Testing::parts;
     my Int $count = $parts[$entry]<count>;
+    my Int $lines = $parts[$entry]<lines>;
     my Str $test-label = "$parts[$entry]<label>$count";
 
     my XML::Element $table .= new(:name<table>);
@@ -69,10 +70,10 @@ say "make table todo entry $entry";
     # Bold test code characters in front of test comment
     my XML::Element $b = insert-element( $td, 'b');
     my Str $t;
-    if $count > 1 {
-      $t = "Next $count tests (D{$entry+1}-{$entry+$count} are todo tests: ";
+    if $lines > 1 {
+      $t = "Next $lines tests (D{$entry+1}-{$entry+$lines}) are todo tests: ";
     }
-    
+
     else {
       $t = "Next D{$entry+1} test is a todo test: ";
     }

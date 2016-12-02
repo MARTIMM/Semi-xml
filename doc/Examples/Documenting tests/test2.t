@@ -11,8 +11,8 @@ is $x, 10, 'D2';
     my Int $y = 10;
 
 ok $y ~~ Int, 'T3';
-is $y, 10, 'T4';
-todo 'D5', 1;
+todo 'D4', 2;
+is $y, 10, 'D5';
 is $y, 11, 'D6';
 
 
