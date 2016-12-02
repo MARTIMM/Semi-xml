@@ -1,32 +1,31 @@
-$!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
+$!report.run title='Basic SemiXML tests' [
 
-  $h1 [ Testing the basic use of SemiXML ]
+  $|h1 [ Testing the basic use of SemiXML ]
+  $|h2 [ Introduction ]
 
-  $h2 [ Introduction ]
-
-  $p [
+  $|p [
     SemiXML is a library which translates an equally named language into XML.
     There are several syntactic constructs which look very much the same as the
     XML language. What we are going to test here is the simple
     structure at the top level,
   ]
 
-  $!td.pre [!=
+  $|pre [!=
     A one liner
 
-    $st [ ]
+    $|st [ ]
 
     This should translate into
 
     <st/>
   !]
 
-  $p [
+  $|p [
     We need to write a convenience routine to call the parser several times from
     the tests. This way we keep the tests simple.
   ]
 
-  $!td.code [!=
+  $!code.add [=
     use SemiXML;
 
     sub parse ( Str $content --> Str ) {
@@ -35,54 +34,54 @@ $!td.report title='Basic SemiXML tests' test-file='t/001-basic.t' [
       $x.parse(:$content);
       ~$x;
     }
-  !]
-
-  $h2 [ Plain top level elements ]
-
-  $p [ First a few tests to generate top level elements ]
-  $!td.code save=$xml [!my $xml = parse('$st []');!]
-
-  $!td.test line="is $xml, '<st/>'" [ The element generated is $*|code[<st/>]. ]
-
-  $!td.code append=1 [!$xml = parse('$st [ abc ]');!]
-
-  $!td.test line="is $xml, '<st>abc</st>'" [
-    The element generated is $*|code[<st>abc</st>].
   ]
 
-  $!td.code [!$xml = parse(Q:q@$st a1=w a2='g g' a3="h h" [ ]@);!]
+  $|h2 [ Plain top level elements ]
+  $|p [ First a few tests to generate top level elements ]
 
-  $!td.test line=^like $xml, /'a1="w"'/^ [a1="w" attribute]
-  $!td.test line=^like $xml, /'a2="g g"'/^ [a2="g g" attribute]
-  $!td.test line=^like $xml, /'a3="h h"'/^ [a3="h h" attribute]
+  $!code.add [
+    my $xml = parse('$|st []');
+    $!test.add t="is $xml, '<st/>'" [ The element generated is $*|code[<st/>]. ]
 
-  $!td.test line="dies-ok { $xml = parse('$st [ $f w [] hj ]'); }" [
-    Elementary parse failures are trapped. Here the first attribute $**b[w] to
-    element $**b[f] is unfinished. Unfortunately the location where the error
-    exactly happens is not always accurate.
+    $xml = parse('$|st [ abc ]');
+    $!test.add t="is $xml, '<st>abc</st>'" [
+      The element generated is $*|code[<st>abc</st>].
+    ]
+
+    $xml = parse(Q:q@$|st a1=w a2='g g' a3="h h" [ ]@);
+    $!test.add t=^like $xml, /'a1="w"'/^ [a1="w" attribute]
+    $!test.add t=^like $xml, /'a2="g g"'/^ [a2="g g" attribute]
+    $!test.add t=^like $xml, /'a3="h h"'/^ [a3="h h" attribute]
+  
+    $!test.add t="dies-ok { $xml = parse('$|st [ $|f w [] hj ]'); }" [
+      Elementary parse failures are trapped. Here the first attribute $**b[w] to
+      element $**b[f] is unfinished. Unfortunately the location where the error
+      exactly happens is not always accurate.
+    ]
   ]
 
-  $h2 [ Basic nesting ]
+  $|h2 [ Basic nesting ]
+  $|p [ Nesting is done by specifying other tags in the body of a tag. ]
 
-  $p [ Nesting is done by specifying other tags in the body of a tag. ]
+  $!code.add [
+    $xml = parse('$|t1 [ $|t2 [] $|t3[]]');
+    $!test.add t="is $xml, '<t1><t2/><t3/></t1>'" [
+      t2 and t3 are the nested tags
+    ]
 
-  $!td.code [!$xml = parse('$t1 [ $t2 [] $t3[]]');!]
-  $!td.test line="is $xml, '<t1><t2/><t3/></t1>'" [
-    t2 and t3 are the nested tags
-  ]
+    $xml = parse('$|t1 [ $**t2 [] $|t3[]]');
+    $!test.add t="is $xml, '<t1> <t2/> <t3/></t1>'" [!
+      nested tags with spaces around element t2 using $**
+    !]
 
-  $!td.code [!$xml = parse('$t1 [ $**t2 [] $t3[]]');!]
-  $!td.test line="is $xml, '<t1> <t2/> <t3/></t1>'" [
-    nested tags with spaces around element t2 using \$**
-  ]
+    $xml = parse('$|t1 [ $|*t2 [] $|t3[]]');
+    $!test.add t="is $xml, '<t1><t2/> <t3/></t1>'" [!
+      nested tags with a space on the right of t2 with $|*
+    !]
 
-  $!td.code append=1 [!$xml = parse('$t1 [ $|*t2 [] $t3[]]');!]
-  $!td.test line="is $xml, '<t1><t2/> <t3/></t1>'" [
-    nested tags with a space on the right of t2 with \$|*
-  ]
-
-  $!td.code append=1 [!$xml = parse('$t1 [ $*|t2 [] $t3[]]');!]
-  $!td.test line="is $xml, '<t1> <t2/><t3/></t1>'" [
-    nested tags with a space on the left of t2 done with \$*|
+    $xml = parse('$|t1 [ $*|t2 [] $|t3[]]');
+    $!test.add t="is $xml, '<t1> <t2/><t3/></t1>'" [!
+      nested tags with a space on the left of t2 done with $*|
+    !]
   ]
 ]
