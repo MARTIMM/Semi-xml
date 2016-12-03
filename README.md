@@ -5,18 +5,11 @@
 
 ## Description
 
-Package to generate XML from an easier readable and writable description plus,
-because it is written in Perl 6, the possibility to insert XML from other
-sources such as files, text, code , variables etc.
-
-## Versions of PERL
-
-* Perl6 version v6.c
+Package to generate XML typed languages from an easier readable and writable description plus, because it is written in Perl 6, the possibility to insert XML using code elements.
 
 ## Introduction
 
-I'm a lazy bum, so writing XML is too exhausting. instead of writing;
-
+The following piece of xml (html) text
 ```
 <html>
   <head>
@@ -33,29 +26,28 @@ I'm a lazy bum, so writing XML is too exhausting. instead of writing;
 I want to do something like the following
 
 ```
-$html [
-  $head [
-    $title [ Title of page ]
+$|html [
+  $|head [
+    $|title [ Title of page ]
   ]
-  $body [
-    $h1 [ Introduction ]
-    $p class=green [ Piece of text. See $*<a href=google.com [google].]
+  $|body [
+    $|h1 [ Introduction ]
+    $|p class=green [ Piece of text. See $*|a href=google.com [google].]
   ]
 ]
 ```
-(9 lines, 29 words, 164 characters. Less characters typed and still indenting. Note that characters like ']' is counted as a word!).
-
-This second form looks much more airy and better to read. There are also some other advantages using it this way. It will be even better to read when language highlights are programmed in your favorite editor.
+(9 lines, 29 words, 170 characters. Less characters typed and still indenting. Note that characters like ']' is counted as a word!). Besides this the xml generated from the sxml file is smaller than above because it removes as much white space as necessary.
 
 ### Advantages of using this language
 
-* As mentoned above it has better reading capabilities.
-* You don't need to write the xml endtags because of nesting.
-* Attribute values do not need quoting when there are no spaces in the value.
-* A tag is introduced by the '$' to support simple parsing. This translates just to the XML tagname. E.g. $html [] becomes <html/>.
-* Additional symbols following the '$' changes its intent.
-  * '$!' is used to call a method from an external module to insert new or change existing content. When the rules for substitution or the methods are not found then the tag will be as if no '.' or '!' is used.
-  * '$\*\*', '$\*|' and '$|\*' provides for spacing around the tag and its body.
+While the example above does not show a big advantage, however there are some summarized below.
+
+* This semi xml has a bit better reading capabilities because no textual endtag is needed. It is just a closing bracket.
+* Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: ', " and ^.
+* An XML element is introduced by **$|** to support simple parsing. This translates just to the XML element. E.g. **$|html []** becomes **< html/>**.
+* Other symbols following the **$** changes its meaning.
+  * **$!** is used to call a method from an external module to insert xml controlled by data from elsewhere.
+  * **$\*\***, **$\*|** and **$|\*** provides for spacing around the tag and its body.
 
 ## Ideas and Todo
 
@@ -65,9 +57,17 @@ Please check out the file doc/TODO.md
 
 Check file doc/BUGS.md
 
-## Changes
+## Release notes
 
 For changes look for the file doc/CHANGES.md in this repository.
+
+## Versions of perl using moar vm
+
+* Perl6 version v6.c
+
+## Install
+
+Use panda or zef to install SemiXML
 
 ## Aurhor
 
