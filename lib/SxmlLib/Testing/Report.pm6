@@ -302,6 +302,7 @@ say "\n\nFile:\n$test-file";
     # run the tests using prove and get the result contents through a pipe
     my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
                  '--rules=seq=*', $test-file, :out;
+#say "\nProc: ", $p.perl;
 
     # read lines from pipe from testing command
     my @lines = $p.out.lines;
@@ -346,6 +347,8 @@ say "R: $line";
         self!set-test-results( $test-code, $ok);
       }
     }
+
+#say "\nProc: ", $p.perl;
 
     # save metric data in a file
     self!save-metrics( $test-file, $attrs);
