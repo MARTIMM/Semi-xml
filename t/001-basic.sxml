@@ -39,16 +39,19 @@ $!report.run title='Basic SemiXML tests' [
   $|h2 [ Plain top level elements ]
   $|p [ First a few tests to generate top level elements ]
 
-  $!code.add [
+  $!code.add [!
     my $xml = parse('$|st []');
+  !][
     $!test.add t="is $xml, '<st/>'" [ The element generated is $*|code[<st/>]. ]
-
+  ][!
     $xml = parse('$|st [ abc ]');
+  !][
     $!test.add t="is $xml, '<st>abc</st>'" [
       The element generated is $*|code[<st>abc</st>].
     ]
-
+  ][!
     $xml = parse(Q:q@$|st a1=w a2='g g' a3="h h" [ ]@);
+  !][
     $!test.add t=^like $xml, /'a1="w"'/^ [a1="w" attribute]
     $!test.add t=^like $xml, /'a2="g g"'/^ [a2="g g" attribute]
     $!test.add t=^like $xml, /'a3="h h"'/^ [a3="h h" attribute]
@@ -63,23 +66,27 @@ $!report.run title='Basic SemiXML tests' [
   $|h2 [ Basic nesting ]
   $|p [ Nesting is done by specifying other tags in the body of a tag. ]
 
-  $!code.add [
+  $!code.add [!
     $xml = parse('$|t1 [ $|t2 [] $|t3[]]');
+  !][
     $!test.add t="is $xml, '<t1><t2/><t3/></t1>'" [
       t2 and t3 are the nested tags
     ]
-
+  ][!
     $xml = parse('$|t1 [ $**t2 [] $|t3[]]');
+  !][
     $!test.add t="is $xml, '<t1> <t2/> <t3/></t1>'" [!
       nested tags with spaces around element t2 using $**
     !]
-
+  ][!
     $xml = parse('$|t1 [ $|*t2 [] $|t3[]]');
+  !][
     $!test.add t="is $xml, '<t1><t2/> <t3/></t1>'" [!
       nested tags with a space on the right of t2 with $|*
     !]
-
+  ][!
     $xml = parse('$|t1 [ $*|t2 [] $|t3[]]');
+  !][
     $!test.add t="is $xml, '<t1> <t2/><t3/></t1>'" [!
       nested tags with a space on the left of t2 done with $*|
     !]
