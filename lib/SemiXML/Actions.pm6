@@ -400,13 +400,11 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
         my $match = $tag-bodies[$mi];
-say "\nMatch: ", $match.perl;
-#        for $ast -> $a {
-say "\nAst: ", $match.ast;
+#say "\nMatch: ", $match.perl;
         for @($match.ast) {
-#        given ($match.ast)[0] {
 
-          # Any piece of found text
+          # Any piece of found text. Happens when bodies are found ignoring any
+          # tags in it using [! !]
           when Str {
             if ? $_ {
               $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
@@ -415,26 +413,8 @@ say "\nAst: ", $match.ast;
           }
 
           # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
-          when Array {
-say "\nArray: ", $_.elems;
-
-            # tag ast: [ tag type, namespace, tag name, module, method, attributes
-            my Array $tag-ast = $_[0];
-
-            # Test if spaces are needed before the document
-            $parent.append(SemiXML::Text.new(:text(' ')))
-              if $tag-ast[0] ~~ any(< $** $*| >);
-
-            $parent.append($_[2]);
-
-            # Test if spaces are needed after the document
-            $parent.append(SemiXML::Text.new(:text(' ')))
-              if $tag-ast[0] ~~ any(< $** $|* >);
-          }
-
-          # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
           when Hash {
-say "\nHash: ", $_.keys;
+#say "\nHash: ", $_.keys;
 
             # tag ast: [ tag type, namespace, tag name, module, method, attributes
             my Array $tag-ast = $_<tag-ast>;
@@ -450,7 +430,6 @@ say "\nHash: ", $_.keys;
               if $tag-ast[0] ~~ any(< $** $|* >);
           }
         }
-#        }
       }
 
       $parent;
@@ -468,7 +447,7 @@ say "\nHash: ", $_.keys;
 
       my Str $symbol = $match<tag><sym>.Str;
       $ast.push: $symbol;
-say "Tag symbol: $symbol";
+#say "Tag symbol: $symbol";
 
       my Hash $attrs = {};
       for $match<attributes>.caps -> $as {
@@ -500,7 +479,7 @@ say "Tag symbol: $symbol";
 
       # Add to the list
       $!tag-list.push($tag-name);
-say "Tag name: $tag-name";
+#say "Tag name: $tag-name";
 
       $ast.push: $attrs;
 
@@ -515,6 +494,7 @@ say "Tag name: $tag-name";
       my Array $ast = [];
       for $match.caps {
 
+        # keys can be body1-contents..body4-contents
         my $p = $^a.key;
         my $v = $^a.value;
 
@@ -535,22 +515,23 @@ say "Tag name: $tag-name";
 
           for $match<body3-contents>.caps {
 
+            # keys can be body1-text or document
             my $p3 = $^a.key;
             my $v3 = $^a.value;
 
+            # body1-text
             if $p3 eq 'body1-text' {
 
               $ast.push: self!clean-text( $v3.Str, :fixed);
             }
 
-            # Text can have nested documents and text may be re-formatted
+            # document
             elsif $p3 eq 'document' {
 
               my $d = $v3;
               my $tag-ast = $d<tag-spec>.ast;
-#              my $body-ast = $d<tag-body>.ast;
               my $body-ast = $d<tag-body>;
-              $ast.push([ $tag-ast, $body-ast, $d.ast]);
+              $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.ast)};
             }
           }
         }
@@ -558,22 +539,24 @@ say "Tag name: $tag-name";
         # Text can have nested documents and text may be re-formatted
         elsif $p eq 'body4-contents' {
 
+          # walk through all body pieces
           for $match<body4-contents>.caps {
 
+            # keys can be body1-text or document
             my $p4 = $^a.key;
             my $v4 = $^a.value;
 
+            # body1-text
             if $p4 eq 'body1-text' {
 
               $ast.push: self!clean-text( $v4.Str, :!fixed);
             }
 
-            # Text cannot have nested documents and text may be re-formatted
+            # document
             elsif $p4 eq 'document' {
 
               my $d = $v4;
               my $tag-ast = $d<tag-spec>.ast;
-#              my $body-ast = $d<tag-body>.ast;
               my $body-ast = $d<tag-body>;
               $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.ast)};
             }
