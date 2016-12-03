@@ -15,8 +15,6 @@
     * [x] Tags '$\*\*', '$|\*' and '$\*|>' is introduced to add a space to the right or left of the tag and its content.
 
 * Grammar extensions;
-  * Empty elements are always like ```$xyz a=b []``` having an empty bracket pair. Might be possible to write just ```$xyz a=b |```
-  * At the moment there is only one content block per element specification like ```$abc [some text]```. Might be possible to have more blocks like ```$abc [some text] [!protected text!] [and some more]```
 
 * External modules
   * [x] A methods tag content between [ ... ] is a named argument to the sub called content-body.

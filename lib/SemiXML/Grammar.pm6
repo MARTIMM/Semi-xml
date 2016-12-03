@@ -14,7 +14,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     # A document is only a tag with its content. Defined like this there can
     # only be one toplevel document.
     #
-    token document { <tag-spec> <tag-body> }
+    rule pop-tag-from-list { <?> }
+    token document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
 
     # A tag is an identifier prefixed with a symbol to attach several semantics
     # to the tag.

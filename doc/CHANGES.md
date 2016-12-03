@@ -1,7 +1,21 @@
 ## Changes
 
+* 0.25.0
+  * Before there was only one content block per element specification like ```$abc [some text]```. Now it is possible to have 0, 1 or more blocks following a tag so the following is possible;
+  ```
+  $|a
+  $|b [ hgf $|xyz ]
+  $|c [ code: ][! $j = $delta * 10 !]
+  ```
+  which generates
+  ```
+  <a/>
+  <b>hgf <xyz/></b>
+  <c>code: $j = $delta * 10</c>
+  ```
+
 * 0.24.0
-  Change in grammar. ```$xyx []``` has become ```$|xyz []```. This is a big help when code with many dollar characters are used. These should be escaped but wil make things unreadable. Also using the [! !] bodies are not always acceptable because it prevents nesting of elements when needed. So this can now be done;
+  * Change in grammar. ```$xyx []``` has become ```$|xyz []```. This is a big help when code with many dollar characters are used. These should be escaped but wil make things unreadable. Also using the [! !] bodies are not always acceptable because it prevents nesting of elements when needed. So this can now be done;
   ```$|abc [ $x = 10; ]```
 * 0.23.0
   * Dropped the use of $.mod.symbol-access. There is less to none use for it.

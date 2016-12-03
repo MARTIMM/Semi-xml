@@ -292,12 +292,17 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #---------------------------------------------------------------------------
+    method pop-tag-from-list ( $match ) {
+
+#TODO only after the last block. Also when no block is found!
+      # This level is done so drop an element tag from the list
+      $!tag-list.pop;
+    }
+
+    #---------------------------------------------------------------------------
     method document ( $match ) {
 
       self!current-state( $match, 'document');
-
-      # This level is done so drop an element tag from the list
-      $!tag-list.pop;
 
       my XML::Element $x;
 
@@ -316,6 +321,16 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
 
           $x .= new( :name($tag), :attribs(%$att));
+
+          # Check for xmlns uri definitions and set them on the current node
+          for $att.keys {
+            when m/^ 'xmlns:' ( <before '='>* ) $/ {
+              my $ns-prefix = $0;
+              $x.setNamespace( $att{$_}, $0);
+            }
+          }
+
+          self!build-content-body( $match<tag-body>, $x);
         }
 
         # Method tag
@@ -338,8 +353,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
               XML::Element.new(:name('__PARENT_CONTAINER__')),
               $att,
               :content-body( self!build-content-body(
-                  $match<tag-body>.ast,
-#                  XML::Element.new(:name('__BODY_CONTAINER__'))
+                  $match<tag-body>,
                   XML::Element.new(:name('__PARENT_CONTAINER__'))
                 )
               ),
@@ -355,7 +369,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           }
         }
       }
-
+#`{{
       # For all types but methods
       if $tt ~~ any(< $| $** $*| $|* >) {
 
@@ -367,8 +381,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           }
         }
 
-        self!build-content-body( $match<tag-body>.ast, $x);
+        self!build-content-body( $match<tag-body>, $x);
       }
+}}
 
       # Set AST on node document
       $match.make($x);
@@ -376,35 +391,66 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     #---------------------------------------------------------------------------
     method !build-content-body (
-      $ast, XML::Element $parent
+      Array $tag-bodies, XML::Element $parent
 
       --> XML::Element
     ) {
 
-      for @$ast {
-#say "\nAst";
-#.say;
-        # Any piece of found text
-        when Str {
-          $parent.append(SemiXML::Text.new(:text($_))) if ?$_;
+#say "\nTB: ", $tag-bodies.perl;
+      loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
+
+        my $match = $tag-bodies[$mi];
+say "\nMatch: ", $match.perl;
+#        for $ast -> $a {
+say "\nAst: ", $match.ast;
+        for @($match.ast) {
+#        given ($match.ast)[0] {
+
+          # Any piece of found text
+          when Str {
+            if ? $_ {
+              $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
+              $parent.append(SemiXML::Text.new(:text($_)));
+            }
+          }
+
+          # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
+          when Array {
+say "\nArray: ", $_.elems;
+
+            # tag ast: [ tag type, namespace, tag name, module, method, attributes
+            my Array $tag-ast = $_[0];
+
+            # Test if spaces are needed before the document
+            $parent.append(SemiXML::Text.new(:text(' ')))
+              if $tag-ast[0] ~~ any(< $** $*| >);
+
+            $parent.append($_[2]);
+
+            # Test if spaces are needed after the document
+            $parent.append(SemiXML::Text.new(:text(' ')))
+              if $tag-ast[0] ~~ any(< $** $|* >);
+          }
+
+          # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
+          when Hash {
+say "\nHash: ", $_.keys;
+
+            # tag ast: [ tag type, namespace, tag name, module, method, attributes
+            my Array $tag-ast = $_<tag-ast>;
+
+            # Test if spaces are needed before the document
+            $parent.append(SemiXML::Text.new(:text(' ')))
+              if $tag-ast[0] ~~ any(< $** $*| >);
+
+            $parent.append($_<doc-ast>);
+
+            # Test if spaces are needed after the document
+            $parent.append(SemiXML::Text.new(:text(' ')))
+              if $tag-ast[0] ~~ any(< $** $|* >);
+          }
         }
-
-        # Nested document: [ tag ast, body ast, doc xml]
-        when Array {
-
-          # tag ast: [ tag type, namespace, tag name, module, method, attributes
-          my Array $tag-ast = $_[0];
-
-          # Test if spaces are needed before the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $*| >);
-
-          $parent.append($_[2]);
-
-          # Test if spaces are needed after the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $|* >);
-        }
+#        }
       }
 
       $parent;
@@ -497,12 +543,13 @@ say "Tag name: $tag-name";
               $ast.push: self!clean-text( $v3.Str, :fixed);
             }
 
-            # Text cannot have nested documents and text may be re-formatted
+            # Text can have nested documents and text may be re-formatted
             elsif $p3 eq 'document' {
 
               my $d = $v3;
               my $tag-ast = $d<tag-spec>.ast;
-              my $body-ast = $d<tag-body>.ast;
+#              my $body-ast = $d<tag-body>.ast;
+              my $body-ast = $d<tag-body>;
               $ast.push([ $tag-ast, $body-ast, $d.ast]);
             }
           }
@@ -526,8 +573,9 @@ say "Tag name: $tag-name";
 
               my $d = $v4;
               my $tag-ast = $d<tag-spec>.ast;
-              my $body-ast = $d<tag-body>.ast;
-              $ast.push([ $tag-ast, $body-ast, $d.ast]);
+#              my $body-ast = $d<tag-body>.ast;
+              my $body-ast = $d<tag-body>;
+              $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.ast)};
             }
           }
         }
@@ -671,7 +719,7 @@ say "Tag name: $tag-name";
           last;
         }
       }
-      
+
       $object;
     }
   }

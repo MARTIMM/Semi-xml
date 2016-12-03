@@ -1,0 +1,4 @@
+$|abc [ abc def $|de $|fg $|h1]
+      [! $!xyz !]
+      [ def $*|h1 [test 2][!$j = $h - 10!]]
+
