@@ -5,7 +5,13 @@ use SemiXML;
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 class LoremIpsum {
-  has Str $!perl5-lorem = Q:to/EOIPSUM/;
+
+  # could not use 'has' because of time of existence and calculatig length
+  # in submethod BUILD
+  #
+  my Hash $lorem-texts = {
+    perl5-lorem => {
+      text => Q:to/EOIPSUM/,
         alias consequatur aut perferendis sit voluptatem accusantium doloremque
         aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto
         beatae vitae dicta sunt explicabo. aspernatur aut odit aut fugit, sed
@@ -32,8 +38,18 @@ class LoremIpsum {
         rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus
         maiores doloribus asperiores repellat.
         EOIPSUM
+      length => 0,
+    }
+  }
 
-  has Int $!lorem-length = $!perl5-lorem.chars;
+  #-----------------------------------------------------------------------------
+  submethod BUILD ( ) {
+    
+    for $lorem-texts.keys -> $k {
+      $lorem-texts{$k}<length> = $lorem-texts{$k}<text>.chars;
+    }
+  }
+
 
   #-----------------------------------------------------------------------------
   method standard1500 ( XML::Element $parent, Hash $attrs --> XML::Element ) {
@@ -248,10 +264,12 @@ class LoremIpsum {
   method !make-sentence ( --> Str ) {
 
     # get some point in the first half of the text and find the next space
-    my Int $start = $!perl5-lorem.index( ' ', ($!lorem-length/2).rand.Int);
+    my Int $start = $lorem-texts<perl5-lorem><text>.index(
+      ' ', (($lorem-texts<perl5-lorem><length>)/2).rand.Int
+    );
 
     # use that point to get some words from the text
-    my Str $ipsum = $!perl5-lorem.substr($start).comb(
+    my Str $ipsum = $lorem-texts<perl5-lorem><text>.substr($start).comb(
       /\w+/, 4 + 6.rand.Int
     ).join(' ').tc;
 
@@ -262,10 +280,12 @@ class LoremIpsum {
   method !make-word ( --> Str ) {
 
     # get some point in the first half of the text and find the next space
-    my Int $start1 = $!perl5-lorem.index( ' ', ($!lorem-length - 20).rand.Int);
-    my Int $start2 = $!perl5-lorem.index( ' ', $start1 + 1);
+    my Int $start1 = $lorem-texts<perl5-lorem><text>.index(
+      ' ', (($lorem-texts<perl5-lorem><length>) - 20).rand.Int
+    );
+    my Int $start2 = $lorem-texts<perl5-lorem><text>.index( ' ', $start1 + 1);
 
     # use the points to get a words from the text
-    $!perl5-lorem.substr( $start1, $start2 - $start1);
+    $lorem-texts<perl5-lorem><text>.substr( $start1, $start2 - $start1);
   }
 }
