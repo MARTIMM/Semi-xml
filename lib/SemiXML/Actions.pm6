@@ -263,6 +263,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
       }
 
+#`{{
       # Conversion to xml escapes is done as late as possible
       my Sub $after-math = sub ( XML::Element $x ) {
 
@@ -286,6 +287,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       &$after-math($parent);
+}}
 
       # Return the completed report
       $!xml-document .= new($parent);
@@ -607,10 +609,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       # Substitute many spaces with one space
       $t ~~ s:g/ \s\s+ / / unless $fixed;
 
-#      $t = self!process-esc($t);
       $t;
     }
 
+#`{{
     #---------------------------------------------------------------------------
     # Substitute some escape characters in entities and remove the remaining
     # backslashes.
@@ -647,7 +649,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       return $esc;
     }
-
+}}
     #---------------------------------------------------------------------------
     method !current-state ( Match $match, Str $state ) {
 

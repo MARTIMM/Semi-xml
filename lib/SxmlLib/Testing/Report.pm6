@@ -173,7 +173,7 @@ print "\n";
 
         # get the nodes stored in the code section
         my @code-nodes = $!code-obj.get-code-part($centry).nodes;
-        while @code-nodes {
+        while +@code-nodes {
 
           my $code-node = shift @code-nodes;
 #say "Y: ", $code-node.WHAT, ", $code-node";
@@ -187,10 +187,10 @@ print "\n";
                 and $code-node.name eq '__PARENT_CONTAINER__';
 
           if ? $x {
+            my Int $tentry = ([~] $code-node[0].nodes).Int;
             if $x.name eq 'test' {
 
               # get test entry number 
-              my Int $tentry = ([~] $code-node[0].nodes).Int;
               my Str $code-text = ~$!test-obj.get-code-text($tentry);
 say "test $tentry, $code-text";
 
@@ -204,10 +204,9 @@ say "test $tentry, $code-text";
               $hook.before($!test-obj.make-table($tentry));
             }
 
-            elsif $x and $x.name eq 'todo' {
+            elsif $x.name eq 'todo' {
 
               # get test entry number 
-              my Int $tentry = ([~] $code-node[0].nodes).Int;
               my Str $code-text = ~$!todo-obj.get-code-text($tentry);
 say "todo $tentry, $code-text";
 
@@ -221,10 +220,9 @@ say "todo $tentry, $code-text";
               $!test-program ~= "$code-text\n";
             }
 
-            elsif $x and $x.name eq 'bug' {
+            elsif $x.name eq 'bug' {
 
               # get test entry number 
-              my Int $tentry = ([~] $code-node[0].nodes).Int;
               my Str $code-text = ~$!bug-obj.get-code-text($tentry);
 say "bug issue $tentry, $code-text";
 
@@ -238,17 +236,16 @@ say "bug issue $tentry, $code-text";
               $!test-program ~= "$code-text\n";
             }
 
-            elsif $x and $x.name eq 'skip' {
+            elsif $x.name eq 'skip' {
 
               # get test entry number 
-              my Int $tentry = ([~] $code-node[0].nodes).Int;
               my Str $code-text = ~$!skip-obj.get-code-text($tentry);
 say "skip $tentry, $code-text";
 
               # add skip to the <pre> block
               append-element( $pre, :text("$code-text\n"));
 
-              # add bug text after the <pre> and before the <hook>
+              # add skip text after the <pre> and before the <hook>
               $hook.before($!skip-obj.make-table($tentry));
 
               # and to the test program
@@ -256,8 +253,10 @@ say "skip $tentry, $code-text";
             }
           }
 
+          # $x not defined so it is plain code text
           else {
             $pre.append($code-node);
+            append-element( $pre, :text("\n"));
             $!test-program ~= "$code-node\n";
           }
         }
@@ -312,7 +311,7 @@ say "\n\nFile:\n$test-file";
 say "R: $line";
 
       # get the test code if there is one. only for tests and todo(also bugs)
-      $line ~~ m/ '-' \s* (<[TDB]> \d+) /;
+      $line ~~ m/ '-' \s* (<[TDBS]> \d+) /;
       my Str $test-code = $0.Str if ? $/;
       my Any $ok = $line ~~ m:s/^ 'ok' /
                    ?? True
@@ -428,14 +427,18 @@ say "TR: $test-code, $ok-c, $nok-c";
       my XML::Element $td;
       if $ok-c {
         $td = before-element( $node, 'td', {class => 'check-mark green'} );
+        
+        # check mark todo ok is an empty sheet symbol
         if $test-code ~~ m/^ 'D' / {
           append-element( $td, :text('&#128459;'));
         }
 
+        # check mark bug issue ok is an empty sheet symbol
         elsif $test-code ~~ m/^ 'B' / {
           append-element( $td, :text('&#128459;'));
         }
 
+        # check mark test ok is an check mark symbol
         else {
           append-element( $td, :text('&#10004;'));
         }
@@ -444,19 +447,28 @@ say "TR: $test-code, $ok-c, $nok-c";
       }
 
       if $nok-c {
+        # if multiple tests are done on the same testline (e.g. loops)
+        # make the <td> smaller and add another one
+        #
         my Bool $ok-td-exists = $td.defined;
         $td.set( 'class', 'smaller-check-mark green') if $ok-td-exists;
 
+        # the other being the not ok <td>
         $td = before-element( $node, 'td', {class => 'check-mark red'});
         $td.set( 'class', 'smaller-check-mark red') if $ok-td-exists;
+
+        # check mark todo nok is a written sheet symbol
         if $test-code ~~ m/^ 'D' / {
           append-element( $td, :text('&#128462;'));
         }
 
+        # check mark bug issue nok is a written sheet symbol
         elsif $test-code ~~ m/^ 'B' / {
-          append-element( $td, :text('&#128027;'));
+#          append-element( $td, :text('&#128027;'));
+          append-element( $td, :text('&#128462;'));
         }
 
+        # check mark test nok is a cross symbol
         else {
           append-element( $td, :text('&#10008;'));
         }

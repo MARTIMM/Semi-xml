@@ -22,16 +22,16 @@ class Skip {
                  ?? $attrs<tl>.Int
                  !! ($attrs<n>:exists ?? $attrs<n>.Int !! 1);
 
-say "bug: $attrs<n>, 'B$count'";
+say "skip: $attrs<n>, 'S$count'";
     $parts.push: {
       comment => $content-body,
-      code => "bug 'B$count', $test-lines;",
+      code => "skip 'S$count', $test-lines;",
       lines => $test-lines,
       count => $count,
-      label => 'B'
+      label => 'S'
     };
 
-    my XML::Element $c = append-element( $parent, 'bug');
+    my XML::Element $c = append-element( $parent, 'skip');
     append-element( $c, :text("$count"));
 
     $parent;
@@ -41,7 +41,7 @@ say "bug: $attrs<n>, 'B$count'";
   #-----------------------------------------------------------------------------
   method make-table ( Int $entry --> XML::Element ) {
 
-say "make table bug entry $entry";
+say "make table skip entry $entry";
     my Array $parts := $SxmlLib::Testing::parts;
     my Int $count = $parts[$entry]<count>;
     my Int $lines = $parts[$entry]<lines>;
@@ -62,23 +62,18 @@ say "make table bug entry $entry";
     $td.insert($_) for $parts[$entry]<comment>.nodes.reverse;
     $td.set( 'class', 'test-comment');
 
-    # Bold test code characters in front of test comment
+    # bold test code characters in front of test comment
     my XML::Element $b = insert-element( $td, 'b');
     my Str $t;
     if $lines > 1 {
-      $t = "Next $lines tests (B{$entry+1}-{$entry+$lines}) are bug issue tests: ";
+      $t = "Next $lines tests (S{$entry+1}-{$entry+$lines}) are skipped tests: ";
     }
 
     else {
-      $t = "Next B{$entry+1} test is a bug issue test: ";
+      $t = "Next S{$entry+1} test is a skipped test: ";
     }
     insert-element( $b, :text($t));
 
-#   insert-element( $b, :text('Next B## tests are bug issue tests: '));
-#   insert-element( $b, :text('Next S## tests are skipped tests: '));
-
-    # Prefix the comment with the test code
-#    insert-element( $b, :text("$test-label: "));
     $table;
   }
 
@@ -86,7 +81,7 @@ say "make table bug entry $entry";
   method get-code-text ( Int $entry --> Str ) {
 
     my Array $parts := $SxmlLib::Testing::parts;
-    $SxmlLib::Testing::current-type = BugCmd;
+    $SxmlLib::Testing::current-type = SkipCmd;
     $SxmlLib::Testing::type-count = $parts[$entry]<lines>;
 
     $parts[$entry]<code>;
