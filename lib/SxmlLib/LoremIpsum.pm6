@@ -154,12 +154,12 @@ class LoremIpsum {
     Hash $attrs --> XML::Element
   ) {
 
-    my Str $ipsum = Q:to/EOIPSUM/;
+    my Str $ipsum = Q:qq:to/EOIPSUM/;
         Veggies sunt bona vobis, proinde vos postulo esse magis grape pea
         sprouts horseradish courgette maize spinach prairie turnip jicama
         coriander quandong gourd broccoli seakale gumbo. Parsley corn
         lentil zucchini radicchio maize horseradish courgette maize spinach
-        prairie turnip j\N{U+00ED}cama coriander quandong burdock avocado
+        prairie turnip \x[00ED]cama coriander quandong burdock avocado
         sea lettuce. Garbanzo tigernut earthnut pea fennel.
         EOIPSUM
 
