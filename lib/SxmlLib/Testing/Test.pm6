@@ -19,9 +19,6 @@ class Test {
     my Int $count = $SxmlLib::Testing::count++;
     my Array $parts := $SxmlLib::Testing::parts;
 
-#say "T: ", ~$parent;
-#say "B: ", ~$content-body;
-
 say "test: $attrs<t>, 'T$count'";
     $parts.push: {
       comment => $content-body,

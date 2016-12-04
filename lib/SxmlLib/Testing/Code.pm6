@@ -11,20 +11,6 @@ class Code {
   has Array $!parts = [ ];
   has Int $!count = 0;
 
-#`{{
-  has $!test-obj;
-
-  #-----------------------------------------------------------------------------
-  method initialize ( SemiXML::Sxml $sxml, Hash $attrs ) {
-
-say "\nInit code: ";
-for $attrs.kv -> $k, $v { say "$k => $v" };
-print "\n";
-
-    $!test-obj = $sxml.get-sxml-object('SxmlLib::Testing::Test');
-  }
-}}
-
   #-----------------------------------------------------------------------------
   method add (
     XML::Element $parent, Hash $attrs,
@@ -33,15 +19,11 @@ print "\n";
     --> XML::Node
   ) {
   
-#say "C: $parent";
-#say "B: ", ~$content-body;
-
     $!parts.push: { code => $content-body, };
 
     my XML::Element $c = append-element( $parent, 'code');
     append-element( $c, :text($!count.Str));
 
-#say $!parts.elems;
     $!count++;
     $parent;
   }

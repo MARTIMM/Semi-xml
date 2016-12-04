@@ -74,11 +74,6 @@ say "make table todo entry $entry";
     }
     insert-element( $b, :text($t));
 
-#   insert-element( $b, :text('Next B## tests are bug issue tests: '));
-#   insert-element( $b, :text('Next S## tests are skipped tests: '));
-
-    # Prefix the comment with the test code
-#    insert-element( $b, :text("$test-label: "));
     $table;
   }
 
