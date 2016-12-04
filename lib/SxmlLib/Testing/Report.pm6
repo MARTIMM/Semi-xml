@@ -255,8 +255,10 @@ say "skip $tentry, $code-text";
 
           # $x not defined so it is plain code text
           else {
-            $pre.append($code-node);
-            append-element( $pre, :text("\n"));
+            my Str $code-text = self!process-code(~$code-node);
+            append-element( $pre, :text($code-text));
+#            $pre.append($code-node);
+#            append-element( $pre, :text("\n"));
             $!test-program ~= "$code-node\n";
           }
         }
@@ -270,6 +272,42 @@ say "skip $tentry, $code-text";
 say "Hook: ", $hook.WHAT;
 say "Body: ", ~$!report-doc;
     $hook.remove;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !process-code ( Str $code-text ) {
+
+    state $indent-level = 0;
+    state $prev-indent-level = 0;
+    my Str $code = '';
+    
+    for $code-text.split(/\n/) {
+      
+      # clean line
+      my Str $line = $^a;
+      $line ~~ s/^ \h+ //;
+      $line ~~ s/ \s+ $ //;
+
+      # count open brackets to increment level
+      $indent-level += ($line ~~ m:g/<[\[\(\{]>/).elems;
+
+      # count close brackets to decrement level
+      $indent-level += ($line ~~ m:g/<[\]\)\}]>/).elems;
+
+      # if indent-level is decreased then use new indent
+      if $prev-indent-level > $indent-level {
+        $code ~= ' ' x ($indent-level * 2) ~ $line ~ "\n";
+        $prev-indent-level = $indent-level;
+      }
+      
+      # if indent-level is increased then use previous indent first
+      else {
+        $code ~= ' ' x ($prev-indent-level * 2) ~ $line ~ "\n";
+        $prev-indent-level = $indent-level;
+      }
+    }
+    
+    $code;
   }
 
   #-----------------------------------------------------------------------------
