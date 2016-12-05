@@ -34,10 +34,6 @@ class Report {
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $sxml, Hash $attrs ) {
 
-say "\nInit report: ";
-for $attrs.kv -> $k, $v { say "$k => $v" };
-print "\n";
-
     $!sxml = $sxml;
 
     $!test-program = Q:to/EOINIT/;
@@ -152,12 +148,9 @@ print "\n";
     while @nodes {
 
       my $node = @nodes.shift;
-#say "\nN: ", $node.WHAT;
       if $node ~~ XML::Element
          and $node.name eq '__PARENT_CONTAINER__'
          and $node.nodes[0].name eq 'code' {
-
-#say $node.name;
 
         # <pre> used to display code in
         $pre = append-element( $!body, 'pre', {:class<test-block-code>});
@@ -169,14 +162,12 @@ print "\n";
 
         # get code entry number
         my Int $centry = ([~] $node.nodes[0].nodes).Int;
-#say "code $centry";
 
         # get the nodes stored in the code section
         my @code-nodes = $!code-obj.get-code-part($centry).nodes;
         while +@code-nodes {
 
           my $code-node = shift @code-nodes;
-#say "Y: ", $code-node.WHAT, ", $code-node";
 
           # test sections must be translated in code and also inserted just
           # after this <pre> section
@@ -192,7 +183,6 @@ print "\n";
 
               # get test entry number 
               my Str $code-text = ~$!test-obj.get-code-text($tentry);
-say "test $tentry, $code-text";
 
               # add test to the <pre> block
               append-element( $pre, :text(self!process-code($code-text)));
@@ -208,7 +198,6 @@ say "test $tentry, $code-text";
 
               # get test entry number 
               my Str $code-text = ~$!todo-obj.get-code-text($tentry);
-say "todo $tentry, $code-text";
 
               # add todo to the <pre> block
               append-element( $pre, :text(self!process-code($code-text)));
@@ -224,7 +213,6 @@ say "todo $tentry, $code-text";
 
               # get test entry number 
               my Str $code-text = ~$!bug-obj.get-code-text($tentry);
-say "bug issue $tentry, $code-text";
 
               # add bug issue to the <pre> block
               append-element( $pre, :text(self!process-code($code-text)));
@@ -240,7 +228,6 @@ say "bug issue $tentry, $code-text";
 
               # get test entry number 
               my Str $code-text = ~$!skip-obj.get-code-text($tentry);
-say "skip $tentry, $code-text";
 
               # add skip to the <pre> block
               append-element( $pre, :text(self!process-code($code-text)));
@@ -257,8 +244,6 @@ say "skip $tentry, $code-text";
           else {
             my Str $code-text = self!process-code(~$code-node);
             append-element( $pre, :text($code-text));
-#            $pre.append($code-node);
-#            append-element( $pre, :text("\n"));
             $!test-program ~= "$code-node\n";
           }
         }
@@ -269,8 +254,6 @@ say "skip $tentry, $code-text";
       }
     }
 
-say "Hook: ", $hook.WHAT;
-say "Body: ", ~$!report-doc;
     $hook.remove;
   }
 
@@ -290,8 +273,6 @@ say "Body: ", ~$!report-doc;
       my Str $line = $^a;
       $line ~~ s/^ \h+ //;
       $line ~~ s/ \s+ $ //;
-
-say "Line: '$line'";
 
       # skip empty lines
       next unless ? $line;
@@ -333,30 +314,24 @@ say "Line: '$line'";
     # Finish up the test text and write the text to a file 
     $!test-program ~= "\n\ndone-testing;\n";
 
-say "\n\nCode:\n$!test-program";
-
     # get a filename for the tests and write
     my $test-file = $attrs<test-file>;
     $test-file //= ($!sxml.get-current-filename ~ '.t');
     $test-file //= ($*TMPDIR.Str ~ '/perl6-test.t');
-
-say "\n\nFile:\n$test-file";
 
     spurt( $test-file, $!test-program);
 
     # run the tests using prove and get the result contents through a pipe
     my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
                  '--rules=seq=*', $test-file, :out;
-#say "\nProc: ", $p.perl;
-
     # read lines from pipe from testing command
     my @lines = $p.out.lines;
     loop ( my $l = 0; $l < @lines.elems; $l++) {
       my $line = @lines[$l];
 
-say "R: $line";
+#say "R: $line";
 
-      # get the test code if there is one. only for tests and todo(also bugs)
+      # get the test code if there is one.
       $line ~~ m/ '-' \s* (<[TDBS]> \d+) /;
       my Str $test-code = $0.Str if ? $/;
       my Any $ok = $line ~~ m:s/^ 'ok' /
@@ -384,18 +359,15 @@ say "R: $line";
 
       # check skipped code
       elsif $line ~~ m/'# SKIP' \s* ('S' \d+) $/ {
-
         my Str $test-code2 = $0.Str if ? $/;
         self!set-test-results( $test-code2, $ok, :metric);
       }
 
-      else {
-
-        self!set-test-results( $test-code, $ok);
+      elsif $test-code {
+        $test-code ~~ s/^ 'S' /T/;
+        self!set-test-results( $test-code, $ok, :metric);
       }
     }
-
-#say "\nProc: ", $p.perl;
 
     # save metric data in a file
     self!save-metrics( $test-file, $attrs);
@@ -453,9 +425,9 @@ say "R: $line";
     $metric-text ~= ("D", $!all-metrics[7..9]>>.fmt('%.2f')).join(':') ~ "\n";
 
     # skip metrics
-    $ts = $!test-metrics<S>[0];
-    $!all-metrics.push: $ts;
-    $metric-text ~= ("S", $!all-metrics[10].fmt('%.2f')).join(':') ~ "\n";
+    $ts = [+] @($!test-metrics<S>[0]);
+    $!all-metrics.push: $!test-metrics<S>[0], $!test-metrics<S>[1], $ts;
+    $metric-text ~= ("S", $!all-metrics[10..12].fmt('%.2f')).join(':') ~ "\n";
 
     spurt( $metric-file, $metric-text);
   }
@@ -469,8 +441,20 @@ say "R: $line";
 
       my Str $test-code = $node.attribs<test-code>.Str;
 
-      ( my Int $ok-c, my Int $nok-c) = @($!test-results{$test-code} // [ 0, 0]);
-say "TR: $test-code, $ok-c, $nok-c";
+      my Int $ok-c;
+      my Int $nok-c;
+      ( $ok-c, $nok-c) = @($!test-results{$test-code} // [ 0, 0]);
+
+      # when skip statements are executed, the metrics will be counted under
+      # the T## test metric. So, when there is no info and the test-code was a
+      # skip code, try to get it from the T## entry
+      #
+      if !$ok-c and !$nok-c and $test-code ~~ m/^ 'S' / {
+        my $tc = $test-code;
+        $tc ~~ s/^ 'S' /T/;
+        ( $ok-c, $nok-c) = @($!test-results{$tc} // [ 0, 0]);
+      }
+#say "TR: $test-code, $ok-c, $nok-c";
 
       my XML::Element $td;
       if $ok-c {
@@ -486,7 +470,12 @@ say "TR: $test-code, $ok-c, $nok-c";
           append-element( $td, :text('&#128459;'));
         }
 
-        # check mark test ok is an check mark symbol
+        # check mark skip but ok is a check mark symbol
+        elsif $test-code ~~ m/^ 'S' / {
+          append-element( $td, :text('&#10004;'));
+        }
+
+        # check mark test ok is a check mark symbol
         else {
           append-element( $td, :text('&#10004;'));
         }
@@ -512,8 +501,12 @@ say "TR: $test-code, $ok-c, $nok-c";
 
         # check mark bug issue nok is a written sheet symbol
         elsif $test-code ~~ m/^ 'B' / {
-#          append-element( $td, :text('&#128027;'));
           append-element( $td, :text('&#128462;'));
+        }
+
+        # check mark skip but nok is a cross symbol
+        elsif $test-code ~~ m/^ 'S' / {
+          append-element( $td, :text('&#10008;'));
         }
 
         # check mark test nok is a cross symbol
@@ -531,7 +524,7 @@ say "TR: $test-code, $ok-c, $nok-c";
 
         $td = before-element( $node, 'td', {class => 'check-mark red'});
         $td.set( 'class', 'smaller-check-mark red') if $ok-td-exists;
-        append-element( $td, :text('&#x1F648;'));
+        append-element( $td, :text('&#x2728;'));
       }
 
       $node.remove;
@@ -603,7 +596,7 @@ say "TR: $test-code, $ok-c, $nok-c";
       $tr, $!all-metrics[0],
       ([+] $!all-metrics[1], $!all-metrics[4], $!all-metrics[7]),
       $!all-metrics[2], $!all-metrics[5], $!all-metrics[8],
-      $!all-metrics[10]
+      $!all-metrics[12]
     );
   }
 
