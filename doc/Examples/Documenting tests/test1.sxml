@@ -1,96 +1,83 @@
-$!td.report title='Integer manipulations'
+$!report.run title='Integer manipulations'
             class='Int' label='Int-test'
             test-file='doc/Examples/Documenting tests/test1.t' [
 
-  $h1 [The Perl 6 integer test report]
+  $|h1 [The Perl 6 integer test report]
   
-  $p [
+  $|p [
     The integer is in perl the most important type so we need to do our best
     to test it thoroughly. First we declare a constant to be used later and an
     integer without a value.
   ]
 
-  $!td.code [!=
+  $!code.add [=
     constant ABC = 10;
     my Int $i;
-  !]
 
-  $!td.test line="nok $i.defined" [
-    Declaration of an integer without an assignment of a value,
-    should result in an undefinedness.
+    $!test.add t="nok $i.defined" [
+      Declaration of an integer without an assignment of a value,
+      should result in an undefinedness.
+    ]
+
+    $!test.add t="ok $i ~~ Int" [
+      But when defined or not, its type value can be compared.
+    ]
+
+    $!todo.add n=1 [
+      Someday we might make this not fail when wormwhole modules are installed
+    ]
+
+    $!test.add t="ok $i !~~ Int" [The opposite test should fail]
+    $!test.add t="ok $i ~~ Cool" [
+      Also inherited classes should be compared
+      successfully.
+    ]
   ]
 
-  $!td.test line="ok $i ~~ Int" [
-    But when defined or not, its type value can be compared.
-  ]
-
-  $!td.todo n=1 [
-    Someday we might make this not fail when wormwhole modules are installed
-  ]
-
-  $!td.test line="ok $i !~~ Int" [The opposite test should fail]
-  $!td.test line="ok $i ~~ Cool" [
-    Also inherited classes should be compared
-    successfully.
-  ]
-
-  $h3 [Operations]
+  $|h3 [Operations]
   
-  $p [Next a few tests to see if operations can be applied to the integer]
+  $|p [Next a few tests to see if operations can be applied to the integer]
 
-  $!td.code [!=
+  $!code.add [=
     $i = ABC;
-  !]
 
-  $!td.test line="is $i, 10" [
-    Initialize Int with the constant seems to have done well
-  ]
+    $!test.add t="is $i, 10" [
+      Initialize Int with the constant seems to have done well
+    ]
 
 
-  $!td.code [!=
     if ?"We are not stupid" {
-  !]
-  $!td.skip n=2 [
-    Two lines are skipped because these are stupid tests
-  ]
-  $!td.code append=1 [!=
-  } else {
-  !]
-  $!td.test line='  ok 10 < 7' [10 not smaller than 7]
-  $!td.test line='  ok 11 / 0' [Won't work in this universe]
-  $!td.code append=1 [!=}!]
 
+      $!skip.add n=2 [ Two lines are skipped because these are stupid tests ]
 
+    } else {
 
+      $!test.add t='ok 10 < 7' [10 not smaller than 7]
+      $!test.add t='ok 11 / 0' [Won't work in this universe]
+      $!code.add append=1 [!=}!]
+    }
 
-  $!td.todo n=2 [
-    Incredible tests which will be true in the not so distant future
-  ]
-  $!td.test line="is $i, 11" [Integer is 10 not 11]
-  $!td.test line="like $i.Str, /'not 10, but text'/" [test some text]
+    $!todo.add n=2 [
+      Incredible tests which will be true in the not so distant future
+    ]
+    $!test.add t="is $i, 11" [Integer is 10 not 11]
+    $!test.add t="like $i.Str, /'not 10, but text'/" [test some text]
 
-
-  $!td.code [!=
     for ^10 {
-  !]
+      $!test.add t='  ok $^a < 7' [test a series of numbers against 7]
+    }
 
-  $!td.test line='  ok $^a < 7' [test a series of numbers against 7]
-
-  $!td.code append=1 [!=}!]
-
-  $!td.code [!=
     for ^11 {
-  !]
 
-  $!td.todo n=11 tl=1 [Should make todos with this test]
-  $!td.test line='  ok $^a > 8' [test a series of numbers against 8]
+      $!todo.add n=11 tl=1 [Should make todos with this test]
+      $!test.add t='  ok $^a > 8' [test a series of numbers against 8]
 
-  $!td.code append=1 [!=}!]
+    }
 
-  $!td.code [!=
     my Int $i2 = 20304;
-  !]
-  $!td.bug n=2 [Mentioned a few bugs from the issues list on github ]
-  $!td.test line='is $i2, 20304' [ok, for now]
-  $!td.test line='is $i2 - 20305, 1' [not ok]
+
+    $!bug.add n=2 [ Mentioned a few bugs from the issues list on github ]
+    $!test.add t='is $i2, 20304' [ ok, for now ]
+    $!test.add t='is $i2 - 20305, 1' [ not ok ]
+  ]
 ]
