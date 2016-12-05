@@ -195,7 +195,7 @@ print "\n";
 say "test $tentry, $code-text";
 
               # add test to the <pre> block
-              append-element( $pre, :text("$code-text\n"));
+              append-element( $pre, :text(self!process-code($code-text)));
 
               # and to the test program
               $!test-program ~= "$code-text\n";
@@ -211,7 +211,7 @@ say "test $tentry, $code-text";
 say "todo $tentry, $code-text";
 
               # add todo to the <pre> block
-              append-element( $pre, :text("$code-text\n"));
+              append-element( $pre, :text(self!process-code($code-text)));
 
               # add todo text after the <pre> and before the <hook>
               $hook.before($!todo-obj.make-table($tentry));
@@ -227,7 +227,7 @@ say "todo $tentry, $code-text";
 say "bug issue $tentry, $code-text";
 
               # add bug issue to the <pre> block
-              append-element( $pre, :text("$code-text\n"));
+              append-element( $pre, :text(self!process-code($code-text)));
 
               # add bug text after the <pre> and before the <hook>
               $hook.before($!bug-obj.make-table($tentry));
@@ -243,7 +243,7 @@ say "bug issue $tentry, $code-text";
 say "skip $tentry, $code-text";
 
               # add skip to the <pre> block
-              append-element( $pre, :text("$code-text\n"));
+              append-element( $pre, :text(self!process-code($code-text)));
 
               # add skip text after the <pre> and before the <hook>
               $hook.before($!skip-obj.make-table($tentry));
@@ -275,38 +275,46 @@ say "Body: ", ~$!report-doc;
   }
 
   #-----------------------------------------------------------------------------
-  method !process-code ( Str $code-text ) {
+  method !process-code ( Str $code-text is copy --> Str ) {
 
     state $indent-level = 0;
     state $prev-indent-level = 0;
     my Str $code = '';
-    
+
+    # insert newline after any closing curly bracket
+    $code-text ~~ s:g/ '}' /}\n/;
+
+    # split code script on every line
     for $code-text.split(/\n/) {
-      
-      # clean line
+      # clean line for leading and trailing spaces
       my Str $line = $^a;
       $line ~~ s/^ \h+ //;
       $line ~~ s/ \s+ $ //;
+
+say "Line: '$line'";
+
+      # skip empty lines
+      next unless ? $line;
 
       # count open brackets to increment level
       $indent-level += ($line ~~ m:g/<[\[\(\{]>/).elems;
 
       # count close brackets to decrement level
-      $indent-level += ($line ~~ m:g/<[\]\)\}]>/).elems;
+      $indent-level -= ($line ~~ m:g/<[\]\)\}]>/).elems;
 
       # if indent-level is decreased then use new indent
       if $prev-indent-level > $indent-level {
         $code ~= ' ' x ($indent-level * 2) ~ $line ~ "\n";
         $prev-indent-level = $indent-level;
       }
-      
+
       # if indent-level is increased then use previous indent first
       else {
         $code ~= ' ' x ($prev-indent-level * 2) ~ $line ~ "\n";
         $prev-indent-level = $indent-level;
       }
     }
-    
+
     $code;
   }
 
@@ -374,13 +382,15 @@ say "R: $line";
         self!set-test-results( $test-code, $ok);
       }
 
-      # check skip code
+      # check skipped code
       elsif $line ~~ m/'# SKIP' \s* ('S' \d+) $/ {
+
         my Str $test-code2 = $0.Str if ? $/;
         self!set-test-results( $test-code2, $ok, :metric);
       }
 
       else {
+
         self!set-test-results( $test-code, $ok);
       }
     }
@@ -465,7 +475,7 @@ say "TR: $test-code, $ok-c, $nok-c";
       my XML::Element $td;
       if $ok-c {
         $td = before-element( $node, 'td', {class => 'check-mark green'} );
-        
+
         # check mark todo ok is an empty sheet symbol
         if $test-code ~~ m/^ 'D' / {
           append-element( $td, :text('&#128459;'));
@@ -511,7 +521,7 @@ say "TR: $test-code, $ok-c, $nok-c";
           append-element( $td, :text('&#10008;'));
         }
 
-        append-element( $td, :text("$ok-c ")) if $nok-c > 1;
+        append-element( $td, :text("$nok-c ")) if $nok-c > 1;
       }
 
       # Skipped tests
