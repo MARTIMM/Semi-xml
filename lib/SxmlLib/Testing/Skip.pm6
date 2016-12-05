@@ -22,7 +22,6 @@ class Skip {
                  ?? $attrs<tl>.Int
                  !! ($attrs<n>:exists ?? $attrs<n>.Int !! 1);
 
-say "skip: $attrs<n>, 'S$count'";
     $parts.push: {
       comment => $content-body,
       code => "skip 'S$count', $test-lines;",
@@ -41,7 +40,6 @@ say "skip: $attrs<n>, 'S$count'";
   #-----------------------------------------------------------------------------
   method make-table ( Int $entry --> XML::Element ) {
 
-say "make table skip entry $entry";
     my Array $parts := $SxmlLib::Testing::parts;
     my Int $count = $parts[$entry]<count>;
     my Int $lines = $parts[$entry]<lines>;
@@ -66,11 +64,11 @@ say "make table skip entry $entry";
     my XML::Element $b = insert-element( $td, 'b');
     my Str $t;
     if $lines > 1 {
-      $t = "Next $lines tests (S{$entry+1}-{$entry+$lines}) are skipped tests: ";
+      $t = "Next $lines tests (S{$entry+1}-{$entry+$lines}) might be skipped: ";
     }
 
     else {
-      $t = "Next S{$entry+1} test is a skipped test: ";
+      $t = "Next S{$entry+1} test might be skipped: ";
     }
     insert-element( $b, :text($t));
 
