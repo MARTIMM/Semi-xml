@@ -19,7 +19,6 @@ class Test {
     my Int $count = $SxmlLib::Testing::count++;
     my Array $parts := $SxmlLib::Testing::parts;
 
-say "test: $attrs<t>, 'T$count'";
     $parts.push: {
       comment => $content-body,
       code => "$attrs<t>, ",
@@ -37,7 +36,6 @@ say "test: $attrs<t>, 'T$count'";
   #-----------------------------------------------------------------------------
   method make-table ( Int $entry --> XML::Element ) {
 
-say "make table test entry $entry";
     my Array $parts := $SxmlLib::Testing::parts;
     my Str $test-label = $parts[$entry]<label> ~ $parts[$entry]<count>;
 
