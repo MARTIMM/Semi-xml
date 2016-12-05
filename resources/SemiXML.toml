@@ -1,12 +1,9 @@
 [ dependencies ]
 #  file          = [ ]
 
+#[ module ]
 
-[ module ]
-
-
-[ option ]
-  debug         = false
+#[ option ]
 
 [ option.doctype ]
   show          = false
@@ -23,11 +20,9 @@
 
 
 [ output ]
-#  filepath      = '.'
-#  filename      = 'x'
   fileext       = 'xml'
 
-[ output.program ]
+#[ output.program ]
 #  c1 = 'wkhtml2pdf - %f'
 
 

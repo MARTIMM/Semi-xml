@@ -1,7 +1,8 @@
 ## Changes
 
 * 0.26.0
-  * implemented the skip part of the report generator
+  * Implemented the skip part of the report generator.
+  * Change in processing configuration files.
 * 0.25.0
   * Before there was only one content block per element specification like ```$abc [some text]```. Now it is possible to have 0, 1 or more blocks following a tag so the following is possible;
   ```

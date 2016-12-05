@@ -23,7 +23,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has Hash $.styles;
     has Config::DataLang::Refine $configuration;
 
-    submethod BUILD ( ) {
+    submethod BUILD ( Str :$filename ) {
       $!grammar .= new;
       $!actions .= new(:sxml-obj(self));
 
@@ -32,11 +32,25 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Str $rsrc-p = %?RESOURCES<SemiXML.toml>.IO.abspath;
       my Str $rsrc-d = $rsrc-p;
       $rsrc-d ~~ s/ '/'? $rsrc-bn //;
+      my Array $locations = [$rsrc-d];
+      my Bool $merge = False;
+
+      # if filename is given, use its path also in its locations
+      if ?$filename and $filename.IO ~~ :r {
+        my Str $fn-bn = $filename.IO.basename;
+        my Str $fn-p = $filename.IO.abspath;
+        my Str $fn-d = $fn-p;
+        $fn-d ~~ s/ '/'? $fn-bn //;
+        $locations.unshift($fn-d);
+        $merge = True;
+      }
 
       my Config::DataLang::Refine $c0 = self!load-config(
-        :config-name($rsrc-bn),
-        :locations([$rsrc-d])
+        :config-name($rsrc-bn), :$locations, :$merge
       );
+#say "L: ", $locations.perl;
+#say "C: $merge";
+#dd $c0.config;
 
       my Hash $other-config = ? $c0 ?? $c0.config.clone !! {};
       $c0 = self!load-config( :config-name<SemiXML.toml>, :$other-config);
@@ -96,18 +110,19 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     #---------------------------------------------------------------------------
     method !load-config (
-      Str :$config-name, Array :$locations = [], Hash :$other-config
+      Str :$config-name, Array :$locations = [], Hash :$other-config,
+      Bool :$merge
       --> Config::DataLang::Refine
     ) {
 
       my Config::DataLang::Refine $c;
       try {
         if ?$other-config {
-          $c .= new( :$config-name, :$locations, :$other-config);
+          $c .= new( :$config-name, :$locations, :$other-config, :$merge);
         }
 
         else {
-          $c .= new( :$config-name, :$locations);
+          $c .= new( :$config-name, :$locations, :$merge);
         }
 
         CATCH {

@@ -30,7 +30,7 @@ sub MAIN ( Str $filename, Str :$run ) {
 #-------------------------------------------------------------------------------
 sub process-sxml ( Str:D $filename is copy, Str :$run ) {
 
-  my SemiXML::Sxml $x .= new;
+  my SemiXML::Sxml $x .= new(:$filename);
 
   if $filename.IO ~~ :r {
     $x.parse-file(:$filename);
