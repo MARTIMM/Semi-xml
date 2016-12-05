@@ -22,7 +22,6 @@ class Todo {
                  ?? $attrs<tl>.Int
                  !! ($attrs<n>:exists ?? $attrs<n>.Int !! 1);
 
-say "todo: $attrs<n>, 'D$count'";
     $parts.push: {
       comment => $content-body,
       code => "todo 'D$count', $test-lines;",
@@ -41,7 +40,6 @@ say "todo: $attrs<n>, 'D$count'";
   #-----------------------------------------------------------------------------
   method make-table ( Int $entry --> XML::Element ) {
 
-say "make table todo entry $entry";
     my Array $parts := $SxmlLib::Testing::parts;
     my Int $count = $parts[$entry]<count>;
     my Int $lines = $parts[$entry]<lines>;

@@ -22,7 +22,6 @@ class Bug {
                  ?? $attrs<tl>.Int
                  !! ($attrs<n>:exists ?? $attrs<n>.Int !! 1);
 
-say "bug: $attrs<n>, 'B$count'";
     $parts.push: {
       comment => $content-body,
       code => "todo 'B$count', $test-lines;",
@@ -41,7 +40,6 @@ say "bug: $attrs<n>, 'B$count'";
   #-----------------------------------------------------------------------------
   method make-table ( Int $entry --> XML::Element ) {
 
-say "make table bug entry $entry";
     my Array $parts := $SxmlLib::Testing::parts;
     my Int $count = $parts[$entry]<count>;
     my Int $lines = $parts[$entry]<lines>;
