@@ -82,7 +82,7 @@ td.test-comment {
 }
 
 .orange {
-  color:                #bb8800;
+  color:                #cc9900;
 }
 
 .purple {
@@ -197,7 +197,7 @@ svg {
 }
 
 .todo-nok {
-  fill:                 #e60;
+  fill:                 #ff8800;
   stroke:               black;
   stroke-width:         1;
 }
