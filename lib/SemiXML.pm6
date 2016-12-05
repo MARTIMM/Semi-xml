@@ -27,6 +27,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $!grammar .= new;
       $!actions .= new(:sxml-obj(self));
 
+      # Get the default config file from resources and elsewhere
       my Str $rsrc-bn = %?RESOURCES<SemiXML.toml>.IO.basename;
       my Str $rsrc-p = %?RESOURCES<SemiXML.toml>.IO.abspath;
       my Str $rsrc-d = $rsrc-p;

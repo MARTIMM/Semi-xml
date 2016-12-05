@@ -2,7 +2,7 @@ $!report.run
     title='Code Nesting' package=SxmlLib::Testing class=Report
     distribution=SemiXML [
 
-  $|h2 class=t1                         [ $!lorem.sentence ]
+  $|h2 class=t1                                 [ $!lorem.sentence ]
   $|p                                           [ $!lorem.samuel-ipsum ]
 
   $!code.add [=
