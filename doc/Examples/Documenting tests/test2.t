@@ -25,18 +25,28 @@ ok $t < $z - 3, 'B8';
 
 is $z, 5, 'T9';
 is $z, 6, 'T10';
- 
+if not True {
+
+skip 'S11', 2;
+}
+
+    else {
+
+is $z, 7, 'S12';
+is $z, 5, 'S13';
+}
+
 
     my $k = $*KERNEL;
  
 if $k.name eq 'linux' {
 
-skip 'S11', 2;
+skip 'S14', 2;
  
 } else {
 
-ok $k.name, "win32", 'S12';
-ok $k.name, "macos", 'S13';
+ok $k.name, "win32", 'S15';
+ok $k.name, "macos", 'S16';
  
 }
 

@@ -2,46 +2,59 @@ $!report.run
     title='Code Nesting' package=SxmlLib::Testing class=Report
     distribution=SemiXML [
 
-  $|h2 class=t1                 [ $!lorem.sentence ]
-  $|p                           [ $!lorem.samuel-ipsum ]
+  $|h2 class=t1                         [ $!lorem.sentence ]
+  $|p                                           [ $!lorem.samuel-ipsum ]
 
   $!code.add [=
     my Int $x = 10;
-    $!test.add t='ok $x ~~ Int' [ $!lorem.sentences n=3 ]
-    $!todo.add n=1              [ $!lorem.cupcake-ipsum ]
-    $!test.add t='is $x, 10'    [ $!lorem.sentences n=3 ]
+    $!test.add t='ok $x ~~ Int'                 [ $!lorem.sentences n=3 ]
+    $!todo.add n=1                              [ $!lorem.cupcake-ipsum ]
+    $!test.add t='is $x, 10'                    [ $!lorem.sentences n=3 ]
   ]
 
-  $|h3                          [ $!lorem.sentence ]
+  $|h3                                          [ $!lorem.sentence ]
   $!lorem.paragraph n=2
 
   $!code.add [=
     my Int $y = 10;
-    $!test.add t='ok $y ~~ Int' [ $!lorem.sentences n=3 ]
-    $!todo.add n=2              [ $!lorem.cupcake-ipsum ]
-    $!test.add t='is $y, 10'    [ $!lorem.veggie-ipsum ]
-    $!test.add t='is $y, 11'    [ $!lorem.veggie-ipsum ]
+    $!test.add t='ok $y ~~ Int'                 [ $!lorem.sentences n=3 ]
+    $!todo.add n=2                              [ $!lorem.cupcake-ipsum ]
+    $!test.add t='is $y, 10'                    [ $!lorem.veggie-ipsum ]
+    $!test.add t='is $y, 11'                    [ $!lorem.veggie-ipsum ]
   ]
 
   $!code.add [=
     my Int $z = 5;
     for ^$z -> $t {
-      $!bug.add tl=1            [ $!lorem.sentence ]
-      $!test.add t='ok $t < $z - 3' [ $!lorem.sentence ]
+      $!bug.add n=1                             [ $!lorem.sentence ]
+      $!test.add t='ok $t < $z - 3'             [ $!lorem.sentence ]
     }
 
-    $!test.add t='is $z, 5'     [ $!lorem.sentence ]
-    $!test.add t='is $z, 6'     [ $!lorem.sentence ]
-  ][!=
-    my $k = $*KERNEL;
-  !][
-    if $k.name eq 'linux' {
-      $!skip.add n=2            [ $!lorem.sentences n=2 ]
+    $!test.add t='is $z, 5'                     [ $!lorem.sentence ]
+    $!test.add t='is $z, 6'                     [ $!lorem.sentence ]
+
+    if not True {
+      $!skip.add n=2                            [ $!lorem.sentences n=2 ]
     }
 
     else {
-      $!test.add t='ok $k.name, "win32"' [ $!lorem.sentence ]
-      $!test.add t='ok $k.name, "macos"' [ $!lorem.sentence ]
+      $!test.add t='is $z, 7'                   [ $!lorem.sentence ]
+      $!test.add t='is $z, 5'                   [ $!lorem.sentence ]
+    }
+  ]
+
+  $!lorem.paragraph n=2
+
+  $!code.add [!=
+    my $k = $*KERNEL;
+  !][
+    if $k.name eq 'linux' {
+      $!skip.add n=2                            [ $!lorem.sentences n=2 ]
+    }
+
+    else {
+      $!test.add t='ok $k.name, "win32"'        [ $!lorem.sentence ]
+      $!test.add t='ok $k.name, "macos"'        [ $!lorem.sentence ]
     }
   ]
 ]
