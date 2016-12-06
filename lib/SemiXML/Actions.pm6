@@ -617,12 +617,12 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
 
       # Entity must be known in the xml result!
+      $esc ~~ s:g/\&/\&amp;/;
 #      $esc ~~ s:g/\\\\/\&\#x5C;/;
       $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
       $esc ~~ s:g/<-[\\]>\</\&lt;/ unless $is-attr;
 #      $esc ~~ s:g/<-[\\]>\>/\&gt;/ unless $is-attr;
       $esc ~~ s:g/\"/\&quot;/ if $is-attr;
-      $esc ~~ s:g/\&/\&amp;/;
 #`{{
       # Remove rest of the backslashes unless followed by hex numbers prefixed
       # by an 'x'
