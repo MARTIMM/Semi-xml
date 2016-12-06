@@ -2,7 +2,7 @@
   show          = 0
 
 [output]
-  fileext       = 'html'
+  fileext       = 'svg'
 
 [output.program]
   pdf           = 'wkhtmltopdf - %of.pdf'

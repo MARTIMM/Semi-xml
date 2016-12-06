@@ -1,0 +1,14 @@
+[option.doctype]
+  show          = 0
+
+[output]
+  fileext       = 'html'
+#  filepath      = '.'
+
+[output.program]
+  pdf           = 'wkhtmltopdf - %of.pdf'
+  xml           = 'cat > %of.xml'
+
+[module]
+  lorem         = 'SxmlLib::LoremIpsum'
+

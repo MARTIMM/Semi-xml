@@ -1,51 +1,38 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
-#
----
-#option/xml-prelude/show:        0;
-#option/doctype/show:            0;
-
-output/filepath:                .;
-
-output/program/html:            | cat > e01.html;
-output/program/pdf:             | wkhtmltopdf - e01.pdf;
-
-module/LoremIpsum:              SxmlLib::LoremIpsum;
----
-$html lang=en-US dir=ltr [
-  $head [
-    $meta charset=utf-8 []
-    $title [ Example 1 ]
-    $style [!
-      \#svg1 {
-        background-color:          \#ffffe0;
+$|html lang=en-US dir=ltr [
+  $|head [
+    $|meta charset=utf-8 []
+    $|title [ Example 1 ]
+    $|style [!
+      #svg1 {
+        background-color:          #ffffe0;
       }
 
-      \#text1 {
+      #text1 {
         border-width:              3px;
-        border-color:              \#ff0;
-        background-color:          \#055;
-        color:                     \#ffd;
+        border-color:              #ff0;
+        background-color:          #055;
+        color:                     #ffd;
         margin:                    1px;
         padding:                   4px;
       }
     !]
   ]
   
-  $body [
-    $div id=svg1 [
-      $svg xmlns=http://www.w3.org/2000/svg
+  $|body [
+    $|div id=svg1 [
+      $|svg xmlns=http://www.w3.org/2000/svg
            width=450 height=450
            viewport='0 0 300 300' [
-        $g fill-opacity=0.7 stroke=black stroke-width=0.1cm [
-          $circle cx=6cm cy=2cm r=100 fill=red transform='translate(0 50)' []
-          $circle cx=6cm cy=2cm r=100 fill=blue transform='translate(70 150)' []
-          $circle cx=6cm cy=2cm r=100
+        $|g fill-opacity=0.7 stroke=black stroke-width=0.1cm [
+          $|circle cx=6cm cy=2cm r=100 fill=red transform='translate(0 50)' []
+          $|circle cx=6cm cy=2cm r=100 fill=blue transform='translate(70 150)' []
+          $|circle cx=6cm cy=2cm r=100
                   fill=green transform='translate(-70 150)' []
         ]
       ]
 
-      $div id=text1 [
-        $!LoremIpsum.show type=Cicero-45BC-1.10.33 []
+      $|div id=text1 [
+        $!Lorem.cicero45bc []
       ]
     ]
   ]
