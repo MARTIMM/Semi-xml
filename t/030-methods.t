@@ -14,24 +14,25 @@ spurt( 't/M/m1.pm6', q:to/EOMOD/);
 
     # method 1 can be used at top of document
     method mth1 ( XML::Element $parent,
-                   Hash $attrs,
-                   XML::Element :$content-body
+                  Hash $attrs,
+                  XML::Element :$content-body
 
-                   --> XML::Element
-                 ) {
+                  --> XML::Element
+                ) {
 
       my XML::Element $p .= new(:name('p'));
       $parent.append($p);
       $parent;
     }
 
-    # method 2 can not be used at top of document
+    # method 2 can not be used at top of document because it generates
+    # more than one top level elements
     method mth2 ( XML::Element $parent,
-                   Hash $attrs,
-                   XML::Element :$content-body
+                  Hash $attrs,
+                  XML::Element :$content-body
 
-                   --> XML::Element
-                 ) {
+                  --> XML::Element
+                ) {
 
       my XML::Element $p .= new(:name('p'));
       $parent.append($p);
@@ -76,12 +77,12 @@ ok $r ~~ Match, "match $content";
 
 $xml = $x.get-xml-text;
 like $xml, /'<method-generated-too-many-nodes'/, "generated $xml";
-like $xml, /'module="mod1"'/, "wrong module mod1";
-like $xml, /'method="mth2"'/, "wrong method mth2";
+like $xml, /'module="mod1"'/, "culprit module mod1";
+like $xml, /'method="mth2"'/, "culprit method mth2";
 
 
 
-$content = '$x [ $!mod1.mth2 [ ] ]';
+$content = '$|x [ $!mod1.mth2 [ ] ]';
 $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
@@ -90,7 +91,7 @@ is $xml, '<x><p/><p>Added 0 xml nodes</p></x>', "generated: $xml";
 
 
 
-$content = '$x [ $!mod1.mth2 [ $h [abc] $h[def]]]';
+$content = '$|x [ $!mod1.mth2 [ $|h [abc] $|h[def]]]';
 $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
