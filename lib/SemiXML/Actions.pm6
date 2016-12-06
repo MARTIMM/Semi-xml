@@ -263,7 +263,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
       }
 
-#`{{
       # Conversion to xml escapes is done as late as possible
       my Sub $after-math = sub ( XML::Element $x ) {
 
@@ -287,7 +286,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       }
 
       &$after-math($parent);
-}}
 
       # Return the completed report
       $!xml-document .= new($parent);
@@ -612,7 +610,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       $t;
     }
 
-#`{{
     #---------------------------------------------------------------------------
     # Substitute some escape characters in entities and remove the remaining
     # backslashes.
@@ -620,18 +617,19 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
 
       # Entity must be known in the xml result!
-      $esc ~~ s:g/\\\\/\&\#x5C;/;
+#      $esc ~~ s:g/\\\\/\&\#x5C;/;
       $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
       $esc ~~ s:g/<-[\\]>\</\&lt;/ unless $is-attr;
-      $esc ~~ s:g/<-[\\]>\>/\&gt;/ unless $is-attr;
+#      $esc ~~ s:g/<-[\\]>\>/\&gt;/ unless $is-attr;
       $esc ~~ s:g/\"/\&quot;/ if $is-attr;
-
+      $esc ~~ s:g/\&/\&amp;/;
+#`{{
       # Remove rest of the backslashes unless followed by hex numbers prefixed
       # by an 'x'
       #
       if $esc ~~ m/ '\\x' <xdigit>+ / {
         my $set-utf8 = sub ( $m1, $m2) {
-          return Blob.new(:16($m1.Str),:16($m2.Str)).decode;
+          return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
         };
 
         $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
@@ -644,12 +642,12 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         };
         $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
       }
-
+}}
       $esc ~~ s:g/'\\'//;
 
       return $esc;
     }
-}}
+
     #---------------------------------------------------------------------------
     method !current-state ( Match $match, Str $state ) {
 
