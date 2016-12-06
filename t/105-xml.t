@@ -10,9 +10,9 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-$html [
-  $body [
-    $h1 [First chapter]
+$|html [
+  $|body [
+    $|h1 [First chapter]
     some text
 
     $!file.include type=include reference=t/D/d1.sxml [ ignored content ]
@@ -25,8 +25,8 @@ EOSX
 #
 mkdir('t/D');
 spurt( 't/D/d1.sxml', q:to/EOSXML/);
-$h1 [ Intro ]
-$p [
+$|h1 [ Intro ]
+$|p [
   How 'bout this!
 ]
 EOSXML
@@ -49,7 +49,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-#say "\nXml: $xml-text";
+say $xml-text;
 
 ok $xml-text ~~ m/'<h1>'/, 'Check h1 included';
 ok $xml-text ~~ m/'<p>'/, 'Check p included';

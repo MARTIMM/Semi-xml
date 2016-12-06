@@ -10,13 +10,13 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-$html [
-  $body [
-    $h1 [ Data from file ]
-    $table [
-      $tr [
-        $th[ header ]
-        $td[ data ]
+$|html [
+  $|body [
+    $|h1 [ Data from file ]
+    $|table [
+      $|tr [
+        $|th[ header ]
+        $|td[ data ]
       ]
     ]
   ]
@@ -63,7 +63,6 @@ unlink $filename;
 $filename ~~ s/\.sxml//;
 $x.save(:$filename);
 ok "$filename.html".IO ~~ :e, "File $filename written";
-
 unlink $filename;
 
 # Write xml out to file. Filename named in prelude
@@ -71,7 +70,6 @@ unlink $filename;
 $filename = 't/some-file.html';
 $x.save;
 ok $filename.IO ~~ :e, "File $filename written";
-
 unlink $filename;
 
 $filename = 't/another.html';
@@ -80,7 +78,6 @@ ok $filename.IO ~~ :!e, "File $filename not written";
 
 $filename = 't/some-file.html';
 ok $filename.IO ~~ :e, "File $filename written instead";
-
 unlink $filename;
 
 #-------------------------------------------------------------------------------
