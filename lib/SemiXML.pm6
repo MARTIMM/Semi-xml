@@ -292,11 +292,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Hash $configuration = $!actions.config;
 
       # If there is one, try to generate the xml
-      #
       if ?$root-element {
 
         # Check if a http header must be shown
-        #
         my Hash $http-header = $configuration<option><http-header>;
 
         if ? $http-header<show> {
@@ -308,7 +306,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
 
         # Check if xml prelude must be shown
-        #
         my Hash $xml-prelude = $configuration<option><xml-prelude>;
 
         if ? $xml-prelude<show> {
@@ -320,13 +317,17 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
 
         # Check if doctype must be shown
-        #
         my Hash $doc-type = $configuration<option><doctype>;
 
         if ? $doc-type<show> {
-          my $definition = $doc-type<definition>;
-          my $ws = $definition ?? ' ' !! '';
-          $document ~= "<!DOCTYPE $root-element$ws$definition>\n";
+          my Hash $entities = $doc-type<entities>;
+          my Str $start = ?$entities ?? " [\n" !! '';
+          my Str $end = ?$entities ?? "]>\n" !! '';
+          $document ~= "<!DOCTYPE $root-element$start";
+          for $entities.kv -> $k, $v {
+            $document ~= "<!ENTITY $k \"$v\">\n";
+          }
+          $document ~= "$end\n";
         }
 
         $document ~= ?$other-document
