@@ -1,0 +1,13 @@
+[ option.doctype ]
+  show          = 1
+
+[ option.xml-prelude ]
+  show          = 0
+
+[ output ]
+  fileext       = 'html'
+
+[ output.program ]
+  pdf           = 'wkhtmltopdf - %of.pdf'
+  lint          = 'xmllint --format - > unicode.html'
+

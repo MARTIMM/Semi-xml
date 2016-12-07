@@ -12,13 +12,13 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-$html [
-  $body [                                       # Body
-    $h1 [ Data from file \# h1 ]                # outside h1
-    $table [ data                               # table
-      $tr [ trrr                                # trrr
-        $th[header \# th ]                      # outside th
-        $td[data \# td ]                        # outside td
+$|html [
+  $|body [                                       # Body
+    $|h1 [ Data from file \# h1 ]                # outside h1
+    $|table [ data                               # table
+      $|tr [ trrr                                # trrr
+        $|th[header \# th ]                      # outside th
+        $|td[data \# td ]                        # outside td
       ]
     ]
   ]
@@ -34,6 +34,8 @@ my Str $xml-text = ~$x;
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text !~~ m/\<head\>/, 'Head not found';
 ok $xml-text ~~ ms/Data from file/, 'Section text found';
+todo 'comments are not implemented yet', 1;
+unlike $xml-text, /:s '#' 'outside' 'h1' /, 'comment removed';
 
 #say $xml-text;
 

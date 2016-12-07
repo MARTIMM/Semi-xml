@@ -17,17 +17,17 @@ isa-ok $x, 'SemiXML::Sxml', $x.^name;
 
 # Setup the text to parse
 my Str $sx-text = q:to/EOSX/;
-$html [
-  $head [
-    $title [ Title of page \$ is used here ]
+$|html [
+  $|head [
+    $|title [ Title of page $ is used here ]
   ]
-  $body [
-    $h1 class=green id=h1001 [ Introduction ]
-    $p class=green [ Piece of \[text\]. See $a href=google.com [google]]
-    $x class='green blue' [ empty but not ]
-    $y data_1='quoted"test"' [ empty but not ]
-    $z data_2="double 'quoted' tests" [ empty but not ]
-    $br[]
+  $|body [
+    $|h1 class=green id=h1001 [ Introduction ]
+    $|p class=green [ Piece of \[text\]. See $|a href=google.com [google]]
+    $|x class='green blue' [ empty but not ]
+    $|y data_1='quoted"test"' [ empty but not ]
+    $|z data_2="double 'quoted' attrs" [ empty but not ]
+    $|br []
   ]
 ]
 EOSX
@@ -65,7 +65,7 @@ like $xml-text,
      /'<y data_1="quoted&quot;test&quot;">'/,
      'Class test 3';
 like $xml-text,
-     / :s '<z data_2="double' "'quoted'" 'tests">'/,
+     / :s '<z data_2="double' "'quoted'" 'attrs">'/,
      'Class test 4';
 
 

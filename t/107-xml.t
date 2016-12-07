@@ -12,7 +12,7 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-$top [
+$|top [
   $!SxmlCore.date []
   $!SxmlCore.date year=1957 month=6 day=26 []
   $!SxmlCore.date year=1957 day=26 []

@@ -16,24 +16,41 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     our $debug = False;
 
     has SemiXML::Grammar $!grammar;
-    has SemiXML::Actions $.actions;
+    has SemiXML::Actions $.actions handles <
+      get-sxml-object get-current-filename
+    >;
 
     has Hash $.styles;
     has Config::DataLang::Refine $configuration;
 
-    submethod BUILD ( ) {
+    submethod BUILD ( Str :$filename ) {
       $!grammar .= new;
-      $!actions .= new;
+      $!actions .= new(:sxml-obj(self));
 
+      # Get the default config file from resources and elsewhere
       my Str $rsrc-bn = %?RESOURCES<SemiXML.toml>.IO.basename;
       my Str $rsrc-p = %?RESOURCES<SemiXML.toml>.IO.abspath;
       my Str $rsrc-d = $rsrc-p;
       $rsrc-d ~~ s/ '/'? $rsrc-bn //;
+      my Array $locations = [$rsrc-d];
+      my Bool $merge = False;
+
+      # if filename is given, use its path also in its locations
+      if ?$filename and $filename.IO ~~ :r {
+        my Str $fn-bn = $filename.IO.basename;
+        my Str $fn-p = $filename.IO.abspath;
+        my Str $fn-d = $fn-p;
+        $fn-d ~~ s/ '/'? $fn-bn //;
+        $locations.unshift($fn-d);
+        $merge = True;
+      }
 
       my Config::DataLang::Refine $c0 = self!load-config(
-        :config-name($rsrc-bn),
-        :locations([$rsrc-d])
+        :config-name($rsrc-bn), :$locations, :$merge
       );
+#say "L: ", $locations.perl;
+#say "C: $merge";
+#dd $c0.config;
 
       my Hash $other-config = ? $c0 ?? $c0.config.clone !! {};
       $c0 = self!load-config( :config-name<SemiXML.toml>, :$other-config);
@@ -93,18 +110,19 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     #---------------------------------------------------------------------------
     method !load-config (
-      Str :$config-name, Array :$locations = [], Hash :$other-config
+      Str :$config-name, Array :$locations = [], Hash :$other-config,
+      Bool :$merge
       --> Config::DataLang::Refine
     ) {
 
       my Config::DataLang::Refine $c;
       try {
         if ?$other-config {
-          $c .= new( :$config-name, :$locations, :$other-config);
+          $c .= new( :$config-name, :$locations, :$other-config, :$merge);
         }
 
         else {
-          $c .= new( :$config-name, :$locations);
+          $c .= new( :$config-name, :$locations, :$merge);
         }
 
         CATCH {
@@ -133,15 +151,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       # Remove comments, trailing and leading spaces
       $content ~~ s/^\s+//;
       $content ~~ s/\s+$//;
-
-      # Get user introduced attribute information
-      for self.^attributes -> $class-attr {
-        given $class-attr.name {
-          when '$!styles' {
-            $!styles = $class-attr.get_value(self);
-          }
-        }
-      }
 
       # Check if modules needs to be instantiated in the config
       $!actions.process-config-for-modules;
@@ -180,7 +189,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       return self.get-xml-text;
     }
 
-
     #---------------------------------------------------------------------------
     # Expect filename without extension
     method save ( Str :$filename is copy,
@@ -191,7 +199,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Hash $configuration = $!actions.config;
 
       # Did not parse a file but content or filename not defined. In that case
-      # take the name of the program and remove extention
+      # take the name of the program and remove extension
       #
       if $configuration<output><filename>:!exists {
         my Str $fn = $*PROGRAM.basename;
@@ -204,13 +212,17 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       if $configuration<output><filepath>:!exists {
         my Str $fn = $*PROGRAM.abspath;
         my Str $bn = $*PROGRAM.basename;
-        $fn ~~ s/ '/'? $bn //;
+        $fn ~~ s/ ('/'||\\)? $bn //;
         $configuration<output><filepath> = $fn;
       }
 
       # Set the filename
       $filename = $filename.IO.basename if $filename.defined;
       $filename = $configuration<output><filename> unless $filename.defined;
+
+      # substitute extension
+      my Str $ext = $filename.IO.extension;
+      $filename ~~ s/ '.' $ext //;
       $filename ~= "." ~ $configuration<output><fileext>;
 
       # If not absolute prefix the path from the config
@@ -230,11 +242,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
         if $cmd.defined {
 
-        # Drop the extention again. Let it be provided by the command
-        my Str $ext = $filename.IO.extension;
-        $filename ~~ s/ '.' $ext //;
+          # Drop the extention again. Let it be provided by the command
+          my Str $ext = $filename.IO.extension;
+          $filename ~~ s/ '.' $ext //;
 
-          $cmd ~~ s/ '%of' /'$filename'/;
+          my Str $path = $configuration<output><filepath>;
+
+          $cmd ~~ s:g/ '%of' /'$filename'/;
+          $cmd ~~ s:g/ '%op' /'$path'/;
           say "Sent file to program: $cmd";
           my Proc $p = shell "$cmd 2> '{$run-code}-command.log'", :in;
           $p.in.print($document);
@@ -280,11 +295,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Hash $configuration = $!actions.config;
 
       # If there is one, try to generate the xml
-      #
       if ?$root-element {
 
         # Check if a http header must be shown
-        #
         my Hash $http-header = $configuration<option><http-header>;
 
         if ? $http-header<show> {
@@ -296,7 +309,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
 
         # Check if xml prelude must be shown
-        #
         my Hash $xml-prelude = $configuration<option><xml-prelude>;
 
         if ? $xml-prelude<show> {
@@ -308,13 +320,17 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
 
         # Check if doctype must be shown
-        #
         my Hash $doc-type = $configuration<option><doctype>;
 
         if ? $doc-type<show> {
-          my $definition = $doc-type<definition>;
-          my $ws = $definition ?? ' ' !! '';
-          $document ~= "<!DOCTYPE $root-element$ws$definition>\n";
+          my Hash $entities = $doc-type<entities>;
+          my Str $start = ?$entities ?? " [\n" !! '';
+          my Str $end = ?$entities ?? "]>\n" !! '';
+          $document ~= "<!DOCTYPE $root-element$start";
+          for $entities.kv -> $k, $v {
+            $document ~= "<!ENTITY $k \"$v\">\n";
+          }
+          $document ~= "$end\n";
         }
 
         $document ~= ?$other-document
@@ -409,7 +425,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #-----------------------------------------------------------------------------
     sub before-element (
       XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
-      --> XML::Element
+      --> XML::Node
     ) is export {
 
       my XML::Node $element;
@@ -429,7 +445,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #-----------------------------------------------------------------------------
     sub after-element (
       XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
-      --> XML::Element
+      --> XML::Node
     ) is export {
 
       my XML::Node $element;

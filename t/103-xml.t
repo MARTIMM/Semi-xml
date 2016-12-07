@@ -13,28 +13,28 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-$html [
-  $head [
-    $style type=text/css [=
-      .green {
-        color: \#0f0;
-        background-color: \#f0f;
+$|html [
+  $|head [
+    $|style type=text/css [=
+      green {
+        color: #0f0;
+        background-color: #f0f;
       }
     ]
-    $script [!=
+    $|script [!=
       var a_tags = $('a');
       var b = a_tags[1];
     !]
   ]
 
-  $body [
-    $h1 class=green [ Data from file ]
-    $table [
-      $tr [
-        $th[ header ]
-        $td[ data at $*|a href='http://example.com/' []
-          $p [
-            bla bla $b [bla] bla $*|u [bla $b [bla]].
+  $|body [
+    $|h1 class=green [ Data from file ]
+    $|table [
+      $|tr [
+        $|th[ header ]
+        $|td[ data at $*|a href='http://example.com/' []
+          $|p [
+            bla bla $|b [bla] bla $*|u [bla $|b [bla]].
           ]
         ]
       ]
@@ -78,7 +78,7 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
 ok $xml-text ~~ m/
-'      .green {
+'     green {
         color: #0f0;
         background-color: #f0f;
       }

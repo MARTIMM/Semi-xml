@@ -1,0 +1,68 @@
+@startuml
+
+'-------------------------------------------------------------------------------
+'Use cases
+'-------------------------------------------------------------------------------
+usecase report as "generate report
+--
+Gather all code and test it
+Read all results and generate
+the report in HTML"
+
+usecase tcode as "handle test code"
+usecase code_gen as "handle extra code"
+usecase cview as "code view bubbles"
+usecase rview as "report view bubbles"
+usecase combine as "combine
+--
+Combine code and report bubbles"
+usecase ctext as "code text"
+usecase prove as "proving code"
+usecase xml_result as "html
+--
+Generated report in html and svg"
+
+usecase txt_metrics as "text
+--
+Generated metrics from test result"
+
+
+'-------------------------------------------------------------------------------
+'Actors
+'-------------------------------------------------------------------------------
+actor :General test\nstatement: as test <<SemiXML>>
+actor :Todo statement: as todo <<SemiXML>>
+actor :Bug statement: as bug <<SemiXML>>
+actor :Skip statement: as skip <<SemiXML>>
+actor :extra code: as cextra <<SemiXML>>
+
+
+'-------------------------------------------------------------------------------
+'Connectioms
+'-------------------------------------------------------------------------------
+cextra <|-- test
+test <|-- todo
+test <|-- skip
+todo <|-- bug
+
+
+test --> tcode
+tcode --> rview : XML
+tcode --> cview : XML
+tcode -> ctext : perl6 code
+
+cextra --> code_gen
+code_gen --> cview : XML
+code_gen -> ctext : perl6 code
+
+ctext --> prove : perl6 code
+prove --> report : TAP results
+rview --> combine
+cview --> combine
+combine --> report
+
+report --> xml_result
+report --> txt_metrics
+
+
+@enduml

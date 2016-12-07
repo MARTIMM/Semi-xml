@@ -3,9 +3,12 @@
 
 [output]
   fileext       = 'html'
+#  filepath      = '.'
 
 [output.program]
   pdf           = 'wkhtmltopdf - %of.pdf'
+  xml           = 'cat > %of.xml'
 
 [module]
-  td            = 'SxmlLib::Testing::TestDoc'
+  lorem         = 'SxmlLib::LoremIpsum'
+

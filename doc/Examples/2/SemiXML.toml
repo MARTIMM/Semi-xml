@@ -1,0 +1,21 @@
+[option.doctype]
+  show          = 0
+
+[output]
+  fileext       = 'html'
+#  filepath      = '.'
+
+[output.program]
+  pdf           = 'wkhtmltopdf - %of.pdf'
+  xml           = 'cat > %of.xml'
+
+[module]
+  report        = 'SxmlLib::Testing::Report'
+  code          = 'SxmlLib::Testing::Code'
+  test          = 'SxmlLib::Testing::Test'
+  todo          = 'SxmlLib::Testing::Todo'
+  bug           = 'SxmlLib::Testing::Bug'
+  skip          = 'SxmlLib::Testing::Skip'
+  lorem         = 'SxmlLib::LoremIpsum'
+  file          = 'SxmlLib::File'
+

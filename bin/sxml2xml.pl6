@@ -30,19 +30,10 @@ sub MAIN ( Str $filename, Str :$run ) {
 #-------------------------------------------------------------------------------
 sub process-sxml ( Str:D $filename is copy, Str :$run ) {
 
-  my SemiXML::Sxml $x .= new(:init);
-
-  # Split filename in its parts
-#say $*SPEC;
-#  my @path-spec = $*SPEC.splitpath($filename);
-#  $x.configuration<output><filepath> = @path-spec[1];
-#  $x.configuration<output><filename> = @path-spec[2];
-
-  # Drop extension
-#  $x.configuration<output><filename> ~~ s/\.<-[\.]>+$//;
+  my SemiXML::Sxml $x .= new(:$filename);
 
   if $filename.IO ~~ :r {
-    my $X = $x.parse-file(:$filename);
+    $x.parse-file(:$filename);
     $filename ~~ s/ '.' $filename.IO.extention //;
     $x.save( :run-code($run), :$filename);
     my $deps = $x.get-option( :section('dependencies'), :option('files')) // '';

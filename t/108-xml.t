@@ -13,21 +13,21 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-$html [
-  $body [
-    $h1 [Tests for comments etc]
+$|html [
+  $|body [
+    $|h1 [Tests for comments etc]
 
     $!SxmlCore.comment [comment text]
     $!SxmlCore.comment [comment text $!SxmlCore.date []]
-    $!SxmlCore.comment [comment text $p [data in section] $br []]
+    $!SxmlCore.comment [comment text $|p [data in section] $|br []]
 
     $!SxmlCore.cdata [cdata text]
     $!SxmlCore.cdata [cdata text $!SxmlCore.date []]
-    $!SxmlCore.cdata [cdata text $p [data in section] $br []]
+    $!SxmlCore.cdata [cdata text $|p [data in section] $|br []]
 
     $!SxmlCore.pi [perl6 instruction text]
 
-    $h1 [End of tests]
+    $|h1 [End of tests]
   ]
 ]
 EOSX

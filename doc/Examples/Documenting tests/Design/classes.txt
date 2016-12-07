@@ -1,0 +1,19 @@
+@startuml
+
+class Report
+
+class Code
+
+class Test
+
+
+
+Report "1" o-- "*" Code
+Report "1" o-- "*" Test
+
+
+
+
+
+
+@enduml

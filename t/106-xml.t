@@ -10,8 +10,8 @@ use SemiXML;
 #
 my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
-$html [
-  $body [
+$|html [
+  $|body [
     $!list.dir-list header=2,3 directory=t ref-attr=data_href id=ldir0001 []
   ]
 ]

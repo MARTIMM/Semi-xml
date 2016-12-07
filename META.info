@@ -12,9 +12,9 @@
   "name": "SemiXML",
   "perl": "6c",
   "provides": {
-    "SemiXML::Actions":                "lib/SemiXML/Actions.pm6",
-    "SemiXML::Grammar":                "lib/SemiXML/Grammar.pm6",
-    "SemiXML":                         "lib/SemiXML.pm6",
+    "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
+    "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
+    "SemiXML":                          "lib/SemiXML.pm6",
 
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
@@ -25,9 +25,16 @@
     "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
     "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6",
 
-    "SxmlLib::Testing::TestDoc":        "lib/SxmlLib/Testing/TestDoc.pm6",
+    "SxmlLib::Testing::Bug":            "lib/SxmlLib/Testing/Bug.pm6",
+    "SxmlLib::Testing::Code":           "lib/SxmlLib/Testing/Code.pm6",
+    "SxmlLib::Testing::Report":         "lib/SxmlLib/Testing/Report.pm6",
+    "SxmlLib::Testing::Skip":           "lib/SxmlLib/Testing/Skip.pm6",
+    "SxmlLib::Testing::Test":           "lib/SxmlLib/Testing/Test.pm6",
+    "SxmlLib::Testing::Testing":        "lib/SxmlLib/Testing/Testing.pm6",
+    "SxmlLib::Testing::Todo":           "lib/SxmlLib/Testing/Todo.pm6",
+
     "sxml2xml":                         "bin/sxml2xml.pl6"
   },
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.21.0.3"
+  "version": "v0.26.0"
 }

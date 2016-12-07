@@ -1,0 +1,9 @@
+[option.doctype]
+  show          = 0
+
+[output]
+  fileext       = 'svg'
+
+[output.program]
+  pdf           = 'wkhtmltopdf - %of.pdf'
+

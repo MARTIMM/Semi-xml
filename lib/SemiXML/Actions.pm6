@@ -36,8 +36,6 @@ package SemiXML:auth<https://github.com/MARTIMM> {
   #
   class SxmlCore {
 
-    has Hash $.symbols = {};
-
     # $!SxmlCore.date year=nn month=nn day=nn []
     #
     method date ( XML::Element $parent,
@@ -180,18 +178,32 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 #TODO comments
   class Actions {
 
+    # Caller SemiXML::Sxml object
+    has $!sxml-obj;
+
     # Objects hash with one predefined object for core methods
-    #
     has Hash $.objects = { SxmlCore => SemiXML::SxmlCore.new() };
     has Hash $.config is rw = {};
     has XML::Document $!xml-document;
 
-     # Keep current state of affairs. Hopefully some info when parsing fails
-     has Int $.from;
-     has Int $.to;
-     has Str $.prematch;
-     has Str $.postmatch;
-     has Str $.state;
+    # Keep current state of affairs. Hopefully some info when parsing fails
+    has Int $.from;
+    has Int $.to;
+    has Str $.prematch;
+    has Str $.postmatch;
+    has Str $.state;
+
+    # Save a list of tags from root to deepest level. This is possible because
+    # body is processed later than tag-spec. The names are the element name,
+    # method name or symbol name. The xml namesspace and module name are not
+    # added because these can be any name defined by the user.
+    #
+    has Array $!tag-list = [];
+
+    #---------------------------------------------------------------------------
+    submethod BUILD ( :$sxml-obj ) {
+      $!sxml-obj = $sxml-obj;
+    }
 
     #---------------------------------------------------------------------------
     method init-doc ( $match ) {
@@ -207,14 +219,18 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       self!current-state( $match, 'at the top');
 
-      my $parent = $match<document>.ast;
+      my $parent = $match<document>.made;
 
       # Cleanup residue tags left from processing methods. The childnodes in
-      #'__PARENT_CONTAINER__' tags must be moved to the parent of it. There
+      # '__PARENT_CONTAINER__' tags must be moved to the parent of it. There
       # is one exception, that is when the tag is at the top. Then there may
       # only be one tag. If there are more, an error tag is generated.
       #
-      my $containers = $parent.getElementsByTagName('__PARENT_CONTAINER__');
+      my $containers = $parent.elements(
+        :TAG<__PARENT_CONTAINER__>,
+        :RECURSE, :NEST,
+      );
+
       for @$containers -> $node {
 
         my $children = $node.nodes;
@@ -226,17 +242,24 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           $node.parent.after( $node, $^a);
         }
 
-        $node.parent.removeChild($node);
+        # Remove the now empty element
+        $node.remove;
       }
 
       # Process top level method container
-      if $parent.name() eq '__PARENT_CONTAINER__' {
-        if $parent.nodes == 1 {
+      if $parent.name eq '__PARENT_CONTAINER__' {
+        if +$parent.nodes == 0 {
+          # No nodes generated
+          $parent = XML::Element.new;
+        }
+
+        elsif +$parent.nodes == 1 {
+          # One node generated
           $parent = $parent.nodes[0];
         }
 
         else {
-          my $tag-ast = $match<document><tag-spec>.ast;
+          my $tag-ast = $match<document><tag-spec>.made;
           $parent = XML::Element.new(
             :name('method-generated-too-many-nodes'),
             :attribs( module => $tag-ast[3], method => $tag-ast[4])
@@ -250,7 +273,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         # Process attributes to escape special chars
         my %a = $x.attribs;
         for %a.kv -> $k, $v {
-          $x.set( $k, self!process-esc($v));
+          $x.set( $k, self!process-esc( $v, :is-attr));
         }
 
         # Process body text to escape special chars
@@ -266,14 +289,23 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
       }
 
-      $after-math($parent);
+      &$after-math($parent);
 
       # Return the completed report
       $!xml-document .= new($parent);
     }
 
     #---------------------------------------------------------------------------
+    method pop-tag-from-list ( $match ) {
+
+#TODO only after the last block. Also when no block is found!
+      # This level is done so drop an element tag from the list
+      $!tag-list.pop;
+    }
+
+    #---------------------------------------------------------------------------
     method document ( $match ) {
+#say "\nDoc: ", $match.perl;
 
       self!current-state( $match, 'document');
 
@@ -281,112 +313,67 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       ( my $tt,                 # tag type
         my $ns, my $tn,         # namespace and tag name
-        my $mod, my $symmth,    # module and symbol or method
+        my $mod, my $meth,      # module and method
         my $att                 # attributes
-      ) = @($match<tag-spec>.ast);
+      ) = @($match<tag-spec>.made);
 
       # Check the node type
       given $tt {
 
         # Any normal tag
-        when any(< $ $** $*| $|* >) {
+        when any(< $| $** $*| $|* >) {
 
           my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
 
           $x .= new( :name($tag), :attribs(%$att));
-        }
 
-        # Substitution tag
-        when '$.' {
-
-          my $module = $!objects{$mod} if $!objects{$mod}:exists;
-
-          # Check if module exists
-          if $module.defined {
-
-            # Test if symbols accessor exists in module
-            if $module.^can('symbols') {
-              my Str $tn = $!objects{$mod}.symbols{$symmth}<tag-name>;
-              my Hash $at = $!objects{$mod}.symbols{$symmth}<attributes> // {};
-              $x .= new( :name($tn), :attribs( |%$at, |%$att));
-            }
-
-            else {
-              $x .= new(
-                :name('undefined-method'),
-                :attribs( module => $mod, :method<symbols>)
-              );
+          # Check for xmlns uri definitions and set them on the current node
+          for $att.keys {
+            when m/^ 'xmlns:' ( <before '='>* ) $/ {
+              my $ns-prefix = $0;
+              $x.setNamespace( $att{$_}, $0);
             }
           }
 
-          else {
-            $x .= new(
-              :name('undefined-module'),
-              :attribs(module => $mod)
-            );
-          }
+          self!build-content-body( $match, $x);
         }
 
         # Method tag
         when '$!' {
 
           # Get the module if it exists
-          my $module = $!objects{$mod} if $!objects{$mod}:exists;
+          my $module = self!can-method( $mod, $meth, :!optional);
 
-          # check it
-          if $module.defined {
-
-            # test if symbols accessor exists in module
-            if $module.^can($symmth) {
-
-              # call user method and expect result in $y
-              $x = $module."$symmth"(
-                XML::Element.new(:name('__PARENT_CONTAINER__')),
-                $att,
-                :content-body( self!build-content-body(
-                    $match<tag-body>.ast,
-                    XML::Element.new(:name('__BODY_CONTAINER__'))
-                  )
-                )
-              );
-
-              if not $x.defined {
-                $x .= new(
-                  :name('method-returned-no-result'),
-                  :attribs( module => $mod, method => $symmth)
-                );
-              }
-            }
-
-            else {
-              $x .= new(
-                :name('undefined-method'),
-                :attribs( module => $mod, method => $symmth)
-              );
-            }
+          # When module and/or method is not found an error is generated in the
+          # form of XML.
+          if $module ~~ XML::Element {
+            $x = $module;
           }
 
+          # Otherwise it is the module on which method can be called
           else {
-            $x .= new(
-              :name('undefined-module'),
-              :attribs(module => $mod)
+
+            # call user method and expect result in $x
+            $x = $module."$meth"(
+              XML::Element.new(:name('__PARENT_CONTAINER__')),
+              $att,
+              :content-body(
+                self!build-content-body(
+                  $match,
+                  XML::Element.new(:name('__PARENT_CONTAINER__'))
+                )
+              ),
+              :$!tag-list
             );
+
+            if not $x.defined {
+              $x .= new(
+                :name('method-returned-no-result'),
+                :attribs( module => $mod, method => $meth)
+              );
+            }
           }
         }
-      }
-
-      # For all types but methods
-      if $tt ~~ any(< $ $** $*| $|* $. >) {
-
-        # Check for xmlns uri definitions and set them on the current node
-        for $att.keys {
-          when m/^ 'xmlns:' ( <before '='>* ) $/ {
-            my $ns-prefix = $0;
-            $x.setNamespace( $att{$_}, $0);
-          }
-        }
-
-        self!build-content-body( $match<tag-body>.ast, $x);
       }
 
       # Set AST on node document
@@ -395,32 +382,46 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     #---------------------------------------------------------------------------
     method !build-content-body (
-      $ast, XML::Element $parent
-
+      Match $match, XML::Element $parent
       --> XML::Element
     ) {
 
-      for @$ast {
-        # Any piece of found text
-        when Str {
-          $parent.append(SemiXML::Text.new(:text($_))) if ?$_;
-        }
+      my Array $comments = $match<comment>;
+      my Array $tag-bodies = $match<tag-body>;
+      loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
-        # Nested document: [ tag ast, body ast, doc xml]
-        when Array {
+        my $match = $tag-bodies[$mi];
+        for @($match.made) {
 
-          # tag ast: [ tag type, namespace, tag name, module, method, attributes
-          my Array $tag-ast = $_[0];
+          # Any piece of found text in bodies. Filter out any comments.
+          when Str {
 
-          # Test if spaces are needed before the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $*| >);
+            my Str $txt = $_;
+            if ? $$txt {
+              $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
+              $parent.append(SemiXML::Text.new(:text($$txt)));
+            }
+          }
 
-          $parent.append($_[2]);
+          # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
+          when Hash {
+#say "Ast hash: ", $_.keys;
+#say "Ast tag: ", $_<tag-ast>;
+#say "Ast body: ", $_<body-ast>;
+#say "Ast doc: ", $_<doc-ast>;
+            # tag ast: [ tag type, namespace, tag name, module, method, attributes
+            my Array $tag-ast = $_<tag-ast>;
 
-          # Test if spaces are needed after the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $|* >);
+            # Test if spaces are needed before the document
+            $parent.append(SemiXML::Text.new(:text(' ')))
+              if $tag-ast[0] ~~ any(< $** $*| >);
+
+            $parent.append($_<doc-ast>);
+
+            # Test if spaces are needed after the document
+            $parent.append(SemiXML::Text.new(:text(' ')))
+              if $tag-ast[0] ~~ any(< $** $|* >);
+          }
         }
       }
 
@@ -430,30 +431,18 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     #---------------------------------------------------------------------------
     method tag-spec ( $match ) {
 
+#say ~$match;
+
       self!current-state( $match, 'tag specification');
+
+      # Name of element or method to be saved in array $!tag-list on $!level
+      my Str $tag-name;
 
       my Array $ast = [];
 
       my Str $symbol = $match<tag><sym>.Str;
       $ast.push: $symbol;
-
-      if $symbol ~~ any(< $** $|* $*| $ >) {
-
-        my $tn = $match<tag><tag-name>;
-        $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
-      }
-
-      elsif $symbol eq '$.' {
-
-        my $tn = $match<tag>;
-        $ast.push: '', '', $tn<mod-name>.Str, $tn<sym-name>.Str;
-      }
-
-      elsif $symbol eq '$!' {
-
-        my $tn = $match<tag>;
-        $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
-      }
+#say "Tag symbol: $symbol";
 
       my Hash $attrs = {};
       for $match<attributes>.caps -> $as {
@@ -462,6 +451,30 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         my $av = $a<attr-value-spec><attr-value>.Str;
         $attrs{$a<attr-key>.Str} = $av;
       }
+
+      if $symbol ~~ any(< $** $|* $*| $| >) {
+
+        my $tn = $match<tag><tag-name>;
+        $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
+        $tag-name = $tn<element>.Str;
+      }
+
+      elsif $symbol eq '$!' {
+
+        my $tn = $match<tag>;
+        $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
+        $tag-name = $tn<meth-name>.Str;
+
+
+        # Check if there is a method initialize in the module. If so call it
+        # with the found attributes.
+        my $module = self!can-method( $tn<mod-name>.Str, 'initialize');
+        $module.initialize( $!sxml-obj, $attrs) if $module;
+      }
+
+      # Add to the list
+      $!tag-list.push($tag-name);
+#say "Tag name: $tag-name";
 
       $ast.push: $attrs;
 
@@ -476,19 +489,20 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Array $ast = [];
       for $match.caps {
 
+        # keys can be body1-contents..body4-contents
         my $p = $^a.key;
         my $v = $^a.value;
 
         # Text cannot have nested documents and text must be taken literally
         if $p eq 'body1-contents' {
 
-          $ast.push: self!clean-text( $v<body2-text>.Str, :fixed);
+          $ast.push: self!clean-text( $v<body2-text>.Str, :fixed, :!comment);
         }
 
         # Text cannot have nested documents and text may be re-formatted
         elsif $p eq 'body2-contents' {
 
-          $ast.push: self!clean-text( $v<body2-text>.Str, :!fixed);
+          $ast.push: self!clean-text( $v<body2-text>.Str, :!fixed, :!comment);
         }
 
         # Text can have nested documents and text must be taken literally
@@ -496,21 +510,23 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
           for $match<body3-contents>.caps {
 
+            # keys can be body1-text or document
             my $p3 = $^a.key;
             my $v3 = $^a.value;
 
+            # body1-text
             if $p3 eq 'body1-text' {
 
-              $ast.push: self!clean-text( $v3.Str, :fixed);
+              $ast.push: self!clean-text( $v3.Str, :fixed, :comment);
             }
 
-            # Text cannot have nested documents and text may be re-formatted
+            # document
             elsif $p3 eq 'document' {
 
               my $d = $v3;
-              my $tag-ast = $d<tag-spec>.ast;
-              my $body-ast = $d<tag-body>.ast;
-              $ast.push([ $tag-ast, $body-ast, $d.ast]);
+              my $tag-ast = $d<tag-spec>.made;
+              my $body-ast = $d<tag-body>;
+              $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.made)};
             }
           }
         }
@@ -518,23 +534,26 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         # Text can have nested documents and text may be re-formatted
         elsif $p eq 'body4-contents' {
 
+          # walk through all body pieces
           for $match<body4-contents>.caps {
 
+            # keys can be body1-text or document
             my $p4 = $^a.key;
             my $v4 = $^a.value;
 
+            # body1-text
             if $p4 eq 'body1-text' {
 
-              $ast.push: self!clean-text( $v4.Str, :!fixed);
+              $ast.push: self!clean-text( $v4.Str, :!fixed, :comment);
             }
 
-            # Text cannot have nested documents and text may be re-formatted
+            # document
             elsif $p4 eq 'document' {
 
               my $d = $v4;
-              my $tag-ast = $d<tag-spec>.ast;
-              my $body-ast = $d<tag-body>.ast;
-              $ast.push([ $tag-ast, $body-ast, $d.ast]);
+              my $tag-ast = $d<tag-spec>.made;
+              my $body-ast = $d<tag-body>;
+              $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.made)};
             }
           }
         }
@@ -545,18 +564,107 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #---------------------------------------------------------------------------
-    method !clean-text ( Str $t is copy, Bool :$fixed = False --> Str ) {
+#    method comment ( Match $match ) {
+#      say "Comment: ", $match.perl;
+#      $match.make: (:comment($match.Str));
+#      $match.make: [comment => ~$match];
+#    }
 
-      # Remove leading spaces at begin of text
+    #---------------------------------------------------------------------------
+    # Return object if module and method is found. Otherwise return Any
+    method !can-method ( Str $mod-name, $meth-name, Bool :$optional = True ) {
+
+      my XML::Element $x;
+
+      my $module = $!objects{$mod-name} if $!objects{$mod-name}:exists;
+
+      if $module.defined {
+        if $module.^can($meth-name) {
+          $module;
+        }
+
+        else {
+          $x .= new(
+            :name('undefined-method'),
+            :attribs( module => $mod-name, method => $meth-name)
+          ) unless $optional;
+        }
+      }
+
+      else {
+        $x .= new( :name('undefined-module'), :attribs(module => $mod-name))
+          unless $optional;
+      }
+    }
+
+    #---------------------------------------------------------------------------
+    method !clean-text (
+      Str $t is copy, Bool :$fixed = False, Bool :$comment = True
+      --> Str
+    ) {
+
+      # filter comments
+      $t ~~ s:g/ <.ws>? '#' \N* \n?// if $comment;
+
+      # remove leading spaces at begin of text
       $t ~~ s/^ \s+ // unless $fixed;
 
-      # Remove trailing spaces at every line
+      # remove trailing spaces at every line
       $t ~~ s:g/ \h+ $$ //;
 
-      # Substitute many spaces with one space
+      # substitute multiple spaces with one space
       $t ~~ s:g/ \s\s+ / / unless $fixed;
 
       $t;
+    }
+
+    #---------------------------------------------------------------------------
+    # Substitute some escape characters in entities and remove the remaining
+    # backslashes.
+    #
+    method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
+
+      # Entity must be known in the xml result!
+      $esc ~~ s:g/\& <!before <[#\w]>+ ';'>/\&amp;/;
+#      $esc ~~ s:g/\\\\/\&\#x5C;/;
+      $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
+      $esc ~~ s:g/<-[\\]>\</\&lt;/ unless $is-attr;
+#      $esc ~~ s:g/<-[\\]>\>/\&gt;/ unless $is-attr;
+      $esc ~~ s:g/\"/\&quot;/ if $is-attr;
+
+#`{{
+      # Remove rest of the backslashes unless followed by hex numbers prefixed
+      # by an 'x'
+      #
+      if $esc ~~ m/ '\\x' <xdigit>+ / {
+        my $set-utf8 = sub ( $m1, $m2) {
+          return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
+        };
+
+        $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
+      }
+
+      if $esc ~~ m/ '\\u' <xdigit>+ / {
+        my $set-utf8 = sub ($m1) {
+
+          return chr(:16($m1.Str));
+        };
+        $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
+      }
+}}
+      $esc ~~ s:g/'\\'//;
+
+      return $esc;
+    }
+
+    #---------------------------------------------------------------------------
+    method !current-state ( Match $match, Str $state ) {
+
+      $!from = $match.from;
+      $!to = $match.to;
+      $!prematch = $match.prematch;
+      $!postmatch = $match.postmatch;
+      $!state = $state;
     }
 
     #---------------------------------------------------------------------------
@@ -582,56 +690,29 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     }
 
     #---------------------------------------------------------------------------
-    # Substitute some escape characters in entities and remove the remaining
-    # backslashes.
-    #
-    method !process-esc ( Str $esc is copy --> Str ) {
+    method get-current-filename ( --> Str ) {
 
-      # Entity must be known in the xml result!
-      #
-      $esc ~~ s:g/\\\\/\&\#x5C;/;
-      $esc ~~ s:g/\\\s/\&nbsp;/;
-      $esc ~~ s:g/\</\&lt;/;
-      $esc ~~ s:g/\>/\&gt;/;
-      $esc ~~ s:g/\"/\&quot;/;
-
-      # Remove rest of the backslashes unless followed by hex numbers prefixed
-      # by an 'x'
-      #
-      if $esc ~~ m/ '\\x' <xdigit>+ / {
-        my $set-utf8 = sub ( $m1, $m2) {
-          return Blob.new(:16($m1.Str),:16($m2.Str)).decode;
-        };
-
-        $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
-      }
-
-      if $esc ~~ m/ '\\u' <xdigit>+ / {
-        my $set-utf8 = sub ($m1) {
-
-          return chr(:16($m1.Str));
-        };
-        $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
-      }
-
-      $esc ~~ s:g/\\//;
-
-      return $esc;
-    }
-
-    #---------------------------------------------------------------------------
-    method !current-state ( Match $match, Str $state ) {
-
-      $!from = $match.from;
-      $!to = $match.to;
-      $!prematch = $match.prematch;
-      $!postmatch = $match.postmatch;
-      $!state = $state;
+      return $!config<output><filepath> ~ '/' ~ $!config<output><filename>;
     }
 
     #---------------------------------------------------------------------------
     method get-document ( --> XML::Document ) {
+
       return $!xml-document;
+    }
+
+    #---------------------------------------------------------------------------
+    method get-sxml-object ( Str $class-name ) {
+
+      my $object;
+      for $!objects.keys -> $ok {
+        if $!objects{$ok}.^name eq $class-name {
+          $object = $!objects{$ok};
+          last;
+        }
+      }
+
+      $object;
     }
   }
 }

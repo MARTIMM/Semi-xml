@@ -1,0 +1,7 @@
+# bla bla
+$|html [
+  # beetje commentaar
+  # en wat meer
+  $|abc [def][!ghi #jhgsdjfhg
+  !]
+]

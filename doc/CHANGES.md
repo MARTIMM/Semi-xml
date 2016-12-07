@@ -1,5 +1,31 @@
 ## Changes
 
+* 0.26.0
+  * Implemented the skip part of the report generator.
+  * Change in processing configuration files.
+* 0.25.0
+  * Before there was only one content block per element specification like ```$abc [some text]```. Now it is possible to have 0, 1 or more blocks following a tag so the following is possible;
+  ```
+  $|a
+  $|b [ hgf $|xyz ]
+  $|c [ code: ][! $j = $delta * 10 !]
+  ```
+  which generates
+  ```
+  <a/>
+  <b>hgf <xyz/></b>
+  <c>code: $j = $delta * 10</c>
+  ```
+* 0.24.0
+  * Change in grammar. ```$xyx []``` has become ```$|xyz []```. This is a big help when code with many dollar characters are used. These should be escaped but wil make things unreadable. Also using the [! !] bodies are not always acceptable because it prevents nesting of elements when needed. So this can now be done;
+  ```$|abc [ $x = 10; ]```
+* 0.23.0
+  * Dropped the use of $.mod.symbol-access. There is less to none use for it.
+  * Add optional initializing() method to sxml modules ($!) with the attributes and SemiXML::Sxml object. These are called as soon as the tag and attributes are parsed. Later when the body is parsed the call to the method of that module is called.
+  * Add get-sxml-object('class name') to Actions class
+  * Add get-sxml-object handle in SemiXML::Sxml to call method.
+* 0.22.0
+  * Added module to make test reports. It gives the possibility to describe the tests and define them as well as run them. The results are shown at the end of the generated document and also written into a metric file. This will be used to make a summary report.
 * 0.21.0
   * Refitted the piping to external commands
 * 0.20.0
