@@ -1,0 +1,42 @@
+[ option.xml-prelude ]
+  show          = 1
+
+[ option.doctype ]
+  show          = 1
+
+[ option.doctype.entities ]
+  company       = 'Acme Mc Carpenter, Inc'
+  program       = 'sxml2xml'
+  library       = 'Semi-xml'
+  language      = 'sxml'
+  nbsp          = ' '
+  E             = 'element'
+  SUE           = 'substitution-element'
+  COE           = 'command-element'
+  SPE           = 'spaced-element'
+
+#  definition    = '[
+#        <!ENTITY company "Acme Mc Carpenter, Inc">
+#        <!ENTITY program "sxml2xml">
+#        <!ENTITY library "Semi-xml">
+#        <!ENTITY language "sxml">
+#        <!ENTITY nbsp " ">
+#        <!ENTITY E "element">
+#        <!ENTITY SUE "substitution-element">
+#        <!ENTITY COE "command-element">
+#        <!ENTITY SPE "spaced-element">
+#]'
+
+
+[ output ]
+  fileext       = 'xml'
+
+[ output.program ]
+  pdf           = 'xsltproc --encoding utf-8 --xinclude doc/Manual/stylesheet.xsl - | xep -fo - -pdf sxml2xml.pdf'
+  xsl           = 'xmllint --format - > %of.xsl'
+  chk           = 'tee sxml2xml.xml | xmllint --format - | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
+
+[ module ]
+  lorem         = 'SxmlLib::LoremIpsum'
+  Db5b          = 'SxmlLib::Docbook5::Basic'
+  Db5f          = 'SxmlLib::Docbook5::FixedLayout'

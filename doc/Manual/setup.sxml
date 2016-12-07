@@ -1,0 +1,566 @@
+$!Db5b.article [
+  $|title [ Using Semi-xml ]
+  $!Db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
+              city=Haarlem country=Netherlands
+              copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
+    $|para [
+      The &library; package comprises of a set of Perl 6 modules to convert a
+      language coined 'semi xml' or &language; text into $**emphasis[XML]
+      languages such as $*|emphasis[HTML], $**emphasis[SOAP] or $*|emphasis[XSL].
+    ]
+
+    $|para [
+      In the package there is also a program called &program; which uses this
+      library to transform &language; text from a file into XML after which it
+      is stored in another file. The generated XML can also be send to any
+      program for conversion to other formats or for checking. Examples are
+      xsltproc, xmllint, rnv, wkhtmltopdf, xep etcetera.
+    ]
+
+    $|para [
+      The latest version of this document is generated on date
+      $!SxmlCore.date
+    ]
+  ]
+
+  $|sect1 [
+    $|title [ Introduction of module &library; ]
+    $|para [
+      Welcome to $*|emphasis[&library;]. As mentioned in the abstract, the 
+      modules in the library helps the programmer to convert &language; text
+      into $*|emphasis[XML].
+    ]
+
+    $|sect2 [
+      $|title [Advantages using this language]
+      $|itemizedlist [
+        $|listitem [!
+          It is more clear to read the text which is where you want to focus on
+          and therefor more maintainable than XML is. One of those thing I find
+          annoying is writing the end tag. This is solved by using '[' and ']'
+          to enclose a deeper level of nesting.
+        !]
+
+        $|listitem [
+          Some language constructs will help inserting predefined text. An
+          example of this might be to insert a lot of attributes of some element
+          and hide it under a name.
+        ]
+
+        $|listitem [
+          There are also constructs which are able to call code in modules to
+          simplify things. An example is the use of one of the core methods
+          to insert a date or time-stamp in the text. As an example above at the
+          end of the abstract a date is generated. This date will always be the
+          current date when the text is processed again. This specific part
+          adds dynamism to your text.
+        ]
+
+        $|listitem [
+          The language is extensible. Developers can add their own libraries
+          to load for example data from a database and inserting it in the text
+          as a HTML table.
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Disadvantages]
+      $|itemizedlist [
+        $|listitem [
+          There is an extra level of processing. If the XML text is simple
+          one should not be bothered learning this language. Especially when
+          the dynamic constructs aren't used.
+        ]
+
+        $|listitem [
+          This project is only just started. There are many things left on the
+          wish list. E.g. I would like to give proper messages when mistakes are
+          made in the syntax.
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Information given in this article]
+      $|itemizedlist [
+        $|listitem [
+          $|para [
+            $|emphasis[The language]. Here the basic layout will be explained,
+            the terminology and meaning of the syntax. The start will be gentle
+            showing simple cases first..
+
+            $|itemizedlist [
+              $|listitem [
+                $|para [
+                  $|emphasis[The document section]. The document is where text
+                  is written for the specific documents together with the
+                  elements to format the text. Some of the special elements will
+                  need the prelude section explained in the next section.
+                ]
+              ]
+              $|listitem [
+                $|para [
+                  $|emphasis[The prelude section]. The prelude section will be
+                  explained. In this section you can control the output of the
+                  result. Some options are only used by the program &program;.
+                  Defaults are also explained.
+                ]
+              ]
+            ]
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            $|emphasis[The programmers view]. Developers can write new modules
+            with methods to process tasks not yet captured by this package.
+
+            $|itemizedlist [
+              $|listitem [
+                $|para [
+                  $|emphasis[Classes data and methods]. An explanation of the
+                  layout of a users module and an explanation of how to specify
+                  the options in the prelude
+                ]
+              ]
+              $|listitem [
+                $|para [
+                  $|emphasis[Substitution data]. Declarations of data which
+                  can be used to substitute into the text.
+                ]
+              ]
+              $|listitem [
+                $|para [
+                  $|emphasis[Methods]. Methods which help inserting new text
+                  and entities into the text.
+                ]
+              ]
+            ]
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            $|emphasis[Using the program]. The program is used to read
+            &language; from a file and saved or send away. Explanation of
+            arguments and prelude options can be found here.
+          ]
+        ]
+        $|listitem [
+          $|para [
+            $|emphasis[Examples]. Many short examples to show its use of sxml.
+          ]
+        ]
+
+$!SxmlCore.comment [
+        $|listitem [
+          $|emphasis[].
+        ]
+]
+      ]
+    ]
+  ]
+
+  $|sect1 [
+
+    $|title [The language]
+
+    $|para [
+      The language exists of two parts, a prelude and the document. The prelude
+      is used to set options to introduce external modules or to define ways
+      to output the resulting xml. The prelude is also optional. 
+    ]
+
+    $|para [
+      The prelude starts with 3 dashes and ends with it. The prelude itself
+      consists of a series of key-value pairs to control the way output is to be
+      delivered. The prelude part is also optional. In that case defaults will
+      be applied.
+      $|programlisting [!=
+---
+... prelude area ...
+---
+... document area ...
+      !]
+    ]
+
+    $|para [
+      The document follows the prelude and is the thing you want to publish. It
+      has a similar look as any xml typed language but is easier to read.
+    ]
+
+    $|para [
+      Below you see a simple example where the prelude is not used. When
+      the prelude is missing the default action is to write the result into a
+      second file. The name of the file is kept the same but with an extension
+      of '.xml'.
+
+      $!Db5f.load-test-example
+         path=Book-Examples/BE-001.sxml
+         start='$!SxmlCore.comment [Start]'
+         stop='$!SxmlCore.comment [Stop]'
+         fix-indent=2
+         callout-prefix=BE-001.a
+         callout-rows=0,2,10
+         callout-col=64
+
+      $|calloutlist [
+        $|callout arearefs=BE-001.a01 [
+          $|para [!
+            An element which becomes <html> with a body starting with '['
+            enclosing other elements and text.
+          !]
+        ]
+
+        $|callout arearefs=BE-001.a02 [
+          $|para [
+            The title element only contains text and no other elements.
+          ]
+        ]
+
+        $|callout arearefs=BE-001.a03 [
+          $|para [!
+            The html element ends here with the ']' generating </html>.
+          !]
+        ]
+      ]
+    ]
+
+    $|para [
+      The result after running through &program; is shown below. Importend to
+      note that this text is nicely formatted for this example and the output
+      would be more like a one-liner.
+      $!Db5f.load-test-example
+         path=Book-Examples/BE-001.xml
+         start='<!--Start-->'
+         stop='<!--Stop-->'
+         keep-literal=1
+         fix-indent=2
+         callout-prefix=BE-001.b
+         callout-rows=0,2,8
+         callout-col=64
+
+      $|calloutlist [
+        $|callout arearefs=BE-001.b01 [
+          $|para [!
+            Result of '$html \[' starts with <html>.
+          !]
+        ]
+
+        $|callout arearefs=BE-001.b02 [
+          $|para [!
+            The title element is generated as <title>... text ... </title>.
+          !]
+        ]
+
+        $|callout arearefs=BE-001.b03 [
+          $|para [!
+            The html element ends here with the generated </html>.
+          !]
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Document]
+      $|para [
+        The document is where the text comes in the same way as in a normal XML
+        document. The elements most of us are aware of all start with a dollar
+        '\$'. Above in an example we have seen the expression $*|emphasis [!
+        $|title [ Hello World ] !]. The body of the element is enclosed between
+        square brackets '\[' and '\]'. Within these brackets you can write new
+        elements intermittent with normal text. The methods in the library will
+        not check if a particular element may be used on such place, you will
+        need to look into the specifics of the XML language at hand.. So the
+        syntax of writing an element structure is quite simple.
+      ]
+
+      $|para [
+        However, &language; is capable of doing more than just entering XML
+        elements in an alternative way. E.g. an element might need attributes.
+        Below you see in a not too strict $**emphasis[BNF] variant a part of the
+        syntax;
+        $|programlisting [!=
+<document> ::= <prefix> <element> ( <attribute> '=' <attr-value> )*
+               '[' <body-start-control> <body> <body-end-control>
+               ']';
+
+<prefix> ::= '$.' | '$!' | '$*<' | '$*>' | '$*' | '$';
+
+<element> ::= <identifier>;
+<attribute> ::= <identifier>;
+<attr-value> ::= '"' <ws-text> '"' | "'" <ws-text> "'"
+                 | <non-ws-text>;
+
+<identifier> ::=  <letter> (<letter>|<number>)*
+                  ( '-' (<letter> (<letter>|<number>)+) )*;
+
+<body-start-control> ::= '!=' | '!' | '=';
+<body-end-control> ::= '!';
+        !]
+
+        White space is forbidden between the <prefix> and <element> as well as 
+        between the <attribute>, '=' and <attr-value>. Furthermore between the
+        brackets and <body-start-control> and <body-end-control> are also no
+        spaces. In the BNF above is not appearant that the '\[!' combination
+        must be used with the '!\] combination.
+      ]
+
+      $|sect3 [
+        $|title [Element types]
+        $|para [
+
+        ]
+      ]
+
+      $|sect3 [
+        $|title [Escaping characters]
+        $|para [
+
+        ]
+      ]
+
+      $|sect3 [
+        $|title [Unicode characters]
+        $|para [
+
+        ]
+      ]
+
+      $|sect3 [
+        $|title [Core elements]
+        $|para [
+
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Prelude]
+      $|para [
+        The prelude is used to e.g. control to output of the result. Other
+        usages are referencing libraries to be used in the document.
+      ]
+
+      $|para [
+        The prelude consists of a series of key-value pairs. The keys are
+        defined as a series of catagories and subcatagories. The value can be
+        anything. The key value pair is separated by a colon ':' and the pair
+        ends in a ';'. The prelude part is also optional. In that case defaults
+        will be applied.
+      ]
+
+      $|para [
+        Below you see an example of two options to let the xml prelude be
+        written as well as a doctype at the start of the result.
+        $|programlisting [!=
+---
+option/xml-prelude/show:      1;
+option/doctype/show:          1;
+---
+        !]
+      ]
+
+$!SxmlCore.comment [
+        $|sect4 [
+          $|title [  ]
+          $|para [
+          ]
+        ]
+]
+
+      $|sect3 [
+        $|title [ Options used by the library &library; ]
+
+        $|sect4 [
+          $|title [ module ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ option/doctype/definition ]
+          $|para [
+            $|programlisting [!=
+option/doctype/definition: \[
+  <!ENTITY company "Acme Mc Carpenter, Inc">
+  <!ENTITY program "sxml2xml">
+  <!ENTITY library "Semi-xml">
+  <!ENTITY nbsp " ">
+\]
+            !]
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ option/doctype/show ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ option/http-header ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ option/xml-prelude/encoding ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ option/xml-prelude/show ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ option/xml-prelude/version ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ output/fileext ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ output/filename ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ output/filepath ]
+          $|para [
+          ]
+        ]
+
+        $|sect4 [
+          $|title [ output/program ]
+          $|para [
+            $|programlisting [!=
+output/program/pdf:
+  | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
+  | xep -fo - -pdf sxml2xml.pdf
+  ;
+            !]
+          ]
+        ]
+      ]
+    ]
+  ]
+
+  $|sect1 [
+    $|title [The programmers view]
+    $|para [
+    ]
+
+    $|sect2 [
+      $|title [Classes data and methods]
+      $|para [
+
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Substitution data]
+      $|para [
+
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Methods]
+      $|para [
+
+      ]
+    ]
+  ]
+
+  $|sect1 [
+    $|title [Using program &program;]
+    $|para [
+
+    ]
+
+    $|sect2 [
+      $|title [Program arguments]
+      $|para [
+        $|synopsis [!=
+sxml2xml [--run=<run-selector>] <sxml-file>
+        !]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Prelude options]
+      $|sect3 [
+        $|title [dependencies/files]
+        $|para [
+          The value of this option is a list of paths to semi-xml
+          documents which must be processed after the current one.
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Unix she-bang usage]
+      $|para [
+      ]
+    ]
+  ]
+
+$!SxmlCore.comment [
+    $|sect2 [
+      $|title []
+      $|para [
+      ]
+    ]
+]
+
+  $|sect1 [
+    $|title [Syntax]
+    $|para [
+      $|programlisting [!=
+<sxml-syntax> ::= <prelude-section>? <document>;
+
+<prelude-section> ::= '---' <new-line> <key-value-pairs>* '---' <new-line>;
+<key-value-pairs> ::= <key-name> ':' <value> ';';
+<key-name> ::= <key-part> ('/' <key-part>)*;
+<key-part> ::= <letter> (<letter>|<number>)*;
+
+<document> ::= <prefix> <element> ( <attribute> '=' <attr-value> )*
+               '[' <body-start-control> <body> <body-end-control>
+               ']';
+
+<prefix> ::= '$.' | '$!' | '$*<' | '$*>' | '$*' | '$';
+
+<element> ::= <identifier>;
+<attribute> ::= <identifier>;
+<attr-value> ::= '"' <ws-text> '"' | "'" <ws-text> "'"
+                 | <non-ws-text>;
+
+<identifier> ::=  <letter> (<letter>|<number>)*
+                  ( '-' (<letter> (<letter>|<number>)+) )*;
+
+<body-start-control> ::= '!=' | '!' | '=';
+<body-end-control> ::= '!';
+      !]
+    ]
+  ]
+
+  $|sect1 [
+    $|title [Examples]
+    $|para [
+
+    ]
+  ]
+
+  $|index
+]

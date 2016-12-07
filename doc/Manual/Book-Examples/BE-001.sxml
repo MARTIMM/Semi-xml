@@ -1,0 +1,12 @@
+$|x [
+  $!SxmlCore.comment [Start]
+  $|html [
+    $|head [ $|title [ Hello World ] ]
+    $|body [
+      $|h1 [ My first header ]
+      $|p [ And another greeting ]
+    ]
+  ]
+  $!SxmlCore.comment [Stop]
+]
+

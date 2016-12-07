@@ -1,0 +1,12 @@
+[ option.doctype ]
+  show          = 1
+
+[ option.xml-prelude ]
+  show          = 1
+
+[ output ]
+  fileext       = 'xml'
+
+[ output.program ]
+  xml           = 'xmllint --format - > %of.xml'
+
