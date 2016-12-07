@@ -1,3 +1,5 @@
+# Stylesheet for use with setup.sxml
+#
 $|xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
 
   # Get the docbook formatting objects stylesheet
@@ -55,7 +57,7 @@ $|xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
 
 #   $|xsl:param name=column.count.body select=2
 
-  $|xsl:param name=bibliography.collection [ file:///home/Data/Boeken/Bibliotheek/bibliotheek-referenties.xml ]
+#  $|xsl:param name=bibliography.collection [ file:///home/Data/Boeken/Bibliotheek/bibliotheek-referenties.xml ]
 
   $|xsl:attribute-set name=xref.properties [
     $|xsl:attribute name=color [

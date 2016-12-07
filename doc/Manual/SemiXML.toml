@@ -32,8 +32,9 @@
   fileext       = 'xml'
 
 [ output.program ]
-  pdf           = 'xsltproc --encoding utf-8 --xinclude doc/Manual/stylesheet.xsl - | xep -fo - -pdf sxml2xml.pdf'
+  pdf           = 'xsltproc --encoding utf-8 --xinclude %op/stylesheet.xsl - | xep -fo - -pdf %op/sxml2xml.pdf'
   xsl           = 'xmllint --format - > %of.xsl'
+  xml           = 'xmllint --format - > %of.xml'
   chk           = 'tee sxml2xml.xml | xmllint --format - | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
 
 [ module ]
