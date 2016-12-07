@@ -54,7 +54,7 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
 
-#say $xml-text;
+say $xml-text;
 
 unlink $filename;
 

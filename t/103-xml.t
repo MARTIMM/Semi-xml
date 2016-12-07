@@ -15,12 +15,12 @@ my $filename = 't/test-file.sxml';
 spurt( $filename, q:to/EOSX/);
 $|html [
   $|head [
-    $|style type=text/css [=
+    $|style type=text/css [!=
       green {
         color: #0f0;
         background-color: #f0f;
       }
-    ]
+    !]
     $|script [!=
       var a_tags = $('a');
       var b = a_tags[1];
@@ -70,7 +70,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-say $xml-text;
+#say $xml-text;
 
 
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
@@ -81,8 +81,7 @@ ok $xml-text ~~ m/
 '     green {
         color: #0f0;
         background-color: #f0f;
-      }
-'
+      }'
 /, 'Check for literal text in css';
 
 #ok $xml-text ~~ ms/var a_tags '=' '$(\'a\');' var b '=' a_tags\[1\];/,

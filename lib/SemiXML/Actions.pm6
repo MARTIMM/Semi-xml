@@ -604,7 +604,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     ) {
 
       # filter comments
-      $t ~~ s:g/ <.ws>? '#' \N* \n?// if $comment;
+      $t ~~ s:g/ <.ws> '#' \N* \n // if $comment;
+      $t ~~ s:g/^ '#' \N* \n // if $comment;
 
       # remove leading spaces at begin of text
       $t ~~ s/^ \s+ // unless $fixed;
@@ -626,11 +627,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       # Entity must be known in the xml result!
       $esc ~~ s:g/\& <!before <[#\w]>+ ';'>/\&amp;/;
-#      $esc ~~ s:g/\\\\/\&\#x5C;/;
       $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
       $esc ~~ s:g/<-[\\]>\</\&lt;/ unless $is-attr;
-#      $esc ~~ s:g/<-[\\]>\>/\&gt;/ unless $is-attr;
       $esc ~~ s:g/\"/\&quot;/ if $is-attr;
+      $esc ~~ s:g/'\\'//;
 
 #`{{
       # Remove rest of the backslashes unless followed by hex numbers prefixed
@@ -643,16 +643,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
         $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
       }
-
-      if $esc ~~ m/ '\\u' <xdigit>+ / {
-        my $set-utf8 = sub ($m1) {
-
-          return chr(:16($m1.Str));
-        };
-        $esc ~~ s:g/ '\\u' (<xdigit>**4) /{&$set-utf8($0)}/;
-      }
 }}
-      $esc ~~ s:g/'\\'//;
 
       return $esc;
     }

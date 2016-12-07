@@ -3,6 +3,7 @@
 * 0.26.0
   * Implemented the skip part of the report generator.
   * Change in processing configuration files.
+  * Implemented comments in normal bodies [ ... ].
 * 0.25.0
   * Before there was only one content block per element specification like ```$abc [some text]```. Now it is possible to have 0, 1 or more blocks following a tag so the following is possible;
   ```

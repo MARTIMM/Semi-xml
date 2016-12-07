@@ -78,10 +78,10 @@ grammar Grammar {
   rule body4-contents  { [ <body1-text> || <document> ]* }
 
   token body1-text      {
-    [ <comment> ||            # any comment
-      <.escape-char> ||       # an escaped character e.g. '\$'
-      <-[\$\]]> ||            # any character not being '$' or ']'
-      '$' <!before <[!|*]>>   # a $ not followed by '!', '|' or '*'
+    [ <.escape-char> ||         # an escaped character e.g. '\$'
+      <-[\$\]]> ||              # any character not being '$' or ']'
+      '$' <!before <[!|*]>>     # a $ not followed by '!', '|' or '*'
+#      <.comment>                # any comment
     ]+
   }
 
