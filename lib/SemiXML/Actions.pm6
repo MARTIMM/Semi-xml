@@ -226,7 +226,11 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       # is one exception, that is when the tag is at the top. Then there may
       # only be one tag. If there are more, an error tag is generated.
       #
-      my $containers = $parent.getElementsByTagName('__PARENT_CONTAINER__');
+      my $containers = $parent.elements(
+        :TAG<__PARENT_CONTAINER__>,
+        :RECURSE, :NEST,
+      );
+
       for @$containers -> $node {
 
         my $children = $node.nodes;
@@ -239,7 +243,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         }
 
         # Remove the now empty element
-        $node.parent.removeChild($node);
+        $node.remove;
       }
 
       # Process top level method container
