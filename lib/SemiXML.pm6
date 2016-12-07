@@ -323,9 +323,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         my Hash $doc-type = $configuration<option><doctype>;
 
         if ? $doc-type<show> {
-          my Hash $entities = $doc-type<entities>;
+          my Hash $entities = $doc-type<entities> // {};
           my Str $start = ?$entities ?? " [\n" !! '';
-          my Str $end = ?$entities ?? "]>\n" !! '';
+          my Str $end = ?$entities ?? "]>\n" !! ">\n";
           $document ~= "<!DOCTYPE $root-element$start";
           for $entities.kv -> $k, $v {
             $document ~= "<!ENTITY $k \"$v\">\n";
