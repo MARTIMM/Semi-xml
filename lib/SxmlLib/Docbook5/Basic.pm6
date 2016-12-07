@@ -1,48 +1,54 @@
 use v6.c;
-
 use SemiXML;
 
-# Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
-# to fail not finding the symbol &File when doing so.
-#
+#-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
+#-------------------------------------------------------------------------------
 class Docbook5::Basic {
-  has Hash $.symbols = {
-
-    # $.m.book []
-    book => {
-      tag-name => 'book',
-      attributes => {
-        'xmlns' => 'http://docbook.org/ns/docbook',
-        'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
-        'xmlns:xl' => 'http://www.w3.org/1999/xlink',
-        'version' => '5.0',
-        'xml:lang' => 'en'
-      }
-    },
-
-    # $.m.article []
-    article => {
-      tag-name => 'article',
-      attributes => {
-        'xmlns' => 'http://docbook.org/ns/docbook',
-        'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
-        'xmlns:xl' => 'http://www.w3.org/1999/xlink',
-        'version' => '5.0',
-        'xml:lang' => 'en'
-      }
-    },
-  };
 
   #-----------------------------------------------------------------------------
-#TODO do we need this?
-  method Xarticle (
+  method book (
     XML::Element $parent,
-    Hash $attrs is copy,
+    Hash $attrs,
     XML::Node :$content-body
+    --> XML::Node
   ) {
 
+    my XML::Element $art = append-element(
+      $parent, 'book', {
+        'xmlns' => 'http://docbook.org/ns/docbook',
+        'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
+        'xmlns:xl' => 'http://www.w3.org/1999/xlink',
+        'version' => '5.0',
+        'xml:lang' => 'en'
+      }
+    );
+
+    $art.append($content-body);
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method article (
+    XML::Element $parent,
+    Hash $attrs,
+    XML::Node :$content-body
+    --> XML::Node
+  ) {
+
+    my XML::Element $art = append-element(
+      $parent, 'article', {
+        'xmlns' => 'http://docbook.org/ns/docbook',
+        'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
+        'xmlns:xl' => 'http://www.w3.org/1999/xlink',
+        'version' => '5.0',
+        'xml:lang' => 'en'
+      }
+    );
+
+    $art.append($content-body);
+    $parent;
   }
 
   #-----------------------------------------------------------------------------
