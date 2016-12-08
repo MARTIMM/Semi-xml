@@ -6,6 +6,7 @@
 
 [output.program]
   pdf           = 'wkhtmltopdf - %of.pdf'
+  fmt           = 'xmllint --format - > %of.%oe'
 
 [module]
   report        = 'SxmlLib::Testing::Report'

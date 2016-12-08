@@ -245,11 +245,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           # Drop the extention again. Let it be provided by the command
           my Str $ext = $filename.IO.extension;
           $filename ~~ s/ '.' $ext //;
+          $cmd ~~ s:g/ '%of' /'$filename'/;
 
           my Str $path = $configuration<output><filepath>;
-
-          $cmd ~~ s:g/ '%of' /'$filename'/;
           $cmd ~~ s:g/ '%op' /'$path'/;
+
+          $ext = $configuration<output><fileext>;
+          $cmd ~~ s:g/ '%oe' /'$ext'/;
+
           say "Sent file to program: $cmd";
           my Proc $p = shell "$cmd 2> '{$run-code}-command.log'", :in;
           $p.in.print($document);

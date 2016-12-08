@@ -6,6 +6,8 @@
 
 [output.program]
   pdf           = 'wkhtmltopdf - %of.pdf'
+  fmt           = 'xmllint --format - > %of.%oe'
+  chk           = 'tee sxml2xml.xml | xmllint --format - | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
 
 [module]
   report        = 'SxmlLib::Testing::Report'
