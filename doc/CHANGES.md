@@ -1,5 +1,7 @@
 ## Changes
 
+* 0.26.2
+  * added run option fmt to format output for better reading. use as ```sxml2xml --run=fmt abc.sxml```.
 * 0.26.1
   * More output when generating reports in SxmlLib::Testing::Testing::Report
 * 0.26.0

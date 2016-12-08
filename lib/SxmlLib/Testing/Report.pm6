@@ -254,7 +254,7 @@ class Report {
       }
     }
 
-    $hook.remove;
+    $hook.remove if $hook.defined and $hook.parent.defined;
   }
 
   #-----------------------------------------------------------------------------
