@@ -323,13 +323,24 @@ class Report {
 
     # run the tests using prove and get the result contents through a pipe
     my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
-                 '--rules=seq=*', $test-file, :out;
+                 '--rules=seq=*', "--lib", $test-file, :out;
     # read lines from pipe from testing command
     my @lines = $p.out.lines;
+
+    # tail of the test results
+    my Bool $save-summary = False;
+    my Str $prove-summary-text = '';
+
+    say "\n---[Prove output]", '-' x 63;
     loop ( my $l = 0; $l < @lines.elems; $l++) {
       my $line = @lines[$l];
+      say "$line";
 
-#say "R: $line";
+      if $line ~~ m:s/^ 'Test' 'Summary' 'Report' / or $save-summary {
+        $save-summary = True;
+        $prove-summary-text ~= $line;
+        next;
+      }
 
       # get the test code if there is one.
       $line ~~ m/ '-' \s* (<[TDBS]> \d+) /;
@@ -368,6 +379,9 @@ class Report {
         self!set-test-results( $test-code, $ok, :metric);
       }
     }
+
+    say "---[End prove output]", '-' x 59;
+    say " ";
 
     # save metric data in a file
     self!save-metrics( $test-file, $attrs);
@@ -597,7 +611,7 @@ class Report {
       ([+] $!all-metrics[1], $!all-metrics[4], $!all-metrics[7]),
       $!all-metrics[2], $!all-metrics[5], $!all-metrics[8],
       $!all-metrics[12]
-    );
+    ) if $!all-metrics[0];
   }
 
   #-----------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 ## Changes
 
+* 0.26.1
+  * More output when generating reports in SxmlLib::Testing::Testing::Report
 * 0.26.0
   * Implemented the skip part of the report generator.
   * Change in processing configuration files.
