@@ -22,8 +22,9 @@
 [ output ]
   fileext       = 'xml'
 
-#[ output.program ]
-#  c1 = 'wkhtml2pdf - %f'
+[ output.program ]
+  fmt           = 'xmllint --format - > %of.%oe'
+#  pdf           = 'wkhtmltopdf - %of.pdf'
 
 
 #TODO [ styles ]
