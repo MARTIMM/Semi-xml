@@ -4,6 +4,8 @@ use Test;
 
     constant ABC = 10;
     my Int $i;
+    my Hash $h;
+    $h<test> = $i;
 
 
 nok $i.defined, 'T0';

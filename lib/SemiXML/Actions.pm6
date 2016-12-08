@@ -626,9 +626,10 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
 
       # Entity must be known in the xml result!
-      $esc ~~ s:g/\& <!before <[#\w]>+ ';'>/\&amp;/;
+      $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/ unless $is-attr;
       $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
-      $esc ~~ s:g/<-[\\]>\</\&lt;/ unless $is-attr;
+      $esc ~~ s:g/\</\&lt;/ unless $is-attr;
+
       $esc ~~ s:g/\"/\&quot;/ if $is-attr;
       $esc ~~ s:g/'\\'//;
 

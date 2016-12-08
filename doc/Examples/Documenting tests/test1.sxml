@@ -13,6 +13,8 @@ $!report.run title='Integer manipulations'
   $!code.add [=
     constant ABC = 10;
     my Int $i;
+    my Hash $h;
+    $h<test> = $i;
 
     $!test.add t="nok $i.defined" [
       Declaration of an integer without an assignment of a value,
