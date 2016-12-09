@@ -254,17 +254,23 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           $cmd ~~ s:g/ '%oe' /'$ext'/;
 
           say "Sent file to program: $cmd";
-          my Proc $p = shell "$cmd ", :in, :err;
-          my Promise $send-it .= start( { $p.in.print($document) });
+          my Proc $p = shell "$cmd ", :in; #, :err;
+          $p.in.print($document);
+#`{{
+say "P0: ", $p.perl;
 
           # wait for errors if any
           my @lines = $p.err.lines;
+say "P1: ", $p.perl;
+
           say "\n---[Error output]", '-' x 63 if @lines.elems;
           .say for @lines;
           say "---[Finish error]", '-' x 63 if @lines.elems;
 
           # wait for promise to finish
+          my Promise $send-it .= start( { $p.in.print($document); say 'done'; });
           $send-it.result;
+}}
         }
 
         else {
