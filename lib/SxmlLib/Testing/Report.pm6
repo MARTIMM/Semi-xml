@@ -277,7 +277,7 @@ class Report {
           # $x not defined so it is plain code text
           else {
             my Str $code-text = self!process-code(~$code-node);
-            append-element( $pre, :text($code-text));
+            append-element( $pre, :text($code-text)) if ?$code-text;
             $!test-program ~= "$code-node\n";
           }
         }
