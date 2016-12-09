@@ -99,7 +99,6 @@ class Report {
   method summary (
     XML::Element $parent, Hash $attrs,
     XML::Element :$content-body, Array :$tag-list
-
     --> XML::Node
   ) {
 

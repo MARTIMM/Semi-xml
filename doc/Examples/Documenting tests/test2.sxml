@@ -1,5 +1,6 @@
 $!report.run
     title='Code Nesting' package=SxmlLib::Testing class=Report
+    highlight-lang='lang-perl6' highlight-skin='default' linenumbers=1
     distribution=SemiXML [
 
   $|h2 class=t1                                 [ $!lorem.sentence ]

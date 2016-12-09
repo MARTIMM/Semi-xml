@@ -3,6 +3,7 @@
 * 0.26.2
   * Added run option fmt to format output for better reading. use as ```sxml2xml --run=fmt abc.sxml```.
   * Error messages to the commandline instead of log file
+  * Google highlighting code for code snippets in test report module. Files are installed locally in the resources directory.
 * 0.26.1
   * More output when generating reports in SxmlLib::Testing::Testing::Report
 * 0.26.0
