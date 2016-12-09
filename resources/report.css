@@ -1,33 +1,25 @@
-pre.test-block-code {
+pre {
   border-width:         2px;
   border-style:         solid;
   border-color:         #006000;
   padding:              0 0 0 5px;
   color:                #00501e;
-  background-color:     #eaefea;
-  font-family:          FreeMono;
-  font-size:            11pt;
   box-shadow:           6px 6px 4px #aaafaa;
   border-radius:        4px;
   page-break-inside:    avoid;
 }
 
-pre.hide {
-  display:              none;
+pre.test-block-code {
+  background-color:     #eaefea;
+  font-family:          FreeMono;
+  font-size:            11pt;
 }
 
 pre.example {
-  border-width:         2px;
-  border-style:         solid;
-  border-color:         #a06000;
-  padding:              0 0 0 5px;
   color:                #00401e;
   background-color:     #ffeeee;
   font-family:          FreeMono;
   font-size:            11pt;
-  box-shadow:           6px 6px 4px #aaafaa;
-  border-radius:        4px;
-  page-break-inside:    avoid;
 }
 
 table {

@@ -86,7 +86,7 @@ class Report {
     # Add footer to the end of the report
     my XML::Element $div = append-element( $!body, 'div', {class => 'footer'});
     append-element(
-      $div, :text("Generated using SemiXML, SxmlLib::Testing::TestDoc, XML")
+      $div, :text("Generated using SemiXML, SxmlLib::Testing::*, XML")
     );
 
     # save report in parent
@@ -120,6 +120,8 @@ class Report {
 
     # make a body
     $!body = append-element( $!report-doc, 'body');
+    $!body.set( 'onload', 'prettyPrint()') if $!highlight-code;
+    
 
     # if there is a title attribute, make a h1 title
     if ? $attrs<title> {
@@ -144,6 +146,7 @@ class Report {
     );
 
     if $!highlight-code {
+#`{{
       my Str $options = '';
       $options ~= "?skin=$!highlight-skin";
       $options ~= "&amp;lang=$!highlight-skin";
@@ -155,11 +158,28 @@ class Report {
       );
 
       append-element( $script, :text(' '));
+}}
+      append-element(
+        $head, 'link', {
+          :href('file://' ~ %?RESOURCES<google-code-prettify/prettify.css>),
+          :type<text/css>, :rel<stylesheet>
+        }
+      );
+
+      my XML::Element $js = append-element(
+        $head, 'script', {
+          :src('file://' ~ %?RESOURCES<google-code-prettify/prettify.js>),
+          :type<text/javascript>
+        }
+      );
+      append-element( $js, :text(' '));
     }
 
     append-element(
-      $head, 'link',
-      { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
+      $head, 'link', {
+        :href('file://' ~ %?RESOURCES<report.css>),
+        :type<text/css>, :rel<stylesheet>
+      }
     );
   }
 
