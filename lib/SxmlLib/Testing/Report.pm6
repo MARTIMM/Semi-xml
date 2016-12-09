@@ -31,6 +31,12 @@ class Report {
   has Hash $!test-metrics;
   has Array $!all-metrics = [];
 
+  has Bool $!highlight-code = False;
+  has Str $!highlight-language = '';
+  has Str $!highlight-skin = '';
+  has Bool $!linenumbers = False;
+  my Int $line-number = 1;
+
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $sxml, Hash $attrs ) {
 
@@ -47,6 +53,11 @@ class Report {
     $!todo-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Todo');
     $!bug-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Bug');
     $!skip-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Skip');
+
+    $!highlight-code = ?$attrs<highlight-lang> // False;
+    $!highlight-language = $attrs<highlight-lang> // '';
+    $!highlight-skin = lc($attrs<highlight-skin> // 'default');
+    $!linenumbers = ?$attrs<linenumbers> // False;
 
     self!setup-report-doc($attrs);
   }
@@ -132,6 +143,20 @@ class Report {
       $head, 'meta', {charset => 'UTF-8'}
     );
 
+    if $!highlight-code {
+      my Str $options = '';
+      $options ~= "?skin=$!highlight-skin";
+      $options ~= "&amp;lang=$!highlight-skin";
+      my XML::Element $script = append-element(
+        $head, 'script',
+        { :src("https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js$options"),
+          :type<text/javascript>
+        }
+      );
+
+      append-element( $script, :text(' '));
+    }
+
     append-element(
       $head, 'link',
       { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
@@ -144,6 +169,11 @@ class Report {
     my XML::Element $hook;
     my XML::Element $pre;
 
+    # <hook> used to insert test, todo, bug and skip content.
+    # $hook is removed later
+    #
+    $hook = append-element( $!body, 'hook');
+
     my @nodes = $content-body.nodes;
     while @nodes {
 
@@ -153,12 +183,16 @@ class Report {
          and $node.nodes[0].name eq 'code' {
 
         # <pre> used to display code in
-        $pre = append-element( $!body, 'pre', {:class<test-block-code>});
+        my Str $class = 'test-block-code';
+        if $!highlight-code {
+          $class = "prettyprint $!highlight-language";
+          if $!linenumbers {
+            $class ~= ' linenums' ~
+                      ($line-number == 1 ?? '' !! ":$line-number");
+          }
+        }
 
-        # <hook> used to insert test, todo, bug and skip content.
-        # $hook is removed later
-        #
-        $hook = append-element( $!body, 'hook');
+        $pre = before-element( $hook, 'pre', {:$class});
 
         # get code entry number
         my Int $centry = ([~] $node.nodes[0].nodes).Int;
@@ -254,14 +288,14 @@ class Report {
       }
     }
 
-    $hook.remove if $hook.defined and $hook.parent.defined;
+    $hook.remove if $hook.defined;
   }
 
   #-----------------------------------------------------------------------------
   method !process-code ( Str $code-text is copy --> Str ) {
 
-    state $indent-level = 0;
-    state $prev-indent-level = 0;
+    state Int $indent-level = 0;
+    state Int $prev-indent-level = 0;
     my Str $code = '';
 
     # insert newline after any closing curly bracket
@@ -294,6 +328,8 @@ class Report {
         $code ~= ' ' x ($prev-indent-level * 2) ~ $line ~ "\n";
         $prev-indent-level = $indent-level;
       }
+
+      $line-number++;
     }
 
     $code;
