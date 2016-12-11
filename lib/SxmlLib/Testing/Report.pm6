@@ -188,15 +188,12 @@ class Report {
     my XML::Element $hook;
     my XML::Element $pre;
 
-    # <hook> used to insert test, todo, bug and skip content.
-    # $hook is removed later
-    #
-    $hook = append-element( $!body, 'hook');
-
     my @nodes = $content-body.nodes;
     while @nodes {
 
       my $node = @nodes.shift;
+
+      # check the start of code sections
       if $node ~~ XML::Element
          and $node.name eq '__PARENT_CONTAINER__'
          and $node.nodes[0].name eq 'code' {
@@ -211,7 +208,13 @@ class Report {
           }
         }
 
-        $pre = before-element( $hook, 'pre', {:$class});
+        $pre = append-element( $!body, 'pre', {:$class});
+
+        # <hook> used to insert test, todo, bug and skip content after the code.
+        # $hook is removed later
+        #
+        $hook = append-element( $!body, 'hook');
+
 
         # get code entry number
         my Int $centry = ([~] $node.nodes[0].nodes).Int;
@@ -302,6 +305,7 @@ class Report {
         }
       }
 
+      # anything else is text/nodes
       else {
         $!body.append($node);
       }
