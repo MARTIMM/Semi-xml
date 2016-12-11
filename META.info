@@ -39,8 +39,6 @@
     "SemiXML.toml",
     "report.css",
 
-    "google-code-prettify/lang-css.js",
-    "google-code-prettify/lang-yaml.js",
     "google-code-prettify/prettify.css",
     "google-code-prettify/prettify.js",
     "google-code-prettify/run_prettify.js"

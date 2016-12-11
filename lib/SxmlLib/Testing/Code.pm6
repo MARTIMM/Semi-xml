@@ -30,6 +30,7 @@ class Code {
 
 #`{{
   #-----------------------------------------------------------------------------
+#TODO not ok to use example
   method example (
     XML::Element $parent, Hash $attrs,
     XML::Element :$content-body, Array :$tag-list
@@ -38,7 +39,7 @@ class Code {
 say "E: $content-body";
     my XML::Element $pre = append-element( $parent, 'pre', {:class<example>});
     $parent.append($pre);
-#`{{
+}}#`{{
     # <pre> used to display code in
     my Str $class = 'test-block-code';
     if $!highlight-code {
@@ -48,7 +49,7 @@ say "E: $content-body";
                   ($line-number == 1 ?? '' !! ":$line-number");
       }
     }
-}}
+}}#`{{
 
     for $content-body.nodes.reverse -> $node {
       $pre.insert($node);
