@@ -6,7 +6,7 @@ use SxmlLib::Testing::Testing;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 #-------------------------------------------------------------------------------
-class Report {
+class Report:ver<0.1.0> {
 
   has $!sxml;
 
@@ -86,7 +86,8 @@ class Report {
     # Add footer to the end of the report
     my XML::Element $div = append-element( $!body, 'div', {class => 'footer'});
     append-element(
-      $div, :text("Generated using SemiXML, SxmlLib::Testing::*, XML")
+      $div,
+      :text("Generated using SemiXML, SxmlLib::Testing::*, XML, &copy;Google prettify")
     );
 
     # save report in parent
