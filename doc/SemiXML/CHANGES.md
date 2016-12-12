@@ -1,4 +1,6 @@
-## Changes
+## Changes in SemiXML and sxml2xml
+
+Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
 * 0.26.2
   * Added run option fmt to format output for better reading. use as ```sxml2xml --run=fmt abc.sxml```.

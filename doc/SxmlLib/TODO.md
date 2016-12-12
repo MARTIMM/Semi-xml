@@ -1,30 +1,14 @@
+# Todo list for the SxmlLib module tree
 
-* Parser and actions.
-  * [x] Rethinking the parser grammar.
-  * [x] Xml Namespaces
-  * [ ] Doctype entities
-  * [ ] '#' commenting should be improved using grammar instead of overall removal
-  * [x] Better error messages when parser fails.
-  * [x] Add another set of brackets which will not allow child elements. This is handy to write javascript and or stylesheets whithout the need to escape every other character like the $ and #.
-  * [x] Exporting generated xml to other programs instead of file using config option ```output/program/<run-code>: <command line to run>;```. E.g. when ```output/program/chk: | xmllint --format -;``` is defined in the toml cnfig one can run ```sxml2xml -run chk my-file.sxml```. To get the user information, method save() has a new named argument :$run-code which is the key as in /output/program/<run-code>.
-  * [x] Define rules to define spacing around tags. Default would be to have no space at all.
-    * [x] ```$x [ ... ]```. Normal tag where all leading and trailing spaces are removed and between words, spaces are reduced to one space.
-    * [x] ```$x [! ... !]```. Body can not have tags. '$' is ignored and this character as well as ']' do not have to be escaped.
-    * [x] ```[ ... ]``` and ```[! ... !]``` can have a '=' directly after the '[' or '[!'. It means that all text must
-    be kept as typed. Leading newlines (on the whole text) and trailing spaces (on every line) are still removed.
-    * [x] Tags '$\*\*', '$|\*' and '$\*|>' is introduced to add a space to the right or left of the tag and its content.
-
-* Grammar extensions;
-
-* External modules
-  * [x] A methods tag content between [ ... ] is a named argument to the sub called content-body.
+* External modules located in SxmlLib tree
+  * [x] A methods tag content between [ ... ] is a named argument to the sub called :$content-body having type XML::Element.
   * [x] Library paths to find modules are provided
   * [x] Are introduced via toml config file
   * [x] ```$.tagname <attrs> [<body>]``` for tag name substitution and attribute additions.
   * [x] ```$!tagname <attrs> [<body>]``` for insertion of tags and body using attributes as arguments to subs/methods.
   * [ ] A module should be accessable from within another perl6 sxml module. Problem of registration.
-  * [ ] Get information from SemiXML e.g. current processed filename.
-  * [ ] Perl test reports using prove
+  * [x] Get information from SemiXML e.g. current processed filename.
+  * [x] Perl test reports using prove
 
 * Now modules can be used from sxml, the following libs might come in handy
   * SxmlLib::File - File and link handling.
@@ -55,7 +39,6 @@
   * [x] Generate a http header!
   * [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the sxml2xml program will not bother (yet).
   * [x] Dependencies on other files
-  * [ ] Partial parsing of prelude or document.
   * [ ] Store internal representation back into sxml. This cannot be dynamic for the moment.
 
 * [x] Simplify syntax by removing the prelude and move the options into a config file using TOML. Using module Config::DataLang::Refine searching for options files is as follows;
