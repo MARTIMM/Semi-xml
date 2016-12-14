@@ -2,6 +2,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.26.3
+  * bugfixes in finding config files
 * 0.26.2
   * Added run option fmt to format output for better reading. use as ```sxml2xml --run=fmt abc.sxml```.
   * Error messages to the commandline instead of log file
@@ -27,7 +29,7 @@ Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md w
   ```
 * 0.24.0
   * Change in grammar. ```$xyx []``` has become ```$|xyz []```. This is a big help when code with many dollar characters are used. These should be escaped but wil make things unreadable. Also using the [! !] bodies are not always acceptable because it prevents nesting of elements when needed. So this can now be done;
-  ```$|abc [ $x = 10; ]```
+  ``` $|abc [ $x = 10; ] ```
 * 0.23.0
   * Dropped the use of $.mod.symbol-access. There is less to none use for it.
   * Add optional initializing() method to sxml modules ($!) with the attributes and SemiXML::Sxml object. These are called as soon as the tag and attributes are parsed. Later when the body is parsed the call to the method of that module is called.

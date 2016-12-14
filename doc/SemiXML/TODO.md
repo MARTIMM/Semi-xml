@@ -17,6 +17,15 @@
 
 * Grammar extensions;
 
+* External modules located in SxmlLib tree
+  * [x] A methods tag content between [ ... ] is a named argument to the sub called :$content-body having type XML::Element.
+  * [x] Library paths to find modules are provided
+  * [x] Are introduced via toml config file
+  * [x] ```$!mod.method <attrs> [<content>]``` for insertion of elements and content using attributes as arguments to subs/methods.
+  * [ ] A module should be accessable from within another perl6 sxml module. Problem of registration.
+  * [x] Get information from SemiXML e.g. current processed filename.
+  * [x] Perl test reports using prove
+
 * Items needed in program sxml2xml
   * [x] Generate a http header!
   * [x] File extension is .sxml, not yet defined at IANA mimetypes. However, the sxml2xml program will not bother (yet).
