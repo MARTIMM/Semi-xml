@@ -33,27 +33,31 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Str $rsrc-d = $rsrc-p;
       $rsrc-d ~~ s/ '/'? $rsrc-bn //;
       my Array $locations = [$rsrc-d];
-      my Bool $merge = False;
 
-      # if filename is given, use its path also in its locations
-      if ?$filename and $filename.IO ~~ :r {
-        my Str $fn-bn = $filename.IO.basename;
-        my Str $fn-p = $filename.IO.abspath;
-        my Str $fn-d = $fn-p;
-        $fn-d ~~ s/ '/'? $fn-bn //;
-        $locations.unshift($fn-d);
-        $merge = True;
-      }
-
+      # $rsrc-bn can be SemiXML.toml if module is found in the the lib
+      # perl search path. Otherwise it will be an encoded name from the perl6
+      # install tree when module is installed.
+      #
       my Config::DataLang::Refine $c0 = self!load-config(
-        :config-name($rsrc-bn), :$locations, :$merge
+        :config-name($rsrc-bn), :$locations, :!merge
       );
 #say "L: ", $locations.perl;
 #say "C: $merge";
 #dd $c0.config;
 
       my Hash $other-config = ? $c0 ?? $c0.config.clone !! {};
-      $c0 = self!load-config( :config-name<SemiXML.toml>, :$other-config);
+      # if filename is given, use its path also in its locations
+      if ?$filename and $filename.IO ~~ :r {
+        my Str $fn-bn = $filename.IO.basename;
+        my Str $fn-p = $filename.IO.abspath;
+        my Str $fn-d = $fn-p;
+        $fn-d ~~ s/ '/'? $fn-bn //;
+        $locations = [$fn-d];
+
+        $c0 = self!load-config(
+          :config-name<SemiXML.toml>, :$other-config, :$locations, :merge
+        );
+      }
 
       $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
     }
@@ -117,6 +121,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
       my Config::DataLang::Refine $c;
       try {
+
         if ?$other-config {
           $c .= new( :$config-name, :$locations, :$other-config, :$merge);
         }
