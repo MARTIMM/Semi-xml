@@ -1,14 +1,9 @@
-[ dependencies ]
+#[ dependencies ]
 #  file          = [ ]
 
 #[ module ]
 
 #[ option ]
-
-[ option.doctype ]
-  show          = false
-
-#[ option.doctype.entities ]
 
 [ option.http-header ]
   show          = false
@@ -18,13 +13,20 @@
   version       = '1.0'
   encoding      = 'UTF-8'
 
+[ option.doctype ]
+  show          = false
+
+#[ option.doctype.entities ]
+#  copy          = '&#xa9;'
+
 
 [ output ]
   fileext       = 'xml'
 
 [ output.program ]
-  fmt           = 'xmllint --format - > %of.%oe'
+#  fmt           = 'xmllint --format --noent - > %of.%oe'
 #  pdf           = 'wkhtmltopdf - %of.pdf'
+#  chk           = 'tidy -'
 
 
 #TODO [ styles ]
