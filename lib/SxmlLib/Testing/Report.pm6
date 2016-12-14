@@ -56,7 +56,9 @@ class Report:ver<0.1.0> {
 
     $!highlight-code = ?$attrs<highlight-lang> // False;
     $!highlight-language = $attrs<highlight-lang> // '';
-    $!highlight-skin = lc($attrs<highlight-skin> // 'default');
+    $!highlight-skin = lc($attrs<highlight-skin> // 'prettify');
+    $!highlight-skin = $attrs<highlight-skin> eq 'default'
+                       ?? 'prettify' !! $attrs<highlight-skin>;
     $!linenumbers = ?$attrs<linenumbers> // False;
 
     self!setup-report-doc($attrs);
@@ -146,22 +148,11 @@ class Report:ver<0.1.0> {
     );
 
     if $!highlight-code {
-#`{{
-      my Str $options = '';
-      $options ~= "?skin=$!highlight-skin";
-      $options ~= "&amp;lang=$!highlight-skin";
-      my XML::Element $script = append-element(
-        $head, 'script',
-        { :src("https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js$options"),
-          :type<text/javascript>
-        }
-      );
 
-      append-element( $script, :text(' '));
-}}
+      my $pretty-css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
       append-element(
         $head, 'link', {
-          :href('file://' ~ %?RESOURCES<google-code-prettify/prettify.css>),
+          :href("file://$pretty-css"),
           :type<text/css>, :rel<stylesheet>
         }
       );
@@ -248,7 +239,7 @@ class Report:ver<0.1.0> {
               $!test-program ~= "$code-text\n";
 
               # add test text after the <pre> and before the <hook>
-              $hook.before($!test-obj.make-table($tentry));
+              $!body.before( $hook, $!test-obj.make-table($tentry));
             }
 
             elsif $x.name eq 'todo' {
@@ -260,7 +251,7 @@ class Report:ver<0.1.0> {
               append-element( $pre, :text(self!process-code($code-text)));
 
               # add todo text after the <pre> and before the <hook>
-              $hook.before($!todo-obj.make-table($tentry));
+              $!body.before( $hook, $!todo-obj.make-table($tentry));
 
               # and to the test program
               $!test-program ~= "$code-text\n";
@@ -275,7 +266,7 @@ class Report:ver<0.1.0> {
               append-element( $pre, :text(self!process-code($code-text)));
 
               # add bug text after the <pre> and before the <hook>
-              $hook.before($!bug-obj.make-table($tentry));
+              $!body.before( $hook, $!bug-obj.make-table($tentry));
 
               # and to the test program
               $!test-program ~= "$code-text\n";
@@ -290,7 +281,7 @@ class Report:ver<0.1.0> {
               append-element( $pre, :text(self!process-code($code-text)));
 
               # add skip text after the <pre> and before the <hook>
-              $hook.before($!skip-obj.make-table($tentry));
+              $!body.before( $hook, $!skip-obj.make-table($tentry));
 
               # and to the test program
               $!test-program ~= "$code-text\n";
@@ -312,7 +303,11 @@ class Report:ver<0.1.0> {
       }
     }
 
-    $hook.remove if $hook.defined;
+    # Cannot use $!body.removeChild($hook) because in the mean time there
+    # are many hooks left behind, so search by name
+    for $!body.nodes.reverse -> $node {
+      $node.remove if $node.name eq 'hook';
+    }
   }
 
   #-----------------------------------------------------------------------------
