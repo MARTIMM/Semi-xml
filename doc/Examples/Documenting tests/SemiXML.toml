@@ -1,12 +1,13 @@
-[option.doctype]
-  show          = 0
+[ option.doctype ]
+  show          = true
 
 [output]
   fileext       = 'html'
 
 [output.program]
   pdf           = 'wkhtmltopdf - %of.pdf'
-  fmt           = 'xmllint --format - > %of.%oe'
+#  fmt           = 'xmllint --format --noent - > %of.%oe'
+#  tidy          = 'tidy --output-html 1 - >%of.%oe'
 
 [module]
   report        = 'SxmlLib::Testing::Report'
