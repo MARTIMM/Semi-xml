@@ -6,7 +6,7 @@ use SxmlLib::Testing::Testing;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 #-------------------------------------------------------------------------------
-class Report:ver<0.1.0> {
+class Report:ver<0.1.1> {
 
   has $!sxml;
 
