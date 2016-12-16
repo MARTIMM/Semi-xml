@@ -6,7 +6,7 @@ use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
 #-------------------------------------------------------------------------------
-package SemiXML:ver<0.26.3.2>:auth<https://github.com/MARTIMM> {
+package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
 
   subset ParseResult is export where $_ ~~ any(Match|Nil);
 
@@ -26,24 +26,17 @@ package SemiXML:ver<0.26.3.2>:auth<https://github.com/MARTIMM> {
       $!grammar .= new;
       $!actions .= new(:sxml-obj(self));
 
-      # Get the default config file from resources and elsewhere
-      my Str $rsrc-bn = %?RESOURCES<SemiXML.toml>.IO.basename;
-      my Str $rsrc-p = %?RESOURCES<SemiXML.toml>.IO.abspath;
-      my Str $rsrc-d = $rsrc-p;
-      $rsrc-d ~~ s/ '/'? $rsrc-bn //;
-      my Array $locations = [$rsrc-d];
-
-      # $rsrc-bn can be SemiXML.toml if module is found in the the lib
-      # perl search path. Otherwise it will be an encoded name from the perl6
-      # install tree when module is installed.
-      #
+      # Load the config file from resources. This is an sha encoded file when
+      # installed, so this one will be the only one.
       my Config::DataLang::Refine $c0 = self!load-config(
-        :config-name($rsrc-bn), :$locations, :!merge
+        :config-name(%?RESOURCES<SemiXML.toml>.IO.abspath)
       );
 #say "L: ", $locations.perl;
 #say "C: $merge";
+#say "--[dd]", '-' x 74;
 #dd $c0.config;
 
+      my Array $locations;
       my Hash $other-config = ? $c0 ?? $c0.config.clone !! {};
       # if filename is given, use its path also in its locations
       if ?$filename and $filename.IO ~~ :r {
@@ -53,10 +46,24 @@ package SemiXML:ver<0.26.3.2>:auth<https://github.com/MARTIMM> {
         $fn-d ~~ s/ '/'? $fn-bn //;
         $locations = [$fn-d];
 
+        # load the default config file name from several locations
         $c0 = self!load-config(
           :config-name<SemiXML.toml>, :$other-config, :$locations, :merge
         );
+#say "--[dd]", '-' x 74;
+#dd $c0.config;
+
+        # then load the sxml config file name from several locations
+        $other-config = ? $c0 ?? $c0.config.clone !! {};
+        $fn-p ~~ s/ $fn-d '/'? //;
+        my $fn-e = $filename.IO.extension;
+        $fn-p ~~ s/ $fn-e $/toml/;
+        $c0 = self!load-config(
+          :config-name($fn-p), :$other-config, :$locations, :merge
+        );
       }
+#say "--[dd]", '-' x 74;
+#dd $c0.config;
 
       $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
     }
@@ -74,6 +81,7 @@ package SemiXML:ver<0.26.3.2>:auth<https://github.com/MARTIMM> {
         $name-d ~~ s/ \/? $name-bn//;
         $name-bn ~~ s/ '.sxml' /.toml/;
 
+#`{{
         # Only assign if config is defined
         my Hash $other-config = $!actions.config.clone if ? $!actions.config;
         my Config::DataLang::Refine $c0 = self!load-config(
@@ -84,7 +92,7 @@ package SemiXML:ver<0.26.3.2>:auth<https://github.com/MARTIMM> {
 
         # Set the config in the actions
         $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
-
+}}
         if $!actions.config<output><filename>:!exists {
           my Str $fn = $filename.IO.basename;
           my $ext = $filename.IO.extension;
