@@ -6,7 +6,7 @@ use SxmlLib::Testing::Testing;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 #-------------------------------------------------------------------------------
-class Report:ver<0.1.1> {
+class Report:ver<0.2.0> {
 
   has $!sxml;
 
@@ -35,7 +35,7 @@ class Report:ver<0.1.1> {
   has Str $!highlight-language = '';
   has Str $!highlight-skin = '';
   has Bool $!linenumbers = False;
-  my Int $line-number = 1;
+  has Int $!line-number;
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $sxml, Hash $attrs ) {
@@ -47,6 +47,7 @@ class Report:ver<0.1.1> {
       use Test;
 
       EOINIT
+    $!line-number = 4;
 
     $!code-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Code');
     $!test-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Test');
@@ -195,8 +196,7 @@ class Report:ver<0.1.1> {
         if $!highlight-code {
           $class = "prettyprint $!highlight-language";
           if $!linenumbers {
-            $class ~= ' linenums' ~
-                      ($line-number == 1 ?? '' !! ":$line-number");
+            $class ~= " linenums:$!line-number";
           }
         }
 
@@ -230,13 +230,13 @@ class Report:ver<0.1.1> {
             if $x.name eq 'test' {
 
               # get test entry number 
-              my Str $code-text = ~$!test-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!test-obj.get-code-text($tentry));
 
               # add test to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
+              append-element( $pre, :text($code-text));
 
               # and to the test program
-              $!test-program ~= "$code-text\n";
+              $!test-program ~= $code-text;
 
               # add test text after the <pre> and before the <hook>
               $!body.before( $hook, $!test-obj.make-table($tentry));
@@ -245,54 +245,55 @@ class Report:ver<0.1.1> {
             elsif $x.name eq 'todo' {
 
               # get test entry number 
-              my Str $code-text = ~$!todo-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!todo-obj.get-code-text($tentry));
 
               # add todo to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
+              append-element( $pre, :text($code-text));
+
+              # and to the test program
+              $!test-program ~= $code-text;
 
               # add todo text after the <pre> and before the <hook>
               $!body.before( $hook, $!todo-obj.make-table($tentry));
-
-              # and to the test program
-              $!test-program ~= "$code-text\n";
             }
 
             elsif $x.name eq 'bug' {
 
               # get test entry number 
-              my Str $code-text = ~$!bug-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!bug-obj.get-code-text($tentry));
 
               # add bug issue to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
+              append-element( $pre, :text($code-text));
+
+              # and to the test program
+              $!test-program ~= $code-text;
 
               # add bug text after the <pre> and before the <hook>
               $!body.before( $hook, $!bug-obj.make-table($tentry));
-
-              # and to the test program
-              $!test-program ~= "$code-text\n";
             }
 
             elsif $x.name eq 'skip' {
 
               # get test entry number 
-              my Str $code-text = ~$!skip-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!skip-obj.get-code-text($tentry));
 
               # add skip to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
+              append-element( $pre, :text($code-text));
+
+              # and to the test program
+              $!test-program ~= $code-text;
 
               # add skip text after the <pre> and before the <hook>
               $!body.before( $hook, $!skip-obj.make-table($tentry));
-
-              # and to the test program
-              $!test-program ~= "$code-text\n";
             }
           }
 
           # $x not defined so it is plain code text
           else {
+
             my Str $code-text = self!process-code(~$code-node);
             append-element( $pre, :text($code-text)) if ?$code-text;
-            $!test-program ~= "$code-node\n";
+            $!test-program ~= $code-text if ?$code-text;
           }
         }
       }
@@ -315,10 +316,11 @@ class Report:ver<0.1.1> {
 
     state Int $indent-level = 0;
     state Int $prev-indent-level = 0;
+    constant INDENT-STEP = 4;
     my Str $code = '';
 
     # insert newline after any closing curly bracket
-    $code-text ~~ s:g/ '}' /}\n/;
+    $code-text ~~ s:g/ '}' <!before <[\n;]>>/}\n/;
 
     # split code script on every line
     for $code-text.split(/\n/) {
@@ -338,17 +340,17 @@ class Report:ver<0.1.1> {
 
       # if indent-level is decreased then use new indent
       if $prev-indent-level > $indent-level {
-        $code ~= ' ' x ($indent-level * 2) ~ $line ~ "\n";
+        $code ~= ' ' x ($indent-level * INDENT-STEP) ~ $line ~ "\n";
         $prev-indent-level = $indent-level;
       }
 
       # if indent-level is increased then use previous indent first
       else {
-        $code ~= ' ' x ($prev-indent-level * 2) ~ $line ~ "\n";
+        $code ~= ' ' x ($prev-indent-level * INDENT-STEP) ~ $line ~ "\n";
         $prev-indent-level = $indent-level;
       }
 
-      $line-number++;
+      $!line-number++;
     }
 
     $code;
@@ -367,7 +369,7 @@ class Report:ver<0.1.1> {
     $!test-metrics = { T => [0,0], D => [0,0], B => [0,0], S => [0,0]};
 
     # Finish up the test text and write the text to a file 
-    $!test-program ~= "\n\ndone-testing;\n";
+    $!test-program ~= "\ndone-testing;\n";
 
     # get a filename for the tests and write
     my $test-file = $attrs<test-file>;

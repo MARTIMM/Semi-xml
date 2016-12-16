@@ -6,7 +6,7 @@ use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
 #-------------------------------------------------------------------------------
-package SemiXML:ver<0.26.3.1>:auth<https://github.com/MARTIMM> {
+package SemiXML:ver<0.26.3.2>:auth<https://github.com/MARTIMM> {
 
   subset ParseResult is export where $_ ~~ any(Match|Nil);
 

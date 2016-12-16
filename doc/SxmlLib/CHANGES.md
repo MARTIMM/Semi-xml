@@ -10,6 +10,9 @@
   * dir-list() to recursively create list of files and directories.
 
 ## Testing
+* 0.1.2
+  * Code numbering in report is following lines in the real test program so it is possible to look in your report at the proper line with the information from the test output.
+  * Indenting is per 4 characters instead of two.
 * 0.1.1
   * Downloaded wrong files for the google prettify
   * Bugfix removing hook elements from the resulting document
