@@ -9,6 +9,7 @@ mkdir('t/M');
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
   use v6.c;
   use SemiXML;
+  use XML;
 
   class M::m1 {
 
