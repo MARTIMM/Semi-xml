@@ -1,8 +1,10 @@
 use v6.c;
-use SemiXML;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
+
+use XML;
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 class Docbook5::FixedLayout {

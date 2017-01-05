@@ -1,15 +1,17 @@
 use v6.c;
 
-use SemiXML;
-use XML;
-
+#-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
+use XML;
+use SemiXML;
+
+#-------------------------------------------------------------------------------
 class File {
+
   has Hash $.symbols = {};
 
   #-----------------------------------------------------------------------------
-  #
   method include ( XML::Element $parent,
                    Hash $attrs,
                    XML::Element :$content-body

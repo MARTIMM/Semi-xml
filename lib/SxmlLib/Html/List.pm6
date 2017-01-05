@@ -1,13 +1,15 @@
 use v6.c;
 
-use SemiXML;
-use XML;
-
+#-------------------------------------------------------------------------------
 # Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
 # to fail not finding the methods when doing so (perl6 2015-04).
 #
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
+use XML;
+use SemiXML;
+
+#-------------------------------------------------------------------------------
 class Html::List {
   has Hash $.symbols = {};
 

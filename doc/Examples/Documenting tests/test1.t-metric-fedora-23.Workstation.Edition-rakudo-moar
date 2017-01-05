@@ -4,11 +4,11 @@ Module:-
 Class:Int
 Distribution:-
 Label:Int-test
-OS-Kernel:linux:4.8.11.100.fc.23.x.86._.64
+OS-Kernel:linux:4.8.13.100.fc.23.x.86._.64
 OS-Distro:fedora:23.Workstation.Edition:23:False
 Perl:Perl 6:6.c
-Compiler:rakudo:2016.11.216.g.190.a.4.d.3
-VM:moar:2016.11.41.gd.2139.b.5
+Compiler:rakudo:2016.12.194.g.4545759
+VM:moar:2016.12.55.gfe.110.d.6
 Total: 32
 T:11.00 3.00 14.00
 B:1.00 1.00 2.00

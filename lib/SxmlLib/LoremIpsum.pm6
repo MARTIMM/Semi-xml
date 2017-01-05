@@ -1,9 +1,12 @@
 use v6.c;
 
-use SemiXML;
-
+#-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
+use XML;
+use SemiXML;
+
+#-------------------------------------------------------------------------------
 class LoremIpsum {
 
   # could not use 'has' because of time of existence and calculatig length

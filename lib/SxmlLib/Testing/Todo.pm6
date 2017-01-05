@@ -1,9 +1,11 @@
 use v6.c;
-use SemiXML;
-use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
+
+use XML;
+use SemiXML;
+use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
 class Todo {
