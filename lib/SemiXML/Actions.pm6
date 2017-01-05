@@ -1,6 +1,8 @@
 use v6.c;
 use XML;
 
+use Data::Dump::Tree;
+
 package SemiXML:auth<https://github.com/MARTIMM> {
 
   #-----------------------------------------------------------------------------
@@ -185,7 +187,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has Hash $.objects = { SxmlCore => SemiXML::SxmlCore.new() };
     has Hash $.config is rw = {};
     has XML::Document $!xml-document;
-
+    
     # Keep current state of affairs. Hopefully some info when parsing fails
     has Int $.from;
     has Int $.to;
@@ -307,6 +309,14 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     method document ( $match ) {
 #say "\nDoc: ", $match.perl;
 
+dump $match;
+      my Int $from = $match.from;
+      my Int $to = $match.to;
+say "O: ", $match.orig;
+      my Int $open = $match.orig.substr( $from, $to - $from).index('[');
+say '[: ', $open;
+      
+
       self!current-state( $match, 'document');
 
       my XML::Element $x;
@@ -391,6 +401,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
         my $match = $tag-bodies[$mi];
+say "\n~$match\n$match.from(), $match.to()";
+
         for @($match.made) {
 
           # Any piece of found text in bodies. Filter out any comments.
@@ -443,6 +455,9 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       my Str $symbol = $match<tag><sym>.Str;
       $ast.push: $symbol;
 #say "Tag symbol: $symbol";
+#dump $match;
+
+      # find level of indent
 
       my Hash $attrs = {};
       for $match<attributes>.caps -> $as {

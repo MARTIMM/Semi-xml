@@ -14,7 +14,7 @@ grammar Grammar {
   # only be one toplevel document.
   #
   rule pop-tag-from-list { <?> }
-  token document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
+  token document { <tag-spec> <.ws>? <tag-body>* <.ws>? <.pop-tag-from-list> }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
@@ -58,14 +58,12 @@ grammar Grammar {
   token attr-pw-value { [ <.escape-char> || <-[\^]> ]+ }
   token attr-s-value  { [ <.escape-char> || <-[\s]> ]+ }
 
-  token tag-body {
-    <.ws>? [
+  token tag-body { [
       '[!=' ~ '!]'    <body1-contents> ||
       '[!' ~ '!]'     <body2-contents> ||
       '[=' ~ ']'      <body3-contents> ||
       '[' ~ ']'       <body4-contents>
     ]
-    <.ws>?
   }
 
   # The content can be anything mixed with document tags except following the
