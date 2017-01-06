@@ -45,21 +45,20 @@ While the example above does not show a big advantage, however there are some su
 * This semi xml has a bit better reading capabilities because no textual endtag is needed. It is just a closing bracket.
 * Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: ', " and ^.
 * An XML element is introduced by **$|** to support simple parsing. This translates just to the XML element. E.g. **$|html []** becomes **< html/>**.
+* Empty element content does not have to be written in the way shown above. It can be written just like **$|html**.
 * Other symbols following the **$** changes its meaning.
   * **$!** is used to call a method from an external module to insert xml controlled by data from elsewhere.
   * **$\*\***, **$\*|** and **$|\*** provides for spacing around the tag and its body.
 
-## Ideas and Todo
+## Documentation
 
-Please check out the file doc/TODO.md
+### SemiXML
+* [Release notes](https://github.com/MARTIMM/Semi-xml/blob/master/docSemiXML/CHANGES.md)
+* [Bugs and Todo](https://github.com/MARTIMM/Semi-xml/blob/master/doc/SemiXML/TODO.md)
 
-## Bugs
-
-Check file doc/BUGS.md
-
-## Release notes
-
-For changes look for the file doc/CHANGES.md in this repository.
+### SxmlLib
+* [Release notes](https://github.com/MARTIMM/Semi-xml/blob/master/doc/SxmlLib/CHANGES.md)
+* [Bugs and Todo](https://github.com/MARTIMM/Semi-xml/blob/master/doc/SxmlLib/TODO.md)
 
 ## Versions of perl using moar vm
 
