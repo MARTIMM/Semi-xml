@@ -83,13 +83,13 @@ grammar Grammar {
     [ <.escape-char> ||         # an escaped character e.g. '\$'
       <-[\$\]]> ||              # any character not being '$' or ']'
       '$' <!before <[!|*]>>     # a $ not followed by '!', '|' or '*'
-#      <.comment>                # any comment
     ]+
   }
 
   token escape-char        { '\\' . }
 
-  # No comments allowed in [! ... !]
+  # No comments allowed in [! ... !]. This works because a nested document is
+  # not allowed and thus no extra comments are checked and handled as such..
   token body2-text      { [ .*? <?before <.ws>? '!]'> ] }
 
   # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
