@@ -7,14 +7,18 @@ grammar Grammar {
 
   rule init-doc { <?> }
   rule TOP {
-    <.init-doc> <comment>* <document> <comment>*
+    <.init-doc> <document>
   }
 
   # A document is only a tag with its content. Defined like this there can
   # only be one toplevel document.
   #
   rule pop-tag-from-list { <?> }
-  token document { <tag-spec> <.ws>? <tag-body>* <.ws>? <.pop-tag-from-list> }
+  token document {
+    <.comment>*
+    <tag-spec> <.ws>? <tag-body>* <.ws>?
+    <.comment>* <.ws>? <.pop-tag-from-list>
+  }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
