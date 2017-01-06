@@ -182,9 +182,17 @@ package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
         $before ~~ s:g/ <-[\n]>* \n //;
         $after ~~ s:g/ \n <-[\n]>* //;
 
-        die "Parse failure just after '$!actions.state()' at line $nth-line\n" ~
-            $before ~ $current ~
-            color('red') ~ "\x[23CF]$after" ~ color('reset');
+        if $!actions.unleveled-brackets.elems {
+          die [~] "Parse failure possible missing bracket at\n",
+          map {"  line $_<line-number>, tag $_<tag-name>, body number $_<body-count>\n"},
+              @($!actions.unleveled-brackets);
+        }
+
+        else {
+          die "Parse failure just after '$!actions.state()' at line $nth-line\n" ~
+              $before ~ $current ~
+              color('red') ~ "\x[23CF]$after" ~ color('reset');
+        }
       }
 
       $m;

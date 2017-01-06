@@ -2,6 +2,9 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.26.5
+  * More locations where comments are allowed.
+  * Better location information when parsing fails.
 * 0.26.4
   * Better search for config files. done in one place instead of two.
 * 0.26.3

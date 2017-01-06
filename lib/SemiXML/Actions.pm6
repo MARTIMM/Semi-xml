@@ -1,7 +1,7 @@
 use v6.c;
 use XML;
 
-use Data::Dump::Tree;
+#use Data::Dump::Tree;
 
 package SemiXML:auth<https://github.com/MARTIMM> {
 
@@ -187,13 +187,15 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has Hash $.objects = { SxmlCore => SemiXML::SxmlCore.new() };
     has Hash $.config is rw = {};
     has XML::Document $!xml-document;
-    
+
     # Keep current state of affairs. Hopefully some info when parsing fails
     has Int $.from;
     has Int $.to;
     has Str $.prematch;
     has Str $.postmatch;
     has Str $.state;
+
+    has Array $.unleveled-brackets = [];
 
     # Save a list of tags from root to deepest level. This is possible because
     # body is processed later than tag-spec. The names are the element name,
@@ -307,15 +309,77 @@ package SemiXML:auth<https://github.com/MARTIMM> {
 
     #---------------------------------------------------------------------------
     method document ( $match ) {
-#say "\nDoc: ", $match.perl;
 
-dump $match;
+#dump $match;
+      # Try to find indent level to match up open '[' with close ']'.
+      #
+      # 1) $|x                  no body at all
+      # 2) $|x [ ]              no newline in body
+      # 3) $|x [                with newline, the ']' should line up with $|x.
+      #    ]
+      # 4) $|x [ ] [ ]          multiple bodies no newline
+      # 5) $|x [                idem with newline in first body. 1st ']'
+      #    ] [                  lines up with $|x. When in 2nd, the 2nd ']'
+      #    ]                    should also line up with $|x
+      # 6) $|x [ $|y [ ] ]      nested bodies no newline
+      # 7) $|x [                with newline, outer ']' should line up
+      #      $|y [              with $|x and inner ']' with $|y.
+      #      ]
+      #    ]
+      #
+      my Str $orig = $match.orig;
       my Int $from = $match.from;
       my Int $to = $match.to;
-say "O: ", $match.orig;
-      my Int $open = $match.orig.substr( $from, $to - $from).index('[');
-say '[: ', $open;
-      
+
+#say "ORDoc:  $from, $to: $orig";
+
+      my Array $tag-bodies = $match<tag-body>;
+      loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
+
+        my Int $b-from = $match.from;
+        my Int $b-to = $match.to;
+#say "ORBody $b-from, $b-to";
+
+        # find start of body
+        my Int $bstart = $match.orig.substr( $b-from, $b-to - $b-from).index('[')
+                       + $b-from;
+
+        # find end of body, search from the end
+        my Int $bend = $match.orig.substr( $bstart, $b-to - $bstart).rindex(']')
+                     + $bstart;
+
+        # check for newlines in this body
+        my Bool $has-nl = (
+          $match.orig.substr( $bstart, $bend - $bstart).index("\n")
+        ).defined;
+
+#say "BE: $bstart, $bend, $has-nl";
+        # if there is a newline, check alignment
+        if $has-nl {
+
+          my Int $tag-loc = $match<tag-spec>.from;
+          my Int $indent-start = $tag-loc
+                        - ($orig.substr( 0, $tag-loc).rindex("\n") // -1) - 1;
+
+          my Int $indent-end = $bend
+                        - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
+#say "NLDoc  $tag-loc, $indent-start, $indent-end, $bstart, $bend";
+
+          # make a note when indents are not the same, it might point to a
+          # missing bracket.
+          if $indent-start != $indent-end {
+
+            $match.prematch.Str ~~ m:g/ (\n) /;
+            my $line-number = $/.elems + 1;
+            $!unleveled-brackets.push: {
+              tag-name => $match<tag-spec><tag>.Str,
+              :$line-number,
+              body-count => $mi + 1
+            };
+#dump $!unleveled-brackets;
+          }
+        }
+      }
 
       self!current-state( $match, 'document');
 
@@ -401,8 +465,6 @@ say '[: ', $open;
       loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
         my $match = $tag-bodies[$mi];
-say "\n~$match\n$match.from(), $match.to()";
-
         for @($match.made) {
 
           # Any piece of found text in bodies. Filter out any comments.

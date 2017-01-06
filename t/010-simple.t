@@ -3,39 +3,94 @@ use v6.c;
 use Test;
 use SemiXML;
 
-my $xml = parse('$|st');
-is $xml, '<st/>', "1 tag: $xml";
+#-------------------------------------------------------------------------------
+subtest 'test onliners', {
 
-$xml = parse(Q:q@$|st a1=w a2='g g' a3="h h" [ ]@);
-like $xml, /'a1="w"'/, 'a1 attribute';
-like $xml, /'a2="g g"'/, 'a2 attribute';
-like $xml, /'a3="h h"'/, 'a2 attribute';
+  my $xml = parse('$|st');
+  is $xml, '<st/>', "1 tag: $xml";
 
-#dies-ok { $xml = parse('$|st [ $f w [] hj ]'); }, 'Parse failure';
+  $xml = parse(Q:q@$|st a1=w a2='g g' a3="h h" [ ]@);
+  like $xml, /'a1="w"'/, 'a1 attribute';
+  like $xml, /'a2="g g"'/, 'a2 attribute';
+  like $xml, /'a3="h h"'/, 'a2 attribute';
 
-try {
-  $xml = parse('$|st [ $f w [] hj ]');
+  #dies-ok { $xml = parse('$|st [ $f w [] hj ]'); }, 'Parse failure';
 
-  CATCH {
-    default {
-      my $m = .message;
-      $m ~~ s/\n/ /;
-      like $m, /^ "Parse failure just after 'at the top'"/, $m;
+  try {
+    $xml = parse('$|st [ $f w [] hj ]');
+
+    CATCH {
+      default {
+        my $m = .message;
+        $m ~~ s/\n/ /;
+        like $m, /^ "Parse failure just after 'at the top'"/, $m;
+      }
     }
   }
+
+  $xml = parse('$|t1 [ $|t2 [] $|t3[]]');
+  is $xml, '<t1><t2/><t3/></t1>', "nested tags: $xml";
+
+  $xml = parse('$|t1 [ $**t2 [] $|t3[]]');
+  is $xml, '<t1> <t2/> <t3/></t1>', "nested tags with \$**: $xml";
+
+  $xml = parse('$|t1 [ $|*t2 [] $|t3[]]');
+  is $xml, '<t1><t2/> <t3/></t1>', "nested tags with \$|*: $xml";
+
+  $xml = parse('$|t1 [ $*|t2 [] $|t3[]]');
+  is $xml, '<t1> <t2/><t3/></t1>', "nested tags with \$*|: $xml";
 }
 
-$xml = parse('$|t1 [ $|t2 [] $|t3[]]');
-is $xml, '<t1><t2/><t3/></t1>', "nested tags: $xml";
+#-------------------------------------------------------------------------------
+subtest 'test multi liners', {
 
-$xml = parse('$|t1 [ $**t2 [] $|t3[]]');
-is $xml, '<t1> <t2/> <t3/></t1>', "nested tags with \$**: $xml";
+  my Str $xml = parse(Q:q:to/EOXML/);
+    $|st [
+    ]
+    EOXML
 
-$xml = parse('$|t1 [ $|*t2 [] $|t3[]]');
-is $xml, '<t1><t2/> <t3/></t1>', "nested tags with \$|*: $xml";
+  is $xml, '<st/>', "1 tag: $xml";
 
-$xml = parse('$|t1 [ $*|t2 [] $|t3[]]');
-is $xml, '<t1> <t2/><t3/></t1>', "nested tags with \$*|: $xml";
+
+  $xml = parse(Q:q:to/EOXML/);
+    $|aa [
+      $|bb [
+      ]
+    ]
+    EOXML
+
+  is $xml, '<aa><bb/></aa>', "2 tags: $xml";
+
+  try {
+    $xml = parse(Q:q:to/EOXML/);
+      $|aa [
+        $|bb [ ][
+          $|cc [
+        ]
+      ]
+      EOXML
+
+    CATCH {
+
+      default {
+        like .message, /:s line 3\, tag \$\|cc\, body number 1/,
+             .message;
+      }
+    }
+  }
+
+
+  $xml = parse(Q:q:to/EOXML/);
+    $|aa [
+      $|bb [ ][
+        $|cc [
+      ]
+       ]
+    ]
+    EOXML
+
+  is $xml, '<aa><bb><cc/></bb></aa>', "3 tags: $xml";
+}
 
 #-------------------------------------------------------------------------------
 sub parse ( Str $content --> Str ) {
