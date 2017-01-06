@@ -7,7 +7,7 @@ use XML;
 use SemiXML;
 
 #-------------------------------------------------------------------------------
-class Docbook5::Basic {
+class Docbook5::Basic:ver<0.3.0> {
 
   #-----------------------------------------------------------------------------
   method book (
@@ -74,27 +74,32 @@ class Docbook5::Basic {
 
     my XML::Element $info = append-element( $parent, 'info');
 
-    if $firstname.defined or $surname.defined or $email.defined {
+    if ?$firstname or ?$surname or ?$email {
       my XML::Element $author = append-element( $info, 'author');
 
-      if $firstname.defined or $surname.defined {
+      if ?$firstname or ?$surname {
         my XML::Element $personname = append-element( $author, 'personname');
 
-        if $firstname.defined {
+        if ?$firstname {
           my XML::Element $f = append-element( $personname, 'firstname');
           append-element( $f, :text($firstname));
         }
 
-        if $surname.defined {
+        if ?$surname {
           my XML::Element $s = append-element( $personname, 'surname');
           append-element( $s, :text($surname));
         }
+      }
+
+      if ?$email {
+        my XML::Element $e = append-element( $author, 'email');
+        append-element( $e, :text($email));
       }
     }
 
     my $city = $attrs<city>;
     my $country = $attrs<country>;
-    my $ = $attrs<>;
+#    my $ = $attrs<>;
     if $city.defined or $country.defined {
 
       my XML::Element $address = append-element( $info, 'address');

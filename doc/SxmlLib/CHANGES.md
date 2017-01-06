@@ -2,8 +2,12 @@
 
 ## Docbook5
 * SxmlLib::Docbook5::Basic - Basic docbook methods
-  * book() and article() methods to start easy with a lot of attributes.
-  * info() to specify the elaborate info tag.
+  * 0.3.0
+    * docbook 5 email added to info
+  * 0.2.0
+    * book() and article() methods to start easy with a lot of attributes.
+  * 0.1.0
+    * info() to specify the elaborate info tag.
 
 ## Html
 * SxmlLib::Html::List - Html lists like ul/li
