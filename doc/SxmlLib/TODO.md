@@ -1,4 +1,4 @@
-# Todo list for the SxmlLib module tree
+# Bugs and Todo list for the SxmlLib module tree
 
 * Now modules can be used from sxml, the following libs might come in handy
   * SxmlLib::File - File and link handling.

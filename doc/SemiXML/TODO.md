@@ -1,8 +1,10 @@
-# Todo list for the SemiXML module and sxml2xml program
+# Bugs and Todo list for the SemiXML modules and sxml2xml program
 
 * Parser and actions.
   * Error messages when parser fails can still be improved.
   * Check on indenting on '[' and ']'?
+
+* All indents of generated documents should be unindented to proper level and reduced to the minimum spacing as is done in perl6 here docs.
 
 * Grammar extensions;
   * Remove '=' directly after '[' to keep text as it is typed. This is often forgotten by me, so others may have the same problem. Also it makes the grammar cleaner. Instead the following can be done to have the same effects;
@@ -12,10 +14,18 @@
 * External modules located in SxmlLib tree
   * Library paths to find modules are provided
   * A module should be accessable from within another perl6 sxml module. Problem of registration.
+  * Use a plugin system for the modules.
+  * Store SxmlLib modules in the resources directory.
 
-* Items needed in program sxml2xml
+* Items needed in program sxml2xml or SemiXML.pm6
   * Dependencies on other files
   * Store internal representation back into sxml.
+  * Load any xml based source to convert back to sxml. Can be used as a start for templating things using pages from a nice website.
+
+* Tests
+  * tags without body but with attributes
+  * comments in sxml
+  * lineup of brackets of body to find errors
 
 * Configuration
   * Search for config files (assume parsed file is fpath/file.sxml)
