@@ -14,10 +14,10 @@ grammar Grammar {
   # only be one toplevel document.
   #
   rule pop-tag-from-list { <?> }
-  token document {
+  rule document {
     <.comment>*
-    <tag-spec> <.ws>? <tag-body>* <.ws>?
-    <.comment>* <.ws>? <.pop-tag-from-list>
+    <tag-spec> <tag-body>*
+    <.comment>* <.pop-tag-from-list>
   }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
@@ -64,23 +64,23 @@ grammar Grammar {
 
   token tag-body { [
       '[!=' ~ '!]'    <body1-contents> ||
-      '[!' ~ '!]'     <body2-contents> ||
-      '[=' ~ ']'      <body3-contents> ||
-      '[' ~ ']'       <body4-contents>
+      '[!' ~  '!]'    <body2-contents> ||
+      '[=' ~   ']'    <body3-contents> ||
+      '[' ~    ']'    <body4-contents>
     ]
   }
 
   # The content can be anything mixed with document tags except following the
-  # no-elements character. To use the brackets and
-  # other characters in the text, the characters must be escaped.
+  # no-elements character. To use the brackets and other characters in the
+  # text, the characters must be escaped.
   #
   rule body1-contents  { <body2-text> }
   rule body2-contents  { <body2-text> }
   rule body3-contents  { [ <body1-text> || <document> ]* }
   rule body4-contents  { [ <body1-text> || <document> ]* }
 
-  token body1-text      {
-    [ <.escape-char> ||         # an escaped character e.g. '\$'
+  rule body1-text { [ 
+      <.escape-char> ||         # an escaped character e.g. '\$'
       <-[\$\]]> ||              # any character not being '$' or ']'
       '$' <!before <[!|*]>>     # a $ not followed by '!', '|' or '*'
     ]+
@@ -97,6 +97,6 @@ grammar Grammar {
   #
   token identifier { <.ident> [ '-' <.ident> ]* }
 
-  token comment { <.ws>? '#' \N* \n }
+  rule comment { '#' \N* \n }
 }
 
