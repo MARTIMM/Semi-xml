@@ -22,6 +22,8 @@ $|html [
         $|td[data \# td ]                        # outside td
         $|td [! # inside protected body !]
       ]
+    ][
+    # comment on its own in 2nd body
     ]
   ]
 ]
@@ -42,7 +44,7 @@ unlike $xml-text, /:s '#' 'trrr' /, 'comment also removed';
 like $xml-text, /:s '#' 'inside' 'protected' 'body' /, 'comment not removed';
 like $xml-text, /:s 'header' '#' 'th' /, 'escaped # not removed';
 
-#say $xml-text;
+say $xml-text;
 
 unlink $filename;
 

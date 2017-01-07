@@ -7,7 +7,7 @@ grammar Grammar {
 
   rule init-doc { <?> }
   rule TOP {
-    <.init-doc> <document>
+    <.init-doc> <.comment>* <document> <.comment>* 
   }
 
   # A document is only a tag with its content. Defined like this there can
@@ -15,9 +15,10 @@ grammar Grammar {
   #
   rule pop-tag-from-list { <?> }
   rule document {
-    <.comment>*
+#    <.comment>*
     <tag-spec> <tag-body>*
-    <.comment>* <.pop-tag-from-list>
+#    <.comment>*
+    <.pop-tag-from-list>
   }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
@@ -76,12 +77,12 @@ grammar Grammar {
   #
   rule body1-contents  { <body2-text> }
   rule body2-contents  { <body2-text> }
-  rule body3-contents  { [ <body1-text> || <document> ]* }
-  rule body4-contents  { [ <body1-text> || <document> ]* }
+  rule body3-contents  { [ <.comment> || <body1-text> || <document> ]* }
+  rule body4-contents  { [ <.comment> || <body1-text> || <document> ]* }
 
-  rule body1-text { [ 
-      <.escape-char> ||         # an escaped character e.g. '\$'
-      <-[\$\]]> ||              # any character not being '$' or ']'
+  token body1-text {
+    [ <.escape-char> ||         # an escaped character e.g. '\$'
+      <-[\$\]\#]> ||            # any character not being '$', '#' or ']'
       '$' <!before <[!|*]>>     # a $ not followed by '!', '|' or '*'
     ]+
   }
@@ -97,6 +98,6 @@ grammar Grammar {
   #
   token identifier { <.ident> [ '-' <.ident> ]* }
 
-  rule comment { '#' \N* \n }
+  token comment { \h* '#' \N* \n }
 }
 

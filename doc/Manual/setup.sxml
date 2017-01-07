@@ -559,6 +559,7 @@ $!SxmlCore.comment [
     $|title [Examples]
     $|para [
 
+    # comment on its own in 1st body
     ]
   ]
 
