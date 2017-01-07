@@ -12,8 +12,8 @@ install:
 #  - panda installdeps .
   - panda update
   - panda --notests install XML
-  - panda --notests Config::DataLang::Refine
-  - panda --notests Terminal::ANSIColor
+  - panda --notests install Config::DataLang::Refine
+  - panda --notests install Terminal::ANSIColor
 
 cache:
   directories:
