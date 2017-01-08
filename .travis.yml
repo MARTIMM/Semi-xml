@@ -11,9 +11,9 @@ install:
   - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
 #  - panda installdeps .
   - panda update
-  - panda --notests install XML
+  - panda install XML
   - panda --notests install Config::DataLang::Refine
-  - panda --notests install Terminal::ANSIColor
+  - panda install Terminal::ANSIColor
 
 cache:
   directories:
