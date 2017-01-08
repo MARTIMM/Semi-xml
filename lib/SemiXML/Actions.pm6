@@ -1,7 +1,7 @@
 use v6.c;
 
 #-------------------------------------------------------------------------------
-#use Data::Dump::Tree;
+use Data::Dump::Tree;
 use XML;
 
 #-------------------------------------------------------------------------------
@@ -198,6 +198,7 @@ package SemiXML:auth<https://github.com/MARTIMM> {
     has Str $.state;
 
     has Array $.unleveled-brackets = [];
+    has Array $.mismatched-brackets = [];
 
     # Save a list of tags from root to deepest level. This is possible because
     # body is processed later than tag-spec. The names are the element name,
@@ -330,10 +331,8 @@ package SemiXML:auth<https://github.com/MARTIMM> {
       #    ]
       #
       my Str $orig = $match.orig;
-      my Int $from = $match.from;
-      my Int $to = $match.to;
-
-#say "ORDoc:  $from, $to: $orig";
+#      my Int $from = $match.from;
+#      my Int $to = $match.to;
 
       my Array $tag-bodies = $match<tag-body>;
       loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
@@ -342,17 +341,39 @@ package SemiXML:auth<https://github.com/MARTIMM> {
         my Int $b-to = $match.to;
 #say "ORBody $b-from, $b-to";
 
+#dump $tag-bodies[$mi];
+#say $tag-bodies[$mi].from, '--', $tag-bodies[$mi].to, ': ',
+    $orig.substr( $tag-bodies[$mi].to - 3, 3);
+
+        # test for special body
+        my Bool $special-body = ?$orig.substr(
+          $b-from, $b-to - $b-from
+        ).index('[!');
+
+        $orig.substr( $tag-bodies[$mi].to - 3, 3);
+
         # find start of body
-        my Int $bstart = $match.orig.substr( $b-from, $b-to - $b-from).index('[')
-                       + $b-from;
+        my Int $bstart = $orig.substr(
+          $b-from, $b-to - $b-from
+        ).index('[') + $b-from;
 
         # find end of body, search from the end
-        my Int $bend = $match.orig.substr( $bstart, $b-to - $bstart).rindex(']')
-                     + $bstart;
+        my Int $bend;
+        if $special-body {
+          $bend = $orig.substr(
+            $bstart, $b-to - $bstart
+          ).rindex('!]') + $bstart;
+        }
+
+        else {
+          $bend = $orig.substr(
+            $bstart, $b-to - $bstart
+          ).rindex(']') + $bstart;
+        }
 
         # check for newlines in this body
         my Bool $has-nl = (
-          $match.orig.substr( $bstart, $bend - $bstart).index("\n")
+          $orig.substr( $bstart, $bend - $bstart).index("\n")
         ).defined;
 
 #say "BE: $bstart, $bend, $has-nl";
@@ -371,11 +392,22 @@ package SemiXML:auth<https://github.com/MARTIMM> {
           # missing bracket.
           if $indent-start != $indent-end {
 
-            $match.prematch.Str ~~ m:g/ (\n) /;
-            my $line-number = $/.elems + 1;
-            $!unleveled-brackets.push: {
+            # get line numbers of begin and end of body
+            $orig.substr( 0, $tag-loc) ~~ m:g/ (\n) /;
+            my Int $line-begin = $/.elems + 1;
+
+            $orig.substr( 0, $bend) ~~ m:g/ (\n) /;
+            my Int $line-end = $/.elems + 1;
+
+            # save data
+            my $bracket-info := $!unleveled-brackets;
+            $bracket-info := $.mismatched-brackets
+              if $orig.substr( $tag-bodies[$mi].to - 3, 3) ~~ m/ '!]' /;
+
+            $bracket-info.push: {
               tag-name => $match<tag-spec><tag>.Str,
-              :$line-number,
+              :$line-begin,
+              :$line-end,
               body-count => $mi + 1
             };
 #dump $!unleveled-brackets;

@@ -5,21 +5,22 @@ unit package SemiXML:auth<https://github.com/MARTIMM>;
 
 grammar Grammar {
 
+  # Actions initialize
   rule init-doc { <?> }
-  rule TOP {
-    <.init-doc> <.comment>* <document> <.comment>* 
-  }
 
-  # A document is only a tag with its content. Defined like this there can
-  # only be one toplevel document.
+  # A document is only a tag with its content in a body. Defined like this
+  # there can only be one toplevel document. In the following body documents
+  # can be nested.
+  #
+  # Possible comments outside toplevel document
+  rule TOP { <.init-doc> <.comment>* <document> <.comment>* }
+
+  # Rule to pop the current bottomlevel element from the stack. It is not
+  # possible to use a rule to add the element to this stack. This happens in
+  # the actions method for <tag-spac>.
   #
   rule pop-tag-from-list { <?> }
-  rule document {
-#    <.comment>*
-    <tag-spec> <tag-body>*
-#    <.comment>*
-    <.pop-tag-from-list>
-  }
+  rule document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.

@@ -73,7 +73,7 @@ subtest 'test multi liners', {
     CATCH {
 
       default {
-        like .message, /:s line 3\, tag \$\|cc\, body number 1/,
+        like .message, /:s line 3\-4\, tag \$\|cc\, body number 1/,
              .message;
       }
     }
