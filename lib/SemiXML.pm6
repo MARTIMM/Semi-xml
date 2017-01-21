@@ -5,6 +5,8 @@ use SemiXML::Actions;
 use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
+#use Data::Dump::Tree;
+
 #-------------------------------------------------------------------------------
 package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
 
@@ -134,6 +136,7 @@ package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
         }
 
         else {
+say "$config-name, $locations, {$merge//'-'}";
           $c .= new( :$config-name, :$locations, :$merge);
         }
 
@@ -142,7 +145,7 @@ package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
           $c = Nil;
           default {
             # Ignore file not found exception
-            if .message !~~ m/ :s Config file .* not found / {
+            if .message !~~ m/ :s Config files .* not found / {
               .rethrow;
             }
           }
@@ -159,6 +162,8 @@ package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
         my Config::DataLang::Refine $c;
         $!actions.config = $c.merge-hash( $!actions.config, $config);
       }
+
+#dump $!actions.config;
 
       # Remove comments, trailing and leading spaces
       $content ~~ s/^\s+//;
@@ -342,7 +347,7 @@ say "P1: ", $p.perl;
       if ?$root-element {
 
         # Check if a http header must be shown
-        my Hash $http-header = $configuration<option><http-header>;
+        my Hash $http-header = $configuration<option><http-header> // {};
 
         if ? $http-header<show> {
           for $http-header.kv -> $k, $v {
@@ -353,7 +358,7 @@ say "P1: ", $p.perl;
         }
 
         # Check if xml prelude must be shown
-        my Hash $xml-prelude = $configuration<option><xml-prelude>;
+        my Hash $xml-prelude = $configuration<option><xml-prelude> // {};
 
         if ? $xml-prelude<show> {
           my $version = $xml-prelude<version>;

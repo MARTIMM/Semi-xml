@@ -152,6 +152,8 @@ class Report:ver<0.2.0> {
 
     if $!highlight-code {
 
+say "$!highlight-skin.css, ", %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
+
       my $pretty-css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
       append-element(
         $head, 'link', {
@@ -381,7 +383,8 @@ class Report:ver<0.2.0> {
     spurt( $test-file, $!test-program);
 
     # run the tests using prove and get the result contents through a pipe
-    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
+#    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
+    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose',
                  '--rules=seq=*', "--lib", $test-file, :out;
     # read lines from pipe from testing command
     my @lines = $p.out.lines;
