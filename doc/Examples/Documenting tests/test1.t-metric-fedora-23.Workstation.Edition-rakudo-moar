@@ -7,8 +7,8 @@ Label:Int-test
 OS-Kernel:linux:4.8.13.100.fc.23.x.86._.64
 OS-Distro:fedora:23.Workstation.Edition:23:False
 Perl:Perl 6:6.c
-Compiler:rakudo:2016.12.194.g.4545759
-VM:moar:2016.12.55.gfe.110.d.6
+Compiler:rakudo:2017.01.9.g.07.f.95.ce
+VM:moar:2017.01
 Total: 32
 T:11.00 3.00 14.00
 B:1.00 1.00 2.00
