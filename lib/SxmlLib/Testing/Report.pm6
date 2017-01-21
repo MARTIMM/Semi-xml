@@ -155,28 +155,33 @@ class Report:ver<0.2.0> {
     if $!highlight-code {
 
 dump %?RESOURCES<google-code-prettify>;
-say "google-code-prettify/$!highlight-skin.css, ", %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
+      # temporary check of RESOURCES path when using uninstalled version
+      my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
+$css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
+say "Pretty css: $css";
 
-      my $pretty-css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
       append-element(
         $head, 'link', {
-          :href("file://$pretty-css"),
+          :href("file://$css"),
           :type<text/css>, :rel<stylesheet>
         }
       );
 
-      my XML::Element $js = append-element(
-        $head, 'script', {
-          :src('file://' ~ %?RESOURCES<google-code-prettify/prettify.js>),
-          :type<text/javascript>
-        }
+      my Str $js = %?RESOURCES<google-code-prettify/prettify.js>.Str;
+$js ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
+say "pretty js: $js";
+      my XML::Element $jse = append-element(
+        $head, 'script', { :src("file://$js"), :type<text/javascript>}
       );
-      append-element( $js, :text(' '));
+      append-element( $jse, :text(' '));
     }
 
+    my $css = %?RESOURCES<report.css>.Str;
+$css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
+say "Css report: $css";
     append-element(
       $head, 'link', {
-        :href('file://' ~ %?RESOURCES<report.css>),
+        :href("file://$css"),
         :type<text/css>, :rel<stylesheet>
       }
     );
