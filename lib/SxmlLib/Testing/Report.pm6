@@ -7,6 +7,8 @@ use XML;
 use SemiXML;
 use SxmlLib::Testing::Testing;
 
+use Data::Dump::Tree;
+
 #-------------------------------------------------------------------------------
 class Report:ver<0.2.0> {
 
@@ -60,8 +62,8 @@ class Report:ver<0.2.0> {
     $!highlight-code = ?$attrs<highlight-lang> // False;
     $!highlight-language = $attrs<highlight-lang> // '';
     $!highlight-skin = lc($attrs<highlight-skin> // 'prettify');
-    $!highlight-skin = $attrs<highlight-skin> eq 'default'
-                       ?? 'prettify' !! $attrs<highlight-skin>;
+    $!highlight-skin = $!highlight-skin eq 'default'
+                       ?? 'prettify' !! $!highlight-skin;
     $!linenumbers = ?$attrs<linenumbers> // False;
 
     self!setup-report-doc($attrs);
@@ -152,7 +154,8 @@ class Report:ver<0.2.0> {
 
     if $!highlight-code {
 
-say "$!highlight-skin.css, ", %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
+dump %?RESOURCES<google-code-prettify>;
+say "google-code-prettify/$!highlight-skin.css, ", %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
 
       my $pretty-css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"};
       append-element(

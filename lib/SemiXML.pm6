@@ -254,7 +254,7 @@ say "$config-name, $locations, {$merge//'-'}";
       # substitute extension
       my Str $ext = $filename.IO.extension;
       $filename ~~ s/ '.' $ext //;
-      $filename ~= "." ~ $configuration<output><fileext>;
+      $filename ~= "." ~ ($configuration<output><fileext> // 'xml');
 
       # If not absolute prefix the path from the config
       if $filename !~~ m/^ '/' / {
@@ -361,15 +361,15 @@ say "P1: ", $p.perl;
         my Hash $xml-prelude = $configuration<option><xml-prelude> // {};
 
         if ? $xml-prelude<show> {
-          my $version = $xml-prelude<version>;
-          my $encoding = $xml-prelude<encoding>;
+          my $version = $xml-prelude<version> // '1.0';
+          my $encoding = $xml-prelude<encoding> // 'utf-8';
 
           $document ~= "<?xml version=\"$version\"";
           $document ~= " encoding=\"$encoding\"?>\n";
         }
 
         # Check if doctype must be shown
-        my Hash $doc-type = $configuration<option><doctype>;
+        my Hash $doc-type = $configuration<option><doctype> // {};
 
         if ? $doc-type<show> {
           my Hash $entities = $doc-type<entities> // {};
