@@ -7,10 +7,10 @@ use XML;
 use SemiXML;
 use SxmlLib::Testing::Testing;
 
-use Data::Dump::Tree;
+#use Data::Dump::Tree;
 
 #-------------------------------------------------------------------------------
-class Report:ver<0.2.0> {
+class Report:ver<0.2.1> {
 
   has $!sxml;
 
@@ -154,11 +154,11 @@ class Report:ver<0.2.0> {
 
     if $!highlight-code {
 
-dump %?RESOURCES<google-code-prettify>;
+#dump %?RESOURCES<google-code-prettify>;
       # temporary check of RESOURCES path when using uninstalled version
       my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
 $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
-say "Pretty css: $css";
+#say "Pretty css: $css";
 
       append-element(
         $head, 'link', {
@@ -169,7 +169,7 @@ say "Pretty css: $css";
 
       my Str $js = %?RESOURCES<google-code-prettify/prettify.js>.Str;
 $js ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
-say "pretty js: $js";
+#say "pretty js: $js";
       my XML::Element $jse = append-element(
         $head, 'script', { :src("file://$js"), :type<text/javascript>}
       );
@@ -178,7 +178,7 @@ say "pretty js: $js";
 
     my $css = %?RESOURCES<report.css>.Str;
 $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
-say "Css report: $css";
+#say "Css report: $css";
     append-element(
       $head, 'link', {
         :href("file://$css"),
