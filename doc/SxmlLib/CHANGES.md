@@ -2,6 +2,8 @@
 
 ## Docbook5
 * SxmlLib::Docbook5::Basic - Basic docbook methods
+  * 0.3.1
+    * in basic module the article and book methods should generate proper namespace names, i.e. xlink instead of xl.
   * 0.3.0
     * docbook 5 email added to info
   * 0.2.0

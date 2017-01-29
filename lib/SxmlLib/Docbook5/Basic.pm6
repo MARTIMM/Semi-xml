@@ -7,7 +7,7 @@ use XML;
 use SemiXML;
 
 #-------------------------------------------------------------------------------
-class Docbook5::Basic:ver<0.3.0> {
+class Docbook5::Basic:ver<0.3.1> {
 
   #-----------------------------------------------------------------------------
   method book (
@@ -21,7 +21,7 @@ class Docbook5::Basic:ver<0.3.0> {
       $parent, 'book', {
         'xmlns' => 'http://docbook.org/ns/docbook',
         'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
-        'xmlns:xl' => 'http://www.w3.org/1999/xlink',
+        'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
         'version' => '5.0',
         'xml:lang' => 'en'
       }
@@ -43,7 +43,7 @@ class Docbook5::Basic:ver<0.3.0> {
       $parent, 'article', {
         'xmlns' => 'http://docbook.org/ns/docbook',
         'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
-        'xmlns:xl' => 'http://www.w3.org/1999/xlink',
+        'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
         'version' => '5.0',
         'xml:lang' => 'en'
       }
