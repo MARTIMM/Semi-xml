@@ -5,8 +5,6 @@ use SemiXML::Actions;
 use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
-#use Data::Dump::Tree;
-
 #-------------------------------------------------------------------------------
 package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
 
@@ -162,8 +160,6 @@ say "$config-name, $locations, {$merge//'-'}";
         my Config::DataLang::Refine $c;
         $!actions.config = $c.merge-hash( $!actions.config, $config);
       }
-
-#dump $!actions.config;
 
       # Remove comments, trailing and leading spaces
       $content ~~ s/^\s+//;

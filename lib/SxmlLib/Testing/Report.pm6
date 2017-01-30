@@ -7,8 +7,6 @@ use XML;
 use SemiXML;
 use SxmlLib::Testing::Testing;
 
-#use Data::Dump::Tree;
-
 #-------------------------------------------------------------------------------
 class Report:ver<0.2.1> {
 
@@ -154,7 +152,6 @@ class Report:ver<0.2.1> {
 
     if $!highlight-code {
 
-#dump %?RESOURCES<google-code-prettify>;
       # temporary check of RESOURCES path when using uninstalled version
       my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
 $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
