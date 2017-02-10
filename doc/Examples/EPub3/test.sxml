@@ -1,0 +1,5 @@
+$!epub3.make
+  epub-build-dir=doc/Examples/EPub3/test-doc
+  mimetype=application/epub+zip
+  cleanup=1 [
+]

@@ -11,6 +11,13 @@
   * 0.1.0
     * info() to specify the elaborate info tag.
 
+## Epub3
+* EPub3::Builder - Build an Epub3 document. See also http://www.jedisaber.com/eBooks/formatsource.shtml
+  * 0.1.0
+    * Generate directory structure
+    * Generate mimetype
+    * Generate META-INF/container.xml
+
 ## Html
 * SxmlLib::Html::List - Html lists like ul/li
   * dir-list() to recursively create list of files and directories.

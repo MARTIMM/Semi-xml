@@ -1,0 +1,13 @@
+[ option.doctype ]
+  show          = true
+
+[output]
+  fileext       = 'html'
+
+[output.program]
+#  pdf           = 'wkhtmltopdf - %of.pdf'
+#  fmt           = 'xmllint --format --noent - > %of.%oe'
+#  tidy          = 'tidy --output-html 1 - >%of.%oe'
+
+[module]
+  epub3         = 'SxmlLib::EPub3::Builder'

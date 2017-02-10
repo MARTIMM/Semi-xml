@@ -19,11 +19,10 @@
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
 
+    "SxmlLib::EPub3::Builder":          "lib/SxmlLib/EPub3/Builder.pm6",
+
     "SxmlLib::Html::FixedLayout":       "lib/SxmlLib/Html/FixedLayout.pm6",
     "SxmlLib::Html::List":              "lib/SxmlLib/Html/List.pm6",
-
-    "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
-    "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6",
 
     "SxmlLib::Testing::Bug":            "lib/SxmlLib/Testing/Bug.pm6",
     "SxmlLib::Testing::Code":           "lib/SxmlLib/Testing/Code.pm6",
@@ -33,7 +32,8 @@
     "SxmlLib::Testing::Testing":        "lib/SxmlLib/Testing/Testing.pm6",
     "SxmlLib::Testing::Todo":           "lib/SxmlLib/Testing/Todo.pm6",
 
-    "sxml2xml":                         "bin/sxml2xml.pl6"
+    "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
+    "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6"
   },
   "resources": [
     "SemiXML.toml",
@@ -49,5 +49,5 @@
     "google-code-prettify/run_prettify.js"
   ],
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.26.5.11.2"
+  "version": "v0.27.0"
 }
