@@ -9,19 +9,59 @@ use SemiXML;
 #-------------------------------------------------------------------------------
 class EPub3::Builder:ver<0.1.0> {
 
+  constant mediatypes = %(
+    :ncx<application/x-dtbncx+xml>,
+
+    :xpgt<application/vnd.adobe-page-template+xml>,
+    :css<text/css>,
+
+    :gif<image/gif>, :jpg<image/jpg>, :jpeg<image/jpg>,
+    :png<image/png>,
+
+    :html<application/html>, :xhtml<application/xhtml+xml>,
+  );
+
+  has Hash $!doc-refs = {};
+  has Int $!doc-id-count = 1;
+  has Hash $!epub-attrs;
+
   #-----------------------------------------------------------------------------
   method make (
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Node :$content-body
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
     --> XML::Node
   ) {
 
-    my Str $build-dir = $attrs<epub-build-dir> // '/tmp/epub3-doc';
+    # Attributes
+    #   epub-build-dir          default '/tmp/epub3-build-dir'
+    #   epub-doc-name           default from title
+    #   cleanup                 default 1
+    #   mimetype                default 'application/epub+zip'
+    #   publisher               default from creator
+    $!epub-attrs = {
+      :title($attrs<title> // 'No Title'),
+      :creator($attrs<creator> // 'Unknown'),
+      :language($attrs<language> // 'US-en'),
+      :rights($attrs<rights> // 'Public Domain'),
+      :publisher($attrs<publisher> // $attrs<creator> // 'Unknown'),
+      :book-id($attrs<book-id> // 'Unknown should be unique book id'),
+      :id-scheme($attrs<id-scheme> // 'Unknown'),
+
+      :epub-build-dir($attrs<epub-build-dir> // '/tmp/epub3-build-dir'),
+      :epub-doc-name($attrs<epub-doc-name> // {
+          my Str $name = $attrs<title>;
+          $name ~~ s:g/ (<[,.]>|\s)+ /-/;
+        }
+      ),
+
+      :mimetype($attrs<mimetype> // 'application/epub+zip'),
+      :cleanup(?$attrs<cleanup>),
+    };
+
+    my Str $build-dir = $!epub-attrs<epub-build-dir>;
     note "Check build directory $build-dir";
     mkdir( $build-dir, 0o755) unless $build-dir.IO ~~ :e;
 
-    my Str $mimetype = $attrs<mimetype>;
+    my Str $mimetype = $!epub-attrs<mimetype>;
     note "Store mimetype data: $mimetype";
     spurt( "$build-dir/mimetype", $mimetype);
 
@@ -29,6 +69,7 @@ class EPub3::Builder:ver<0.1.0> {
     note "Check build directory $meta-dir";
     mkdir( $meta-dir, 0o755) unless $meta-dir.IO ~~ :e;
 
+    # OEBPS - Open EBook Publication Structure
     my Str $oebps-dir = "$build-dir/OEBPS";
     note "Check build directory $oebps-dir";
     mkdir( $oebps-dir, 0o755) unless $oebps-dir.IO ~~ :e;
@@ -45,15 +86,98 @@ class EPub3::Builder:ver<0.1.0> {
     note "Check build directory $text-dir";
     mkdir( $text-dir, 0o755) unless $text-dir.IO ~~ :e;
 
+    self!make-package( $oebps-dir, $content-body);
 
     self!make-container( $oebps-dir, $meta-dir);
-    self!report($parent);
+    self!make-report($parent);
     $parent;
   }
 
   #-----------------------------------------------------------------------------
-  # Make report of setup
-  method !report ( $parent ) {
+  # Gather the data for the manifest
+  method manifest (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
+#TODO check for existence
+
+    my XML::Element $manifest .= new(:name<manifest>);
+    my Str $workdir = $attrs<workdir> // '.';
+note "\nManifest wd: $workdir";
+
+    my @items = $content-body.nodes;
+    for @items -> $i {
+      my Str $href = $i.attribs<href>;
+      append-element(
+        $manifest, 'item',
+        %( :id($!doc-refs{$href}<id>),
+           :href("$workdir/$href"),
+           :media-type($!doc-refs{$href}<media-type>)
+         )
+      );
+    }
+
+note "\nManifest: $manifest";
+    $manifest;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Create table of content
+  method toc (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
+
+    my XML::Element $spine .= new( :name<spine>, :attribs(%(:toc<ncx>,)));
+    my @items = $content-body.nodes;
+    for @items -> $i {
+      my Str $href = $i.attribs<href>;
+      append-element( $spine, 'itemref', %(:idref($!doc-refs{$href}<id>),));
+    }
+
+note "\nSpine: $spine";
+    $spine;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Create table of content
+  method item (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
+
+    my XML::Element $item;
+    my Str $href = $attrs<href>;
+    if self!check-href($href) or $!doc-refs{$href}:exists {
+      $item .= new( :name<i>, :attribs(%(:$href,)));
+    }
+
+note "item: $item";
+    $item;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !check-href ( Str $href --> Bool ) {
+
+    my Bool $inserted = False;
+    if ? $href and $!doc-refs{$href}:!exists {
+      my Str $doc-id = "doc-" ~ $!doc-id-count++;
+      my Str $ext = $href.IO.extension;
+
+      $!doc-refs{$href} = %(
+        :id($doc-id),
+        :media-type(mediatypes{$ext} // 'application/text'),
+      );
+
+      $inserted = True;
+    }
+
+    $inserted;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Make report
+  method !make-report ( $parent ) {
 
     my XML::Element $html = append-element( $parent, 'html');
     append-element( $html, 'head');
@@ -61,7 +185,7 @@ class EPub3::Builder:ver<0.1.0> {
   }
 
   #-----------------------------------------------------------------------------
-  # Make report of setup
+  # Make container
   method !make-container ( Str $oebps-dir, Str $meta-dir ) {
 
     my XML::Element $container = XML::Element.new(
@@ -99,5 +223,73 @@ class EPub3::Builder:ver<0.1.0> {
     );
 
     note "Saved file $meta-dir/container.xml";
+  }
+
+  #-----------------------------------------------------------------------------
+  # Make package
+  method !make-package( Str $oebps-dir, XML::Element $content-body) {
+
+    my Str $unique-identifier = 'SxmlLib-EPub3-DocId';
+
+    my XML::Element $package = XML::Element.new(
+      :name<package>,
+      :attribs( %(
+          :version<3.1>,
+          :xmlns<http://www.idpf.org/2007/opf>,
+          :$unique-identifier,
+        )
+      )
+    );
+
+    my XML::Element $metadata = append-element(
+      $package, 'metadata', %(
+        'xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
+        'xmlns::opf' => 'http://www.idpf.org/2007/opf'
+      )
+    );
+
+    my XML::Element $m = append-element( $metadata, 'dc:title');
+    append-element( $m, :text($!epub-attrs<title>));
+
+    $m = append-element( $metadata, 'dc:language');
+    append-element( $m, :text($!epub-attrs<language>));
+
+    $m = append-element( $metadata, 'dc:rights');
+    append-element( $m, :text($!epub-attrs<rights>));
+
+    $m = append-element( $metadata, 'dc:publisher');
+    append-element( $m, :text($!epub-attrs<publisher>));
+
+    $m = append-element(
+      $metadata, 'dc:identifier',
+      %( 'opf:scheme' => $!epub-attrs<id-scheme>,)
+    );
+    append-element( $m, :text($!epub-attrs<book-id>));
+
+#    $m = append-element( $metadata, 'dc:');
+#    append-element( $m, :text($!epub-attrs<>));
+
+#    $m = append-element( $metadata, 'meta', %());
+#    append-element( $m, :text($!epub-attrs<>));
+
+
+    save-xml(
+      :filename("$oebps-dir/content.opf"),
+      :document($package),
+      :config( %(
+          option => {
+            http-header => { :!show, },
+            doctype => { :!show, },
+            xml-prelude => {
+              :show,
+              :encoding<utf-8>,
+              :version<1.0>,
+            }
+          }
+        )
+      )
+    );
+
+    note "Saved file $oebps-dir/content.opf";
   }
 }

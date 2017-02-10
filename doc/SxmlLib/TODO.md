@@ -13,6 +13,9 @@
 
 # Docbook5
 
+# Epub3
+  * copying styles and images to specific directories might need a changes of the references from text documents too
+
 # Html
 
 # Testing
