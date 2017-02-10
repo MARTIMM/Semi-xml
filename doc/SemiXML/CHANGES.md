@@ -2,6 +2,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.27.0
+  * Added a sub save-xml() to save an XML document to disk
 * 0.26.5
   * More locations where comments are allowed.
   * Better location information when parsing fails.

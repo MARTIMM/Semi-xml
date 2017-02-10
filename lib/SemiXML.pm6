@@ -6,7 +6,7 @@ use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
 #-------------------------------------------------------------------------------
-package SemiXML:ver<0.26.4>:auth<https://github.com/MARTIMM> {
+package SemiXML:ver<0.27.0>:auth<https://github.com/MARTIMM> {
 
   subset ParseResult is export where $_ ~~ any(Match|Nil);
 
@@ -425,6 +425,76 @@ say "P1: ", $p.perl;
       }
 
       return Any;
+    }
+
+    #---------------------------------------------------------------------------
+    multi sub save-xml (
+      Str:D :$filename,
+      XML::Element:D :$document!,
+      Hash :$config = {}
+    ) is export {
+      my XML::Document $root .= new($document);
+      save-xml( :$filename, :document($root), :$config);
+    }
+
+    multi sub save-xml (
+      Str:D :$filename,
+      XML::Document:D :$document!,
+      Hash :$config = {}
+    ) is export {
+
+      # Get the document text
+      my Str $text;
+
+      # Get the top element name
+      my Str $root-element = $document.root.name;
+#      $root-element ~~ s/^(<-[:]>+\:)//;
+
+
+      # If there is one, try to generate the xml
+      if ?$root-element {
+
+        # Check if a http header must be shown
+        my Hash $http-header = $config<option><http-header> // {};
+
+        if ? $http-header<show> {
+          for $http-header.kv -> $k, $v {
+            next if $k ~~ 'show';
+            $text ~= "$k: $v\n";
+          }
+          $text ~= "\n";
+        }
+
+        # Check if xml prelude must be shown
+        my Hash $xml-prelude = $config<option><xml-prelude> // {};
+
+        if ? $xml-prelude<show> {
+          my $version = $xml-prelude<version> // '1.0';
+          my $encoding = $xml-prelude<encoding> // 'utf-8';
+
+          $text ~= "<?xml version=\"$version\"";
+          $text ~= " encoding=\"$encoding\"?>\n";
+        }
+
+        # Check if doctype must be shown
+        my Hash $doc-type = $config<option><doctype> // {};
+
+        if ? $doc-type<show> {
+          my Hash $entities = $doc-type<entities> // {};
+          my Str $start = ?$entities ?? " [\n" !! '';
+          my Str $end = ?$entities ?? "]>\n" !! ">\n";
+          $text ~= "<!DOCTYPE $root-element$start";
+          for $entities.kv -> $k, $v {
+            $text ~= "<!ENTITY $k \"$v\">\n";
+          }
+          $text ~= "$end\n";
+        }
+
+        $text ~= ? $document ?? $document.root !! '';
+      }
+
+      # Save the text to file
+      spurt( $filename, $text);
     }
 
     #-----------------------------------------------------------------------------
