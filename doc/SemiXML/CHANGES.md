@@ -4,6 +4,7 @@ Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md w
 
 * 0.27.0
   * Added a sub save-xml() to save an XML document to disk
+  * Use of :formatted to this sub will format the xml output using the xmllint program and its -format option. Dunno how to use that in windows however. Default is off.
 * 0.26.5
   * More locations where comments are allowed.
   * Better location information when parsing fails.

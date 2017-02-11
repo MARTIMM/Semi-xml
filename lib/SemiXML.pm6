@@ -429,18 +429,16 @@ say "P1: ", $p.perl;
 
     #---------------------------------------------------------------------------
     multi sub save-xml (
-      Str:D :$filename,
-      XML::Element:D :$document!,
-      Hash :$config = {}
+      Str:D :$filename, XML::Element:D :$document!,
+      Hash :$config = {}, Bool :$formatted = False,
     ) is export {
       my XML::Document $root .= new($document);
-      save-xml( :$filename, :document($root), :$config);
+      save-xml( :$filename, :document($root), :$config, :$formatted);
     }
 
     multi sub save-xml (
-      Str:D :$filename,
-      XML::Document:D :$document!,
-      Hash :$config = {}
+      Str:D :$filename, XML::Document:D :$document!,
+      Hash :$config = {}, Bool :$formatted = False
     ) is export {
 
       # Get the document text
@@ -494,7 +492,14 @@ say "P1: ", $p.perl;
       }
 
       # Save the text to file
-      spurt( $filename, $text);
+      if $formatted {
+        my Proc $p = shell "xmllint -format - > $filename", :in;
+        $p.in.say($text);
+      }
+
+      else {
+        spurt( $filename, $text);
+      }
     }
 
     #-----------------------------------------------------------------------------
