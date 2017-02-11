@@ -13,8 +13,11 @@
 
 ## Epub3
 * EPub3::Builder - Build an Epub3 document. See also http://www.jedisaber.com/eBooks/formatsource.shtml and http://idpf.org/epub
+  * 0.2.0
+    * Generate package config in content.opf. It contains metadata, manifest and spine
+    * Files are copied from workdir into Build-dir.
   * 0.1.0
-    * Generate directory structure
+    * Generate directory structure in build-dir.
     * Generate mimetype
     * Generate META-INF/container.xml
 

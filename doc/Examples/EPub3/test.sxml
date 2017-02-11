@@ -11,23 +11,18 @@ $!epub3.make
   epub-doc-name=My-Book
   mimetype=application/epub+zip
 
-  cleanup=1 [
+  cleanup=1
+  formatted-xml=1 [
 
-  # All files for the book
+  # All files for the book go in the manifest section
   $!epub3.manifest workdir=doc/Examples/EPub3/My-Docs [
-    $!epub3.item href=page-template.xpgt
-    $!epub3.item href=sample.png
-    $!epub3.item href=stylesheet.css
+    $!epub3.item href=Styles/page-template.xpgt
+    $!epub3.item href=Styles/stylesheet.css
+    $!epub3.item href=Images/sample.png
 
-    $!epub3.item href=title_page.xhtml
-    $!epub3.item href=chap01.xhtml
-    $!epub3.item href=chap02.xhtml
-  ]
-
-  # Files and sequence of the book
-  $!epub3.toc [
-    $!epub3.item href=title_page.xhtml
-    $!epub3.item href=chap01.xhtml
-    $!epub3.item href=chap02.xhtml
+    # The books below also go in the spine section in this order
+    $!epub3.item spine=1 href=Text/title_page.xhtml
+    $!epub3.item spine=1 href=Text/chap01.xhtml
+    $!epub3.item spine=1 href=Text/chap02.xhtml
   ]
 ]
