@@ -5,7 +5,7 @@ $!epub3.make
   rights='Public Domain'
   publisher=mt1957
   book-id=5da84cf4-ef95-11e6-bc64-92361f002671
-  id-scheme="UUID"
+  book-id-type="uuid"
 
   epub-build-dir=doc/Examples/EPub3/Build-Doc
   epub-doc-name=My-Book
