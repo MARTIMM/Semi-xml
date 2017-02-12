@@ -11,8 +11,8 @@
   * 0.1.0
     * info() to specify the elaborate info tag.
 
-## Epub3
-* EPub3::Builder - Build an Epub3 document. See also http://www.jedisaber.com/eBooks/formatsource.shtml and http://idpf.org/epub
+## Epub
+* EPub::Epub3Builder - Build an Epub3 document. See also http://www.jedisaber.com/eBooks/formatsource.shtml and http://idpf.org/epub
   * 0.2.0
     * Generate package config in content.opf. It contains metadata, manifest and spine
     * Files are copied from workdir into Build-dir.
