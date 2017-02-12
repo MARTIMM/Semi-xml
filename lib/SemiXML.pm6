@@ -359,9 +359,12 @@ say "P1: ", $p.perl;
         if ? $xml-prelude<show> {
           my $version = $xml-prelude<version> // '1.0';
           my $encoding = $xml-prelude<encoding> // 'utf-8';
+          my $standalone = $xml-prelude<standalone>;
 
-          $document ~= "<?xml version=\"$version\"";
-          $document ~= " encoding=\"$encoding\"?>\n";
+          $document ~= '<?xml version="' ~ $version ~ '"';
+          $document ~= ' encoding="' ~ $encoding ~ '"';
+          $document ~= ' standalone="' ~ $standalone ~ '"' if $standalone;
+          $document ~= "?>\n";
         }
 
         # Check if doctype must be shown
@@ -469,9 +472,12 @@ say "P1: ", $p.perl;
         if ? $xml-prelude<show> {
           my $version = $xml-prelude<version> // '1.0';
           my $encoding = $xml-prelude<encoding> // 'utf-8';
+          my $standalone = $xml-prelude<standalone>;
 
-          $text ~= "<?xml version=\"$version\"";
-          $text ~= " encoding=\"$encoding\"?>\n";
+          $text ~= '<?xml version="' ~ $version ~ '"';
+          $text ~= ' encoding="' ~ $encoding ~ '"';
+          $text ~= ' standalone="' ~ $standalone ~ '"' if $standalone;
+          $text ~= "?>\n";
         }
 
         # Check if doctype must be shown
