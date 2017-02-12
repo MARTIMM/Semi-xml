@@ -227,7 +227,7 @@ class EPub::EPub3Builder:ver<0.2.0> {
     );
 
     my XML::Element $rf = append-element( $container, 'rootfiles');
-    my Str $path = "$!oebps-dir/content.opf";
+    my Str $path = "$!oebps-dir/package.opf";
     my Str $builddir = $!epub-attrs<epub-build-dir>;
     $path ~~ s/ $builddir '/'//;
     append-element(
@@ -243,7 +243,7 @@ class EPub::EPub3Builder:ver<0.2.0> {
       :config( %(
           option => {
             http-header => { :!show, },
-            doctype => { :!show, },
+            doctype => { :show, },
             xml-prelude => {
               :show,
               :encoding<utf-8>,
@@ -304,10 +304,8 @@ class EPub::EPub3Builder:ver<0.2.0> {
     $m = append-element(
       $metadata, 'dc:identifier', %(:id($unique-identifier,))
     );
-note 'urn:' ~ $!epub-attrs<id-type> ~ ':' ~ $!epub-attrs<book-id>;
     append-element(
-      $m,
-      :text('urn:' ~ $!epub-attrs<id-type> ~ ':' ~ $!epub-attrs<book-id>)
+      $m, :text('urn:' ~ $!epub-attrs<id-type> ~ ':' ~ $!epub-attrs<book-id>)
     );
 
     # version 3
@@ -337,7 +335,7 @@ note 'urn:' ~ $!epub-attrs<id-type> ~ ':' ~ $!epub-attrs<book-id>;
     $package.append($content-body.getElementsByTagName('spine')[0]);
 
     save-xml(
-      :filename("$!oebps-dir/content.opf"),
+      :filename("$!oebps-dir/package.opf"),
       :document($package),
       :config( %(
           option => {

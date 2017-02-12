@@ -15,6 +15,8 @@
 
 # Epub3
   * copying styles and images to specific directories might need a changes of the references from text documents too
+  * think about version 2
+  * navigation implementation
 
 # Html
 

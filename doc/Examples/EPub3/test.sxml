@@ -25,4 +25,10 @@ $!epub3.make
     $!epub3.item spine=1 href=Text/chap01.xhtml
     $!epub3.item spine=1 href=Text/chap02.xhtml
   ]
+
+  #TODO
+  # - User provided navigation document
+  # - a $!epub3.navigation []
+  # - automatic navigation generation in package document
+  # - turning nav doc off when included in text docs
 ]
