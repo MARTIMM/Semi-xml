@@ -7,7 +7,9 @@ use XML;
 use SemiXML;
 
 #-------------------------------------------------------------------------------
-class EPub3::Builder:ver<0.2.0> {
+#TODO compatibility with version2 NCX navigation documents?
+
+class EPub::EPub3Builder:ver<0.2.0> {
 
   constant mediatypes = %(
     :ncx<application/x-dtbncx+xml>,
@@ -52,7 +54,7 @@ class EPub3::Builder:ver<0.2.0> {
       :rights($attrs<rights> // 'Public Domain'),
       :publisher($attrs<publisher> // $attrs<creator> // 'Unknown'),
       :book-id($attrs<book-id> // 'Unknown should be unique book id'),
-      :id-scheme($attrs<id-scheme> // 'Unknown'),
+      :id-type($attrs<book-id-type> // 'Unknown'),
 
       :epub-build-dir($attrs<epub-build-dir> // '/tmp/epub3-build-dir'),
       :epub-doc-name($attrs<epub-doc-name> // {
@@ -71,7 +73,7 @@ class EPub3::Builder:ver<0.2.0> {
     mkdir( $build-dir, 0o755) unless $build-dir.IO ~~ :e;
 
     my Str $mimetype = $!epub-attrs<mimetype>;
-    note "Store mimetype data: $mimetype";
+    note "Create mimetype file for '$mimetype'";
     spurt( "$build-dir/mimetype", $mimetype);
 
     $!meta-dir = "$build-dir/META-INF";
@@ -95,9 +97,14 @@ class EPub3::Builder:ver<0.2.0> {
     note "Check build directory $text-dir";
     mkdir( $text-dir, 0o755) unless $text-dir.IO ~~ :e;
 
-    self!make-package($content-body);
-
     self!make-container;
+    self!make-package($content-body);
+    self!make-nav($content-body);
+
+#Version 2 compat
+#    self!make-ncx($content-body);
+
+
     self!make-report($parent);
     $parent;
   }
@@ -113,6 +120,7 @@ class EPub3::Builder:ver<0.2.0> {
     my Str $workdir = $attrs<workdir> // '.';
     $!epub-attrs<workdir> = $workdir;
 
+#`{{
     # Add the toc ref to it
     self!check-href('toc.ncx');
     append-element(
@@ -121,6 +129,7 @@ class EPub3::Builder:ver<0.2.0> {
          :media-type($!doc-refs<toc.ncx><media-type>)
        )
     );
+}}
 
     my @items = $content-body.nodes;
     for @items -> $i {
@@ -144,12 +153,13 @@ class EPub3::Builder:ver<0.2.0> {
 
     $parent.append($manifest);
 
+#TODO compatibility version < 3    :attribs(%(:toc<ncx>
 
-    my XML::Element $spine .= new( :name<spine>, :attribs(%(:toc<ncx>,)));
+    my XML::Element $spine .= new(:name<spine>);
     for @items -> $i {
 
       my Str $href = $i.attribs<href>;
-      if $!doc-refs{$href}<exists> and $i.attribs<in-toc> {
+      if $!doc-refs{$href}<exists> and $i.attribs<spine> {
         append-element( $spine, 'itemref', %(:idref($!doc-refs{$href}<id>),));
       }
     }
@@ -169,10 +179,9 @@ class EPub3::Builder:ver<0.2.0> {
     my XML::Element $item;
     my Str $href = $attrs<href>;
     if self!check-href($href) or $!doc-refs{$href}:exists {
-      $item .= new( :name<i>, :attribs( %( :$href, :in-toc(?$attrs<toc>),)));
+      $item .= new( :name<i>, :attribs( %( :$href, :spine(?$attrs<spine>),)));
     }
 
-note "item: $item";
     $item;
   }
 
@@ -218,9 +227,12 @@ note "item: $item";
     );
 
     my XML::Element $rf = append-element( $container, 'rootfiles');
+    my Str $path = "$!oebps-dir/content.opf";
+    my Str $builddir = $!epub-attrs<epub-build-dir>;
+    $path ~~ s/ $builddir '/'//;
     append-element(
       $rf, 'rootfile', %(
-        :full-path("$!oebps-dir/content.opf"),
+        :full-path($path),
         :media-type<application/oebps-package+xml>
       )
     );
@@ -243,7 +255,7 @@ note "item: $item";
       :formatted($!epub-attrs<formatted-xml>)
     );
 
-    note "Saved file $!meta-dir/container.xml";
+    note "Create file $!meta-dir/container.xml";
   }
 
   #-----------------------------------------------------------------------------
@@ -281,11 +293,26 @@ note "item: $item";
     $m = append-element( $metadata, 'dc:publisher');
     append-element( $m, :text($!epub-attrs<publisher>));
 
+#`{{
+    # Version 2 compat
     $m = append-element(
       $metadata, 'dc:identifier',
-      %( 'opf:scheme' => $!epub-attrs<id-scheme>, :id($unique-identifier))
+      %( 'opf:scheme' => $!epub-attrs<id-type>, :id($unique-identifier))
     );
     append-element( $m, :text($!epub-attrs<book-id>));
+}}
+    $m = append-element(
+      $metadata, 'dc:identifier', %(:id($unique-identifier,))
+    );
+note 'urn:' ~ $!epub-attrs<id-type> ~ ':' ~ $!epub-attrs<book-id>;
+    append-element(
+      $m,
+      :text('urn:' ~ $!epub-attrs<id-type> ~ ':' ~ $!epub-attrs<book-id>)
+    );
+
+    # version 3
+    $m = append-element( $metadata, 'meta', %(:property<dcterms:modified>,));
+    append-element( $m, :text(DateTime.now.utc.Str) );
 
 #    $m = append-element( $metadata, 'dc:');
 #    append-element( $m, :text($!epub-attrs<>));
@@ -327,6 +354,78 @@ note "item: $item";
       :formatted($!epub-attrs<formatted-xml>)
     );
 
-    note "Saved file $!oebps-dir/content.opf";
+    note "Create file $!oebps-dir/content.opf";
+  }
+
+#`{{
+Version 2 compat
+  #-----------------------------------------------------------------------------
+  method !make-ncx ( XML::Element $content-body ) {
+  
+    my XML::Element $ncx .= new(
+      :name<ncx>,
+      :attribs( %( :xmlns<http://www.daisy.org/z3986/2005/ncx/>,))
+    );
+    
+    my XML::Element $head = append-element( $ncx, 'head');
+    append-element(
+      $head, 'meta',
+      %( :name<dtb:uid>, :content($!epub-attrs<book-id>))
+    );
+
+    save-xml(
+      :filename("$!oebps-dir/toc.ncx"),
+      :document($ncx),
+      :config( %(
+          option => {
+            http-header => { :!show, },
+            doctype => { :!show, },
+            xml-prelude => {
+              :show,
+              :encoding<utf-8>,
+              :version<1.0>,
+            }
+          }
+        )
+      ),
+      :formatted($!epub-attrs<formatted-xml>)
+    );
+
+    note "Create file $!oebps-dir/content.opf";
+  }
+}}
+
+  #-----------------------------------------------------------------------------
+  method !make-nav ( XML::Element $content-body ) {
+  
+    my XML::Element $nav .= new(
+      :name<html>,
+      :attribs( %(
+          :xmlns<http://www.w3.org/1999/xhtml>,
+          'xmlns:epub' => 'http://www.idpf.org/2007/ops',
+        )
+      )
+    );
+    
+
+    save-xml(
+      :filename("$!oebps-dir/toc.xhtml"),
+      :document($nav),
+      :config( %(
+          option => {
+            http-header => { :!show, },
+            doctype => { :!show, },
+            xml-prelude => {
+              :show,
+              :encoding<utf-8>,
+              :version<1.0>,
+            }
+          }
+        )
+      ),
+      :formatted($!epub-attrs<formatted-xml>)
+    );
+
+    note "Create file $!oebps-dir/toc.xhtml";
   }
 }
