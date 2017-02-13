@@ -1,5 +1,7 @@
 use v6.c;
 
+# Check sigil, pandoc, perl5 EBook::EPUB,
+
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
@@ -17,8 +19,10 @@ class EPub::EPub3Builder:ver<0.2.0> {
     :xpgt<application/vnd.adobe-page-template+xml>,
     :css<text/css>,
 
-    :gif<image/gif>, :jpg<image/jpg>, :jpeg<image/jpg>,
-    :png<image/png>,
+    :js<text/javascript>,
+
+    :gif<image/gif>, :jpg<image/jpeg>, :jpeg<image/jpeg>,
+    :png<image/png>, :svg<image/svg+xml>,
 
     :html<application/html>, :xhtml<application/xhtml+xml>,
   );
@@ -46,6 +50,7 @@ class EPub::EPub3Builder:ver<0.2.0> {
     #   formatted-xml           default 1, needs xmllint
     #   mimetype                default 'application/epub+zip'
     #   publisher               default from creator
+    #   nav-doc                 default 'navigation.xhtml'
     $!epub-attrs = %( |%$!epub-attrs,
 
       :title($attrs<title> // 'No Title'),
@@ -55,6 +60,9 @@ class EPub::EPub3Builder:ver<0.2.0> {
       :publisher($attrs<publisher> // $attrs<creator> // 'Unknown'),
       :book-id($attrs<book-id> // 'Unknown should be unique book id'),
       :id-type($attrs<book-id-type> // 'Unknown'),
+#version 2
+#      :nav-doc<toc.ncx>,
+      :nav-doc($attrs<nav-doc> // 'navigation.xhtml'),
 
       :epub-build-dir($attrs<epub-build-dir> // '/tmp/epub3-build-dir'),
       :epub-doc-name($attrs<epub-doc-name> // {
@@ -120,16 +128,15 @@ class EPub::EPub3Builder:ver<0.2.0> {
     my Str $workdir = $attrs<workdir> // '.';
     $!epub-attrs<workdir> = $workdir;
 
-#`{{
-    # Add the toc ref to it
-    self!check-href('toc.ncx');
+    # Add the toc ref to it. Name not yet known, so make something up
+    my Str $nav-doc = 'NAV-DOC-PLACEHOLDER-NAME';
+    self!check-href($nav-doc);
     append-element(
       $manifest, 'item',
-      %( :id($!doc-refs<toc.ncx><id>), :href<toc.ncx>,
-         :media-type($!doc-refs<toc.ncx><media-type>)
+      %( :id($!doc-refs{$nav-doc}<id>), :href($nav-doc),
+         :media-type($!doc-refs{$nav-doc}<media-type>)
        )
     );
-}}
 
     my @items = $content-body.nodes;
     for @items -> $i {
@@ -243,7 +250,7 @@ class EPub::EPub3Builder:ver<0.2.0> {
       :config( %(
           option => {
             http-header => { :!show, },
-            doctype => { :show, },
+            doctype => { :!show, },
             xml-prelude => {
               :show,
               :encoding<utf-8>,
@@ -321,10 +328,23 @@ class EPub::EPub3Builder:ver<0.2.0> {
     # Find the manifest and spine. There is only one of each of them
     my XML::Element $manifest = $content-body.getElementsByTagName('manifest')[0];
     my Str $workdir = $!epub-attrs<workdir>;
+    my Str $nav-doc = $!epub-attrs<nav-doc>;
     for $manifest.getElementsByTagName('item') -> $item {
 
       my Str $href = $item.attribs<href>;
-      if $href ne 'toc.ncx' {
+
+      # Could not save the real name in manifest. Now it is known it can be
+      # replaced by the real name.
+      if $href eq 'NAV-DOC-PLACEHOLDER-NAME' {
+        $item.set( 'href', $nav-doc);
+        $!doc-refs{$nav-doc} = $!doc-refs{'NAV-DOC-PLACEHOLDER-NAME'};
+        $!doc-refs{'NAV-DOC-PLACEHOLDER-NAME'}:delete;
+
+        # It's going to be ...
+        $!doc-refs{$nav-doc}<exists> = True;
+      }
+
+      else {
         # copy file as if it is binary
         spurt( "$!oebps-dir/$href", slurp( "$workdir/$href", :bin), :bin);
         note "File $workdir/$href copied";
@@ -332,7 +352,9 @@ class EPub::EPub3Builder:ver<0.2.0> {
     }
 
     $package.append($manifest);
-    $package.append($content-body.getElementsByTagName('spine')[0]);
+
+    # Must clone it, because we need it also later in the navigation
+    $package.append($content-body.getElementsByTagName('spine')[0].cloneNode);
 
     save-xml(
       :filename("$!oebps-dir/package.opf"),
@@ -359,12 +381,12 @@ class EPub::EPub3Builder:ver<0.2.0> {
 Version 2 compat
   #-----------------------------------------------------------------------------
   method !make-ncx ( XML::Element $content-body ) {
-  
+
     my XML::Element $ncx .= new(
       :name<ncx>,
       :attribs( %( :xmlns<http://www.daisy.org/z3986/2005/ncx/>,))
     );
-    
+
     my XML::Element $head = append-element( $ncx, 'head');
     append-element(
       $head, 'meta',
@@ -395,8 +417,8 @@ Version 2 compat
 
   #-----------------------------------------------------------------------------
   method !make-nav ( XML::Element $content-body ) {
-  
-    my XML::Element $nav .= new(
+
+    my XML::Element $nav-html .= new(
       :name<html>,
       :attribs( %(
           :xmlns<http://www.w3.org/1999/xhtml>,
@@ -404,15 +426,56 @@ Version 2 compat
         )
       )
     );
-    
+
+    my Array $nav-array =
+       $content-body.getElementsByTagName('navigation') // [XML::Element];
+
+    if $nav-array.elems {
+
+      $nav-html.append($$nav-array[0]);
+    }
+
+    else {
+
+      my XML::Element $head = append-element( $nav-html, 'head');
+      append-element( $head, 'title', :text($!epub-attrs<title>));
+
+      my XML::Element $body = append-element( $nav-html, 'body');
+      my XML::Element $nav = append-element(
+        $body, 'nav', %('epub:type' => 'toc', :id<toc>)
+      );
+
+      append-element( $nav, 'h1', :text($!epub-attrs<title>));
+      my XML::Element $ol = append-element( $nav, 'ol');
+
+      my XML::Element $spine = $content-body.getElementsByTagName('spine')[0];
+      my Array $spine-items = $spine.getElementsByTagName('itemref');
+
+      my Int $count = 1;
+      for @$spine-items -> $si {
+        my Str $href;
+        for $!doc-refs.keys -> $h {
+          if $si.attribs<idref> eq $!doc-refs{$h}<id> {
+            $href = $h;
+            last;
+          }
+        }
+
+        $href .= IO.basename;
+        $href ~~ s/ '.' <-[\.]>+ $//;
+        append-element(
+          $ol, 'li', %(:$href,), :text("Part {$count++}")
+        )
+      }
+    }
 
     save-xml(
-      :filename("$!oebps-dir/toc.xhtml"),
-      :document($nav),
+      :filename("$!oebps-dir/$!epub-attrs<nav-doc>"),
+      :document($nav-html),
       :config( %(
           option => {
             http-header => { :!show, },
-            doctype => { :!show, },
+            doctype => { :show, },
             xml-prelude => {
               :show,
               :encoding<utf-8>,
