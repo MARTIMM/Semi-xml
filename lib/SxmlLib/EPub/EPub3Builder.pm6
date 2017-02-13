@@ -11,7 +11,7 @@ use SemiXML;
 #-------------------------------------------------------------------------------
 #TODO compatibility with version2 NCX navigation documents?
 
-class EPub::EPub3Builder:ver<0.2.0> {
+class EPub::EPub3Builder:ver<0.3.0> {
 
   constant mediatypes = %(
     :ncx<application/x-dtbncx+xml>,
@@ -112,6 +112,7 @@ class EPub::EPub3Builder:ver<0.2.0> {
 #Version 2 compat
 #    self!make-ncx($content-body);
 
+    self!make-epub;
 
     self!make-report($parent);
     $parent;
@@ -134,7 +135,8 @@ class EPub::EPub3Builder:ver<0.2.0> {
     append-element(
       $manifest, 'item',
       %( :id($!doc-refs{$nav-doc}<id>), :href($nav-doc),
-         :media-type($!doc-refs{$nav-doc}<media-type>)
+         :media-type($!doc-refs{$nav-doc}<media-type>),
+         :properties<nav>
        )
     );
 
@@ -144,13 +146,15 @@ class EPub::EPub3Builder:ver<0.2.0> {
       $!doc-refs{$href}<exists> = "$workdir/$href".IO ~~ :r;
       if $!doc-refs{$href}<exists> {
 
-        append-element(
+        my XML::Element $item = append-element(
           $manifest, 'item',
           %( :id($!doc-refs{$href}<id>),
              :href("$href"),
              :media-type($!doc-refs{$href}<media-type>)
            )
         );
+        $item.set( 'properties', $!doc-refs{$href}<properties>)
+          if ? $!doc-refs{$href}<properties>;
 
         # copy file as if it is binary
 #        spurt( "$!oebps-dir/$href", slurp( "$workdir/$href", :bin), :bin);
@@ -185,7 +189,8 @@ class EPub::EPub3Builder:ver<0.2.0> {
 
     my XML::Element $item;
     my Str $href = $attrs<href>;
-    if self!check-href($href) or $!doc-refs{$href}:exists {
+    if $!doc-refs{$href}:exists
+       or self!check-href( $href, :prop($attrs<properties> // '')) {
       $item .= new( :name<i>, :attribs( %( :$href, :spine(?$attrs<spine>),)));
     }
 
@@ -193,7 +198,27 @@ class EPub::EPub3Builder:ver<0.2.0> {
   }
 
   #-----------------------------------------------------------------------------
-  method !check-href ( Str $href --> Bool ) {
+  # Process an item
+  method navigation (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
+
+     my XML::Element $hook .= new(:name<hook>);
+     my XML::Element $nav .= new( :name<navigation>);
+
+     $nav.append($hook);
+     for @($content-body.nodes).reverse -> $node {
+       $hook.after($node);
+     }
+
+     $hook.remove;
+
+     $nav;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !check-href ( Str $href, Str :$prop --> Bool ) {
 
     my Bool $inserted = False;
     if ? $href and $!doc-refs{$href}:!exists {
@@ -204,6 +229,7 @@ class EPub::EPub3Builder:ver<0.2.0> {
         :id($doc-id),
         :media-type(mediatypes{$ext} // 'application/text'),
       );
+      $!doc-refs{$href}<properties> = $prop if ?$prop;
 
       $inserted = True;
     }
@@ -461,7 +487,7 @@ Version 2 compat
           }
         }
 
-        $href .= IO.basename;
+        $href = $href.IO.basename;
         $href ~~ s/ '.' <-[\.]>+ $//;
         append-element(
           $ol, 'li', %(:$href,), :text("Part {$count++}")
@@ -488,5 +514,11 @@ Version 2 compat
     );
 
     note "Create file $!oebps-dir/toc.xhtml";
+  }
+
+  #-----------------------------------------------------------------------------
+  method !make-epub ( ) {
+
+    
   }
 }

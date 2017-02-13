@@ -21,6 +21,7 @@ $!epub3.make
     $!epub3.item href=Images/sample.png
 
     # The books below also go in the spine section in this order
+#    $!epub3.item spine=1 properties=cover-image href=Text/title_page.xhtml
     $!epub3.item spine=1 href=Text/title_page.xhtml
     $!epub3.item spine=1 href=Text/chap01.xhtml
     $!epub3.item spine=1 href=Text/chap02.xhtml
@@ -31,4 +32,19 @@ $!epub3.make
   # - a $!epub3.navigation []
   # - automatic navigation generation in package document
   # - turning nav doc off when included in text docs
+
+  $!epub3.navigation [
+    $|head [
+      $|title [This is another title]
+    ]
+
+    $|body [
+      $|h1 [This is another title]
+      $|ol [
+        $|li [ $|a href=Text/Text/title_page.xhtml [Cover page] ]
+        $|li [ $|a href=Text/chap01.xhtml [Chapter 1] ]
+        $|li [ $|a href=Text/chap02.xhtml [Chapter 2] ]
+      ]
+    ]
+  ]
 ]
