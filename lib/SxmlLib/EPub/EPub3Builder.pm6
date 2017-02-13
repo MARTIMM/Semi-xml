@@ -519,6 +519,14 @@ Version 2 compat
   #-----------------------------------------------------------------------------
   method !make-epub ( ) {
 
-    
+    my $cwd = $*CWD;
+    chdir($!epub-attrs<epub-build-dir>);
+
+    shell "zip ../$!epub-attrs<epub-doc-name>.epub mimetype";
+    shell "zip -r ../$!epub-attrs<epub-doc-name>.epub mimetype META-INF OEBPS";
+  }
+
+  #-----------------------------------------------------------------------------
+  method !cleanup ( ) {
   }
 }
