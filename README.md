@@ -40,15 +40,15 @@ $|html [
 
 ### Advantages of using this language
 
-While the example above does not show a big advantage, however there are some summarized below.
+While the example above does not show a big advantage, however, there are some summarized below.
 
 * This semi xml has a bit better reading capabilities because no textual endtag is needed. It is just a closing bracket.
 * Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: ', " and ^.
-* An XML element is introduced by **$|** to support simple parsing. This translates just to the XML element. E.g. **$|html []** becomes **< html/>**.
+* An XML element is introduced by **$|** to support simple parsing. This translates just to the XML element. E.g. **$|html []** becomes **<html/>**.
 * Empty element content does not have to be written in the way shown above. It can be written just like **$|html**.
 * Other symbols following the **$** changes its meaning.
   * **$!** is used to call a method from an external module to insert xml controlled by data from elsewhere.
-  * **$\*\***, **$\*|** and **$|\*** provides for spacing around the tag and its body.
+  * **$\*\***, **$\*|** and **$|\*** provides for spacing around the tag and its body when these are used as inline elements like 'a', 'b', 'strong' etc.
 
 ## Documentation
 
@@ -66,8 +66,8 @@ While the example above does not show a big advantage, however there are some su
 
 ## Install
 
-Use panda or zef to install SemiXML
+Use zef to install SemiXML
 
-## Aurhor
+## Author
 
 Marcel Timmerman
