@@ -514,15 +514,19 @@ say "P1: ", $p.perl;
       --> XML::Node
     ) is export {
 
-      my XML::Node $element;
+      my XML::Node $text-element = SemiXML::Text.new(:$text) if ? $text;
+      my XML::Node $element =
+         XML::Element.new( :$name, :attribs(%$attributes)) if ? $name;
 
-      if ? $text {
-        $element = SemiXML::Text.new(:$text);
+      if ? $name and ? $text {
+        $element.append($text-element);
       }
 
-      else {
-        $element = XML::Element.new( :$name, :attribs(%$attributes));
+      elsif ? $text {
+        $element = $text-element;
       }
+
+      # else $name -> no change to $element. No name and no text is an error.
 
       $parent.append($element);
       $element;
