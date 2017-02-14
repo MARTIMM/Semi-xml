@@ -501,6 +501,7 @@ say "P1: ", $p.perl;
       if $formatted {
         my Proc $p = shell "xmllint -format - > $filename", :in;
         $p.in.say($text);
+        $p.in.close;
       }
 
       else {
