@@ -10,4 +10,5 @@
 #  tidy          = 'tidy --output-html 1 - >%of.%oe'
 
 [module]
+  epub2         = 'SxmlLib::EPub::EPub2Builder'
   epub3         = 'SxmlLib::EPub::EPub3Builder'
