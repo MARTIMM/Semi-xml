@@ -13,9 +13,7 @@
 
 # Docbook5
 
-# Epub3
-  * copying styles and images to specific directories might need a changes of the references from text documents too
-  * think about version 2
+# Epub 2 and 3
 
 # Html
 

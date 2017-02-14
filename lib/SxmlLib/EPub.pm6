@@ -11,7 +11,7 @@ use SemiXML;
 #-------------------------------------------------------------------------------
 #TODO compatibility with version2 NCX navigation documents?
 
-class EPub:ver<0.3.0> {
+class EPub:ver<0.4.1> {
 
   constant mediatypes is export = %(
     :ncx<application/x-dtbncx+xml>,

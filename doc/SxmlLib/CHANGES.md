@@ -11,8 +11,15 @@
   * 0.1.0
     * info() to specify the elaborate info tag.
 
-## Epub
-* EPub::Epub3Builder - Build an Epub3 document. See also http://www.jedisaber.com/eBooks/formatsource.shtml and http://idpf.org/epub
+## Epub 2 and 3
+
+  * 0.4.1
+    * EPub.pm6 to put commonalities for version 2 and 3 in.
+    * Generate zip and open with sigil, calibre etc.
+    * Version will become that of EPub.pm6 module.
+  * 0.4.0
+    * EPub::Epub2Builder - Build an Epub2 document. See also http://www.jedisaber.com/eBooks/formatsource.shtml and http://idpf.org/epub
+    * Copy from EPub::Epub3Builder and make changes.
   * 0.3.0
     * Generating navigation document
   * 0.2.0
@@ -22,6 +29,7 @@
     * Generate directory structure in build-dir.
     * Generate mimetype
     * Generate META-INF/container.xml
+    * EPub::Epub3Builder - Build an Epub3 document. See also http://idpf.org/epub
 
 ## Html
 * SxmlLib::Html::List - Html lists like ul/li
