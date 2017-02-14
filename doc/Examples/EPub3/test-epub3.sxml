@@ -7,8 +7,8 @@ $!epub3.make
   book-id=5da84cf4-ef95-11e6-bc64-92361f002671
   book-id-type="uuid"
 
-  epub-build-dir=doc/Examples/EPub3/Build-Doc
-  epub-doc-name=My-Book
+  epub-build-dir=doc/Examples/EPub3/Build-Doc-epub3
+  epub-doc-name=My-Book-e3
   mimetype=application/epub+zip
 
   cleanup=1
@@ -27,12 +27,7 @@ $!epub3.make
     $!epub3.item spine=1 href=Text/chap02.xhtml
   ]
 
-  #TODO
-  # - User provided navigation document
-  # - a $!epub3.navigation []
-  # - automatic navigation generation in package document
-  # - turning nav doc off when included in text docs
-
+$!SxmlCore.comment [
   $!epub3.navigation [
     $|head [
       $|title [This is another title]
@@ -47,4 +42,6 @@ $!epub3.make
       ]
     ]
   ]
+]
+
 ]
