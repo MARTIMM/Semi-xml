@@ -23,7 +23,7 @@ $!Db5b.article [
     ]
   ]
 
-  $|sect1 [
+  $|sect1 id=Introduction [
     $|title [ Introduction of module &library; ]
     $|para [
       Welcome to $*|emphasis[&library;]. As mentioned in the abstract, the 
@@ -173,7 +173,7 @@ $!SxmlCore.comment [
     ]
   ]
 
-  $|sect1 [
+  $|sect1 id=Language [
 
     $|title [The language]
 
@@ -467,7 +467,7 @@ output/program/pdf:
     ]
   ]
 
-  $|sect1 [
+  $|sect1 id=Prog-view [
     $|title [The programmers view]
     $|para [
     ]
@@ -494,7 +494,7 @@ output/program/pdf:
     ]
   ]
 
-  $|sect1 [
+  $|sect1 id=Use-prog [
     $|title [Using program &program;]
     $|para [
 
@@ -535,7 +535,7 @@ $!SxmlCore.comment [
     ]
 ]
 
-  $|sect1 [
+  $|sect1 id=syntax [
     $|title [Syntax]
     $|para [
       $|programlisting [!=
@@ -566,7 +566,7 @@ $!SxmlCore.comment [
     ]
   ]
 
-  $|sect1 [
+  $|sect1 id=Examples [
     $|title [Examples]
     $|para [
 
