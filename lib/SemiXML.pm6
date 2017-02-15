@@ -272,6 +272,7 @@ say "$config-name, $locations, {$merge//'-'}";
           # Drop the extention again. Let it be provided by the command
           my Str $ext = $filename.IO.extension;
           $filename ~~ s/ '.' $ext //;
+          $filename = $filename.IO.basename;
           $cmd ~~ s:g/ '%of' /'$filename'/;
 
           my Str $path = $configuration<output><filepath>;
@@ -281,23 +282,25 @@ say "$config-name, $locations, {$merge//'-'}";
           $cmd ~~ s:g/ '%oe' /'$ext'/;
 
           say "Sent file to program: $cmd";
-          my Proc $p = shell "$cmd ", :in; #, :err;
-          $p.in.print($document);
+          my Proc $p = shell "$cmd ", :in;#, :err;
 #`{{
-say "P0: ", $p.perl;
-
-          # wait for errors if any
-          my @lines = $p.err.lines;
-say "P1: ", $p.perl;
-
-          say "\n---[Error output]", '-' x 63 if @lines.elems;
-          .say for @lines;
-          say "---[Finish error]", '-' x 63 if @lines.elems;
-
           # wait for promise to finish
-          my Promise $send-it .= start( { $p.in.print($document); say 'done'; });
-          $send-it.result;
+          my Promise $send-it .= start( {
+              my @lines = $p.err.lines;
+              $p.err.close;
+#              note 'done';
+              note "\n---[Output]", '-' x 63 if @lines.elems;
+              .note for @lines;
+              note "---[Finish output]", '-' x 63 if @lines.elems;
+            }
+          );
+
+          sleep 0.5;
 }}
+          $p.in.print($document);
+          $p.in.close;
+
+#          $send-it.result;
         }
 
         else {
