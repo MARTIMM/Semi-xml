@@ -5,32 +5,31 @@
   show          = 1
 
 [ option.doctype.entities ]
-  company       = 'Acme Mc Carpenter, Inc'
-  program       = 'sxml2xml'
-  library       = 'Semi-xml'
-  language      = 'sxml'
+  pack          = 'SemiXML'
+  mod           = 'SemiXML::Sxml'
+  act           = 'SemiXML::Actions'
+  gram          = 'SemiXML::Grammar'
+  lib           = 'SxmlLib'
+  prog          = 'sxml2xml'
+  lang          = 'sxml'
   nbsp          = ' '
   E             = 'element'
-  SUE           = 'substitution-element'
-  COE           = 'command-element'
-  SPE           = 'spaced-element'
 
 [ output ]
   fileext       = 'xml'
 
 [ output.program ]
-  pdf           = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
+  pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
   xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
+  chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
-  xml           = 'xmllint --format - > %op/Xsl/%of.%oe'
+  xml           = 'xmllint --format - > %op/%of.%oe'
   xsl           = 'xmllint --format - > %op/Xsl/%of.xsl'
 
-#  chk           = 'tee Manual.xml | xmllint --format - | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
-  p0            = 'xmllint --format - > %op/x.xhtml; cd %op/Chunks; xsltproc /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl ../x.xhtml; rm ../x.xhtml'
-  p1            = 'xmllint --format - > %op/x.xhtml; xsltproc --xincludestyle %op/Xsl/ss-param.xsl /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl %op/x.xhtml'
-  p2            = 'xmllint --format - > %op/x.xhtml; cd %op; xsltproc Xsl/ss-param.xsl x.xhtml'
-
-#xsltproc /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl setup.xml
+  # Generate formatted xml first and save it on disk (tee command)
+  # then send formatted xml to rnc for checking. This way the errors
+  # can be found at the proper line in the save xml file.
+  check         = 'xmllint --format - | tee %op/%of.%oe |rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
 
 [ module ]
   lorem         = 'SxmlLib::LoremIpsum'
