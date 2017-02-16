@@ -379,7 +379,7 @@ class EPub::EPub2Builder is SxmlLib::EPub {
 
     if $nav-array.elems {
 
-#      $nav-html.append($nav-array[0]);
+      $ncx.append($nav-array[0]);
     }
 
     else {
