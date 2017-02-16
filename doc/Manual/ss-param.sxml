@@ -2,8 +2,11 @@
 #
 $|xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
 
+  $|xsl:import href=/usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl
+
   $|xsl:param name=use.id.as.filename select=1
   $|xsl:param name=base.dir select="'Chunks/'"
+
 
 $!SxmlCore.comment [
   # Set paper size to european A4 format

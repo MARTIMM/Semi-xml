@@ -26,8 +26,9 @@
   xsl           = 'xmllint --format - > %op/Xsl/%of.xsl'
 
 #  chk           = 'tee Manual.xml | xmllint --format - | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
-  p             = 'xmllint --format - > %op/x.xhtml; cd %op/Chunks; xsltproc /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl ../x.xhtml; rm ../x.xhtml'
-  p1            = 'xmllint --format - > %op/x.xhtml; xsltproc --xinclude %op/Xsl/ss-param.xsl /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl %op/x.xhtml'
+  p0            = 'xmllint --format - > %op/x.xhtml; cd %op/Chunks; xsltproc /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl ../x.xhtml; rm ../x.xhtml'
+  p1            = 'xmllint --format - > %op/x.xhtml; xsltproc --xincludestyle %op/Xsl/ss-param.xsl /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl %op/x.xhtml'
+  p2            = 'xmllint --format - > %op/x.xhtml; cd %op; xsltproc Xsl/ss-param.xsl x.xhtml'
 
 #xsltproc /usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl setup.xml
 
