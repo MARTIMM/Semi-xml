@@ -2,12 +2,13 @@
 #
 $|xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
 
-  # Get the docbook formatting objects stylesheet
-  #
-#  $|xsl:import href=/usr/share/sgml/docbook/xsl-ns-stylesheets/fo/docbook.xsl
-#  $|xsl:import href=/usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/docbook.xsl
-#  $|xsl:import href=/usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl
+  $|xsl:import href=/usr/share/sgml/docbook/xsl-ns-stylesheets/xhtml/chunk.xsl
 
+  $|xsl:param name=use.id.as.filename select=1
+  $|xsl:param name=base.dir select="'/home/marcel/Languages/Perl6/Projects/Semi-xml/doc/Manual/Chunks/'"
+
+
+$!SxmlCore.comment [
   # Set paper size to european A4 format
   #
   $|xsl:param name=paper.type select="'A4'"
@@ -69,6 +70,8 @@ $|xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
       ]
     ]
   ]
+]
+
 ]
 
 
