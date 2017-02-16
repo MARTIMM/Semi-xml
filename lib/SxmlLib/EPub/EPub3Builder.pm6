@@ -11,8 +11,6 @@ use XML;
 use SemiXML;
 
 #-------------------------------------------------------------------------------
-#TODO compatibility with version2 NCX navigation documents?
-
 class EPub::EPub3Builder is SxmlLib::EPub {
 
   has Hash $!doc-refs = {};
@@ -64,7 +62,7 @@ class EPub::EPub3Builder is SxmlLib::EPub {
       :formatted-xml(?$attrs<formatted-xml>),
     );
 }}
-    self.set-epub-attrs( 'epub2', $attrs);
+    self.set-epub-attrs( 'epub3', $attrs);
 
     my Str $build-dir = $.epub-attrs<epub-build-dir>;
     note "Check build directory $build-dir";
