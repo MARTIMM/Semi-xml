@@ -5,7 +5,7 @@ Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md w
 * 0.27.2
   * indentation in fixed areas like for pre(html) or programlisting(docbook) noted by [= ...] is minimized. Now it is not necessary anymore to place your fixed text at the begin of the line.
 * 0.27.1
-  * possible standalone attribute added to xml prelude usable from toml config
+  * standalone attribute added to xml prelude usable from toml config
 * 0.27.0
   * Added a sub save-xml() to save an XML document to disk
   * Use of :formatted to this sub will format the xml output using the xmllint program and its -format option. Dunno how to use that in windows however. Default is off.
