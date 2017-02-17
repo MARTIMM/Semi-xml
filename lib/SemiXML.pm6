@@ -1,4 +1,5 @@
 use v6.c;
+
 use XML;
 use SemiXML::Grammar;
 use SemiXML::Actions;
@@ -67,7 +68,7 @@ class Sxml {
     $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method parse-file ( Str :$filename, Hash :$config --> ParseResult ) {
 
     my ParseResult $pr;
@@ -118,7 +119,7 @@ class Sxml {
     $pr;
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method !load-config (
     Str :$config-name, Array :$locations = [], Hash :$other-config,
     Bool :$merge
@@ -152,7 +153,7 @@ class Sxml {
     }
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method parse ( Str :$content is copy, Hash :$config --> ParseResult ) {
 
     if $config.defined {
@@ -204,18 +205,18 @@ class Sxml {
     $m;
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method root-element ( --> XML::Element ) {
     my $doc = $!actions.get-document;
     return ?$doc ?? $doc.root !! XML::Element;
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method Str ( --> Str ) {
     return self.get-xml-text;
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Expect filename without extension
   method save ( Str :$filename is copy,
                 Str :$run-code,
@@ -315,7 +316,7 @@ class Sxml {
     }
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method get-xml-text ( :$other-document --> Str ) {
 
     # Get the top element name
@@ -391,7 +392,8 @@ class Sxml {
     return $document;
   }
 
-  #---------------------------------------------------------------------------
+#`{{
+  #-----------------------------------------------------------------------------
   multi method get-option ( Array $hashes, Str $option --> Any ) {
     for $hashes.list -> $h {
       if $h{$option}:exists {
@@ -402,12 +404,11 @@ class Sxml {
     return Any;
   }
 
-  #---------------------------------------------------------------------------
-  multi method get-option ( Str :$section = '',
-                            Str :$sub-section = '',
-                            Str :$option = ''
-                            --> Any
-                          ) {
+
+  multi method get-option (
+    Str :$section = '', Str :$sub-section = '', Str :$option = ''
+    --> Any
+  ) {
     my Array $hashes;
     for ( $!actions.config) -> $h {
       if $h{$section}:exists {
@@ -431,15 +432,16 @@ class Sxml {
 
     return Any;
   }
+}}
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method get-current-filename ( --> Str ) {
 
     return [~] $!configuration<output><filepath>,
                '/', $!configuration<output><filename>;
   }
 
-  #---------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   multi sub save-xml (
     Str:D :$filename, XML::Element:D :$document!,
     Hash :$config = {}, Bool :$formatted = False,
