@@ -134,7 +134,7 @@ package SemiXML:ver<0.27.0>:auth<https://github.com/MARTIMM> {
         }
 
         else {
-say "$config-name, $locations, {$merge//'-'}";
+#say "$config-name, $locations, {$merge//'-'}";
           $c .= new( :$config-name, :$locations, :$merge);
         }
 
