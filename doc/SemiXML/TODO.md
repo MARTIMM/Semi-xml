@@ -48,7 +48,7 @@
     [ option.xml-prelude.file ]
     ```
 
-  * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. These should be set using the options to the sxml2xml program. E.g **'--in=html --out=html'** or **'--in=docbook5 --out=pdf'**. This way the configuration can describe what should be done with the xml prelude, the doctype declaration or the command to select to get the result.
+  * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. These should be set using the options to the sxml2xml program. E.g **'--in=html --out=html'** or **'--in=docbook5 --out=pdf'**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result.
 
     ```
     # --out=html
