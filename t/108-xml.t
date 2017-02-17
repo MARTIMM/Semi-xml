@@ -33,11 +33,9 @@ $|html [
 EOSX
 
 #-------------------------------------------------------------------------------
-my Hash $config = {
-  output => {
-    fileext => 'html'
-  }
-};
+my Hash $config = {};
+$config<output><fileext> = 'html';
+$config<module><SxmlCore> = 'SxmlLib::SxmlCore';
 
 #-------------------------------------------------------------------------------
 # Parse

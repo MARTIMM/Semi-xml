@@ -22,7 +22,7 @@ my Hash $config = {
   module => {
     list => 'SxmlLib::Html::List'
   },
-  
+
   output => {
     fileext => 'html'
   }
@@ -44,7 +44,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+#note $xml-text;
 spurt( 'a.html', $xml-text);
 
 ok $xml-text ~~ m/'<ul id="ldir0001">'/, 'Id attribute on ul';

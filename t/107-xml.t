@@ -26,11 +26,9 @@ $|top [
 EOSX
 
 #-------------------------------------------------------------------------------
-my Hash $config = {
-  output => {
-    fileext => 'html'
-  }
-};
+my Hash $config = {};
+$config<output><fileext> = 'html';
+$config<module><SxmlCore> = 'SxmlLib::SxmlCore';
 
 #-------------------------------------------------------------------------------
 # Parse
@@ -39,7 +37,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse-file( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+#note $xml-text;
 
 diag "Some tests can go wrong on the split second at midnight";
 my $d = Date.today().Str;

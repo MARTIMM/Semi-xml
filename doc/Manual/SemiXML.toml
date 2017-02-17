@@ -35,3 +35,4 @@
   lorem         = 'SxmlLib::LoremIpsum'
   Db5b          = 'SxmlLib::Docbook5::Basic'
   Db5f          = 'SxmlLib::Docbook5::FixedLayout'
+  SxmlCore      = SxmlLib::SxmlCore
