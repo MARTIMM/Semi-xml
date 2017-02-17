@@ -47,7 +47,7 @@ class LoremIpsum {
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( ) {
-    
+
     for $lorem-texts.keys -> $k {
       $lorem-texts{$k}<length> = $lorem-texts{$k}<text>.chars;
     }
