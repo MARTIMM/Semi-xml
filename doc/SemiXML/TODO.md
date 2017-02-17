@@ -2,14 +2,11 @@
 
 * Parser and actions.
   * Error messages when parser fails can still be improved.
-  * Check on indenting on '[' and ']'?
-
-* All indents of generated documents should be unindented to proper level and reduced to the minimum spacing as is done in perl6 here docs.
 
 * Grammar extensions;
   * Remove '=' directly after '[' to keep text as it is typed. This is often forgotten by me, so others may have the same problem. Also it makes the grammar cleaner. Instead the following can be done to have the same effects;
     * No changes at all when the body content is given to a method.
-    * Specific tag can be defined in the config. Most common in html is <script>, <style> and <pre> of which the first two are not really necessary.
+    * Specific tag can be defined in the config. Most common in html is *script*, *style* and *pre* of which the first two are not really necessary.
 
 * External modules located in SxmlLib tree
   * Library paths to find modules are provided
@@ -44,31 +41,28 @@
     [ output.program ]
 
     ```
-
-  * These tables are used as the defaults. Then for each file processed, these are prefixed with the filename. E.g. assuming file.sxml;
+  * These tables are used as the defaults. Then for each file processed, these are postfixed with the filename without extention. E.g. assuming file.sxml;
 
     ```
     [ dependencies.file ]
     [ option.xml-prelude.file ]
     ```
+  * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. These should be set using the options to the sxml2xml program. E.g **'--in=html --out=html'** or **'--in=docbook5 --out=pdf'**. This way the configuration can describe what should be done with the xml prelude, the doctype declaration or the command to select to get the result.
 
-  * Then for any used module the same kind of table extension but only in the [module] table. E.g. assume module *SxmlLib::Docbook5::Basic* nicknamed *Db5b*;
+    # --out=html
+    [ option.xml-prelude.html ]
+    [ output.program.html ]
 
-    ```
-    [ module ]
+    # --in=docbook5
+    [ module.docbook5 ]
 
-    [ module.Db5b ]
-      name    = 'SxmlLib::Docbook5::Basic'
-    ```
-* [ ] Use Config::DataLang::Refine to select the data according to plan shown above.
+* Use Config::DataLang::Refine to select the data according to plan shown above.
 
-* [ ] Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
-* [ ] Use the resources field from META.info to save the core Sxml pluggable modules.
+* Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
+* Use the resources field from META.info to save the core Sxml pluggable modules.
 
 * And ...
   * Documentation.
-    * Module and program documentation
-    * [ ] Documentation is started as a docbook 5 document. There are references
-          to local iconfiles and fonts for which I don't know yet if it may be
-          included (license issues).
-    * [ ] Tutorials.
+  * Module and program documentation
+  * Documentation is started as a docbook 5 document. There are references to local iconfiles and fonts for which I don't know yet if they may be included (license issues).
+  * Tutorials.
