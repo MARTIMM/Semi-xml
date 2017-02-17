@@ -47,14 +47,24 @@
     [ dependencies.file ]
     [ option.xml-prelude.file ]
     ```
+
   * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. These should be set using the options to the sxml2xml program. E.g **'--in=html --out=html'** or **'--in=docbook5 --out=pdf'**. This way the configuration can describe what should be done with the xml prelude, the doctype declaration or the command to select to get the result.
 
+    ```
     # --out=html
     [ option.xml-prelude.html ]
     [ output.program.html ]
 
     # --in=docbook5
     [ module.docbook5 ]
+    ```
+
+  * or both combined where file comes first
+    ```
+    # file is xyz.sxml, --in=docbook, --out=chunked-html
+    [ output.program.xyz.chunked-html ]
+    ```
+  All these ideas could also replace the one option --run which only had a selective influence on the output.program table.
 
 * Use Config::DataLang::Refine to select the data according to plan shown above.
 
