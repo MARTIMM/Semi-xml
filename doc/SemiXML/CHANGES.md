@@ -2,6 +2,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.27.2
+  * indentation in fixed areas like for pre(html) or programlisting(docbook) noted by [= ...] is minimized. Now it is not necessary anymore to place your fixed text at the begin of the line.
 * 0.27.1
   * possible standalone attribute added to xml prelude usable from toml config
 * 0.27.0

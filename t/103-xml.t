@@ -78,10 +78,10 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
 ok $xml-text ~~ m/
-'     green {
-        color: #0f0;
-        background-color: #f0f;
-      }'
+'green {
+  color: #0f0;
+  background-color: #f0f;
+}'
 /, 'Check for literal text in css';
 
 #ok $xml-text ~~ ms/var a_tags '=' '$(\'a\');' var b '=' a_tags\[1\];/,

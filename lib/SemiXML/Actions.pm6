@@ -720,6 +720,28 @@ class Actions {
     # substitute multiple spaces with one space
     $t ~~ s:g/ \s\s+ / / unless $fixed;
 
+    # remove leading spaces for the minimum number of spaces when the content
+    # should be fixed
+    if $fixed {
+      my Int $min-indent = 1_000_000_000;
+      for $t.lines -> $line {
+        $line ~~ m/^ $<indent>=(\s*) /;
+        my Int $c = $/<indent>.Str.chars;
+
+        # adjust minimum only when there is something non-spacical on the line
+        $min-indent = $c if $line ~~ m/\S/ and $c < $min-indent;
+      }
+
+      my $new-t = '';
+      my Str $indent = ' ' x $min-indent;
+      for $t.lines {
+        my $l = $^line;
+        $l ~~ s/^ $indent//;
+        $new-t ~= "$l\n";
+      }
+      $t = $new-t;
+    }
+
     $t;
   }
 
