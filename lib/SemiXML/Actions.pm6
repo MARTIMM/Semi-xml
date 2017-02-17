@@ -664,12 +664,6 @@ class Actions {
   }
 
   #-----------------------------------------------------------------------------
-  method get-current-filename ( --> Str ) {
-
-    return $!config<output><filepath> ~ '/' ~ $!config<output><filename>;
-  }
-
-  #-----------------------------------------------------------------------------
   method get-document ( --> XML::Document ) {
 
     return $!xml-document;

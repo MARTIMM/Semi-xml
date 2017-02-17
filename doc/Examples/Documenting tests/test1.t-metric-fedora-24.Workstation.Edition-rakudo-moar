@@ -1,0 +1,16 @@
+Title:Integer manipulations
+Package:-
+Module:-
+Class:Int
+Distribution:-
+Label:Int-test
+OS-Kernel:linux:4.9.7.101.fc.24.x.86._.64
+OS-Distro:fedora:24.Workstation.Edition:24:False
+Perl:Perl 6:6.c
+Compiler:rakudo:2017.01.154.g.3381.baa
+VM:moar:2017.01.30.g.9258.aca
+Total: 32
+T:11.00 3.00 14.00
+B:1.00 1.00 2.00
+D:2.00 12.00 14.00
+S:2.00 0.00 2.00

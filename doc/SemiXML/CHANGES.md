@@ -4,7 +4,8 @@ Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md w
 
 * 0.27.2
   * indentation in fixed areas like for pre(html) or programlisting(docbook) noted by [= ...] is minimized. Now it is not necessary anymore to place your fixed text at the begin of the line.
-  * removed the SxmlCore class from SxmlLib::Actions to a new file SxmlLib/SxmlCore.pm6. It is also not automatically declared anymore in the module table so users must add it to the module table in their config.
+  * refactored the SxmlCore class from SxmlLib::Actions to a new file SxmlLib/SxmlCore.pm6. It is also not automatically declared anymore in the module table so users must add it to the module table in their config.
+  * refactored method get-current-filename() from Actions to Sxml class.
 * 0.27.1
   * standalone attribute added to xml prelude usable from toml config
 * 0.27.0
