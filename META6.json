@@ -19,7 +19,8 @@
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
 
-    "SxmlLib::EPub3::Builder":          "lib/SxmlLib/EPub3/Builder.pm6",
+    "SxmlLib::EPub::EPub2Builder":      "lib/SxmlLib/EPub/EPub2Builder.pm6",
+    "SxmlLib::EPub::EPub3Builder":      "lib/SxmlLib/EPub/EPub3Builder.pm6",
 
     "SxmlLib::Html::FixedLayout":       "lib/SxmlLib/Html/FixedLayout.pm6",
     "SxmlLib::Html::List":              "lib/SxmlLib/Html/List.pm6",
@@ -32,6 +33,7 @@
     "SxmlLib::Testing::Testing":        "lib/SxmlLib/Testing/Testing.pm6",
     "SxmlLib::Testing::Todo":           "lib/SxmlLib/Testing/Todo.pm6",
 
+    "SxmlLib::SxmlCore":                "lib/SxmlLib/SxmlCore.pm6",
     "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
     "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6"
   },
