@@ -61,7 +61,7 @@ Documentation is not sufficiently available to help the user out. There is a man
 ### SemiXML
 This is about the SemiXML::Sxml class and sxml2xml program.
 
-* [Release notes](https://github.com/MARTIMM/Semi-xml/blob/master/docSemiXML/CHANGES.md)
+* [Release notes](https://github.com/MARTIMM/Semi-xml/blob/master/doc/SemiXML/CHANGES.md)
 * [Bugs and Todo](https://github.com/MARTIMM/Semi-xml/blob/master/doc/SemiXML/TODO.md)
 
 ### SxmlLib
