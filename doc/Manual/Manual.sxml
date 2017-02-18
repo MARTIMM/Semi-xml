@@ -40,7 +40,8 @@ $!Db5b.article [
 
     $|para [
       An example will speak for itself when Sxml is compared with the generated
-      HTML.
+      HTML. The generated html is shown here is pretty printed but would
+      normally be a oneliner.
 
       $|example [
         $|title [Input &lang; text]
