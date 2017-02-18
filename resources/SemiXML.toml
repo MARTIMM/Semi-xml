@@ -2,7 +2,7 @@
 #  file          = [ ]
 
 [ module ]
-  SxmlCore     = SxmlLib::SxmlCore
+  SxmlCore     = 'SxmlLib::SxmlCore'
 
 #[ option ]
 
