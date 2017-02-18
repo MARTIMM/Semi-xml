@@ -15,15 +15,16 @@ subset ParseResult is export where $_ ~~ any(Match|Nil);
 #-------------------------------------------------------------------------------
 class Sxml {
 
-  our $debug = False;
-
   has SemiXML::Grammar $!grammar;
   has SemiXML::Actions $.actions handles < get-sxml-object >;
 
   has Hash $.styles;
   has Config::DataLang::Refine $!configuration;
 
-  submethod BUILD ( Str :$filename ) {
+  has Bool $!trace;
+  has Bool $!merge;
+
+  submethod BUILD ( Str :$filename, :$!trace = False, :$!merge = False ) {
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
 
@@ -48,28 +49,31 @@ $R = Distribution::Resources.new(:repo<file#/home/marcel/Languages/Perl6/Project
 note "\n My C: ", $R<SemiXML.toml>;
 note "\n My R: ", $R.perl;
 
-note "\nC: ", %?RESOURCES<SemiXML.toml>;
-note "\nR: ", %?RESOURCES.perl;
 }}
 
     # Load the config file from resources. This is an sha encoded file when
     # installed, so this one will be the only one.
 
-# There is bug locally to this package resource is having wrong path when using
-# not installed distribution (PERL6LIB)
+# There is bug locally to this package. Resource get wrong path when using
+# local distribution
 
-    my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
+note "\nR: ", %?RESOURCES.perl;
+note "\nC: ", %?RESOURCES<SemiXML.toml>;
+
+my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
 if %?RESOURCES<SemiXML.toml>.Str ~~ m/SemiXML.toml $/ {
   $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
 }
+$!configuration = self!load-config(:config-name($rp.IO.abspath));
 
-    $!configuration = self!load-config(:config-name($rp.IO.abspath));
-#note $!configuration.config.perl;
+#    $!configuration = self!load-config(
+#      :config-name(%?RESOURCES<SemiXML.toml>.Str)
+#    );
 
     my Array $locations;
-    my Hash $other-config = ? $!configuration
-                              ?? $!configuration.config.clone
-                              !! {};
+    my Hash $other-config =
+       ? $!configuration ?? $!configuration.config.clone !! {};
+
     # if filename is given, use its path also in its locations
     if ?$filename and $filename.IO ~~ :r {
       my Str $fn-bn = $filename.IO.basename;
@@ -82,21 +86,19 @@ if %?RESOURCES<SemiXML.toml>.Str ~~ m/SemiXML.toml $/ {
       $!configuration = self!load-config(
         :config-name<SemiXML.toml>, :$other-config, :$locations, :merge
       );
-#note $!configuration.config.perl;
 
       # then load the sxml config file name from several locations
-      $other-config = ? $!configuration
-                        ?? $!configuration.config.clone
-                        !! {};
+      $other-config = ? $!configuration ?? $!configuration.config.clone !! {};
+
       $fn-p ~~ s/ $fn-d '/'? //;
       my $fn-e = $filename.IO.extension;
       $fn-p ~~ s/ $fn-e $/toml/;
       $!configuration = self!load-config(
         :config-name($fn-p), :$other-config, :$locations, :merge
       );
-#note $!configuration.config.perl;
     }
 
+note "\nConfiguration: ", $!configuration.perl;
     $!actions.config = $!configuration.config;
   }
 
@@ -154,24 +156,25 @@ if %?RESOURCES<SemiXML.toml>.Str ~~ m/SemiXML.toml $/ {
   #-----------------------------------------------------------------------------
   method !load-config (
     Str :$config-name, Array :$locations = [], Hash :$other-config,
-    Bool :$merge
+    Bool :$m = False
     --> Config::DataLang::Refine
   ) {
 
+    my Bool $merge = $!merge ?| $m;
     my Config::DataLang::Refine $c;
     try {
 
       if ?$other-config {
-        $c .= new( :$config-name, :$locations, :$other-config, :$merge);
+        $c .= new(
+          :$config-name, :$locations, :$other-config, :$merge, :$!trace
+        );
       }
 
       else {
-#say "$config-name, $locations, {$merge//'-'}";
-        $c .= new( :$config-name, :$locations, :$merge);
+        $c .= new( :$config-name, :$locations, :$merge, :$!trace);
       }
 
       CATCH {
-#          .say;
         $c = Nil;
         default {
           # Ignore file not found exception
