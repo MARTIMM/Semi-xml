@@ -26,7 +26,7 @@ $!report.run title='Basic SemiXML tests' [
   ]
 
   $!code.add [=
-    use SemiXML;
+    use SemiXML::Sxml;
 
     sub parse ( Str $content --> Str ) {
 

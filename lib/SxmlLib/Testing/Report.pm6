@@ -4,7 +4,7 @@ use v6.c;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML;
+use SemiXML::Sxml;
 use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ class Report:ver<0.2.1> {
     # make a body
     $!body = append-element( $!report-doc, 'body');
     $!body.set( 'onload', 'prettyPrint()') if $!highlight-code;
-    
+
 
     # if there is a title attribute, make a h1 title
     if ? $attrs<title> {
@@ -153,6 +153,7 @@ class Report:ver<0.2.1> {
     if $!highlight-code {
 
       # temporary check of RESOURCES path when using uninstalled version
+note "C: ", %?RESOURCES<google-code-prettify/desert.css>;
       my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
 $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
 #say "Pretty css: $css";
@@ -329,7 +330,7 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
     my Str $code = '';
 
     # insert newline after any closing curly bracket
-    $code-text ~~ s:g/ '}' <!before <[\n;]>>/}\n/;
+    $code-text ~~ s:g/ '}' <!before <[\n;,]>>/}\n/;
 
     # split code script on every line
     for $code-text.split(/\n/) {

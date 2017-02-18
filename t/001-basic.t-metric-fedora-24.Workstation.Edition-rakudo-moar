@@ -1,16 +1,16 @@
-Title:Integer manipulations
+Title:Basic SemiXML tests
 Package:-
 Module:-
-Class:Int
+Class:-
 Distribution:-
-Label:Int-test
+Label:-
 OS-Kernel:linux:4.9.7.101.fc.24.x.86._.64
 OS-Distro:fedora:24.Workstation.Edition:24:False
 Perl:Perl 6:6.c
 Compiler:rakudo:2017.01.229.g.9.fde.417
 VM:moar:2017.01.72.g.542.baec
-Total: 32
-T:11.00 3.00 14.00
-B:1.00 1.00 2.00
-D:2.00 12.00 14.00
-S:2.00 0.00 2.00
+Total: 10
+T:10.00 0.00 10.00
+B:0.00 0.00 0.00
+D:0.00 0.00 0.00
+S:0.00 0.00 0.00

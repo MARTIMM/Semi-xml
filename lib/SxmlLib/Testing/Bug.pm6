@@ -4,7 +4,7 @@ use v6.c;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML;
+use SemiXML::Sxml;
 use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------

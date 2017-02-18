@@ -3,7 +3,7 @@ use v6.c;
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
-use SemiXML;
+use SemiXML::Sxml;
 
 enum TestType is export <TestCmd TodoCmd BugCmd SkipCmd>;
 
