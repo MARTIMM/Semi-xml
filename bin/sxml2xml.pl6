@@ -1,7 +1,7 @@
 #!/usr/bin/env perl6
 #
 use v6.c;
-use SemiXML;
+use SemiXML::Sxml;
 
 # Allow switches after positionals. Pinched from an older panda version. Now
 # it is possible to make the sxml file executable with the path of this

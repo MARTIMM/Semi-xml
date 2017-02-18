@@ -4,6 +4,7 @@ Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md w
 
 * 0.27.3
   * refactored SemiXML::Text from Actions to SemiXML/Text.pm6.
+  * long standing bug fixed: Resources gave wrong path when using local distro. Caused by the way the Sxml class was defined. file SemiXML.pm6 is now moved to SemiXml/Sxml.pm6 and all use statements are modified.
 * 0.27.2
   * indentation in fixed areas like for pre(html) or programlisting(docbook) noted by [= ...] is minimized. Now it is not necessary anymore to place your fixed text at the begin of the line.
   * refactored the SxmlCore class from SxmlLib::Actions to a new file SxmlLib/SxmlCore.pm6. It is also not automatically declared anymore in the module table so users must add it to the module table in their config.

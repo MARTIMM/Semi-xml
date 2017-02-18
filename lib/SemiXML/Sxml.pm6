@@ -1,13 +1,14 @@
 use v6.c;
 
-use XML;
+#-------------------------------------------------------------------------------
+unit package SemiXML:auth<https://github.com/MARTIMM>;
+
 use SemiXML::Grammar;
 use SemiXML::Actions;
 use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
-#-------------------------------------------------------------------------------
-unit package SemiXML:ver<0.27.0>:auth<https://github.com/MARTIMM>;
+use XML;
 
 subset ParseResult is export where $_ ~~ any(Match|Nil);
 
@@ -26,18 +27,49 @@ class Sxml {
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
 
+#`{{
+my $R = Distribution::Resources.new(:repo<SemiXML::Sxml>, :dist-id(''));
+note "\n My C: ", $R<SemiXML.toml>;
+note "\n My R: ", $R.perl;
+
+$R = Distribution::Resources.new(:repo<file#/home/marcel/Languages/Perl6/Projects/Semi-xml>, :dist-id(''));
+note "\n My C: ", $R<SemiXML.toml>;
+note "\n My R: ", $R.perl;
+
+$R = Distribution::Resources.new(:repo<Pod::Render>, :dist-id(''));
+note "\n My C: ", $R<pod6.css>;
+note "\n My R: ", $R.perl;
+
+$R = Distribution::Resources.new(:repo<file#/home/marcel/Languages/Perl6/Projects/Semi-xml>, :dist-id(''));
+note "\n My C: ", $R<SemiXML.toml>;
+note "\n My R: ", $R.perl;
+
+$R = Distribution::Resources.new(:repo<file#/home/marcel/Languages/Perl6/Projects/Semi-xml/lib>, :dist-id(''));
+note "\n My C: ", $R<SemiXML.toml>;
+note "\n My R: ", $R.perl;
+
+note "\nC: ", %?RESOURCES<SemiXML.toml>;
+note "\nR: ", %?RESOURCES.perl;
+}}
+
     # Load the config file from resources. This is an sha encoded file when
     # installed, so this one will be the only one.
-    my Config::DataLang::Refine $c0 = self!load-config(
-      :config-name(%?RESOURCES<SemiXML.toml>.IO.abspath)
-    );
-#say "L: ", $locations.perl;
-#say "C: $merge";
-#say "--[dd]", '-' x 74;
-#dd $c0.config;
+
+# There is bug locally to this package resource is having wrong path when using
+# not installed distribution (PERL6LIB)
+
+    my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
+if %?RESOURCES<SemiXML.toml>.Str ~~ m/SemiXML.toml $/ {
+  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
+}
+
+    $!configuration = self!load-config(:config-name($rp.IO.abspath));
+#note $!configuration.config.perl;
 
     my Array $locations;
-    my Hash $other-config = ? $c0 ?? $c0.config.clone !! {};
+    my Hash $other-config = ? $!configuration
+                              ?? $!configuration.config.clone
+                              !! {};
     # if filename is given, use its path also in its locations
     if ?$filename and $filename.IO ~~ :r {
       my Str $fn-bn = $filename.IO.basename;
@@ -47,25 +79,25 @@ class Sxml {
       $locations = [$fn-d];
 
       # load the default config file name from several locations
-      $c0 = self!load-config(
+      $!configuration = self!load-config(
         :config-name<SemiXML.toml>, :$other-config, :$locations, :merge
       );
-#say "--[dd]", '-' x 74;
-#dd $c0.config;
+#note $!configuration.config.perl;
 
       # then load the sxml config file name from several locations
-      $other-config = ? $c0 ?? $c0.config.clone !! {};
+      $other-config = ? $!configuration
+                        ?? $!configuration.config.clone
+                        !! {};
       $fn-p ~~ s/ $fn-d '/'? //;
       my $fn-e = $filename.IO.extension;
       $fn-p ~~ s/ $fn-e $/toml/;
-      $c0 = self!load-config(
+      $!configuration = self!load-config(
         :config-name($fn-p), :$other-config, :$locations, :merge
       );
+#note $!configuration.config.perl;
     }
-#say "--[dd]", '-' x 74;
-#dd $c0.config;
 
-    $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
+    $!actions.config = $!configuration.config;
   }
 
   #-----------------------------------------------------------------------------
@@ -392,7 +424,6 @@ class Sxml {
     return $document;
   }
 
-#`{{
   #-----------------------------------------------------------------------------
   multi method get-option ( Array $hashes, Str $option --> Any ) {
     for $hashes.list -> $h {
@@ -432,13 +463,12 @@ class Sxml {
 
     return Any;
   }
-}}
 
   #-----------------------------------------------------------------------------
   method get-current-filename ( --> Str ) {
 
-    return [~] $!configuration<output><filepath>,
-               '/', $!configuration<output><filename>;
+    return [~] $!configuration.config<output><filepath>,
+               '/', $!configuration.config<output><filename>;
   }
 
   #-----------------------------------------------------------------------------
