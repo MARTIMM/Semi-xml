@@ -1,8 +1,11 @@
 use v6.c;
-#use Grammar::Tracer;
 
+#-------------------------------------------------------------------------------
 unit package SemiXML:auth<https://github.com/MARTIMM>;
 
+#use Grammar::Tracer;
+
+#-------------------------------------------------------------------------------
 grammar Grammar {
 
   # Actions initialize
