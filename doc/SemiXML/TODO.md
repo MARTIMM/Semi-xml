@@ -64,7 +64,7 @@
     # file is xyz.sxml, --in=docbook, --out=chunked-html
     [ output.program.xyz.chunked-html ]
     ```
-  All these ideas could also replace the one option --run which only had a selective influence on the output.program table.
+  All these ideas could also replace the one option --run from the program which only had a selective influence on the [output.program] table. Also less files might be searched through as opposed to the list shown above.
 
 * Use Config::DataLang::Refine to select the data according to plan shown above.
 
