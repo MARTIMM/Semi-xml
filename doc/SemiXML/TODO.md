@@ -67,6 +67,7 @@
   All these ideas could also replace the one option --run from the program which only had a selective influence on the [output.program] table. Also less files might be searched through as opposed to the list shown above.
 
 * Use Config::DataLang::Refine to select the data according to plan shown above.
+Uhmmmm..., totally wrong! Using refine() it gathers key/values from the config into one set depending on keys used. So here it is use 1) use module only to get the config from one or more files or 2) like one but use also refine() to get a **flat** list of key/values. This means that the key names must be rethought and changed to cope with that. Perhaps a special key name could flip between one or the other. Old configs could still be used with the key turned off. Could even use both setups in one file!
 
 * Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
 * Use the resources field from META.info to save the core Sxml pluggable modules.

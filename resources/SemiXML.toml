@@ -1,8 +1,10 @@
+new-style       = 0
+
 #[ dependencies ]
 #  file          = [ ]
 
 [ module ]
-  SxmlCore     = 'SxmlLib::SxmlCore'
+  SxmlCore      = 'SxmlLib::SxmlCore'
 
 #[ option ]
 
