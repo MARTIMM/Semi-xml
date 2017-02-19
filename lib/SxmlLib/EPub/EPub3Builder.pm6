@@ -8,7 +8,7 @@ unit package SxmlLib:auth<https://github.com/MARTIMM>;
 use SxmlLib::EPub;
 
 use XML;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 class EPub::EPub3Builder is SxmlLib::EPub {

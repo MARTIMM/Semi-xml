@@ -4,7 +4,7 @@ use v6.c;
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 class Docbook5::Basic:ver<0.3.1> {

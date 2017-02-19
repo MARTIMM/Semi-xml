@@ -6,7 +6,7 @@ use v6.c;
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 #TODO compatibility with version2 NCX navigation documents?
