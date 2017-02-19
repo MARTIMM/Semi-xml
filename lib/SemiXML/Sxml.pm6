@@ -23,10 +23,22 @@ class Sxml {
 
   has Bool $!trace;
   has Bool $!merge;
+  
+  has Str $!filename;
 
-  submethod BUILD ( Str :$filename, :$!trace = False, :$!merge = False ) {
+  #-----------------------------------------------------------------------------
+  submethod BUILD ( Str :$filename, Hash :$config, :$!trace = False, :$!merge = False ) {
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
+    
+    self!prepare-config( :$!filename, :$config, :$!trace, :$!merge);
+  }
+
+  #-----------------------------------------------------------------------------
+  method !prepare-config (
+    Str :$!filename, Hash :$config, :$!trace = False, :$!merge = False
+  ) {
+
 
 #`{{
 my $R = Distribution::Resources.new(:repo<SemiXML::Sxml>, :dist-id(''));
@@ -51,17 +63,15 @@ note "\n My R: ", $R.perl;
 
 }}
 
-    # Load the config file from resources. This is an sha encoded file when
-    # installed, so this one will be the only one.
+    # load the config file from resources first
 
-# There is bug locally to this package. Resource get wrong path when using
-# local distribution
-
+# There is bug locally to this package. Resources get wrong path when using
+# local distribution. However, strange as it is, not on Travis!
 note "\nR: ", %?RESOURCES.perl;
 note "\nC: ", %?RESOURCES<SemiXML.toml>;
 
 my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
-if %?RESOURCES<SemiXML.toml>.Str ~~ m/SemiXML.toml $/ {
+if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
   $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
 }
 $!configuration = self!load-config(:config-name($rp.IO.abspath));
@@ -75,9 +85,9 @@ $!configuration = self!load-config(:config-name($rp.IO.abspath));
        ? $!configuration ?? $!configuration.config.clone !! {};
 
     # if filename is given, use its path also in its locations
-    if ?$filename and $filename.IO ~~ :r {
-      my Str $fn-bn = $filename.IO.basename;
-      my Str $fn-p = $filename.IO.abspath;
+    if ?$!filename and $!filename.IO ~~ :r {
+      my Str $fn-bn = $!filename.IO.basename;
+      my Str $fn-p = $!filename.IO.abspath;
       my Str $fn-d = $fn-p;
       $fn-d ~~ s/ '/'? $fn-bn //;
       $locations = [$fn-d];
@@ -91,7 +101,7 @@ $!configuration = self!load-config(:config-name($rp.IO.abspath));
       $other-config = ? $!configuration ?? $!configuration.config.clone !! {};
 
       $fn-p ~~ s/ $fn-d '/'? //;
-      my $fn-e = $filename.IO.extension;
+      my $fn-e = $!filename.IO.extension;
       $fn-p ~~ s/ $fn-e $/toml/;
       $!configuration = self!load-config(
         :config-name($fn-p), :$other-config, :$locations, :merge
