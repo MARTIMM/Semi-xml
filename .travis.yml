@@ -8,13 +8,16 @@ perl6:
   - latest
 
 install:
-  - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
-#  - panda installdeps .
-  - panda update
-  - panda install XML
-  - panda --notests install Config::DataLang::Refine
-  - panda install Terminal::ANSIColor
+  - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
+
+  - zef update
+  - zef --notests install Config::DataLang::Refine
+#  - zef install XML
+#  - zef install Terminal::ANSIColor
+  - zef --depsonly install .
 
 cache:
   directories:
-    - $TRAVIS_BUILD_DIR/.rakudobrew
+#    - $TRAVIS_BUILD_DIR/.rakudobrew
+    - $HOME/Travis-ci
+    - $HOME/.rakudobrew
