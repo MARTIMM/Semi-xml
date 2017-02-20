@@ -18,69 +18,31 @@ class Sxml {
   has SemiXML::Grammar $!grammar;
   has SemiXML::Actions $.actions handles < get-sxml-object >;
 
-#  has Hash $.styles;
   has Bool $!new-style;
   has Config::DataLang::Refine $!configuration;
 
   has Str $!filename;
-  has Array $!refine-keys;
+  has Bool $!drop-cfg-filename;
+  has Array $!refine;
   has Hash $!user-config;
   has Bool $!trace;
   has Bool $!merge;
 
   #-----------------------------------------------------------------------------
-  submethod BUILD (
-    Array :$!refine-keys = [], :$!trace = False, :$!merge = False,
-  ) {
+  submethod BUILD ( Array :$!refine = [], :$!trace = False, :$!merge = False ) {
 
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
   }
 
   #-----------------------------------------------------------------------------
-  multi method parse ( Str :$!filename!, Hash :$config --> ParseResult ) {
-
-    $!user-config = $config;
+  multi method parse ( Str:D :$!filename!, Hash :$config --> ParseResult ) {
 
     my ParseResult $pr;
 
     if $!filename.IO ~~ :r {
-#`{{
-      my Str $name-bn = $!filename.IO.basename;
-      my Str $name-p = $!filename.IO.abspath;
-      my Str $name-d = $name-p;
-      $name-d ~~ s/ \/? $name-bn//;
-      $name-bn ~~ s/ '.sxml' /.toml/;
-}}
-#`{{
-      # Only assign if config is defined
-      my Hash $other-config = $!actions.config.clone if ? $!actions.config;
-      my Config::DataLang::Refine $c0 = self!load-config(
-        :config-name($name-bn),
-        :locations([$name-d]),
-        :$other-config
-      );
-
-      # Set the config in the actions
-      $!actions.config = ? $c0 ?? $c0.config.clone !! $other-config;
-}}
-#`{{
-      if $!actions.config<output><filename>:!exists {
-        my Str $fn = $!filename.IO.basename;
-        my $ext = $!filename.IO.extension;
-        $fn ~~ s/ '.' $ext //;
-        $!actions.config<output><filename> = $fn;
-      }
-
-      if $!actions.config<output><filepath>:!exists {
-        my Str $fn = $!filename.IO.abspath;
-        my Str $bn = $!filename.IO.basename;
-        $fn ~~ s/ '/'? $bn //;
-        $!actions.config<output><filepath> = $fn;
-      }
-}}
       my $text = slurp($!filename);
-      $pr = self.parse( :content($text), :$config);
+      $pr = self.parse( :content($text), :$config, :!drop-cfg-filename);
       die "Parse failure" if $pr ~~ Nil;
     }
 
@@ -92,22 +54,14 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  multi method parse ( Str :$content! is copy, Hash :$config --> ParseResult ) {
+  multi method parse (
+    Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True
+    --> ParseResult
+  ) {
 
     $!user-config = $config;
+    $!filename = Str if $!drop-cfg-filename;
     self!prepare-config;
-
-#`{{
-    if $config.defined {
-      my Config::DataLang::Refine $c;
-      $!actions.config = $c.merge-hash( $!actions.config, $config);
-    }
-}}
-#`{{
-    # Remove comments, trailing and leading spaces
-    $content ~~ s/^\s+//;
-    $content ~~ s/\s+$//;
-}}
 
     # Parse the content. Parse can be recursively called
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
@@ -153,7 +107,8 @@ class Sxml {
                 XML::Document :$other-document
               ) {
 
-    my Hash $config = $!actions.config;
+#TODO refine
+    my Hash $config = $!configuration.config;
 
     # Did not parse a file but content or filename not defined. In that case
     # take the name of the program and remove extension
@@ -199,7 +154,7 @@ class Sxml {
 
       if $cmd.defined {
 
-        # Drop the extention again. Let it be provided by the command
+        # Drop the extension again. Let it be provided by the command
         my Str $ext = $filename.IO.extension;
         $filename ~~ s/ '.' $ext //;
         $filename = $filename.IO.basename;
@@ -270,7 +225,8 @@ class Sxml {
     # previous Therefore defaults first, then from user config in roles then
     # the settings from the sxml file.
     #
-    my Hash $config = $!actions.config;
+#TODO refine
+    my Hash $config = $!configuration.config;
 
     # If there is one, try to generate the xml
     if ?$root-element {
@@ -339,7 +295,7 @@ class Sxml {
     --> Any
   ) {
     my Array $hashes;
-    for ( $!actions.config) -> $h {
+    for ( $!configuration.config) -> $h {
       if $h{$section}:exists {
         my $e = $h{$section};
 
@@ -375,123 +331,115 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   method get-current-filename ( --> Str ) {
-
+#TODO refine
     return [~] $!configuration.config<output><filepath>,
                '/', $!configuration.config<output><filename>;
   }
 
   #-----------------------------------------------------------------------------
-  method !prepare-config ( Hash :$config ) {
+  method !prepare-config ( ) {
 
-#`{{
-my $R = Distribution::Resources.new(:repo<SemiXML::Sxml>, :dist-id(''));
-note "\n My C: ", $R<SemiXML.toml>;
-note "\n My R: ", $R.perl;
+    # 1) Cleanup old configs
+    $!configuration = Config::DataLang::Refine;
 
-$R = Distribution::Resources.new(:repo<file#/home/marcel/Languages/Perl6/Projects/Semi-xml>, :dist-id(''));
-note "\n My C: ", $R<SemiXML.toml>;
-note "\n My R: ", $R.perl;
-
-$R = Distribution::Resources.new(:repo<Pod::Render>, :dist-id(''));
-note "\n My C: ", $R<pod6.css>;
-note "\n My R: ", $R.perl;
-
-$R = Distribution::Resources.new(:repo<file#/home/marcel/Languages/Perl6/Projects/Semi-xml>, :dist-id(''));
-note "\n My C: ", $R<SemiXML.toml>;
-note "\n My R: ", $R.perl;
-
-$R = Distribution::Resources.new(:repo<file#/home/marcel/Languages/Perl6/Projects/Semi-xml/lib>, :dist-id(''));
-note "\n My C: ", $R<SemiXML.toml>;
-note "\n My R: ", $R.perl;
-
-}}
-
-    # 1) load the SemiXML.toml from resources directory
+    # 2) load the SemiXML.toml from resources directory
 
 # There is bug locally to this package. Resources get wrong path when using
 # local distribution. However, strange as it is, not on Travis!
-note "\nR: ", %?RESOURCES.perl;
-note "\nC: ", %?RESOURCES<SemiXML.toml>;
+#note "\nR: ", %?RESOURCES.perl;
+#note "\nC: ", %?RESOURCES<SemiXML.toml>;
 
 my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
 if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
   $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
 }
-$!configuration = self!load-config(:config-name($rp.IO.abspath));
+# pickup only one config file. Will always be there.
+self!load-config( :config-name($rp.IO.abspath), :!merge);
 
-#    $!configuration = self!load-config(
-#      :config-name(%?RESOURCES<SemiXML.toml>.Str)
+#    self!load-config(
+#      :config-name(%?RESOURCES<SemiXML.toml>.Str, :!merge)
 #    );
 
+
+    # 3) if filename is given, use its path also
     my Array $locations;
-    my Hash $other-config =
-       ? $!configuration ?? $!configuration.config.clone !! {};
-
-    # 2) if filename is given, use its path also in its locations
+    my Str $fpath;
+    my Str $fname;
+    my Str $fdir;
+    my Str $fext;
     if ?$!filename and $!filename.IO ~~ :r {
-      my Str $fn-bn = $!filename.IO.basename;
-      my Str $fn-p = $!filename.IO.abspath;
-      my Str $fn-d = $fn-p;
-      $fn-d ~~ s/ '/'? $fn-bn //;
-      $locations = [$fn-d];
 
-      # 3) load SemiXML.TOML from the files location
-      $!configuration = self!load-config(
-        :config-name<SemiXML.toml>, :$other-config, :$locations, :merge
-      );
+      $fname = $!filename.IO.basename;
+      $fpath = $!filename.IO.abspath;
+      $fdir = $fpath;
+      $fdir ~~ s/ '/'? $fname //;
+      $locations = [$fdir];
 
-      # 4) load the sxml config file name from its location
-      $other-config = ? $!configuration ?? $!configuration.config.clone !! {};
+      # 3a) to load SemiXML.TOML from the files location, current dir
+      #     (also hidden), and in $HOME. merge is controlled by user.
+      self!load-config( :config-name<SemiXML.toml>, :$locations, :merge);
 
-      $fn-p ~~ s/ $fn-d '/'? //;
-      my $fn-e = $!filename.IO.extension;
-      $fn-p ~~ s/ $fn-e $/toml/;
-      $!configuration = self!load-config(
-        :config-name($fn-p), :$other-config, :$locations, :merge
-      );
+      # 3b) same as in 3a but use the filename now.
+      $fext = $!filename.IO.extension;
+      $fname ~~ s/ $fext $/toml/;
+      self!load-config( :config-name($fname), :$locations, :merge);
     }
 
-    # 3) if filename is not given, the configuration is searched using the
+    # 4) if filename is not given, the configuration is searched using the
     # program name
     else {
-      $!configuration = self!load-config(:$other-config);
+
+      # in case it was set but not found/readable
+      $!filename = Str;
+
+      self!load-config(:merge);
     }
 
-    if $!user-config.defined {
-      my Config::DataLang::Refine $c;
-      $!actions.config = $c.merge-hash( $!actions.config, $config);
-    }
+    # 5) merge any user configuration in it
+    $!configuration.config =
+      $!configuration.merge-hash($!user-config) if ?$!user-config;
 
-#note "\nConfiguration: ", $!configuration.perl;
-    $!actions.config = $!configuration.config;
 
-    # Check if modules needs to be instantiated in the config
-    $!actions.process-config-for-modules;
+    # set filename and path if not set, extension is set in default config
+    my Hash $c := $!configuration.config;
+    $c<output> = {} unless $c<output>:exists;
+
+    # lop off the extension from the above devised config name
+    $fname ~~ s/ '.toml' $// if ?$fname;
+    $c<output><filename> = $fname if ?$fname and $c<output><filename>:!exists;
+    $c<output><filepath> = $fdir if ?$fdir and $c<output><filepath>:!exists;
+
+    # instantiate modules specified in the configuration
+    $!actions.process-modules(
+      :lib($!configuration.config<library> // {}),
+      :mod($!configuration.config<module> // {}),
+    );
+
+    note "\nConfiguration: ", $!configuration.perl if $!trace;
   }
 
   #-----------------------------------------------------------------------------
   method !load-config (
-    Str :$config-name, Array :$locations = [], Hash :$other-config,
-    Bool :$m = False
-    --> Config::DataLang::Refine
+    Str :$config-name, Array :$locations = [], Bool :$merge is copy
   ) {
 
-    my Bool $merge = $!merge ?| $m;
-    my Config::DataLang::Refine $c;
+    $merge = $!merge ?& $merge;
+
     try {
 
-      if ?$other-config {
-        $c .= new(
-          :$config-name, :$locations, :$other-config, :$merge, :$!trace
+      # $!configuration is always undefined the first time.
+      if ?$!configuration {
+        $!configuration .= new(
+          :$config-name, :$locations, :other-config($!configuration.config),
+          :$merge, :$!trace
         );
       }
 
       else {
-        $c .= new( :$config-name, :$locations, :$merge, :$!trace);
+        $!configuration .= new( :$config-name, :$locations, :$merge, :$!trace);
       }
 
       CATCH {
-        $c = Nil;
         default {
           # Ignore file not found exception
           if .message !~~ m/ :s Config files .* not found / {
@@ -499,11 +447,8 @@ $!configuration = self!load-config(:config-name($rp.IO.abspath));
           }
         }
       }
-
-      $c;
     }
   }
-
 
   #-----------------------------------------------------------------------------
   #-----------------------------------------------------------------------------
@@ -670,6 +615,7 @@ $!configuration = self!load-config(:config-name($rp.IO.abspath));
   }
 }
 
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) is export {
   return ~$x.get-xml-text;

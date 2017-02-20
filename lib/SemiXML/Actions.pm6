@@ -14,7 +14,6 @@ class Actions {
 
   # Objects hash with one predefined object for core methods
   has Hash $.objects = {};
-  has Hash $.config is rw = {};
   has XML::Document $!xml-document;
 
   # Keep current state of affairs. Hopefully some info when parsing fails
@@ -614,23 +613,27 @@ class Actions {
   }
 
   #-----------------------------------------------------------------------------
-  method process-config-for-modules ( ) {
+  method process-modules ( Hash :$lib = {}, Hash :$mod = {} ) {
 
-    if $!config<module>:exists {
-      for $!config<module>.kv -> $key, $value {
-        if $!objects{$key}:!exists {
-          if $!config<library>{$key}:exists {
+    # cleanup old objects
+    for $!objects.keys -> $k {
+      undefine $!objects{$k};
+      $!objects{$k}:delete;
+    }
 
-            my $repository = CompUnit::Repository::FileSystem.new(
-              :prefix($!config<library>{$key})
-            );
-            CompUnit::RepositoryRegistry.use-repository($repository);
-          }
+    for $mod.kv  -> $key, $value {
+      if $!objects{$key}:!exists {
+        if $lib{$key}:exists {
 
-          require ::($value);
-          my $obj = ::($value).new;
-          $!objects{$key} = $obj;
+          my $repository = CompUnit::Repository::FileSystem.new(
+            :prefix($lib{$key})
+          );
+          CompUnit::RepositoryRegistry.use-repository($repository);
         }
+
+        require ::($value);
+        my $obj = ::($value).new;
+        $!objects{$key} = $obj;
       }
     }
   }
