@@ -41,7 +41,7 @@ spurt( 't/Grammars/Error messages.html', q:to/EOSXML/);
 EOSXML
 
 my SemiXML::Sxml $x .= new;
-$x.parse-file( :$filename, :$config);
+$x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 #note $xml-text;

@@ -11,29 +11,43 @@ my @a = grep( /^ <-[-]>/, @*ARGS);
 @*ARGS = (|grep( /^ '-'/, @*ARGS), |@a);
 
 #-------------------------------------------------------------------------------
-#= sxml2xml -run run-code filename.sxml
-sub MAIN ( Str $filename, Str :$run ) {
+#= sxml2xml -run=<run-code> filename.sxml
+sub MAIN (
+  Str $filename, Str :$run, Str :$in = 'xml', Str :$out = 'xml',
+  Bool :$trace = False, Bool :$merge = False
+) {
 
-  my $dep = process-sxml( $filename, :$run);
+  my $dep = process-sxml(
+    $filename, :$run, :refine([ $in, $out]), :$trace, :$merge
+  );
+
   if $dep.defined {
     my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
     for $dep-list.list -> $dependency is copy {
+
       $dependency ~~ s/^\s+//;
       $dependency ~~ s/\s+$//;
+
       say "Processing dependency $dependency";
-      my $dep = process-sxml( $dependency, :$run) if ? $dependency;
+      my $dep = process-sxml(
+        $dependency, :$run, :refine([ $in, $out]), :$trace, :$merge
+      ) if ? $dependency;
+
       $dep-list.push: |$dep.split(/\s* ',' \s*/) if ? $dep;
     }
   }
 }
 
 #-------------------------------------------------------------------------------
-sub process-sxml ( Str:D $filename is copy, Str :$run ) {
+sub process-sxml (
+  Str:D $filename is copy, Str :$run, Array :$refine,
+  Bool :$trace = False, Bool :$merge = False, 
+) {
 
-  my SemiXML::Sxml $x .= new(:$filename);
+  my SemiXML::Sxml $x .= new( :$trace, :$merge);
 
   if $filename.IO ~~ :r {
-    $x.parse-file(:$filename);
+    $x.parse(:$filename);
     $filename ~~ s/ '.' $filename.IO.extention //;
     $x.save( :run-code($run), :$filename);
     my $deps = $x.get-option( :section('dependencies'), :option('files')) // '';

@@ -36,7 +36,7 @@ my Hash $config = {
   module => {
     file => 'SxmlLib::File'
   },
-  
+
   output => {
     fileext => 'html'
   }
@@ -46,7 +46,7 @@ my Hash $config = {
 # Parse
 #
 my SemiXML::Sxml $x .= new;
-$x.parse-file( :$filename, :$config);
+$x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 say $xml-text;

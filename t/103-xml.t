@@ -66,11 +66,11 @@ my Hash $config = {
 
 # Parse
 #
-my SemiXML::Sxml $x .= new;
-$x.parse-file( :$filename, :$config);
+my SemiXML::Sxml $x .= new(:trace);
+$x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+say $xml-text;
 
 
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
@@ -98,13 +98,13 @@ like $xml-text, / :s "bla<b>bla</b>bla <u>bla<b>bla</b></u>."/,
      'Check part of result spacing tag $*|';
 
 
-unlink $filename;
+#unlink $filename;
 
 $filename = 't/103-xml.html';
 $x.save;
 ok $filename.IO ~~ :e, "File $filename written";
 
-unlink $filename;
+#unlink $filename;
 
 
 #-------------------------------------------------------------------------------

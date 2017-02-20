@@ -32,7 +32,7 @@ EOSX
 # Parse
 #
 my SemiXML::Sxml $x .= new;
-$x.parse-file(:$filename);
+$x.parse(:$filename);
 
 my Str $xml-text = ~$x;
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';

@@ -34,7 +34,7 @@ $config<module><SxmlCore> = 'SxmlLib::SxmlCore';
 # Parse
 #
 my SemiXML::Sxml $x .= new;
-$x.parse-file( :$filename, :$config);
+$x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
 #note $xml-text;
