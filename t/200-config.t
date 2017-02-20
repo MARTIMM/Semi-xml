@@ -4,8 +4,9 @@ use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 my Str $d = 't/D';
+my Str $cfg = "$d/SemiXML.toml";
 mkdir $d unless $d.IO ~~ :d;
-spurt "$d/SemiXML.toml", qq:to/EOCONFIG/;
+spurt $cfg, qq:to/EOCONFIG/;
 
   # flip interpretation
   new-style = 1
@@ -37,7 +38,7 @@ spurt "$d/SemiXML.toml", qq:to/EOCONFIG/;
 
   EOCONFIG
 
-my Str $f = 't/D/f200.sxml';
+my Str $f = "$d/f200.sxml";
 spurt $f, q:to/EOSXML/;
   $|html [
     $|body [
@@ -48,12 +49,14 @@ spurt $f, q:to/EOSXML/;
   EOSXML
 
 #-------------------------------------------------------------------------------
-my SemiXML::Sxml $x .= new( :trace, :merge);
+my SemiXML::Sxml $x;
+
+$x .= new( :trace, :merge);
 $x.parse(:filename($f));
 my Str $xml-text = ~$x;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 
-$x .= new( :trace, :merge);
+
 $x.parse(:content(slurp($f)));
 $xml-text = ~$x;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
@@ -64,5 +67,6 @@ note $xml-text;
 # cleanup
 done-testing;
 
-
-#unlink ...
+unlink $cfg;
+unlink $f;
+rmdir $d;
