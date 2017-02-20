@@ -2,6 +2,9 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.27.4
+  * Rewrote some parts of Sxml.pm6 to handle the configuration, it is much better now.
+  * parse-file is changed into parse. Together with the original one they are now defined as multi methods.
 * 0.27.3
   * refactored SemiXML::Text from Actions to SemiXML/Text.pm6.
   * long standing bug fixed: Resources gave wrong path when using local distro. Caused by the way the Sxml class was defined. file SemiXML.pm6 is now moved to SemiXml/Sxml.pm6 and all use statements are modified.
