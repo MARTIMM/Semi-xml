@@ -20,6 +20,7 @@
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
 
+    "SxmlLib::EPub":                    "lib/SxmlLib/EPub.pm6",
     "SxmlLib::EPub::EPub2Builder":      "lib/SxmlLib/EPub/EPub2Builder.pm6",
     "SxmlLib::EPub::EPub3Builder":      "lib/SxmlLib/EPub/EPub3Builder.pm6",
 
@@ -52,5 +53,5 @@
     "google-code-prettify/run_prettify.js"
   ],
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.27.4"
+  "version": "v0.27.4.1"
 }
