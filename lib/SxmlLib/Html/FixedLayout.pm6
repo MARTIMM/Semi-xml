@@ -5,6 +5,7 @@ unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
 use SemiXML::Sxml;
+use SemiXML::Text;
 
 #-------------------------------------------------------------------------------
 class Html::FixedLayout {
