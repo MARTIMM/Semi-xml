@@ -5,6 +5,7 @@ unit package SemiXML:auth<https://github.com/MARTIMM>;
 
 use SemiXML::Grammar;
 use SemiXML::Actions;
+use SemiXML::Text;
 use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
@@ -346,8 +347,8 @@ class Sxml {
 
 # There is bug locally to this package. Resources get wrong path when using
 # local distribution. However, strange as it is, not on Travis!
-#note "\nR: ", %?RESOURCES.perl;
-#note "\nC: ", %?RESOURCES<SemiXML.toml>;
+note "\nR: ", %?RESOURCES.perl;
+note "\nC: ", %?RESOURCES<SemiXML.toml>;
 
 my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
 if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
@@ -416,6 +417,7 @@ self!load-config( :config-name($rp.IO.abspath), :!merge);
     );
 
     note "\nConfiguration: ", $!configuration.perl if $!trace;
+exit(0);
   }
 
   #-----------------------------------------------------------------------------

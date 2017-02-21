@@ -9,6 +9,7 @@ mkdir('t/M');
 spurt( 't/M/m1.pm6', q:to/EOMOD/);
   use v6.c;
   use SemiXML::Sxml;
+  use SemiXML::Text;
   use XML;
 
   class M::m1 {
@@ -63,7 +64,7 @@ my Hash $config = {
 my Str $content = '$!mod1.mth1 [ ]';
 
 # instantiate parser and parse with contents and config
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new(:trace);
 my ParseResult $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 

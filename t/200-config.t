@@ -63,10 +63,12 @@ like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 
 note $xml-text;
 
+$x.save;
+
 #-------------------------------------------------------------------------------
 # cleanup
 done-testing;
 
-unlink $cfg;
-unlink $f;
-rmdir $d;
+#unlink $cfg;
+#unlink $f;
+#rmdir $d;

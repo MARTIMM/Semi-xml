@@ -12,7 +12,7 @@ use SemiXML::Sxml;
 #   test attributes
 #-------------------------------------------------------------------------------
 # Setup
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new(:trace);
 isa-ok $x, 'SemiXML::Sxml', $x.^name;
 
 # Setup the text to parse
