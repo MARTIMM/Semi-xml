@@ -10,9 +10,12 @@ use SemiXML::Sxml;
 # Setup
 # Write file
 #
-my $filename = 't/test-file.sxml';
+my $dir = 't/D101';
+my $filename = "$dir/test-file.sxml";
+mkdir $dir unless $dir.IO ~~ :e;
+
 spurt( $filename, q:to/EOSX/);
-#
+
 $|html [
   $|body [                                       # Body
     $|h1 [ Data from file \# h1 ]                # outside h1
@@ -30,7 +33,7 @@ $|html [
 EOSX
 
 # Parse
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new(:trace);
 $x.parse(:$filename);
 
 my Str $xml-text = ~$x;
@@ -45,17 +48,18 @@ like $xml-text, /:s 'header' '#' 'th' /, 'escaped # not removed';
 
 #note $xml-text;
 
-unlink $filename;
 
 # Write xml out to file. Default extention is .xml
-$filename ~~ s/\.sxml//;
-$x.save(:$filename);
-ok "$filename.xml".IO ~~ :e, "File written";
-
-unlink $filename;
+my $fout = $filename;
+$fout ~~ s/\.sxml//;
+$x.save(:$fout);
+ok "$fout.xml".IO ~~ :e, "File $fout.xml written";
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
-done-testing();
+unlink $filename;
+unlink "$fout.xml";
+rmdir $dir;
+
+done-testing;
 exit(0);

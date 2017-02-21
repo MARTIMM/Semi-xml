@@ -9,9 +9,12 @@ use SemiXML::Sxml;
 #     $!SxmlCore.date-time []
 #-------------------------------------------------------------------------------
 # Setup
-#
-my $filename = 't/test-file.sxml';
-spurt( $filename, q:to/EOSX/);
+my $dir = 't/D107';
+mkdir $dir unless $dir.IO ~~ :e;
+my $f1 = "$dir/test-file.sxml";
+
+
+spurt( $f1, q:to/EOSX/);
 $|top [
   $!SxmlCore.date []
   $!SxmlCore.date year=1957 month=6 day=26 []
@@ -34,8 +37,7 @@ $config<module><SxmlCore> = 'SxmlLib::SxmlCore';
 # Parse
 #
 my SemiXML::Sxml $x .= new;
-$x.parse( :$filename, :$config);
-
+$x.parse( :filename($f1), :$config);
 my Str $xml-text = ~$x;
 #note $xml-text;
 
@@ -45,10 +47,9 @@ ok $xml-text ~~ m:s/ '1957-06-26' /, 'Check specific date';
 ok $xml-text ~~ m:s/ '1957-01-26' /, 'Check specific date on 1st month';
 ok $xml-text ~~ m:s/ '1957-06-01' /, 'Check specific date on 1st day';
 ok $xml-text ~~ m:s/ '1957-01-01' /, 'Check specific date on 1st day and month';
-
 ok $xml-text ~~ m:s/ '<X>' $d '</X>' /, 'Check date of today';
 
-#say 'Date: ', $d;
+#note 'Date: ', $d;
 ok $xml-text ~~ m/ '<Y>'
                      $d                                 # year-month-day
                      'T' (\d\d ':')**2 \d\d             # hour:minute second
@@ -67,11 +68,13 @@ ok $xml-text ~~ m/ '<Z>'
                    /,
   'Check iso date, time and timezone of 960 sec';
 
-unlink $filename;
 
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
 done-testing();
+
+unlink $f1;
+rmdir $dir;
+
 exit(0);

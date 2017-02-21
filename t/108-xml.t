@@ -10,9 +10,11 @@ use SemiXML::Sxml;
 #     $!SxmlCore.pi [code text]
 #-------------------------------------------------------------------------------
 # Setup
-#
-my $filename = 't/test-file.sxml';
-spurt( $filename, q:to/EOSX/);
+my $dir = 't/D108';
+mkdir $dir unless $dir.IO ~~ :e;
+my $f1 = "$dir/test-file.sxml";
+
+spurt( $f1, q:to/EOSX/);
 $|html [
   $|body [
     $|h1 [Tests for comments etc]
@@ -41,10 +43,10 @@ $config<module><SxmlCore> = 'SxmlLib::SxmlCore';
 # Parse
 #
 my SemiXML::Sxml $x .= new;
-$x.parse( :$filename, :$config);
+$x.parse( :filename($f1), :$config);
 
 my Str $xml-text = ~$x;
-#say $xml-text;
+#note $xml-text;
 
 my $d = Date.today();
 ok $xml-text ~~ m/'<!--comment text-->'/, 'Check comments';
@@ -61,10 +63,12 @@ ok $xml-text ~~ m/'<![CDATA[cdata text<p>data in section</p><br/>]]>'/,
 
 ok $xml-text ~~ m/'<?perl6 instruction text?>'/, 'Check pi data';
 
-unlink $filename;
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
+
+unlink $f1;
+rmdir $dir;
+
 done-testing();
 exit(0);

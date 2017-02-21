@@ -3,9 +3,9 @@ use Test;
 use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
-my Str $d = 't/D';
-my Str $cfg = "$d/SemiXML.toml";
-mkdir $d unless $d.IO ~~ :d;
+my Str $dir = 't/D200';
+my Str $cfg = "$dir/SemiXML.toml";
+mkdir $dir unless $dir.IO ~~ :d;
 spurt $cfg, qq:to/EOCONFIG/;
 
   # flip interpretation
@@ -26,7 +26,7 @@ spurt $cfg, qq:to/EOCONFIG/;
   [ output ]
     fileext             = 'xml'
     filename            = 'target200'
-    path                = "$d"
+    filepath            = "$dir"
 
   [ output.program ]
     pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
@@ -38,7 +38,7 @@ spurt $cfg, qq:to/EOCONFIG/;
 
   EOCONFIG
 
-my Str $f = "$d/f200.sxml";
+my Str $f = "$dir/f200.sxml";
 spurt $f, q:to/EOSXML/;
   $|html [
     $|body [
@@ -55,6 +55,7 @@ $x .= new( :trace, :merge);
 $x.parse(:filename($f));
 my Str $xml-text = ~$x;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
+$x.save;
 
 
 $x.parse(:content(slurp($f)));
@@ -63,12 +64,12 @@ like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 
 note $xml-text;
 
-$x.save;
 
 #-------------------------------------------------------------------------------
 # cleanup
 done-testing;
 
-#unlink $cfg;
-#unlink $f;
-#rmdir $d;
+unlink $cfg;
+unlink $f;
+unlink "$dir/target200.xml";
+rmdir $dir;
