@@ -547,6 +547,9 @@ class Actions {
     # substitute multiple spaces with one space
     $t ~~ s:g/ \s\s+ / / unless $fixed;
 
+    # remove return characters if found
+    $t ~~ s:g/ \n+ / / unless $fixed;
+
     # remove leading spaces for the minimum number of spaces when the content
     # should be fixed
     if $fixed {
