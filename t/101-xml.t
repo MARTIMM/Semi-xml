@@ -30,7 +30,6 @@ $|html [
 EOSX
 
 # Parse
-#
 my SemiXML::Sxml $x .= new;
 $x.parse(:$filename);
 
@@ -44,7 +43,7 @@ unlike $xml-text, /:s '#' 'trrr' /, 'comment also removed';
 like $xml-text, /:s '#' 'inside' 'protected' 'body' /, 'comment not removed';
 like $xml-text, /:s 'header' '#' 'th' /, 'escaped # not removed';
 
-say $xml-text;
+#note $xml-text;
 
 unlink $filename;
 

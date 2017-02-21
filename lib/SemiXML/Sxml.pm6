@@ -102,47 +102,35 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  # Expect filename without extension
-  method save ( Str :$filename is copy,
-                Str :$run-code,
-                XML::Document :$other-document
-              ) {
+  # Save file to filename or devise filename from config
+  method save (
+    Str :$filename is copy, Str :$run-code, XML::Document :$other-document
+  ) {
 
 #TODO refine
     my Hash $config = $!configuration.config;
 
-    # Did not parse a file but content or filename not defined. In that case
-    # take the name of the program and remove extension
-    #
-    if $config<output><filename>:!exists {
-      my Str $fn = $*PROGRAM.basename;
-      my Str $ext = $*PROGRAM.extension;
-      $fn ~~ s/ '.' $ext //;
-      $config<output><filename> = $fn;
+
+    # set the filename if needed
+    if ?$filename {
+      $filename = $filename.IO.basename;
     }
 
-    # When the path is not defined, take the one of the program
-    if $config<output><filepath>:!exists {
-      my Str $fn = $*PROGRAM.abspath;
-      my Str $bn = $*PROGRAM.basename;
-      $fn ~~ s/ ('/'||\\)? $bn //;
-      $config<output><filepath> = $fn;
+    else {
+      $filename = $config<output><filename>;
     }
 
-    # Set the filename
-    $filename = $filename.IO.basename if $filename.defined;
-    $filename = $config<output><filename> unless $filename.defined;
-
-    # substitute extension
+    # modify extension
     my Str $ext = $filename.IO.extension;
     $filename ~~ s/ '.' $ext //;
-    $filename ~= "." ~ ($config<output><fileext> // 'xml');
+    $filename ~= "." ~ $config<output><fileext>;
 
-    # If not absolute prefix the path from the config
+    # if not absolute prefix the path from the config
     if $filename !~~ m/^ '/' / {
       my $filepath = $config<output><filepath>;
       $filename = "$filepath/$filename" if $filepath;
     }
+
 
     # Get the document text
     my $document = self.get-xml-text(:$other-document);
@@ -191,14 +179,14 @@ class Sxml {
 
       else {
 
-        say "Code '$run-code' to select command not found, Choosen to dump to $filename";
+        note "Code '$run-code' to select command not found, Choosen to dump to $filename";
       }
     }
 
     else {
 
       spurt( $filename, $document);
-      say "Saved file in $filename";
+      note "Saved file in $filename";
     }
   }
 
@@ -345,22 +333,19 @@ class Sxml {
 
     # 2) load the SemiXML.toml from resources directory
 
-# There is bug locally to this package. Resources get wrong path when using
+# There is a bug locally to this package. Resources get wrong path when using
 # local distribution. However, strange as it is, not on Travis!
-note "\nR: ", %?RESOURCES.perl;
-note "\nC: ", %?RESOURCES<SemiXML.toml>;
+#note "\nR: ", %?RESOURCES.perl;
+#note "\nC: ", %?RESOURCES<SemiXML.toml>;
 
-my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
-if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
-  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
-}
+#my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
+#if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
+#  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
+#}
 # pickup only one config file. Will always be there.
-self!load-config( :config-name($rp.IO.abspath), :!merge);
+#self!load-config( :config-name($rp.IO.abspath), :!merge);
 
-#    self!load-config(
-#      :config-name(%?RESOURCES<SemiXML.toml>.Str, :!merge)
-#    );
-
+    self!load-config( :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge);
 
     # 3) if filename is given, use its path also
     my Array $locations;
@@ -405,10 +390,34 @@ self!load-config( :config-name($rp.IO.abspath), :!merge);
     my Hash $c := $!configuration.config;
     $c<output> = {} unless $c<output>:exists;
 
-    # lop off the extension from the above devised config name
-    $fname ~~ s/ '.toml' $// if ?$fname;
-    $c<output><filename> = $fname if ?$fname and $c<output><filename>:!exists;
-    $c<output><filepath> = $fdir if ?$fdir and $c<output><filepath>:!exists;
+    if $c<output><filename>:!exists {
+      if ?$fname {
+        # lop off the extension from the above devised config name
+        $fname ~~ s/ '.toml' $// if ?$fname;
+        $c<output><filename> = $fname;
+      }
+
+      else {
+        $fname = $*PROGRAM.basename;
+        $fext = $*PROGRAM.extension;
+        $fname ~~ s/ '.' $fext //;
+        $c<output><filename> = $fname;
+      }
+    }
+
+    if $c<output><filepath>:!exists {
+      if ?$fdir {
+        $c<output><filepath> = $fdir;
+      }
+
+      else {
+        $fdir = $*PROGRAM.abspath;
+        $fname = $*PROGRAM.basename;
+        $fdir ~~ s/ '/'? $fname //;
+        $c<output><filepath> = $fdir;
+      }
+    }
+
 
     # instantiate modules specified in the configuration
     $!actions.process-modules(
