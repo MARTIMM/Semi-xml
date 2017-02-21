@@ -9,9 +9,9 @@ perl6:
 
 install:
   - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
-
   - zef update
-  - zef --/test install Config::DataLang::Refine
+#  - zef --/test install Config::DataLang::Refine
+  - zef --/test install https://github.com/MARTIMM/config-datalang-refine.git
 #  - zef install XML
 #  - zef install Terminal::ANSIColor
   - zef --depsonly install .
