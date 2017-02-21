@@ -417,7 +417,6 @@ self!load-config( :config-name($rp.IO.abspath), :!merge);
     );
 
     note "\nConfiguration: ", $!configuration.perl if $!trace;
-exit(0);
   }
 
   #-----------------------------------------------------------------------------
