@@ -5,7 +5,7 @@
   fileext       = 'html'
 
 [output.program]
-  pdf           = 'wkhtmltopdf - %of.pdf'
+  pdf           = 'wkhtmltopdf - %op/%of.pdf'
 #  fmt           = 'xmllint --format --noent - > %of.%oe'
 #  tidy          = 'tidy --output-html 1 - >%of.%oe'
 
