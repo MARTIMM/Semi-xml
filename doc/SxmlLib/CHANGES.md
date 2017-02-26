@@ -36,8 +36,9 @@
   * dir-list() to recursively create list of files and directories.
 
 ## Testing
+
 * 0.2.1
-  * **Temporary problem fix in Report module when %\*RESOURCES is used. When program sxml2xml is using the modules via lib instead of the installed ones the path is missing the root directory name of this project. This might be a perl6 problem but I haven't seen it yet in other projects of mine.**
+  * test summary reports
 * 0.2.0
   * Code numbering in report is following lines in the real test program so it is possible to look in your report at the proper line with the information from the test output.
   * Indenting is per 4 characters instead of two.

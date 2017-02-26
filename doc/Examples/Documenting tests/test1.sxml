@@ -9,7 +9,7 @@ $!report.run title='Integer manipulations' class='Int' label='Int-test'
     to test it thoroughly. First we declare a constant to be used later and an
     integer without a value.
   ]
-  
+
   $!code.add [=
     constant ABC = 10;
     my Int $i;

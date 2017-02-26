@@ -27,11 +27,17 @@ class Report:ver<0.2.1> {
   # value is an Array of which the 1st element is the success count and the
   # 2nd the failure count. These are counts so it can be used to do tests in
   # a loop.
-  #
   has Hash $!test-results;
 
+  # Storage of all scored test results per test type. The test type is same as
+  # the test code without the digits. So type 'T', 'D', etc.
   has Hash $!test-metrics;
+
+  # Gathered data from $!test-metrics to show in pie-charts
   has Array $!all-metrics = [];
+
+  # When metrics file is read, some data is stored here
+  has Hash $env-metrics = {};
 
   has Bool $!highlight-code = False;
   has Str $!highlight-language = '';
@@ -45,7 +51,7 @@ class Report:ver<0.2.1> {
     $!sxml = $sxml;
 
     $!test-program = Q:to/EOINIT/;
-      use v6.c;
+      use v6;
       use Test;
 
       EOINIT
@@ -107,6 +113,41 @@ class Report:ver<0.2.1> {
     XML::Element :$content-body, Array :$tag-list
     --> XML::Node
   ) {
+
+    my XML::Element $html = append-element( $parent, 'html');
+    my Str $title = $attrs<title> // '';
+    my XML::Element $head = append-element( $html, 'head');
+#    append-element( $head, 'title', :text($title)) if ?$title;
+    self!setup-head( $head, $attrs);
+    my XML::Element $body = append-element( $html, 'body');
+
+    $body.append($content-body);
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method metrics (
+    XML::Element $parent, Hash $attrs,
+    XML::Element :$content-body, Array :$tag-list
+    --> XML::Node
+  ) {
+
+    my Str $metric-dir = $attrs<metric-dir> // '.';
+    my @metric-files = dir($metric-dir).grep(/t.metric/);
+    for @metric-files -> $mf {
+      self!load-metrics($mf);
+
+#note "T: ", $!test-metrics;
+note "A: ", $!all-metrics;
+#note "M: ", $!env-metrics;
+      my $div = append-element( $parent, 'div');
+      self!summary-pie(
+        $div, $!all-metrics[0],
+        ([+] $!all-metrics[1], $!all-metrics[4], $!all-metrics[7]),
+        $!all-metrics[2], $!all-metrics[5], $!all-metrics[8],
+        $!all-metrics[12]
+      ) if $!all-metrics[0];
+    }
 
     $parent;
   }
@@ -515,6 +556,45 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
   }
 
   #-----------------------------------------------------------------------------
+  # load metric file.and set $!env-metrics and $!all-metrics
+  method !load-metrics ( IO::Path:D $test-file ) {
+
+    $!env-metrics = {};
+    for $test-file.slurp.lines -> $metric {
+      my @mdata = $metric.split(':');
+      my $key = shift @mdata;
+      given $key {
+        when /^ <[TBDS]> $/ {
+          my @m = @mdata.split(' ');
+note "\@m: ", @m;
+          $!test-metrics{$key} = [ @m[0].Int, @m[1].Int];
+        }
+
+        default {
+          $!env-metrics{$key} = @mdata;
+        }
+      }
+    }
+
+    my Int $total =
+      [+] |@($!test-metrics<T>), |@($!test-metrics<B>),
+          |@($!test-metrics<D>), |@($!test-metrics<S>);
+    $!all-metrics = [$total];
+
+    my Int $ts = [+] @($!test-metrics<T>);
+    $!all-metrics.push: $!test-metrics<T>[0], $!test-metrics<T>[1], $ts;
+
+    $ts = [+] @($!test-metrics<B>);
+    $!all-metrics.push: $!test-metrics<B>[0], $!test-metrics<B>[1], $ts;
+
+    $ts = [+] @($!test-metrics<D>);
+    $!all-metrics.push: $!test-metrics<D>[0], $!test-metrics<D>[1], $ts;
+
+    $ts = [+] @($!test-metrics<S>[0]);
+    $!all-metrics.push: $!test-metrics<S>[0], $!test-metrics<S>[1], $ts;
+  }
+
+  #-----------------------------------------------------------------------------
   method !process-test ( ) {
 
     # search for special elements left and modify these
@@ -614,6 +694,11 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
   }
 
   #-----------------------------------------------------------------------------
+  # Gather results of a test. $test-code is a letter code 'T', 'S', 'B' etc.
+  # with the test number attached e.g 'T3'.
+  # $ok is True or False for the test result. Must return when undefined.
+  # $metric controls storage. Not all data must be saved or they will be
+  # duplicated.
   method !set-test-results ( Str $test-code, Any $ok, Bool :$metric = True ) {
 
     return unless ?$test-code and $ok.defined and $ok ~~ Bool;
