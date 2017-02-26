@@ -1,13 +1,15 @@
-## Changes in SemiXML and sxml2xml
+## Changes in SemiXML::* and sxml2xml
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
 * 0.27.4
   * Rewrote some parts of Sxml.pm6 to handle the configuration, it is much better now.
   * parse-file is changed into parse. Together with the original one they are now defined as multi methods.
+  * %?RESOURCES problem is fixed. It depends on PERL6LIB env variable.
 * 0.27.3
   * refactored SemiXML::Text from Actions to SemiXML/Text.pm6.
   * long standing bug fixed: Resources gave wrong path when using local distro. Caused by the way the Sxml class was defined. file SemiXML.pm6 is now moved to SemiXml/Sxml.pm6 and all use statements are modified.
+  * **Temporary problem fix in Report module when %\*RESOURCES is used. When program sxml2xml is using the modules via lib instead of the installed ones the path is missing the root directory name of this project. This might be a perl6 problem but I haven't seen it yet in other projects of mine.**
 * 0.27.2
   * indentation in fixed areas like for pre(html) or programlisting(docbook) noted by [= ...] is minimized. Now it is not necessary anymore to place your fixed text at the begin of the line.
   * refactored the SxmlCore class from SxmlLib::Actions to a new file SxmlLib/SxmlCore.pm6. It is also not automatically declared anymore in the module table so users must add it to the module table in their config.

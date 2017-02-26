@@ -1,4 +1,4 @@
-# Bugs and Todo list for the SemiXML modules and sxml2xml program
+# Bugs and Todo list for the SemiXML::* modules and sxml2xml program
 
 * Parser and actions.
   * Error messages when parser fails can still be improved.
