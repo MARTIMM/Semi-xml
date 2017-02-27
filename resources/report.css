@@ -209,3 +209,27 @@ path.line {
 text.legend {
   font-size:            11;
 }
+
+/* metrics summary table */
+table.summary-table {
+  border-style:         solid;
+  border-color:         #006000;
+  border-width:         1px;
+  box-shadow:           10px 10px 5px #a0b060;
+  background-size:      45px;
+  border-radius:        7px;
+  margin-bottom:        15px;
+  page-break-inside:    avoid;
+  font-size:            11pt;
+}
+
+th.summary-header {
+  text-align:           left;
+  vertical-align:       top;
+  width:                140px;
+}
+
+td.summary-pie {
+  vertical-align:       top;
+  width:                200px;
+}

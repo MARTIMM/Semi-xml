@@ -19,7 +19,7 @@
 
 # Testing
 ### Testing report module comprising Bug, Code, Report, Skip, Test, Testing and Todo
-* Make a summary from a filtered set of reports.
+* Make benchmark reports
 
 # Other modules independent of xml languages
 

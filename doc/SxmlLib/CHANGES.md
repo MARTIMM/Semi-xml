@@ -38,7 +38,7 @@
 ## Testing
 
 * 0.2.1
-  * test summary reports
+  * Implemented test summary reports
 * 0.2.0
   * Code numbering in report is following lines in the real test program so it is possible to look in your report at the proper line with the information from the test output.
   * Indenting is per 4 characters instead of two.
