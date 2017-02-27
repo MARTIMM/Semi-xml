@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 use Test;
 
 my Int $x = 10;

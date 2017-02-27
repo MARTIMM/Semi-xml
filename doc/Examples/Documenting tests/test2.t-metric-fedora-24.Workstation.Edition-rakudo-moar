@@ -1,17 +1,17 @@
-Title:Integer manipulations
-Package:-
+Title:Code Nesting
+Package:SxmlLib::Testing
 Module:-
-Class:Int
-Distribution:-
-Label:Int-test
-Date (zulu):2017-02-27T10:14:27.009744Z
+Class:Report
+Distribution:SemiXML
+Label:-
+Date (zulu):2017-02-27T10:14:44.058697Z
 OS-Kernel:linux:4.9.7.101.fc.24.x.86._.64
 OS-Distro:fedora:24.Workstation.Edition:24:False
 Perl:Perl 6:6.c
 Compiler:rakudo:2017.02.56.g.9.f.10434
 VM:moar:2017.02.7.g.3.d.85900
-Total: 32
-T:11.00 3.00 14.00
-B:1.00 1.00 2.00
-D:2.00 12.00 14.00
+Total: 16
+T:4.00 2.00 6.00
+B:2.00 3.00 5.00
+D:2.00 1.00 3.00
 S:2.00 0.00 2.00

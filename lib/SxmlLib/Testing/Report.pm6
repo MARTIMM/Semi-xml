@@ -117,7 +117,6 @@ class Report:ver<0.2.1> {
     my XML::Element $html = append-element( $parent, 'html');
     my Str $title = $attrs<title> // '';
     my XML::Element $head = append-element( $html, 'head');
-#    append-element( $head, 'title', :text($title)) if ?$title;
     self!setup-head( $head, $attrs);
     my XML::Element $body = append-element( $html, 'body');
 
@@ -140,13 +139,63 @@ class Report:ver<0.2.1> {
 #note "T: ", $!test-metrics;
 note "A: ", $!all-metrics;
 #note "M: ", $!env-metrics;
-      my $div = append-element( $parent, 'div');
+      my XML::Element $table = append-element(
+        $parent, 'table', %(:class<summary-table>)
+      );
+
+      my XML::Element $tr = append-element( $table, 'tr');
+      append-element(
+        $tr, 'th', %(:colspan<3>,),
+        :text($!env-metrics<Title>[0])
+      );
+
+      $tr = append-element( $table, 'tr');
+      append-element(
+        $tr, 'th', %(:class<summary-header>,), :text("Date (zulu)")
+      );
+
+      append-element( $tr, 'td', :text(now.DateTime.utc.Str));
+      my XML::Element $summ-dt = append-element(
+        $tr, 'td', %( :class<summary-pie>, :rowspan<7>)
+      );
       self!summary-pie(
-        $div, $!all-metrics[0],
+        $summ-dt, $!all-metrics[0],
         ([+] $!all-metrics[1], $!all-metrics[4], $!all-metrics[7]),
         $!all-metrics[2], $!all-metrics[5], $!all-metrics[8],
         $!all-metrics[12]
       ) if $!all-metrics[0];
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Distribution>);
+      append-element( $tr, 'td', :text($!env-metrics<Distribution>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Packages>);
+      append-element( $tr, 'td', :text($!env-metrics<Package>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Modules>);
+      append-element( $tr, 'td', :text($!env-metrics<Module>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Classes>);
+      append-element( $tr, 'td', :text($!env-metrics<Class>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Os>);
+      append-element(
+        $tr, 'td', :text($!env-metrics<OS-Distro>[0..2].join(' '))
+      );
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Compiler>);
+      append-element(
+        $tr, 'td', :text(
+          $!env-metrics<Perl>[*].join(' ') ~ ', ' ~
+          $!env-metrics<Compiler>[*].join(' ') ~ ', ' ~
+          $!env-metrics<VM>[*].join(' ')
+        )
+      );
     }
 
     $parent;
@@ -515,6 +564,8 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
     $metric-text ~= "Distribution:{$attrs<distribution> // '-'}\n";
     $metric-text ~= "Label:{$attrs<label> // '-'}\n";
 
+    $metric-text ~= "Date (zulu):" ~ now.DateTime.utc.Str ~ "\n";
+
     # gather data from compiler and system
     $metric-text ~= "OS-Kernel:$*KERNEL.name():$*KERNEL.version()\n";
     $metric-text ~= "OS-Distro:$*DISTRO.name():$*DISTRO.version():$*DISTRO.release():$*DISTRO.is-win()\n";
@@ -561,7 +612,8 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
 
     $!env-metrics = {};
     for $test-file.slurp.lines -> $metric {
-      my @mdata = $metric.split(':');
+      # Split on colons but not double colons in case of modulenames
+      my @mdata = $metric.split(/':' <!before ':'>/);
       my $key = shift @mdata;
       given $key {
         when /^ <[TBDS]> $/ {
@@ -759,8 +811,10 @@ note "\@m: ", @m;
       $tr, $!all-metrics[7], $!all-metrics[8], $!all-metrics[9], 'todo'
     );
 
+    # Setup a table data field with svg element in it
+    my XML::Element $td = append-element( $tr, 'td');
     self!summary-pie(
-      $tr, $!all-metrics[0],
+      $td, $!all-metrics[0],
       ([+] $!all-metrics[1], $!all-metrics[4], $!all-metrics[7]),
       $!all-metrics[2], $!all-metrics[5], $!all-metrics[8],
       $!all-metrics[12]
@@ -863,10 +917,8 @@ note "\@m: ", @m;
     Int $test-nok, Int $bug-nok, Int $todo-nok, Int $skip
   ) {
 
-    # Setup a table data field with svg element in it
-    my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
-      $td, 'svg', {
+      $parent, 'svg', {
         width => '200', height => '100',
       }
     );
