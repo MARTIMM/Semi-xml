@@ -154,7 +154,7 @@ note "A: ", $!all-metrics;
         $tr, 'th', %(:class<summary-header>,), :text("Date (zulu)")
       );
 
-      append-element( $tr, 'td', :text(now.DateTime.utc.Str));
+      append-element( $tr, 'td', :text($!env-metrics{"Date (zulu)"}));
       my XML::Element $summ-dt = append-element(
         $tr, 'td', %( :class<summary-pie>, :rowspan<7>)
       );
@@ -608,22 +608,56 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
 
   #-----------------------------------------------------------------------------
   # load metric file.and set $!env-metrics and $!all-metrics
-  method !load-metrics ( IO::Path:D $test-file ) {
+  method !load-metrics ( IO::Path:D $test-file, Str $filter ) {
+
+    # Filter may be a comma separated list of names to filter on labels
+    my @filters = ?$filter ?? $filter.split /\s* , \s*/ !! ();
+    my Bool $filtered-out = False;
 
     $!env-metrics = {};
     for $test-file.slurp.lines -> $metric {
       # Split on colons but not double colons in case of modulenames
-      my @mdata = $metric.split(/':' <!before ':'>/);
+      my @mdata = $metric.split( ':', 2);
       my $key = shift @mdata;
+      my $value = shift @mdata;
       given $key {
         when /^ <[TBDS]> $/ {
-          my @m = @mdata.split(' ');
+          my @m = $value.split(' ');
 note "\@m: ", @m;
           $!test-metrics{$key} = [ @m[0].Int, @m[1].Int];
         }
 
+        when 'Date (zulu)' {
+          $!env-metrics{$key} = $value;
+        }
+
+        when / Package | Module | Class / {
+          $!env-metrics{$key} = $value;
+        }
+
+        when /Label/ {
+          my @labels = $value.split /\s* , \s*/;
+
+          if ?@filters {
+            $filtered-out = True;
+            FILTERLOOP:
+            for @filters -> $f {
+              for @labels -> $l {
+
+                # Keep measurement in when a label matches
+                if $l eq $f {
+                  $filtered-out = False;
+                  last FILTERLOOP;
+                }
+              }
+            }
+          }
+
+          $!env-metrics{$key} = @labels.join(', ');
+        }
+
         default {
-          $!env-metrics{$key} = @mdata;
+          $!env-metrics{$key} = $value.split(':');
         }
       }
     }

@@ -3,8 +3,8 @@ Package:-
 Module:-
 Class:Int
 Distribution:-
-Label:Int-test
-Date (zulu):2017-02-27T10:14:27.009744Z
+Label:test1,integer,report
+Date (zulu):2017-02-28T11:02:39.587957Z
 OS-Kernel:linux:4.9.7.101.fc.24.x.86._.64
 OS-Distro:fedora:24.Workstation.Edition:24:False
 Perl:Perl 6:6.c

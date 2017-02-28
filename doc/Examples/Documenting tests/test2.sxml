@@ -1,5 +1,5 @@
 $!report.run
-    title='Code Nesting' package=SxmlLib::Testing class=Report
+    title='Code Nesting' package=SxmlLib::Testing class=Sxml::Testing::Report
     highlight-lang='lang-perl6' highlight-skin='desert' linenumbers=1
     distribution=SemiXML [
 

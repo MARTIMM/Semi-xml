@@ -1,5 +1,6 @@
-$!report.run title='Integer manipulations' class='Int' label='Int-test'
-             highlight-lang='lang-perl6' highlight-skin='doxy' linenumbers=1
+$!report.run title='Integer manipulations' class='Int'
+             label=test1,integer,report
+             highlight-lang='lang-perl6' highlight-skin='default' linenumbers=0
              test-file='doc/Examples/Documenting tests/test1.t' [
 
   $|h1 [The Perl 6 integer test report]
