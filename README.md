@@ -23,7 +23,7 @@ The following piece of xml (html) text
 ```
 (9 lines, 23 words, 195 characters)
 
-I want to do something like the following
+I want to write something like the following
 
 ```
 $|html [
@@ -36,14 +36,14 @@ $|html [
   ]
 ]
 ```
-(9 lines, 29 words, 170 characters. Less characters typed and still indenting. Note that characters like ']' is counted as a word!). Besides this the xml generated from the sxml file is smaller than above because it removes as much white space as necessary.
+(9 lines, 29 words, 170 characters. Less characters typed and still indenting. Note that characters like ']' is counted as a word!). Besides this, the xml generated from the sxml file is smaller than above because it removes as much white space as necessary.
 
 ### Advantages of using this language
 
 While the example above does not show a big advantage, there are some summarized below.
 
 * This semi xml has a bit better reading capabilities because no textual end tag is needed. It is just a closing bracket.
-* Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: ', " and ^.
+* Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: ', " and ^ when needed.
 * An XML element is introduced by **$|**. This translates just to the XML element. E.g. **$|html []** becomes **<html/>**.
 * Empty element content does not have to be written in the way shown above. It can be written just like **$|html**.
 * Other symbols following the **$** changes its meaning.
