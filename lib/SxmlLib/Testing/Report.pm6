@@ -244,11 +244,7 @@ class Report:ver<0.2.2> {
     if $!highlight-code {
 
       # temporary check of RESOURCES path when using uninstalled version
-note "C: ", %?RESOURCES<google-code-prettify/desert.css>;
       my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
-$css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
-#say "Pretty css: $css";
-
       append-element(
         $head, 'link', {
           :href("file://$css"),
@@ -257,8 +253,6 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
       );
 
       my Str $js = %?RESOURCES<google-code-prettify/prettify.js>.Str;
-$js ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
-#say "pretty js: $js";
       my XML::Element $jse = append-element(
         $head, 'script', { :src("file://$js"), :type<text/javascript>}
       );
@@ -266,8 +260,6 @@ $js ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
     }
 
     my $css = %?RESOURCES<report.css>.Str;
-$css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
-#say "Css report: $css";
     append-element(
       $head, 'link', {
         :href("file://$css"),
