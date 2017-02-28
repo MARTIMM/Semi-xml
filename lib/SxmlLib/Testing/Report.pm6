@@ -8,7 +8,7 @@ use SemiXML::Sxml;
 use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
-class Report:ver<0.2.1> {
+class Report:ver<0.2.2> {
 
   has $!sxml;
 
@@ -132,13 +132,14 @@ class Report:ver<0.2.1> {
   ) {
 
     my Str $metric-dir = $attrs<metric-dir> // '.';
+    my Str $filter = $attrs<filter> // '';
+
     my @metric-files = dir($metric-dir).grep(/t.metric/);
     for @metric-files -> $mf {
-      self!load-metrics($mf);
 
-#note "T: ", $!test-metrics;
-note "A: ", $!all-metrics;
-#note "M: ", $!env-metrics;
+      # Returns True if filtered
+      next if self!load-metrics( $mf, :$filter);
+
       my XML::Element $table = append-element(
         $parent, 'table', %(:class<summary-table>)
       );
@@ -608,10 +609,10 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
 
   #-----------------------------------------------------------------------------
   # load metric file.and set $!env-metrics and $!all-metrics
-  method !load-metrics ( IO::Path:D $test-file, Str $filter ) {
+  method !load-metrics ( IO::Path:D $test-file, Str :$filter --> Bool ) {
 
     # Filter may be a comma separated list of names to filter on labels
-    my @filters = ?$filter ?? $filter.split /\s* , \s*/ !! ();
+    my @filters = ?$filter ?? $filter.split(/\s* ',' \s*/) !! ();
     my Bool $filtered-out = False;
 
     $!env-metrics = {};
@@ -623,7 +624,6 @@ $css ~~ s/ 'Projects/resources' /Projects\/Semi-xml\/resources/;
       given $key {
         when /^ <[TBDS]> $/ {
           my @m = $value.split(' ');
-note "\@m: ", @m;
           $!test-metrics{$key} = [ @m[0].Int, @m[1].Int];
         }
 
@@ -636,14 +636,13 @@ note "\@m: ", @m;
         }
 
         when /Label/ {
-          my @labels = $value.split /\s* , \s*/;
+          my @labels = $value.split(/\s* ',' \s*/);
 
           if ?@filters {
             $filtered-out = True;
             FILTERLOOP:
             for @filters -> $f {
               for @labels -> $l {
-
                 # Keep measurement in when a label matches
                 if $l eq $f {
                   $filtered-out = False;
@@ -662,22 +661,27 @@ note "\@m: ", @m;
       }
     }
 
-    my Int $total =
-      [+] |@($!test-metrics<T>), |@($!test-metrics<B>),
-          |@($!test-metrics<D>), |@($!test-metrics<S>);
-    $!all-metrics = [$total];
+    unless $filtered-out {
 
-    my Int $ts = [+] @($!test-metrics<T>);
-    $!all-metrics.push: $!test-metrics<T>[0], $!test-metrics<T>[1], $ts;
+      my Int $total =
+        [+] |@($!test-metrics<T>), |@($!test-metrics<B>),
+            |@($!test-metrics<D>), |@($!test-metrics<S>);
+      $!all-metrics = [$total];
 
-    $ts = [+] @($!test-metrics<B>);
-    $!all-metrics.push: $!test-metrics<B>[0], $!test-metrics<B>[1], $ts;
+      my Int $ts = [+] @($!test-metrics<T>);
+      $!all-metrics.push: $!test-metrics<T>[0], $!test-metrics<T>[1], $ts;
 
-    $ts = [+] @($!test-metrics<D>);
-    $!all-metrics.push: $!test-metrics<D>[0], $!test-metrics<D>[1], $ts;
+      $ts = [+] @($!test-metrics<B>);
+      $!all-metrics.push: $!test-metrics<B>[0], $!test-metrics<B>[1], $ts;
 
-    $ts = [+] @($!test-metrics<S>[0]);
-    $!all-metrics.push: $!test-metrics<S>[0], $!test-metrics<S>[1], $ts;
+      $ts = [+] @($!test-metrics<D>);
+      $!all-metrics.push: $!test-metrics<D>[0], $!test-metrics<D>[1], $ts;
+
+      $ts = [+] @($!test-metrics<S>[0]);
+      $!all-metrics.push: $!test-metrics<S>[0], $!test-metrics<S>[1], $ts;
+    }
+
+    $filtered-out;
   }
 
   #-----------------------------------------------------------------------------
@@ -702,7 +706,6 @@ note "\@m: ", @m;
         $tc ~~ s/^ 'S' /T/;
         ( $ok-c, $nok-c) = @($!test-results{$tc} // [ 0, 0]);
       }
-#say "TR: $test-code, $ok-c, $nok-c";
 
       my XML::Element $td;
       if $ok-c {

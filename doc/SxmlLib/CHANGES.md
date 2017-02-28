@@ -37,6 +37,8 @@
 
 ## Testing
 
+* 0.2.2
+  * Metric file fitering on provided labels in tests
 * 0.2.1
   * Implemented test summary reports
 * 0.2.0

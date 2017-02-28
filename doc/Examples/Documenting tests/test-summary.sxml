@@ -42,7 +42,7 @@ $!report.summary title='Test Summary Report' [
     ]
   ]
 
-  $!report.metrics metric-dir='doc/Examples/Documenting tests'
+  $!report.metrics filter=report metric-dir='doc/Examples/Documenting tests'
 
   $|h2 [Types of tests]
   $|p [ $|i [
