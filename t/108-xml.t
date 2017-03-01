@@ -47,7 +47,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse( :filename($f1), :$config);
 
 my Str $xml-text = ~$x;
-note $xml-text;
+#note $xml-text;
 
 my $d = Date.today();
 ok $xml-text ~~ m/'<!--comment text-->'/, 'Check comments';
