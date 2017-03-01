@@ -25,6 +25,7 @@ $|top [
   $**X [ $!SxmlCore.date ]
   $**Y [ $!SxmlCore.date-time iso=1 ]
   $**Z [ $!SxmlCore.date-time iso=1 timezone=960 ]
+  $**Z2 [ $!SxmlCore.date-time utc=1 ]
 ]
 EOSX
 
@@ -41,10 +42,10 @@ $config<module><SxmlCore> = 'SxmlLib::SxmlCore';
 #
 my SemiXML::Sxml $x .= new;
 $x.parse( :filename($f1), :$config);
-my Str $xml-text = ~$x;
-#note $xml-text;
-
 my Date $d = Date.today;
+my Str $xml-text = ~$x;
+note $xml-text;
+
 my Str $dt = $d.Str;
 my Str $dm = $d.month.fmt('%02d');
 my Str $dd = $d.day.fmt('%02d');
@@ -59,23 +60,28 @@ ok $xml-text ~~ m:s/ "<X> $dt\</X>" /, 'Check date of today';
 
 #note 'Date: ', $d;
 ok $xml-text ~~ m/ '<Y>'
-                     $d                                 # year-month-day
+                     $dt                                # year-month-day
                      'T' (\d\d ':')**2 \d\d             # hour:minute second
                      \.\d**6                            # millisec
                      ( '+' \d\d ':' \d\d | 'Z' ) '</Y>' # timezone offset
                                                         # On travis the local
                                                         # TZ is 'Z'
-                   /,
-  'Check iso date, time and timezone';
+                   /, 'Check iso date, time and timezone';
 
 ok $xml-text ~~ m/ '<Z>'
-                     $d                                 # year-month-day
+                     $dt                                # year-month-day
                      'T' (\d\d ':')**2 \d\d             # hour:minute second
                      \.\d**6                            # millisec
-                     '+00:16</Z>'                       # timezone offset
-                   /,
-  'Check iso date, time and timezone of 960 sec';
+                     '+00:16'                           # timezone offset
+                     '</Z>'
+                   /, 'Check iso date, time and timezone of 960 sec';
 
+like $xml-text, / '<Z2>'
+                  $dt \s+                               # year-month-day
+                  (\d\d ':')**2 \d\d                    # hour:minute second
+                  'Z'                                   # zulu time
+                  '</Z2>'
+                /, 'Check utc date == timezone(0)';
 
 
 #-------------------------------------------------------------------------------

@@ -38,22 +38,27 @@ class SxmlCore {
                      XML::Node :$content-body   # Ignored
                    ) {
 
-#      my $date-time = DateTime.now().Str;
-    my $date-time;
+    my DateTime $date-time;
 
     if $attrs<timezone> {
-      $date-time = DateTime.now(:timezone($attrs<timezone>.Int)).Str;
+      $date-time = DateTime.now(:timezone($attrs<timezone>.Int));
     }
 
     else {
-      $date-time = DateTime.now().Str;
+      $date-time = DateTime.now;
     }
 
-    $date-time ~~ s/'T'/ / unless $attrs<iso>:exists;
-    $date-time ~~ s/'+'/ +/ unless $attrs<iso>:exists;
-#      my $txt-e = XML::Text.new(:text($date-time));
-#      $parent.append($txt-e);
-    $parent.append(XML::Text.new(:text($date-time)));
+    $date-time .= utc if ?$attrs<utc>;
+
+    my Str $dtstr = $date-time.Str;
+
+    unless $attrs<iso>:exists {
+      $dtstr ~~ s/'T'/ /;
+      $dtstr ~~ s/'+'/ +/;
+      $dtstr ~~  s/\.\d+//;
+    }
+
+    append-element( $parent, :text($dtstr));
     $parent;
   }
 
