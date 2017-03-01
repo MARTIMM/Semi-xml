@@ -112,7 +112,11 @@ class SxmlCore {
             ) {
 
     $parent.append(
-      XML::PI.new(:data(( $attrs<target>, $content-body.nodes).join(' ')))
+      XML::PI.new(
+        :data((
+          (( $attrs<target> // 'no-target'), $content-body.nodes).join(' ')
+        ))
+      )
     );
     $parent;
   }
