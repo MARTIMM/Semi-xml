@@ -5,39 +5,34 @@
   show          = 1
 
 [ option.doctype.entities ]
-  company       = 'Acme Mc Carpenter, Inc'
-  program       = 'sxml2xml'
-  library       = 'Semi-xml'
-  language      = 'sxml'
+  pack          = 'SemiXML'
+  mod           = 'SemiXML::Sxml'
+  act           = 'SemiXML::Actions'
+  gram          = 'SemiXML::Grammar'
+  lib           = 'SxmlLib'
+  prog          = 'sxml2xml'
+  lang          = 'sxml'
   nbsp          = ' '
   E             = 'element'
-  SUE           = 'substitution-element'
-  COE           = 'command-element'
-  SPE           = 'spaced-element'
-
-#  definition    = '[
-#        <!ENTITY company "Acme Mc Carpenter, Inc">
-#        <!ENTITY program "sxml2xml">
-#        <!ENTITY library "Semi-xml">
-#        <!ENTITY language "sxml">
-#        <!ENTITY nbsp " ">
-#        <!ENTITY E "element">
-#        <!ENTITY SUE "substitution-element">
-#        <!ENTITY COE "command-element">
-#        <!ENTITY SPE "spaced-element">
-#]'
-
 
 [ output ]
   fileext       = 'xml'
 
 [ output.program ]
-  pdf           = 'xsltproc --encoding utf-8 --xinclude %op/stylesheet.xsl - | xep -fo - -pdf %op/sxml2xml.pdf'
-  xsl           = 'xmllint --format - > %of.xsl'
-  xml           = 'xmllint --format - > %of.xml'
-  chk           = 'tee sxml2xml.xml | xmllint --format - | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
+  pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
+  xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
+  chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
+
+  xml           = 'xmllint --format - > %op/%of.%oe'
+  xsl           = 'xmllint --format - > %op/Xsl/%of.xsl'
+
+  # Generate formatted xml first and save it on disk (tee command)
+  # then send formatted xml to rnc for checking. This way the errors
+  # can be found at the proper line in the save xml file.
+  check         = 'xmllint --format - | tee %op/%of.%oe |rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
 
 [ module ]
   lorem         = 'SxmlLib::LoremIpsum'
   Db5b          = 'SxmlLib::Docbook5::Basic'
   Db5f          = 'SxmlLib::Docbook5::FixedLayout'
+#  SxmlCore      = 'SxmlLib::SxmlCore'

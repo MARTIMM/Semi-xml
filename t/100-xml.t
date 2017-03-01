@@ -1,7 +1,7 @@
 use v6.c;
 
 use Test;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -12,7 +12,7 @@ use SemiXML;
 #   test attributes
 #-------------------------------------------------------------------------------
 # Setup
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new(:trace);
 isa-ok $x, 'SemiXML::Sxml', $x.^name;
 
 # Setup the text to parse

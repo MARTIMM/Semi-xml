@@ -1,20 +1,29 @@
 use v6.c;
-#use Grammar::Tracer;
 
+#-------------------------------------------------------------------------------
 unit package SemiXML:auth<https://github.com/MARTIMM>;
 
+#use Grammar::Tracer;
+
+#-------------------------------------------------------------------------------
 grammar Grammar {
 
+  # Actions initialize
   rule init-doc { <?> }
-  rule TOP {
-    <.init-doc> <comment>* <document> <comment>*
-  }
 
-  # A document is only a tag with its content. Defined like this there can
-  # only be one toplevel document.
+  # A document is only a tag with its content in a body. Defined like this
+  # there can only be one toplevel document. In the following body documents
+  # can be nested.
+  #
+  # Possible comments outside toplevel document
+  rule TOP { <.init-doc> <.comment>* <document> <.comment>* }
+
+  # Rule to pop the current bottomlevel element from the stack. It is not
+  # possible to use a rule to add the element to this stack. This happens in
+  # the actions method for <tag-spac>.
   #
   rule pop-tag-from-list { <?> }
-  token document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
+  rule document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
@@ -58,36 +67,34 @@ grammar Grammar {
   token attr-pw-value { [ <.escape-char> || <-[\^]> ]+ }
   token attr-s-value  { [ <.escape-char> || <-[\s]> ]+ }
 
-  token tag-body {
-    <.ws>? [
+  token tag-body { [
       '[!=' ~ '!]'    <body1-contents> ||
-      '[!' ~ '!]'     <body2-contents> ||
-      '[=' ~ ']'      <body3-contents> ||
-      '[' ~ ']'       <body4-contents>
+      '[!' ~  '!]'    <body2-contents> ||
+      '[=' ~   ']'    <body3-contents> ||
+      '[' ~    ']'    <body4-contents>
     ]
-    <.ws>?
   }
 
   # The content can be anything mixed with document tags except following the
-  # no-elements character. To use the brackets and
-  # other characters in the text, the characters must be escaped.
+  # no-elements character. To use the brackets and other characters in the
+  # text, the characters must be escaped.
   #
   rule body1-contents  { <body2-text> }
   rule body2-contents  { <body2-text> }
-  rule body3-contents  { [ <body1-text> || <document> ]* }
-  rule body4-contents  { [ <body1-text> || <document> ]* }
+  rule body3-contents  { [ <.comment> || <body1-text> || <document> ]* }
+  rule body4-contents  { [ <.comment> || <body1-text> || <document> ]* }
 
-  token body1-text      {
-    [ <comment> ||            # any comment
-      <.escape-char> ||       # an escaped character e.g. '\$'
-      <-[\$\]]> ||            # any character not being '$' or ']'
-      '$' <!before <[!|*]>>   # a $ not followed by '!', '|' or '*'
+  token body1-text {
+    [ <.escape-char> ||         # an escaped character e.g. '\$'
+      <-[\$\]\#]> ||            # any character not being '$', '#' or ']'
+      '$' <!before <[!|*]>>     # a $ not followed by '!', '|' or '*'
     ]+
   }
 
   token escape-char        { '\\' . }
 
-  # No comments allowed in [! ... !]
+  # No comments allowed in [! ... !]. This works because a nested document is
+  # not allowed and thus no extra comments are checked and handled as such..
   token body2-text      { [ .*? <?before <.ws>? '!]'> ] }
 
   # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
@@ -95,6 +102,6 @@ grammar Grammar {
   #
   token identifier { <.ident> [ '-' <.ident> ]* }
 
-  token comment { <.ws>? '#' \N* \n }
+  token comment { \h* '#' \N* \n }
 }
 

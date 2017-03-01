@@ -1,0 +1,67 @@
+# Changes in SxmlLib modules. Shown below separately
+
+## Docbook5
+* SxmlLib::Docbook5::Basic - Basic docbook methods
+  * 0.3.1
+    * in basic module the article and book methods should generate proper namespace names, i.e. xlink instead of xl.
+  * 0.3.0
+    * docbook 5 email added to info
+  * 0.2.0
+    * book() and article() methods to start easy with a lot of attributes.
+  * 0.1.0
+    * info() to specify the elaborate info tag.
+
+## Epub 2 and 3
+
+  * 0.4.1
+    * EPub.pm6 to put commonalities for version 2 and 3 in.
+    * Generate zip and open with sigil, calibre etc.
+    * Version will become that of EPub.pm6 module.
+  * 0.4.0
+    * EPub::Epub2Builder - Build an Epub2 document. See also http://www.jedisaber.com/eBooks/formatsource.shtml and http://idpf.org/epub
+    * Copy from EPub::Epub3Builder and make changes.
+  * 0.3.0
+    * Generating navigation document
+  * 0.2.0
+    * Generate package config in content.opf. It contains metadata, manifest and spine
+    * Files are copied from workdir into Build-dir.
+  * 0.1.0
+    * Generate directory structure in build-dir.
+    * Generate mimetype
+    * Generate META-INF/container.xml
+    * EPub::Epub3Builder - Build an Epub3 document. See also http://idpf.org/epub
+
+## Html
+* SxmlLib::Html::List - Html lists like ul/li
+  * dir-list() to recursively create list of files and directories.
+
+## Testing
+
+* 0.2.2
+  * Metric file fitering on provided labels in tests
+* 0.2.1
+  * Implemented test summary reports
+* 0.2.0
+  * Code numbering in report is following lines in the real test program so it is possible to look in your report at the proper line with the information from the test output.
+  * Indenting is per 4 characters instead of two.
+* 0.1.1
+  * Downloaded wrong files for the google prettify
+  * Bugfix removing hook elements from the resulting document
+* 0.1.0 Version set on 2016-12-12. Modules comprising Bug, Code, Report, Skip, Test, Testing and Todo
+
+
+# Other modules independent of xml languages
+
+### File
+* include() other documents.
+
+### LoremIpsum
+
+### SxmlCore
+
+* A Sxml core library included by default to handle simple items like
+  * comment() for comments <!-- ... -->.
+  * PI() for <?...?>.
+  * CData() for <[CDATA[...]]>.
+  * date() for date
+  * date-time() for datetime.

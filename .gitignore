@@ -1,5 +1,5 @@
 .precomp/*
-*/.precomp/*
+**/.precomp/*
 .directory
 *.html
 *.xml
@@ -8,3 +8,7 @@
 spellTmp*
 Old/*
 ~*
+doc/Examples/EPub3/Build-Doc-epub*
+doc/Examples/EPub3/My-Docs
+doc/Examples/EPub3/Sample
+*.epub

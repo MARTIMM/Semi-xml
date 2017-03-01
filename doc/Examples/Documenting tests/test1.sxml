@@ -1,9 +1,10 @@
-$!report.run title='Integer manipulations'
-            class='Int' label='Int-test'
-            test-file='doc/Examples/Documenting tests/test1.t' [
+$!report.run title='Integer manipulations' class='Int'
+             label=test1,integer,report
+             highlight-lang='lang-perl6' highlight-skin='default' linenumbers=0
+             test-file='doc/Examples/Documenting tests/test1.t' [
 
   $|h1 [The Perl 6 integer test report]
-  
+
   $|p [
     The integer is in perl the most important type so we need to do our best
     to test it thoroughly. First we declare a constant to be used later and an
@@ -13,6 +14,8 @@ $!report.run title='Integer manipulations'
   $!code.add [=
     constant ABC = 10;
     my Int $i;
+    my Hash $h;
+    $h<test> = $i;
 
     $!test.add t="nok $i.defined" [
       Declaration of an integer without an assignment of a value,
@@ -35,7 +38,7 @@ $!report.run title='Integer manipulations'
   ]
 
   $|h3 [Operations]
-  
+
   $|p [Next a few tests to see if operations can be applied to the integer]
 
   $!code.add [=

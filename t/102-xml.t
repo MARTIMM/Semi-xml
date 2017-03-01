@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -8,7 +8,21 @@ use SemiXML;
 #-------------------------------------------------------------------------------
 # Setup
 #
-my $filename = 't/test-file.sxml';
+my $dir = 't/D102';
+mkdir $dir unless $dir.IO ~~ :e;
+
+my $filename = "$dir/test-file.sxml";
+
+my $f1 = $filename;
+$f1 ~~ s/ \.sxml /.html/;
+my $f1bn = $filename;
+$f1bn ~~ s/ \.sxml //;
+$f1bn ~~ s/ $dir '/'? //;
+
+my $f2bn = "some-file";
+my $f2 = "$dir/$f2bn.html";
+
+
 spurt( $filename, q:to/EOSX/);
 $|html [
   $|body [
@@ -38,49 +52,37 @@ my Hash $config = {
   },
 
   output => {
-    filename => 'some-file',            # Default current file
-    filepath => 't',
+    filename => $f2bn,                  # Default current file
+    filepath => $dir,
     fileext => 'html',                  # Default xml
   }
 }
 
 # Parse
 my SemiXML::Sxml $x .= new;
-$x.parse-file( :$filename, :$config);
+$x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
+#note $xml-text;
+
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
-
-#say $xml-text;
-
-unlink $filename;
-
-# Write xml out to file. Filename explicitly set.
-#
-$filename ~~ s/\.sxml//;
-$x.save(:$filename);
-ok "$filename.html".IO ~~ :e, "File $filename written";
-unlink $filename;
+# Write xml out to file. Basename explicitly set.
+$x.save(:filename($f1bn));
+ok "$f1".IO ~~ :e, "File $f1 written";
 
 # Write xml out to file. Filename named in prelude
-#
-$filename = 't/some-file.html';
 $x.save;
-ok $filename.IO ~~ :e, "File $filename written";
-unlink $filename;
-
-$filename = 't/another.html';
-$x.save;
-ok $filename.IO ~~ :!e, "File $filename not written";
-
-$filename = 't/some-file.html';
-ok $filename.IO ~~ :e, "File $filename written instead";
-unlink $filename;
+ok $f2.IO ~~ :e, "File $f2 written";
 
 #-------------------------------------------------------------------------------
 # Cleanup
-done-testing();
+unlink $filename;
+unlink $f1;
+unlink $f2;
+rmdir $dir;
+
+done-testing;
 exit(0);

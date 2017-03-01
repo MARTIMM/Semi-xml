@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -10,17 +10,21 @@ use SemiXML;
 #
 #-------------------------------------------------------------------------------
 # Setup
-#
-my $filename = 't/test-file.sxml';
-spurt( $filename, q:to/EOSX/);
+my $dir = 't/D103';
+mkdir $dir unless $dir.IO ~~ :e;
+my $f1 = "$dir/test-file.sxml";
+
+my $f2 = 't/D103/f1.html';
+
+spurt( $f1, q:to/EOSX/);
 $|html [
   $|head [
-    $|style type=text/css [=
+    $|style type=text/css [!=
       green {
         color: #0f0;
         background-color: #f0f;
       }
-    ]
+    !]
     $|script [!=
       var a_tags = $('a');
       var b = a_tags[1];
@@ -58,19 +62,17 @@ my Hash $config = {
   },
 
   output => {
-    filename => '103-xml',              # Default current file
-    filepath => 't',                    # Default path '.'
+    filename => 'f1',                   # Default current file
+    filepath => 't/D103',               # Default path '.'
     fileext => 'html',                  # Default xml
   }
 }
 
 # Parse
-#
-my SemiXML::Sxml $x .= new;
-$x.parse-file( :$filename, :$config);
-
+my SemiXML::Sxml $x .= new;     #(:trace);
+$x.parse( :filename($f1), :$config);
 my Str $xml-text = ~$x;
-say $xml-text;
+#note $xml-text;
 
 
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
@@ -78,14 +80,12 @@ ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
 ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
 
 ok $xml-text ~~ m/
-'     green {
-        color: #0f0;
-        background-color: #f0f;
-      }
-'
+'green {
+  color: #0f0;
+  background-color: #f0f;
+}'
 /, 'Check for literal text in css';
 
-#ok $xml-text ~~ ms/var a_tags '=' '$(\'a\');' var b '=' a_tags\[1\];/,
 ok $xml-text ~~ ms/var a_tags '=' "\$('a');" var b '=' a_tags/,
    'Check for literal text in javascript';
 
@@ -99,17 +99,16 @@ like $xml-text, / :s "bla<b>bla</b>bla <u>bla<b>bla</b></u>."/,
      'Check part of result spacing tag $*|';
 
 
-unlink $filename;
-
-$filename = 't/103-xml.html';
 $x.save;
-ok $filename.IO ~~ :e, "File $filename written";
-
-unlink $filename;
+ok $f2.IO ~~ :e, "File $f2 written";
 
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
+
+unlink $f1;
+unlink $f2;
+rmdir $dir;
+
 done-testing();
 exit(0);

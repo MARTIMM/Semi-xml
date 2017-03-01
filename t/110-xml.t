@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing http-header

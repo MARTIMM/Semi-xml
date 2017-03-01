@@ -1,8 +1,44 @@
-## Changes
+## Changes in SemiXML::* and sxml2xml
 
+Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
+
+* 0.27.5
+  * Rewrote parts of SxmlLib::SxmlCore. Added options to some methods and removed others.
+  * Pod doc for SxmLib::SxmlCore.
+* 0.27.4
+  * Rewrote some parts of Sxml.pm6 to handle the configuration, it is much better now.
+  * parse-file is changed into parse. Together with the original one they are now defined as multi methods.
+  * %?RESOURCES problem is fixed. It depends on PERL6LIB env variable.
+* 0.27.3
+  * refactored SemiXML::Text from Actions to SemiXML/Text.pm6.
+  * long standing bug fixed: Resources gave wrong path when using local distro. Caused by the way the Sxml class was defined. file SemiXML.pm6 is now moved to SemiXml/Sxml.pm6 and all use statements are modified.
+  * **Temporary problem fix in Report module when %\*RESOURCES is used. When program sxml2xml is using the modules via lib instead of the installed ones the path is missing the root directory name of this project. This might be a perl6 problem but I haven't seen it yet in other projects of mine.**
+* 0.27.2
+  * indentation in fixed areas like for pre(html) or programlisting(docbook) noted by [= ...] is minimized. Now it is not necessary anymore to place your fixed text at the begin of the line.
+  * refactored the SxmlCore class from SxmlLib::Actions to a new file SxmlLib/SxmlCore.pm6. It is also not automatically declared anymore in the module table so users must add it to the module table in their config.
+  * refactored method get-current-filename() from Actions to Sxml class.
+* 0.27.1
+  * standalone attribute added to xml prelude usable from toml config
+* 0.27.0
+  * Added a sub save-xml() to save an XML document to disk
+  * Use of :formatted to this sub will format the xml output using the xmllint program and its -format option. Dunno how to use that in windows however. Default is off.
+* 0.26.5
+  * More locations where comments are allowed.
+  * Better location information when parsing fails.
+* 0.26.4
+  * Better search for config files. done in one place instead of two.
+* 0.26.3
+  * bugfixes in finding config files
+* 0.26.2
+  * Added run option fmt to format output for better reading. use as ```sxml2xml --run=fmt abc.sxml```.
+  * Error messages to the commandline instead of log file
+  * Google highlighting code for code snippets in test report module. Files are installed locally in the resources directory.
+* 0.26.1
+  * More output when generating reports in SxmlLib::Testing::Testing::Report
 * 0.26.0
   * Implemented the skip part of the report generator.
   * Change in processing configuration files.
+  * Implemented comments in normal bodies [ ... ].
 * 0.25.0
   * Before there was only one content block per element specification like ```$abc [some text]```. Now it is possible to have 0, 1 or more blocks following a tag so the following is possible;
   ```
@@ -17,8 +53,7 @@
   <c>code: $j = $delta * 10</c>
   ```
 * 0.24.0
-  * Change in grammar. ```$xyx []``` has become ```$|xyz []```. This is a big help when code with many dollar characters are used. These should be escaped but wil make things unreadable. Also using the [! !] bodies are not always acceptable because it prevents nesting of elements when needed. So this can now be done;
-  ```$|abc [ $x = 10; ]```
+  * Change in grammar. ```$xyx []``` has become ```$|xyz []```. This is a big help when code with many dollar characters are used. These should be escaped but wil make things unreadable. Also using the [! !] bodies are not always acceptable because it prevents nesting of elements when needed. So this can now be done; ``` $|abc [ $x = 10; ] ```
 * 0.23.0
   * Dropped the use of $.mod.symbol-access. There is less to none use for it.
   * Add optional initializing() method to sxml modules ($!) with the attributes and SemiXML::Sxml object. These are called as soon as the tag and attributes are parsed. Later when the body is parsed the call to the method of that module is called.

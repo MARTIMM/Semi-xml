@@ -1,12 +1,14 @@
 use v6.c;
-use SemiXML;
-use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
+use XML;
+use SemiXML::Sxml;
+use SxmlLib::Testing::Testing;
+
 #-------------------------------------------------------------------------------
-class Report {
+class Report:ver<0.2.2> {
 
   has $!sxml;
 
@@ -25,11 +27,23 @@ class Report {
   # value is an Array of which the 1st element is the success count and the
   # 2nd the failure count. These are counts so it can be used to do tests in
   # a loop.
-  #
   has Hash $!test-results;
 
+  # Storage of all scored test results per test type. The test type is same as
+  # the test code without the digits. So type 'T', 'D', etc.
   has Hash $!test-metrics;
+
+  # Gathered data from $!test-metrics to show in pie-charts
   has Array $!all-metrics = [];
+
+  # When metrics file is read, some data is stored here
+  has Hash $env-metrics = {};
+
+  has Bool $!highlight-code = False;
+  has Str $!highlight-language = '';
+  has Str $!highlight-skin = '';
+  has Bool $!linenumbers = False;
+  has Int $!line-number;
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $sxml, Hash $attrs ) {
@@ -37,16 +51,24 @@ class Report {
     $!sxml = $sxml;
 
     $!test-program = Q:to/EOINIT/;
-      use v6.c;
+      use v6;
       use Test;
 
       EOINIT
+    $!line-number = 4;
 
     $!code-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Code');
     $!test-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Test');
     $!todo-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Todo');
     $!bug-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Bug');
     $!skip-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Skip');
+
+    $!highlight-code = ?$attrs<highlight-lang> // False;
+    $!highlight-language = $attrs<highlight-lang> // '';
+    $!highlight-skin = lc($attrs<highlight-skin> // 'prettify');
+    $!highlight-skin = $!highlight-skin eq 'default'
+                       ?? 'prettify' !! $!highlight-skin;
+    $!linenumbers = ?$attrs<linenumbers> // False;
 
     self!setup-report-doc($attrs);
   }
@@ -75,7 +97,8 @@ class Report {
     # Add footer to the end of the report
     my XML::Element $div = append-element( $!body, 'div', {class => 'footer'});
     append-element(
-      $div, :text("Generated using SemiXML, SxmlLib::Testing::TestDoc, XML")
+      $div,
+      :text("Generated using SemiXML, SxmlLib::Testing::*, XML, &copy;Google prettify")
     );
 
     # save report in parent
@@ -88,9 +111,94 @@ class Report {
   method summary (
     XML::Element $parent, Hash $attrs,
     XML::Element :$content-body, Array :$tag-list
-
     --> XML::Node
   ) {
+
+    my XML::Element $html = append-element( $parent, 'html');
+    my Str $title = $attrs<title> // '';
+    my XML::Element $head = append-element( $html, 'head');
+    self!setup-head( $head, $attrs);
+    my XML::Element $body = append-element( $html, 'body');
+    append-element( $body, 'h1', %(:id<__top>, :class<title>), :text($title));
+
+    $body.append($content-body);
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method metrics (
+    XML::Element $parent, Hash $attrs,
+    XML::Element :$content-body, Array :$tag-list
+    --> XML::Node
+  ) {
+
+    my Str $metric-dir = $attrs<metric-dir> // '.';
+    my Str $filter = $attrs<filter> // '';
+
+    my @metric-files = dir($metric-dir).grep(/t.metric/);
+    for @metric-files -> $mf {
+
+      # Returns True if filtered
+      next if self!load-metrics( $mf, :$filter);
+
+      my XML::Element $table = append-element(
+        $parent, 'table', %(:class<summary-table>)
+      );
+
+      my XML::Element $tr = append-element( $table, 'tr');
+      append-element(
+        $tr, 'th', %(:colspan<3>,),
+        :text($!env-metrics<Title>[0])
+      );
+
+      $tr = append-element( $table, 'tr');
+      append-element(
+        $tr, 'th', %(:class<summary-header>,), :text("Date (zulu)")
+      );
+
+      append-element( $tr, 'td', :text($!env-metrics{"Date (zulu)"}));
+      my XML::Element $summ-dt = append-element(
+        $tr, 'td', %( :class<summary-pie>, :rowspan<7>)
+      );
+      self!summary-pie(
+        $summ-dt, $!all-metrics[0],
+        ([+] $!all-metrics[1], $!all-metrics[4], $!all-metrics[7]),
+        $!all-metrics[2], $!all-metrics[5], $!all-metrics[8],
+        $!all-metrics[12]
+      ) if $!all-metrics[0];
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Distribution>);
+      append-element( $tr, 'td', :text($!env-metrics<Distribution>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Packages>);
+      append-element( $tr, 'td', :text($!env-metrics<Package>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Modules>);
+      append-element( $tr, 'td', :text($!env-metrics<Module>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Classes>);
+      append-element( $tr, 'td', :text($!env-metrics<Class>[0]));
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Os>);
+      append-element(
+        $tr, 'td', :text($!env-metrics<OS-Distro>[0..2].join(' '))
+      );
+
+      $tr = append-element( $table, 'tr');
+      append-element( $tr, 'th', %(:class<summary-header>,), :text<Compiler>);
+      append-element(
+        $tr, 'td', :text(
+          $!env-metrics<Perl>[*].join(' ') ~ ', ' ~
+          $!env-metrics<Compiler>[*].join(' ') ~ ', ' ~
+          $!env-metrics<VM>[*].join(' ')
+        )
+      );
+    }
 
     $parent;
   }
@@ -109,6 +217,8 @@ class Report {
 
     # make a body
     $!body = append-element( $!report-doc, 'body');
+    $!body.set( 'onload', 'prettyPrint()') if $!highlight-code;
+
 
     # if there is a title attribute, make a h1 title
     if ? $attrs<title> {
@@ -132,9 +242,30 @@ class Report {
       $head, 'meta', {charset => 'UTF-8'}
     );
 
+    if $!highlight-code {
+
+      # temporary check of RESOURCES path when using uninstalled version
+      my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
+      append-element(
+        $head, 'link', {
+          :href("file://$css"),
+          :type<text/css>, :rel<stylesheet>
+        }
+      );
+
+      my Str $js = %?RESOURCES<google-code-prettify/prettify.js>.Str;
+      my XML::Element $jse = append-element(
+        $head, 'script', { :src("file://$js"), :type<text/javascript>}
+      );
+      append-element( $jse, :text(' '));
+    }
+
+    my $css = %?RESOURCES<report.css>.Str;
     append-element(
-      $head, 'link',
-      { href => "file://%?RESOURCES<TestDoc.css>", rel => 'stylesheet'}
+      $head, 'link', {
+        :href("file://$css"),
+        :type<text/css>, :rel<stylesheet>
+      }
     );
   }
 
@@ -148,17 +279,28 @@ class Report {
     while @nodes {
 
       my $node = @nodes.shift;
+
+      # check the start of code sections
       if $node ~~ XML::Element
          and $node.name eq '__PARENT_CONTAINER__'
          and $node.nodes[0].name eq 'code' {
 
         # <pre> used to display code in
-        $pre = append-element( $!body, 'pre', {:class<test-block-code>});
+        my Str $class = 'test-block-code';
+        if $!highlight-code {
+          $class = "prettyprint $!highlight-language";
+          if $!linenumbers {
+            $class ~= " linenums:$!line-number";
+          }
+        }
 
-        # <hook> used to insert test, todo, bug and skip content.
+        $pre = append-element( $!body, 'pre', {:$class});
+
+        # <hook> used to insert test, todo, bug and skip content after the code.
         # $hook is removed later
         #
         $hook = append-element( $!body, 'hook');
+
 
         # get code entry number
         my Int $centry = ([~] $node.nodes[0].nodes).Int;
@@ -182,90 +324,97 @@ class Report {
             if $x.name eq 'test' {
 
               # get test entry number 
-              my Str $code-text = ~$!test-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!test-obj.get-code-text($tentry));
 
               # add test to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
+              append-element( $pre, :text($code-text));
 
               # and to the test program
-              $!test-program ~= "$code-text\n";
+              $!test-program ~= $code-text;
 
               # add test text after the <pre> and before the <hook>
-              $hook.before($!test-obj.make-table($tentry));
+              $!body.before( $hook, $!test-obj.make-table($tentry));
             }
 
             elsif $x.name eq 'todo' {
 
               # get test entry number 
-              my Str $code-text = ~$!todo-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!todo-obj.get-code-text($tentry));
 
               # add todo to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
-
-              # add todo text after the <pre> and before the <hook>
-              $hook.before($!todo-obj.make-table($tentry));
+              append-element( $pre, :text($code-text));
 
               # and to the test program
-              $!test-program ~= "$code-text\n";
+              $!test-program ~= $code-text;
+
+              # add todo text after the <pre> and before the <hook>
+              $!body.before( $hook, $!todo-obj.make-table($tentry));
             }
 
             elsif $x.name eq 'bug' {
 
               # get test entry number 
-              my Str $code-text = ~$!bug-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!bug-obj.get-code-text($tentry));
 
               # add bug issue to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
-
-              # add bug text after the <pre> and before the <hook>
-              $hook.before($!bug-obj.make-table($tentry));
+              append-element( $pre, :text($code-text));
 
               # and to the test program
-              $!test-program ~= "$code-text\n";
+              $!test-program ~= $code-text;
+
+              # add bug text after the <pre> and before the <hook>
+              $!body.before( $hook, $!bug-obj.make-table($tentry));
             }
 
             elsif $x.name eq 'skip' {
 
               # get test entry number 
-              my Str $code-text = ~$!skip-obj.get-code-text($tentry);
+              my Str $code-text = self!process-code(~$!skip-obj.get-code-text($tentry));
 
               # add skip to the <pre> block
-              append-element( $pre, :text(self!process-code($code-text)));
-
-              # add skip text after the <pre> and before the <hook>
-              $hook.before($!skip-obj.make-table($tentry));
+              append-element( $pre, :text($code-text));
 
               # and to the test program
-              $!test-program ~= "$code-text\n";
+              $!test-program ~= $code-text;
+
+              # add skip text after the <pre> and before the <hook>
+              $!body.before( $hook, $!skip-obj.make-table($tentry));
             }
           }
 
           # $x not defined so it is plain code text
           else {
+
             my Str $code-text = self!process-code(~$code-node);
-            append-element( $pre, :text($code-text));
-            $!test-program ~= "$code-node\n";
+            append-element( $pre, :text($code-text)) if ?$code-text;
+            $!test-program ~= $code-text if ?$code-text;
           }
         }
       }
 
+      # anything else is text/nodes
       else {
         $!body.append($node);
       }
     }
 
-    $hook.remove;
+    # Cannot use $!body.removeChild($hook) because in the mean time there
+    # are many hooks left behind, so search by name
+    for $!body.nodes.reverse -> $node {
+      $node.remove if $node.name eq 'hook';
+    }
   }
 
   #-----------------------------------------------------------------------------
   method !process-code ( Str $code-text is copy --> Str ) {
 
-    state $indent-level = 0;
-    state $prev-indent-level = 0;
+    state Int $indent-level = 0;
+    state Int $prev-indent-level = 0;
+    constant INDENT-STEP = 4;
     my Str $code = '';
 
     # insert newline after any closing curly bracket
-    $code-text ~~ s:g/ '}' /}\n/;
+    $code-text ~~ s:g/ '}' <!before <[\n;,]>>/}\n/;
 
     # split code script on every line
     for $code-text.split(/\n/) {
@@ -285,15 +434,17 @@ class Report {
 
       # if indent-level is decreased then use new indent
       if $prev-indent-level > $indent-level {
-        $code ~= ' ' x ($indent-level * 2) ~ $line ~ "\n";
+        $code ~= ' ' x ($indent-level * INDENT-STEP) ~ $line ~ "\n";
         $prev-indent-level = $indent-level;
       }
 
       # if indent-level is increased then use previous indent first
       else {
-        $code ~= ' ' x ($prev-indent-level * 2) ~ $line ~ "\n";
+        $code ~= ' ' x ($prev-indent-level * INDENT-STEP) ~ $line ~ "\n";
         $prev-indent-level = $indent-level;
       }
+
+      $!line-number++;
     }
 
     $code;
@@ -312,7 +463,7 @@ class Report {
     $!test-metrics = { T => [0,0], D => [0,0], B => [0,0], S => [0,0]};
 
     # Finish up the test text and write the text to a file 
-    $!test-program ~= "\n\ndone-testing;\n";
+    $!test-program ~= "\ndone-testing;\n";
 
     # get a filename for the tests and write
     my $test-file = $attrs<test-file>;
@@ -322,14 +473,26 @@ class Report {
     spurt( $test-file, $!test-program);
 
     # run the tests using prove and get the result contents through a pipe
-    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
-                 '--rules=seq=*', $test-file, :out;
+#    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
+    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose',
+                 '--rules=seq=*', "--lib", $test-file, :out;
     # read lines from pipe from testing command
     my @lines = $p.out.lines;
+
+    # tail of the test results
+    my Bool $save-summary = False;
+    my Str $prove-summary-text = '';
+
+    say "\n---[Prove output]", '-' x 63;
     loop ( my $l = 0; $l < @lines.elems; $l++) {
       my $line = @lines[$l];
+      say "$line";
 
-#say "R: $line";
+      if $line ~~ m:s/^ 'Test' 'Summary' 'Report' / or $save-summary {
+        $save-summary = True;
+        $prove-summary-text ~= $line;
+        next;
+      }
 
       # get the test code if there is one.
       $line ~~ m/ '-' \s* (<[TDBS]> \d+) /;
@@ -369,6 +532,9 @@ class Report {
       }
     }
 
+    say "---[End prove output]", '-' x 59;
+    say " ";
+
     # save metric data in a file
     self!save-metrics( $test-file, $attrs);
   }
@@ -391,6 +557,8 @@ class Report {
     $metric-text ~= "Class:{$attrs<class> // '-'}\n";
     $metric-text ~= "Distribution:{$attrs<distribution> // '-'}\n";
     $metric-text ~= "Label:{$attrs<label> // '-'}\n";
+
+    $metric-text ~= "Date (zulu):" ~ now.DateTime.utc.Str ~ "\n";
 
     # gather data from compiler and system
     $metric-text ~= "OS-Kernel:$*KERNEL.name():$*KERNEL.version()\n";
@@ -433,6 +601,83 @@ class Report {
   }
 
   #-----------------------------------------------------------------------------
+  # load metric file.and set $!env-metrics and $!all-metrics
+  method !load-metrics ( IO::Path:D $test-file, Str :$filter --> Bool ) {
+
+    # Filter may be a comma separated list of names to filter on labels
+    my @filters = ?$filter ?? $filter.split(/\s* ',' \s*/) !! ();
+    my Bool $filtered-out = False;
+
+    $!env-metrics = {};
+    for $test-file.slurp.lines -> $metric {
+      # Split on colons but not double colons in case of modulenames
+      my @mdata = $metric.split( ':', 2);
+      my $key = shift @mdata;
+      my $value = shift @mdata;
+      given $key {
+        when /^ <[TBDS]> $/ {
+          my @m = $value.split(' ');
+          $!test-metrics{$key} = [ @m[0].Int, @m[1].Int];
+        }
+
+        when 'Date (zulu)' {
+          $!env-metrics{$key} = $value;
+        }
+
+        when / Package | Module | Class / {
+          $!env-metrics{$key} = $value;
+        }
+
+        when /Label/ {
+          my @labels = $value.split(/\s* ',' \s*/);
+
+          if ?@filters {
+            $filtered-out = True;
+            FILTERLOOP:
+            for @filters -> $f {
+              for @labels -> $l {
+                # Keep measurement in when a label matches
+                if $l eq $f {
+                  $filtered-out = False;
+                  last FILTERLOOP;
+                }
+              }
+            }
+          }
+
+          $!env-metrics{$key} = @labels.join(', ');
+        }
+
+        default {
+          $!env-metrics{$key} = $value.split(':');
+        }
+      }
+    }
+
+    unless $filtered-out {
+
+      my Int $total =
+        [+] |@($!test-metrics<T>), |@($!test-metrics<B>),
+            |@($!test-metrics<D>), |@($!test-metrics<S>);
+      $!all-metrics = [$total];
+
+      my Int $ts = [+] @($!test-metrics<T>);
+      $!all-metrics.push: $!test-metrics<T>[0], $!test-metrics<T>[1], $ts;
+
+      $ts = [+] @($!test-metrics<B>);
+      $!all-metrics.push: $!test-metrics<B>[0], $!test-metrics<B>[1], $ts;
+
+      $ts = [+] @($!test-metrics<D>);
+      $!all-metrics.push: $!test-metrics<D>[0], $!test-metrics<D>[1], $ts;
+
+      $ts = [+] @($!test-metrics<S>[0]);
+      $!all-metrics.push: $!test-metrics<S>[0], $!test-metrics<S>[1], $ts;
+    }
+
+    $filtered-out;
+  }
+
+  #-----------------------------------------------------------------------------
   method !process-test ( ) {
 
     # search for special elements left and modify these
@@ -454,7 +699,6 @@ class Report {
         $tc ~~ s/^ 'S' /T/;
         ( $ok-c, $nok-c) = @($!test-results{$tc} // [ 0, 0]);
       }
-#say "TR: $test-code, $ok-c, $nok-c";
 
       my XML::Element $td;
       if $ok-c {
@@ -532,6 +776,11 @@ class Report {
   }
 
   #-----------------------------------------------------------------------------
+  # Gather results of a test. $test-code is a letter code 'T', 'S', 'B' etc.
+  # with the test number attached e.g 'T3'.
+  # $ok is True or False for the test result. Must return when undefined.
+  # $metric controls storage. Not all data must be saved or they will be
+  # duplicated.
   method !set-test-results ( Str $test-code, Any $ok, Bool :$metric = True ) {
 
     return unless ?$test-code and $ok.defined and $ok ~~ Bool;
@@ -592,12 +841,14 @@ class Report {
       $tr, $!all-metrics[7], $!all-metrics[8], $!all-metrics[9], 'todo'
     );
 
+    # Setup a table data field with svg element in it
+    my XML::Element $td = append-element( $tr, 'td');
     self!summary-pie(
-      $tr, $!all-metrics[0],
+      $td, $!all-metrics[0],
       ([+] $!all-metrics[1], $!all-metrics[4], $!all-metrics[7]),
       $!all-metrics[2], $!all-metrics[5], $!all-metrics[8],
       $!all-metrics[12]
-    );
+    ) if $!all-metrics[0];
   }
 
   #-----------------------------------------------------------------------------
@@ -696,10 +947,8 @@ class Report {
     Int $test-nok, Int $bug-nok, Int $todo-nok, Int $skip
   ) {
 
-    # Setup a table data field with svg element in it
-    my XML::Element $td = append-element( $parent, 'td');
     my XML::Element $svg = append-element(
-      $td, 'svg', {
+      $parent, 'svg', {
         width => '200', height => '100',
       }
     );

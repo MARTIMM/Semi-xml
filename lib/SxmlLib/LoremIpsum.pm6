@@ -1,9 +1,12 @@
 use v6.c;
 
-use SemiXML;
-
+#-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
+use XML;
+use SemiXML::Sxml;
+
+#-------------------------------------------------------------------------------
 class LoremIpsum {
 
   # could not use 'has' because of time of existence and calculatig length
@@ -44,7 +47,7 @@ class LoremIpsum {
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( ) {
-    
+
     for $lorem-texts.keys -> $k {
       $lorem-texts{$k}<length> = $lorem-texts{$k}<text>.chars;
     }

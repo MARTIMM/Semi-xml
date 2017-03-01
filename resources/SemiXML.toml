@@ -1,14 +1,12 @@
-[ dependencies ]
+new-style       = 0
+
+#[ dependencies ]
 #  file          = [ ]
 
-#[ module ]
+[ module ]
+  SxmlCore      = 'SxmlLib::SxmlCore'
 
 #[ option ]
-
-[ option.doctype ]
-  show          = false
-
-#[ option.doctype.entities ]
 
 [ option.http-header ]
   show          = false
@@ -18,12 +16,20 @@
   version       = '1.0'
   encoding      = 'UTF-8'
 
+[ option.doctype ]
+  show          = false
+
+#[ option.doctype.entities ]
+#  copy          = '&#xa9;'
+
 
 [ output ]
   fileext       = 'xml'
 
-#[ output.program ]
-#  c1 = 'wkhtml2pdf - %f'
+[ output.program ]
+#  fmt           = 'xmllint --format --noent - > %of.%oe'
+#  pdf           = 'wkhtmltopdf - %of.pdf'
+#  chk           = 'tidy -'
 
 
 #TODO [ styles ]

@@ -1,43 +1,47 @@
 use v6.c;
 
 use Test;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # prepare directory and create module
-mkdir('t/M');
-spurt( 't/M/m1.pm6', q:to/EOMOD/);
-  use v6.c;
-  use SemiXML;
+my $dir = 't/T030';
+my $mod = "$dir/m1.pm6";
 
-  class M::m1 {
+mkdir($dir) unless $dir.IO ~~ :e;
+
+spurt( $mod, q:to/EOMOD/);
+  use v6.c;
+  use SemiXML::Sxml;
+  use SemiXML::Text;
+  use XML;
+
+  class T030::m1 {
 
     # method 1 can be used at top of document
-    method mth1 ( XML::Element $parent,
-                  Hash $attrs,
-                  XML::Element :$content-body
-
-                  --> XML::Element
-                ) {
-
-      my XML::Element $p .= new(:name('p'));
-      $parent.append($p);
+    method mth1 (
+      XML::Element $parent, Hash $attrs, XML::Element :$content-body
+      --> XML::Element
+    ) {
+      # my XML::Element $p .= new(:name('p'));
+      # $parent.append($p);
+      append-element( $parent, 'p');
       $parent;
     }
 
     # method 2 can not be used at top of document because it generates
     # more than one top level elements
-    method mth2 ( XML::Element $parent,
-                  Hash $attrs,
-                  XML::Element :$content-body
+    method mth2 (
+      XML::Element $parent, Hash $attrs, XML::Element :$content-body
+      --> XML::Element
+    ) {
+      #my XML::Element $p .= new(:name('p'));
+      #$parent.append($p);
+      #$p .= new(:name('p'));
+      #$parent.append($p);
 
-                  --> XML::Element
-                ) {
-
-      my XML::Element $p .= new(:name('p'));
-      $parent.append($p);
-      $p .= new(:name('p'));
-      $parent.append($p);
+      append-element( $parent, 'p');
+      my XML::Element $p = append-element( $parent, 'p');
 
       # Eat from the end of the list and add just after the container element.
       # Somehow they get lost from the array when done otherwise.
@@ -55,14 +59,14 @@ spurt( 't/M/m1.pm6', q:to/EOMOD/);
 # setup the configuration
 my Hash $config = {
   library       => {:mod1<t>},
-  module        => {:mod1<M::m1>}
+  module        => {:mod1<T030::m1>}
 }
 
 # setup the contents to be parsed with a substitution item in it
 my Str $content = '$!mod1.mth1 [ ]';
 
 # instantiate parser and parse with contents and config
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new(:trace);
 my ParseResult $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
@@ -102,9 +106,9 @@ is $xml, '<x><p/><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>', "generated: 
 
 #-------------------------------------------------------------------------------
 # Cleanup
-done-testing();
-unlink 't/M/m1.pm6';
-rmdir 't/M';
+done-testing;
+unlink $mod;
+rmdir $dir;
 
 exit(0);
 

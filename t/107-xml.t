@@ -1,6 +1,6 @@
 use v6.c;
 use Test;
-use SemiXML;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing;
@@ -9,71 +9,86 @@ use SemiXML;
 #     $!SxmlCore.date-time []
 #-------------------------------------------------------------------------------
 # Setup
-#
-my $filename = 't/test-file.sxml';
-spurt( $filename, q:to/EOSX/);
+my $dir = 't/D107';
+mkdir $dir unless $dir.IO ~~ :e;
+my $f1 = "$dir/test-file.sxml";
+
+
+spurt( $f1, q:to/EOSX/);
 $|top [
-  $!SxmlCore.date []
-  $!SxmlCore.date year=1957 month=6 day=26 []
-  $!SxmlCore.date year=1957 day=26 []
-  $!SxmlCore.date year=1957 month=6 []
-  $!SxmlCore.date year=1957 []
-  $**A []
-  $**X [$!SxmlCore.date []]
-  $**Y [$!SxmlCore.date-time iso=1 []]
-  $**Z [$!SxmlCore.date-time iso=1 timezone=960 []]
+  $!SxmlCore.date
+  $!SxmlCore.date year=1957 month=6 day=26
+  $!SxmlCore.date year=1957 day=26
+  $!SxmlCore.date year=1957 month=6
+  $!SxmlCore.date year=1957
+  $**A
+  $**X [ $!SxmlCore.date ]
+  $**Y [ $!SxmlCore.date-time ]
+  $**Z [ $!SxmlCore.date-time timezone=960 ]
+  $**Z2 [ $!SxmlCore.date-time utc=1 iso=0 ]
 ]
 EOSX
 
+# '$**Z [$!SxmlCore.date-time iso=1 timezone=960]' produces an error
+# 'Parse failure possible missing bracket at line 10-11, tag $**Z, body number 1
+
 #-------------------------------------------------------------------------------
-my Hash $config = {
-  output => {
-    fileext => 'html'
-  }
-};
+my Hash $config = {};
+$config<output><fileext> = 'html';
+$config<module><SxmlCore> = 'SxmlLib::SxmlCore';
 
 #-------------------------------------------------------------------------------
 # Parse
 #
 my SemiXML::Sxml $x .= new;
-$x.parse-file( :$filename, :$config);
-
+$x.parse( :filename($f1), :$config);
+my Date $d = Date.today;
 my Str $xml-text = ~$x;
-#say $xml-text;
+#note $xml-text;
+
+my Str $dt = $d.Str;
+my Str $dm = $d.month.fmt('%02d');
+my Str $dd = $d.day.fmt('%02d');
 
 diag "Some tests can go wrong on the split second at midnight";
-my $d = Date.today().Str;
+
 ok $xml-text ~~ m:s/ '1957-06-26' /, 'Check specific date';
-ok $xml-text ~~ m:s/ '1957-01-26' /, 'Check specific date on 1st month';
+ok $xml-text ~~ m:s/ "1957-$dm-26" /, 'Check specific date on 1st month';
 ok $xml-text ~~ m:s/ '1957-06-01' /, 'Check specific date on 1st day';
-ok $xml-text ~~ m:s/ '1957-01-01' /, 'Check specific date on 1st day and month';
+ok $xml-text ~~ m:s/ "1957-$dm-$dd" /, 'Check specific date on 1st day and month';
+ok $xml-text ~~ m:s/ "<X> $dt\</X>" /, 'Check date of today';
 
-ok $xml-text ~~ m:s/ '<X>' $d '</X>' /, 'Check date of today';
-
-#say 'Date: ', $d;
+#note 'Date: ', $d;
 ok $xml-text ~~ m/ '<Y>'
-                     $d                                 # year-month-day
+                     $dt                                # year-month-day
                      'T' (\d\d ':')**2 \d\d             # hour:minute second
                      \.\d**6                            # millisec
                      ( '+' \d\d ':' \d\d | 'Z' ) '</Y>' # timezone offset
                                                         # On travis the local
                                                         # TZ is 'Z'
-                   /,
-  'Check iso date, time and timezone';
+                   /, 'Check iso date, time and timezone';
 
 ok $xml-text ~~ m/ '<Z>'
-                     $d                                 # year-month-day
+                     $dt                                # year-month-day
                      'T' (\d\d ':')**2 \d\d             # hour:minute second
                      \.\d**6                            # millisec
-                     '+00:16</Z>'                       # timezone offset
-                   /,
-  'Check iso date, time and timezone of 960 sec';
+                     '+00:16'                           # timezone offset
+                     '</Z>'
+                   /, 'Check iso date, time and timezone of 960 sec';
 
-unlink $filename;
+like $xml-text, / '<Z2>'
+                  $dt \s+                               # year-month-day
+                  (\d\d ':')**2 \d\d                    # hour:minute second
+                  'Z'                                   # zulu time
+                  '</Z2>'
+                /, 'Check utc date == timezone(0)';
 
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
 done-testing();
+
+unlink $f1;
+rmdir $dir;
+
 exit(0);

@@ -4,25 +4,28 @@
   ],
   "depends": [
     "XML",
-    "Config::DataLang::Refine"
+    "Config::DataLang::Refine",
+    "Terminal::ANSIColor"
   ],
   "license": "The Artistic License 2.0",
   "description": "Semi xml parser",
   "name": "SemiXML",
-  "perl": "6c",
+  "perl": "6.c",
   "provides": {
     "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
     "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
-    "SemiXML":                          "lib/SemiXML.pm6",
+    "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
+    "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
 
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
 
+    "SxmlLib::EPub":                    "lib/SxmlLib/EPub.pm6",
+    "SxmlLib::EPub::EPub2Builder":      "lib/SxmlLib/EPub/EPub2Builder.pm6",
+    "SxmlLib::EPub::EPub3Builder":      "lib/SxmlLib/EPub/EPub3Builder.pm6",
+
     "SxmlLib::Html::FixedLayout":       "lib/SxmlLib/Html/FixedLayout.pm6",
     "SxmlLib::Html::List":              "lib/SxmlLib/Html/List.pm6",
-
-    "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
-    "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6",
 
     "SxmlLib::Testing::Bug":            "lib/SxmlLib/Testing/Bug.pm6",
     "SxmlLib::Testing::Code":           "lib/SxmlLib/Testing/Code.pm6",
@@ -32,8 +35,23 @@
     "SxmlLib::Testing::Testing":        "lib/SxmlLib/Testing/Testing.pm6",
     "SxmlLib::Testing::Todo":           "lib/SxmlLib/Testing/Todo.pm6",
 
-    "sxml2xml":                         "bin/sxml2xml.pl6"
+    "SxmlLib::SxmlCore":                "lib/SxmlLib/SxmlCore.pm6",
+    "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
+    "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6"
   },
+  "resources": [
+    "SemiXML.toml",
+    "report.css",
+
+    "google-code-prettify/desert.css",
+    "google-code-prettify/doxy.css",
+    "google-code-prettify/prettify.css",
+    "google-code-prettify/sons-of-obsidian.css",
+    "google-code-prettify/sunburst.css",
+
+    "google-code-prettify/prettify.js",
+    "google-code-prettify/run_prettify.js"
+  ],
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.26.0"
+  "version": "v0.27.5"
 }

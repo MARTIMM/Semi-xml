@@ -1,9 +1,11 @@
 use v6.c;
-use SemiXML;
-use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
+
+use XML;
+use SemiXML::Sxml;
+use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
 class Test {
@@ -26,8 +28,7 @@ class Test {
       label => 'T'
     };
 
-    my XML::Element $c = append-element( $parent, 'test');
-    append-element( $c, :text($count.Str));
+    append-element( $parent, 'test', :text($count.Str));
 
     $parent;
   }
