@@ -1,0 +1,104 @@
+use v6.c;
+
+#-------------------------------------------------------------------------------
+=begin pod
+
+=comment -----------------------------------------------------------------------
+=TITLE class SxmlLib::SxmlCore
+
+=SUBTITLE 
+
+  unit package SxmlLib;
+  class SxmlCore { ... }
+
+=comment -----------------------------------------------------------------------
+=head1 Synopsis
+
+  $|html [
+    $|body [
+      $!SxmlCore.comment [Some of the test follow below]
+      $|p [ The date and time is now $!SxmlCore.date ]
+    ]
+  ]
+
+=comment -----------------------------------------------------------------------
+=head1 Description
+
+This is a library with some specific tools in order to insert simple daily text
+and to insert typical XML sentences like CDATA and COMMENT. The class
+C<SxmlLib::SxmlCore> is by default mapped to the key C<SxmlCore> in the
+configuration from resources.
+
+=comment -----------------------------------------------------------------------
+=head1 Methods
+
+=head2 date
+
+  $!SxmlCore.date year=2015 month=1 day=1
+
+B<Attributes>
+
+=item1 B<year>. Specify a year
+
+=item1 B<month>. Specify a month.
+
+=item1 B<day>. Specify a day.
+
+If any of the attributes are missing, the value of the current date of today is
+taken. The body of C<date>, when provided, will be ignored and thrown away.
+
+
+=head2 date-time
+
+  $!SxmlCore.date-time iso=0 utc=1 timezone=1234
+  
+B<Attributes>
+
+=item1 B<iso>. Default is 1. When in iso format, the date and time is in the
+ format yyyy-mm-dd 'T' HH:MM:SS.sssss '+' HH:MM. When iso=0 the format is
+ yyyy-mm-dd HH:MM:SS where 'T' becomes a space and milliseconds are removed.
+
+=item1 B<utc>. Default is 0. Specify date and time at zulu time. The output
+ will have a 'Z' attached.
+
+=item1 B<timezone>. Default is the current timezone. Specify timezone in
+seconds.
+
+Without attributes the date and time is taken from C<DateTime.now()>.
+
+
+=head2 comment
+
+  $!SxmlCore.comment [ commented text ]
+
+This will generate an XML comment
+
+  <!-- commented text -->
+
+
+=head2 cdata
+
+  $!SxmlCore.cdata [ data text ]
+
+This will generate a CDATA (character data) section
+
+  <![CDATA[ data text ]]>
+
+
+=head2 pi
+
+  $!SxmlCore.pi target=xml-stylesheet [ href="mystyle.css" type="text/css" ]
+
+Generate a PI (processing instruction). One cannot use this to generate the xml
+prelode (or xml declaration) at the start of a document!
+
+  <?xml-stylesheet href="mystyle.css" type="text/css"?>
+
+B<Attributes>
+
+=item1 B<target>. Specify the target language. Reserved names start with 'xml'
+(any mix of lower and uppercase) like xml-stylesheet. This value must be set
+otherwise an undesired value 'no-target' is used.
+
+=comment -----------------------------------------------------------------------
+=end pod
