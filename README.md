@@ -18,10 +18,10 @@ The following piece of xml (html) text
   <body>
     <h1> Introduction </h1>
     <p class='green'> Piece of text. See <a href='google.com'>google</a>. </p>
+    <p>The date of today is 2015-03-01</p>
   </body>
 </html>
 ```
-(9 lines, 23 words, 195 characters)
 
 I want to write something like the following
 
@@ -33,10 +33,13 @@ $|html [
   $|body [
     $|h1 [ Introduction ]
     $|p class=green [ Piece of text. See $*|a href=google.com [google].]
+    <p>The date of today is $!SxmlCore.date </p>
   ]
 ]
 ```
-(9 lines, 29 words, 170 characters. Less characters typed and still indenting. Note that characters like ']' is counted as a word!). Besides this, the xml generated from the sxml file is smaller than above because it removes as much white space as necessary.
+Less characters typed and still indenting. Besides this, the xml generated from the sxml file is smaller than above because it removes as much white space as necessary. Also note the date in the html example is hand-crafted while in the sxml example the current date is generated on each run.
+
+**NOTE** I am still rethinking the use of $, |, !, \*, etc. characters to initiate an element and how to simplify those. Something like $html, $modkey.method etc. Also the start of a body with [! ... !] or [= ... ] could be easier when elements could be labeled as non-nesting, space-preserving, block or inline. When this becomes possible, the example would become even smaller.
 
 ### Advantages of using this language
 
