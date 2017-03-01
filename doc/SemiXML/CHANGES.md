@@ -2,6 +2,9 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.27.5
+  * Rewrote parts of SxmlLib::SxmlCore. Added options to some methods and removed others.
+  * Pod doc for SxmLib::SxmlCore.
 * 0.27.4
   * Rewrote some parts of Sxml.pm6 to handle the configuration, it is much better now.
   * parse-file is changed into parse. Together with the original one they are now defined as multi methods.
