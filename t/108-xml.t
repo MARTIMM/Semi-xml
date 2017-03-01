@@ -27,7 +27,8 @@ $|html [
     $!SxmlCore.cdata [cdata text $!SxmlCore.date []]
     $!SxmlCore.cdata [cdata text $|p [data in section] $|br []]
 
-    $!SxmlCore.pi [perl6 instruction text]
+    $!SxmlCore.pi target=perl6 [instruction text]
+    $!SxmlCore.pi target=xml-stylesheet [ href="mystyle.css" type="text/css" ]
 
     $|h1 [End of tests]
   ]
@@ -46,7 +47,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse( :filename($f1), :$config);
 
 my Str $xml-text = ~$x;
-#note $xml-text;
+note $xml-text;
 
 my $d = Date.today();
 ok $xml-text ~~ m/'<!--comment text-->'/, 'Check comments';
@@ -61,7 +62,9 @@ like $xml-text, / :s '<![CDATA[cdata text' \d**4 '-' \d\d '-' \d\d ']]>'/,
 ok $xml-text ~~ m/'<![CDATA[cdata text<p>data in section</p><br/>]]>'/,
    'Check cdata with embedded tags';
 
-ok $xml-text ~~ m/'<?perl6 instruction text?>'/, 'Check pi data';
+ok $xml-text ~~ m/'<?perl6 instruction text?>'/, 'Check pi data 1';
+like $xml-text, /'<?xml-stylesheet href="mystyle.css" type="text/css"?>'/,
+     'Check pi data 2';
 
 
 #-------------------------------------------------------------------------------

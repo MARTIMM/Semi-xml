@@ -16,6 +16,7 @@ class SxmlCore {
   method date ( XML::Element $parent,
                 Hash $attrs,
                 XML::Node :$content-body   # Ignored
+                --> XML::Node
               ) {
 
     $parent.append(XML::Text.new(:text(' ')));
@@ -36,23 +37,27 @@ class SxmlCore {
   method date-time ( XML::Element $parent,
                      Hash $attrs,
                      XML::Node :$content-body   # Ignored
+                     --> XML::Node
                    ) {
+
+    my Bool $iso = $attrs<iso>:exists ?? ?$attrs<iso>.Int !! True;
+    my Bool $utc = $attrs<utc>:exists ?? ?$attrs<utc>.Int !! False;
+    my Int $tz = $attrs<timezone>:exists ?? $attrs<timezone>.Int !! 0;
 
     my DateTime $date-time;
 
-    if $attrs<timezone> {
-      $date-time = DateTime.now(:timezone($attrs<timezone>.Int));
+    if $tz {
+      $date-time = DateTime.now(:timezone($tz));
     }
 
     else {
       $date-time = DateTime.now;
     }
 
-    $date-time .= utc if ?$attrs<utc>;
-
+    $date-time .= utc if ?$utc;
     my Str $dtstr = $date-time.Str;
 
-    unless $attrs<iso>:exists {
+    if !$iso {
       $dtstr ~~ s/'T'/ /;
       $dtstr ~~ s/'+'/ +/;
       $dtstr ~~  s/\.\d+//;
@@ -67,6 +72,7 @@ class SxmlCore {
   method comment ( XML::Element $parent,
                    Hash $attrs,
                    XML::Node :$content-body
+                   --> XML::Node
                  ) {
 
     # Textify all body content
@@ -84,12 +90,13 @@ class SxmlCore {
   method cdata ( XML::Element $parent,
                  Hash $attrs,
                  XML::Node :$content-body
+                 --> XML::Node
                ) {
 
     # Textify all body content
     my Str $cdata-content = [~] $content-body.nodes;
 
-    # Remove textitified container tags from the text
+    # Remove container tags from the text
     $cdata-content ~~ s:g/ '<' '/'? '__PARENT_CONTAINER__>' //;
 
     $parent.append(XML::CDATA.new(:data($cdata-content)));
@@ -101,8 +108,12 @@ class SxmlCore {
   method pi ( XML::Element $parent,
               Hash $attrs,
               XML::Node :$content-body
+              --> XML::Node
             ) {
-    $parent.append(XML::PI.new(:data([~] $content-body.nodes)));
+
+    $parent.append(
+      XML::PI.new(:data(( $attrs<target>, $content-body.nodes).join(' ')))
+    );
     $parent;
   }
 }

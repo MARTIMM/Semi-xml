@@ -23,9 +23,9 @@ $|top [
   $!SxmlCore.date year=1957
   $**A
   $**X [ $!SxmlCore.date ]
-  $**Y [ $!SxmlCore.date-time iso=1 ]
-  $**Z [ $!SxmlCore.date-time iso=1 timezone=960 ]
-  $**Z2 [ $!SxmlCore.date-time utc=1 ]
+  $**Y [ $!SxmlCore.date-time ]
+  $**Z [ $!SxmlCore.date-time timezone=960 ]
+  $**Z2 [ $!SxmlCore.date-time utc=1 iso=0 ]
 ]
 EOSX
 
@@ -44,7 +44,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse( :filename($f1), :$config);
 my Date $d = Date.today;
 my Str $xml-text = ~$x;
-note $xml-text;
+#note $xml-text;
 
 my Str $dt = $d.Str;
 my Str $dm = $d.month.fmt('%02d');
