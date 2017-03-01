@@ -119,6 +119,7 @@ class Report:ver<0.2.2> {
     my XML::Element $head = append-element( $html, 'head');
     self!setup-head( $head, $attrs);
     my XML::Element $body = append-element( $html, 'body');
+    append-element( $body, 'h1', %(:id<__top>, :class<title>), :text($title));
 
     $body.append($content-body);
     $parent;

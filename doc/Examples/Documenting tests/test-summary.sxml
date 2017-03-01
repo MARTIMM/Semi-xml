@@ -1,6 +1,6 @@
 $!report.summary title='Test Summary Report' [
 
-  $|h1 [Test Summary Report]
+  $|h1 [Overview of the tests for this application]
 
   $|p [
     This doc is following steps from
