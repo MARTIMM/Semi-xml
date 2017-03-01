@@ -16,17 +16,20 @@ my $f1 = "$dir/test-file.sxml";
 
 spurt( $f1, q:to/EOSX/);
 $|top [
-  $!SxmlCore.date []
-  $!SxmlCore.date year=1957 month=6 day=26 []
-  $!SxmlCore.date year=1957 day=26 []
-  $!SxmlCore.date year=1957 month=6 []
-  $!SxmlCore.date year=1957 []
-  $**A []
-  $**X [$!SxmlCore.date []]
-  $**Y [$!SxmlCore.date-time iso=1 []]
-  $**Z [$!SxmlCore.date-time iso=1 timezone=960 []]
+  $!SxmlCore.date
+  $!SxmlCore.date year=1957 month=6 day=26
+  $!SxmlCore.date year=1957 day=26
+  $!SxmlCore.date year=1957 month=6
+  $!SxmlCore.date year=1957
+  $**A
+  $**X [ $!SxmlCore.date ]
+  $**Y [ $!SxmlCore.date-time iso=1 ]
+  $**Z [ $!SxmlCore.date-time iso=1 timezone=960 ]
 ]
 EOSX
+
+# '$**Z [$!SxmlCore.date-time iso=1 timezone=960]' produces an error
+# 'Parse failure possible missing bracket at line 10-11, tag $**Z, body number 1
 
 #-------------------------------------------------------------------------------
 my Hash $config = {};
@@ -41,13 +44,18 @@ $x.parse( :filename($f1), :$config);
 my Str $xml-text = ~$x;
 #note $xml-text;
 
+my Date $d = Date.today;
+my Str $dt = $d.Str;
+my Str $dm = $d.month.fmt('%02d');
+my Str $dd = $d.day.fmt('%02d');
+
 diag "Some tests can go wrong on the split second at midnight";
-my $d = Date.today().Str;
+
 ok $xml-text ~~ m:s/ '1957-06-26' /, 'Check specific date';
-ok $xml-text ~~ m:s/ '1957-01-26' /, 'Check specific date on 1st month';
+ok $xml-text ~~ m:s/ "1957-$dm-26" /, 'Check specific date on 1st month';
 ok $xml-text ~~ m:s/ '1957-06-01' /, 'Check specific date on 1st day';
-ok $xml-text ~~ m:s/ '1957-01-01' /, 'Check specific date on 1st day and month';
-ok $xml-text ~~ m:s/ '<X>' $d '</X>' /, 'Check date of today';
+ok $xml-text ~~ m:s/ "1957-$dm-$dd" /, 'Check specific date on 1st day and month';
+ok $xml-text ~~ m:s/ "<X> $dt\</X>" /, 'Check date of today';
 
 #note 'Date: ', $d;
 ok $xml-text ~~ m/ '<Y>'

@@ -2,7 +2,7 @@ use v6.c;
 
 #-------------------------------------------------------------------------------
 use XML;
-#use SemiXML::Sxml;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
@@ -18,62 +18,15 @@ class SxmlCore {
                 XML::Node :$content-body   # Ignored
               ) {
 
-#      $parent.append(XML::Text.new(:text(Date.today().Str)));
     $parent.append(XML::Text.new(:text(' ')));
 
-    my Int $year = +$attrs<year> if ? $attrs<year>;
-    my Int $month = +$attrs<month> if ? $attrs<month>;
-    my Int $day = +$attrs<day> if ? $attrs<day>;
+    my Date $today = Date.today;
 
-    if ? $year and ? $month and ? $day {
-      $parent.append(
-        XML::Text.new(
-          :text(Date.new( $year, $month, $day).Str)
-        )
-      );
-    }
+    my Int $year = ($attrs<year> // $today.year.Str).Int;
+    my Int $month = ($attrs<month> // $today.month.Str).Int;
+    my Int $day = ($attrs<day> // $today.day.Str).Int;
 
-    elsif ? $year {
-      if ? $month and ? $day {
-        $parent.append(
-          XML::Text.new(
-            :text(Date.new( :$year, :$month, :$day).Str)
-          )
-        );
-      }
-
-      elsif ? $month {
-        $parent.append(
-          XML::Text.new(
-            :text(Date.new( :$year, :$month).Str)
-          )
-        );
-      }
-
-      elsif ? $day {
-        $parent.append(
-          XML::Text.new(
-            :text(Date.new( :$year, :$day).Str)
-          )
-        );
-      }
-
-      else {
-        $parent.append(
-          XML::Text.new(
-            :text(Date.new(:$year).Str)
-          )
-        );
-      }
-    }
-
-    else {
-      $parent.append(
-        XML::Text.new(
-          :text(Date.today().Str)
-        )
-      );
-    }
+    append-element( $parent, :text(Date.new( $year, $month, $day).Str));
 
     $parent;
   }
