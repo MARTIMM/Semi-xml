@@ -1,5 +1,3 @@
-new-style       = 0
-
 #[ dependencies ]
 #  file          = [ ]
 
@@ -15,6 +13,7 @@ new-style       = 0
   show          = false
   version       = '1.0'
   encoding      = 'UTF-8'
+#  standalone    = 'yes'
 
 [ option.doctype ]
   show          = false
@@ -27,8 +26,8 @@ new-style       = 0
   fileext       = 'xml'
 
 [ output.program ]
-#  fmt           = 'xmllint --format --noent - > %of.%oe'
-#  pdf           = 'wkhtmltopdf - %of.pdf'
+#  pdf           = 'wkhtmltopdf - %op/%of.pdf'
+#  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
 #  chk           = 'tidy -'
 
 
