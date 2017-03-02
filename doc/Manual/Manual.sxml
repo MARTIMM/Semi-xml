@@ -1,3 +1,5 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=db5 --run=pdf
+
 $!Db5b.article [
   $|title [ Package &pack; to describe and use semi XML ]
   $!Db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com

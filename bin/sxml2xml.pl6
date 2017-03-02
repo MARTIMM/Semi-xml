@@ -1,14 +1,27 @@
 #!/usr/bin/env perl6
 #
-use v6.c;
+use v6;
 use SemiXML::Sxml;
 
 # Allow switches after positionals. Pinched from an older panda version. Now
 # it is possible to make the sxml file executable with the path of this
 # program.
 #
-my @a = grep( /^ <-[-]>/, @*ARGS);
-@*ARGS = (|grep( /^ '-'/, @*ARGS), |@a);
+# When switches are given in the Unix hash-bang command the text after the
+# command is one string. This must be split first and pushed separately.
+my @a;
+for grep( /^ '--'/, @*ARGS) -> $a {
+  for $a.split( /\s+ <?before '--'>/ ) {
+    @a.push: $^a;
+  }
+}
+
+@*ARGS = ( |@a, |grep( /^ <-[-]>/, @*ARGS));
+
+#for @*ARGS {
+#  note "A: $^a";
+#}
+
 
 #-------------------------------------------------------------------------------
 #= sxml2xml -run=<run-code> filename.sxml
