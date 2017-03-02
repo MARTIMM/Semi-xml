@@ -4,20 +4,20 @@ use Test;
 use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
-subtest 'test onliners', {
+subtest 'test oneliners', {
 
-  my $xml = parse('$|st');
+  my $xml = parse('$st');
   is $xml, '<st/>', "1 tag: $xml";
 
-  $xml = parse(Q:q@$|st a1=w a2='g g' a3="h h" [ ]@);
+  $xml = parse(Q:q@$st a1=w a2='g g' a3="h h" [ ]@);
   like $xml, /'a1="w"'/, 'a1 attribute';
   like $xml, /'a2="g g"'/, 'a2 attribute';
   like $xml, /'a3="h h"'/, 'a2 attribute';
 
-  #dies-ok { $xml = parse('$|st [ $f w [] hj ]'); }, 'Parse failure';
+  #dies-ok { $xml = parse('$st [ $f w [] hj ]'); }, 'Parse failure';
 
   try {
-    $xml = parse('$|st [ $f w [] hj ]');
+    $xml = parse('$st [ $f w [] hj ]');
 
     CATCH {
       default {
@@ -28,16 +28,16 @@ subtest 'test onliners', {
     }
   }
 
-  $xml = parse('$|t1 [ $|t2 [] $|t3[]]');
+  $xml = parse('$t1 [ $t2 [] $t3[]]');
   is $xml, '<t1><t2/><t3/></t1>', "nested tags: $xml";
 
-  $xml = parse('$|t1 [ $**t2 [] $|t3[]]');
+  $xml = parse('$t1 [ $**t2 [] $t3[]]');
   is $xml, '<t1> <t2/> <t3/></t1>', "nested tags with \$**: $xml";
 
-  $xml = parse('$|t1 [ $|*t2 [] $|t3[]]');
+  $xml = parse('$t1 [ $|*t2 [] $t3[]]');
   is $xml, '<t1><t2/> <t3/></t1>', "nested tags with \$|*: $xml";
 
-  $xml = parse('$|t1 [ $*|t2 [] $|t3[]]');
+  $xml = parse('$t1 [ $*|t2 [] $t3[]]');
   is $xml, '<t1> <t2/><t3/></t1>', "nested tags with \$*|: $xml";
 }
 
@@ -45,16 +45,8 @@ subtest 'test onliners', {
 subtest 'test multi liners', {
 
   my Str $xml = parse(Q:q:to/EOXML/);
-    $|st [
-    ]
-    EOXML
-
-  is $xml, '<st/>', "1 tag: $xml";
-
-
-  $xml = parse(Q:q:to/EOXML/);
-    $|aa [
-      $|bb [
+    $aa [
+      $bb [
       ]
     ]
     EOXML
@@ -63,9 +55,9 @@ subtest 'test multi liners', {
 
   try {
     $xml = parse(Q:q:to/EOXML/);
-      $|aa [
-        $|bb [ ][
-          $|cc [
+      $aa [
+        $bb [ ][
+          $cc [
         ]
       ]
       EOXML
@@ -73,7 +65,7 @@ subtest 'test multi liners', {
     CATCH {
 
       default {
-        like .message, /:s line 3\-4\, tag \$\|cc\, body number 1/,
+        like .message, /:s line 3\-4\, tag \$cc\, body number 1/,
              .message;
       }
     }
@@ -81,9 +73,9 @@ subtest 'test multi liners', {
 
 
   $xml = parse(Q:q:to/EOXML/);
-    $|aa [
-      $|bb [ ][
-        $|cc [
+    $aa [
+      $bb [ ][
+        $cc [
       ]
        ]
     ]

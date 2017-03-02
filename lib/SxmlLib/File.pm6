@@ -42,7 +42,7 @@ class File {
           # the top level node xx-xx-xx is used to be sure there is only one
           # element at the top when parsing starts.
           #
-          my $e = $x.parse(:content("\$|XX-XX-XX [ $sxml-text ]"));
+          my $e = $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
 
           # move nodes to the parent node
           $parent.insert($_) for $x.root-element.nodes.reverse;
@@ -57,7 +57,7 @@ class File {
         die "Type $type not recognized with \$!include";
       }
     }
-    
+
     $parent;
   }
 }

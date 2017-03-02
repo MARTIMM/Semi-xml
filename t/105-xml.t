@@ -14,9 +14,9 @@ my $f1 = "$dir/test-file.sxml";
 my $f2 = "$dir/d1.sxml";
 
 spurt( $f1, q:to/EOSX/);
-  $|html [
-    $|body [
-      $|h1 [First chapter]
+  $html [
+    $body [
+      $h1 [First chapter]
       some text
 
       $!file.include type=include reference=t/D105/d1.sxml [ ignored content ]
@@ -27,8 +27,8 @@ spurt( $f1, q:to/EOSX/);
 #-------------------------------------------------------------------------------
 # Prepare other sxml file to load into f1
 spurt( $f2, q:to/EOSXML/);
-  $|h1 [ Intro ]
-  $|p [
+  $h1 [ Intro ]
+  $p [
     How 'bout this!
   ]
   EOSXML

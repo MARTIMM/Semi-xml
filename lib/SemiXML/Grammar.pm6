@@ -35,7 +35,7 @@ grammar Grammar {
   token tag:sym<$|*>  { <sym> <tag-name> }
   token tag:sym<$*|>  { <sym> <tag-name> }
   token tag:sym<$**>  { <sym> <tag-name> }
-  token tag:sym<$|>   { <sym> <tag-name> }
+  token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
   token sym-name      { <.identifier> }
@@ -87,7 +87,8 @@ grammar Grammar {
   token body1-text {
     [ <.escape-char> ||         # an escaped character e.g. '\$'
       <-[\$\]\#]> ||            # any character not being '$', '#' or ']'
-      '$' <!before <[!|*]>>     # a $ not followed by '!', '|' or '*'
+      '$' <!before [<[!|*]>|<:L>]>
+                                # a $ not followed by '!', '|', '*' or alpha
     ]+
   }
 

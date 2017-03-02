@@ -8,48 +8,110 @@ my Str $cfg = "$dir/SemiXML.toml";
 mkdir $dir unless $dir.IO ~~ :d;
 spurt $cfg, qq:to/EOCONFIG/;
 
-  # flip interpretation
-  new-style = 1
+  #--[new config]-----------------------------------------------------------------
+  # Defaults
+  [ D ]
+    xml-show              = false
+    xml-version           = '1.0'
+    xml-encoding          = 'UTF-8'
+  #  xml-standalone        = 'yes'
+    doctype-show          = false
+    http-show             = false
 
-  # xml prelude definitions, default is off
-  [ option.xml-prelude ]
-    show                = 0
-    version             = 1.0
-    standalone          = 'yes'
+  #  filename              = 'default basename of sxml file'
+  #  filepath              = 'default path of sxml file'
+    fileext               = 'xml'
 
-  [ option.doctype ]
-    show                = 1
+  #[ D.Libraries ]
+  #  SxmlCore              = 'lib'
 
-  [ option.doctype.entities ]
-    what                = 'fun'
+  [ D.Modules ]
+    SxmlCore              = 'SxmlLib::SxmlCore'
 
-  [ output ]
-    fileext             = 'xml'
-    filename            = 'target200'
-    filepath            = "$dir"
+  [ D.Entities ]
+    copy                  = '&#xa9;'
 
-  [ output.program ]
-    pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
-    xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
-    chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
+  #[ D.Run ]
+  #  xml                   = 'xmllint --format - > %op/%of.%oe'
 
-  [ module ]
-    lorem         = 'SxmlLib::LoremIpsum'
+
+
+  # default --in=xml and --out=xml
+  [ D.xml.xml ]
+    xml-show              = true
+    doctype-show          = true
+
+  [ D.Run.xml ]
+    check                 = 'xmllint --format - > %op/%of.%oe'
+
+  [ D.Run.xml ]
+    xsl                   = 'xmllint --format - > %op/Xsl/%of.xsl'
+
+
+
+  [ D.http.email ]
+    Content-Type          = 'text/html; charset="utf-8"'
+    From                  = 'my-addr@gmail.com'
+    User-Agent            = 'SemiXML'
+
+
+
+  # Example document is html
+  [ D.html ]
+    inline                = [ 'b', 'i', 'strong']
+    non-nesting           = [ 'script', 'style']
+    space-preserve        = [ 'pre' ]
+
+    xml-show              = true
+    doctype-show          = true
+
+  [ D.Modules.html ]
+    lorem                 = 'SxmlLib::LoremIpsum'
+
+
+
+  [ D.db5 ]
+    inline                = [ 'emphasis']
+    space-preserve        = [ 'programlisting']
+    xml-show              = true
+    doctype-show          = true
+
+  [ D.db5.pdf ]
+    run                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
+
+  [ D.db5.xhtml ]
+    run                   = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
+
+  [ D.db5.chunk ]
+    run                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
+
+  [ D.Modules.db5 ]
+    lorem                 = 'SxmlLib::LoremIpsum'
+    Db5b                  = 'SxmlLib::Docbook5::Basic'
+    Db5f                  = 'SxmlLib::Docbook5::FixedLayout'
+
+  [ D.Entities.db5 ]
+    copy                  = '&#xa9;'
+    nbsp                  = ' '
 
   EOCONFIG
 
 my Str $f = "$dir/f200.sxml";
 spurt $f, q:to/EOSXML/;
-  $|html [
-    $|body [
-      $|h1 [ Burp ]
-      $|p [ this is &what;! ]
+  $html [
+    $body [
+      $h1 [ Burp ]
+      $p [ this is &what;! ]
     ]
   ]
   EOSXML
 
 #-------------------------------------------------------------------------------
 my SemiXML::Sxml $x;
+
+is 1,1,'yes';
+done-testing;
+exit;
 
 $x .= new( :trace, :merge);
 $x.parse(:filename($f));
@@ -69,7 +131,7 @@ note $xml-text;
 # cleanup
 done-testing;
 
-unlink $cfg;
-unlink $f;
-unlink "$dir/target200.xml";
-rmdir $dir;
+#unlink $cfg;
+#unlink $f;
+#unlink "$dir/target200.xml";
+#rmdir $dir;

@@ -15,7 +15,7 @@ my $f1 = "$dir/test-file.sxml";
 
 
 spurt( $f1, q:to/EOSX/);
-$|top [
+$top [
   $!SxmlCore.date
   $!SxmlCore.date year=1957 month=6 day=26
   $!SxmlCore.date year=1957 day=26
@@ -53,8 +53,8 @@ my Str $dd = $d.day.fmt('%02d');
 diag "Some tests can go wrong on the split second at midnight";
 
 ok $xml-text ~~ m:s/ '1957-06-26' /, 'Check specific date';
-ok $xml-text ~~ m:s/ "1957-$dm-26" /, 'Check specific date on 1st month';
-ok $xml-text ~~ m:s/ '1957-06-01' /, 'Check specific date on 1st day';
+ok $xml-text ~~ m:s/ "1957-$dm-26" /, 'Check specific date on current month';
+ok $xml-text ~~ m:s/ "1957-06-$dd" /, 'Check specific date on currnt day';
 ok $xml-text ~~ m:s/ "1957-$dm-$dd" /, 'Check specific date on 1st day and month';
 ok $xml-text ~~ m:s/ "<X> $dt\</X>" /, 'Check date of today';
 

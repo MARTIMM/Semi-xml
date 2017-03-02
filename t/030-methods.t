@@ -86,7 +86,7 @@ like $xml, /'method="mth2"'/, "culprit method mth2";
 
 
 
-$content = '$|x [ $!mod1.mth2 [ ] ]';
+$content = '$x [ $!mod1.mth2 [ ] ]';
 $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
@@ -95,7 +95,7 @@ is $xml, '<x><p/><p>Added 0 xml nodes</p></x>', "generated: $xml";
 
 
 
-$content = '$|x [ $!mod1.mth2 [ $|h [abc] $|h[def]]]';
+$content = '$x [ $!mod1.mth2 [ $h [abc] $h[def]]]';
 $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
