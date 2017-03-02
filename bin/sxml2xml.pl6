@@ -57,7 +57,7 @@ sub process-sxml (
   Bool :$trace = False, Bool :$merge = False, 
 ) {
 
-  my SemiXML::Sxml $x .= new( :$trace, :$merge);
+  my SemiXML::Sxml $x .= new( :$trace, :$merge, :$refine);
 
   if $filename.IO ~~ :r {
     $x.parse(:$filename);
