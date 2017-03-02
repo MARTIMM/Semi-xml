@@ -4,13 +4,14 @@ Module:-
 Class:-
 Distribution:-
 Label:-
+Date (zulu):2017-03-02T19:04:53.297537Z
 OS-Kernel:linux:4.9.7.101.fc.24.x.86._.64
 OS-Distro:fedora:24.Workstation.Edition:24:False
 Perl:Perl 6:6.c
-Compiler:rakudo:2017.01.229.g.9.fde.417
-VM:moar:2017.01.72.g.542.baec
-Total: 10
-T:10.00 0.00 10.00
+Compiler:rakudo:2017.02.56.g.9.f.10434
+VM:moar:2017.02.7.g.3.d.85900
+Total: 0
+T:0.00 0.00 0.00
 B:0.00 0.00 0.00
 D:0.00 0.00 0.00
 S:0.00 0.00 0.00
