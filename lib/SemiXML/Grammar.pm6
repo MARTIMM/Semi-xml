@@ -16,7 +16,15 @@ grammar Grammar {
   # can be nested.
   #
   # Possible comments outside toplevel document
-  rule TOP { <.init-doc> <.comment>* <document> <.comment>* }
+  rule TOP {
+    <.init-doc>
+    (<.ws> <.comment> <.ws>)*           # Needed to make empty lines between
+                                        # comments possible. Only here is needed
+                                        # body*-contents is taking care for the
+                                        # rest.
+    <document>
+    (<.ws> <.comment> <.ws>)*
+  }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
   # possible to use a rule to add the element to this stack. This happens in
