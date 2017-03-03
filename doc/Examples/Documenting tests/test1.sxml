@@ -1,11 +1,13 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=html --run=pdf
+
 $!report.run title='Integer manipulations' class='Int'
              label=test1,integer,report
              highlight-lang='lang-perl6' highlight-skin='default' linenumbers=0
              test-file='doc/Examples/Documenting tests/test1.t' [
 
-  $|h1 [The Perl 6 integer test report]
+  $h1 [The Perl 6 integer test report]
 
-  $|p [
+  $p [
     The integer is in perl the most important type so we need to do our best
     to test it thoroughly. First we declare a constant to be used later and an
     integer without a value.
@@ -37,9 +39,9 @@ $!report.run title='Integer manipulations' class='Int'
     ]
   ]
 
-  $|h3 [Operations]
+  $h3 [Operations]
 
-  $|p [Next a few tests to see if operations can be applied to the integer]
+  $p [Next a few tests to see if operations can be applied to the integer]
 
   $!code.add [=
     $i = ABC;
