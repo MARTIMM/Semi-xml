@@ -2,8 +2,9 @@
   show          = 0
 
 [output]
-  fileext       = 'svg'
+  fileext       = 'html'
 
 [output.program]
-  pdf           = 'wkhtmltopdf - %of.pdf'
+  pdf           = 'wkhtmltopdf - %op/%of.pdf'
+  lint          = 'xmllint -format - > %op/%of.%oe'
 

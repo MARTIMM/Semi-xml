@@ -24,10 +24,9 @@ $html lang=en-US dir=ltr [
            width=450 height=450
            viewport='0 0 300 300' [
         $g fill-opacity=0.7 stroke=black stroke-width=0.1cm [
-          $circle cx=6cm cy=2cm r=100 fill=red transform='translate(0 50)' []
-          $circle cx=6cm cy=2cm r=100 fill=blue transform='translate(70 150)' []
-          $circle cx=6cm cy=2cm r=100
-                  fill=green transform='translate(-70 150)' []
+          $circle cx=6cm cy=2cm r=100 fill=red transform='translate(0 50)'
+          $circle cx=6cm cy=2cm r=100 fill=blue transform='translate(70 150)'
+          $circle cx=6cm cy=2cm r=100 fill=green transform='translate(-70 150)'
         ]
       ]
 
