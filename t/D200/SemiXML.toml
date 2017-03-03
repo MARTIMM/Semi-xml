@@ -11,7 +11,7 @@
 
 #  filename              = 'default basename of sxml file'
 #  filepath              = 'default path of sxml file'
-  fileext               = 'xml'
+#  fileext               = 'xml'
 
 #[ D.Libraries ]
 #  SxmlCore              = 'lib'
@@ -22,23 +22,22 @@
 [ D.Entities ]
   copy                  = '&#xa9;'
 
-#[ D.Run ]
-#  xml                   = 'xmllint --format - > %op/%of.%oe'
+# sxml2xml use
+#[ D.Dependencies ]
 
 
 
-# default --in=xml and --out=xml
+# in = xml, out = xml
 [ D.xml.xml ]
   xml-show              = true
   doctype-show          = true
 
+#[ D.Run.xml ]
+#  xml                   = 'xmllint --format - > %op/%of.%oe'
+
 [ D.Run.xml ]
   check                 = 'xmllint --format - > %op/%of.%oe'
-
-[ D.Run.xml ]
   xsl                   = 'xmllint --format - > %op/Xsl/%of.xsl'
-
-
 
 [ D.http.email ]
   Content-Type          = 'text/html; charset="utf-8"'
@@ -73,15 +72,15 @@
 [ D.db5.xhtml ]
   run                   = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
 
-[ D.db5.chunk ]
-  run                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
+[ R.db5.chunk ]
+  chunk                 = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
-[ D.Modules.db5 ]
+[ M.db5 ]
   lorem                 = 'SxmlLib::LoremIpsum'
   Db5b                  = 'SxmlLib::Docbook5::Basic'
   Db5f                  = 'SxmlLib::Docbook5::FixedLayout'
 
-[ D.Entities.db5 ]
+[ E.db5 ]
   copy                  = '&#xa9;'
   nbsp                  = ' '
 

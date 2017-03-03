@@ -20,10 +20,13 @@ class Sxml {
   has SemiXML::Actions $.actions handles < get-sxml-object >;
 
   has Config::DataLang::Refine $!configuration;
+  has Array $!refine;
+  has Hash $!refined-config;
 
   has Str $!filename;
+  has Str $!basename;
+
   has Bool $!drop-cfg-filename;
-  has Array $!refine;
   has Hash $!user-config;
   has Bool $!trace;
   has Bool $!merge;
@@ -33,6 +36,9 @@ class Sxml {
 
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
+
+    $!refine[0] = 'xml' unless ?$!refine[0];
+    $!refine[1] = 'xml' unless ?$!refine[1];
   }
 
   #-----------------------------------------------------------------------------
@@ -349,15 +355,16 @@ class Sxml {
     # 3) if filename is given, use its path also
     my Array $locations;
     my Str $fpath;
-    my Str $fname;
     my Str $fdir;
     my Str $fext;
     if ?$!filename and $!filename.IO ~~ :r {
 
-      $fname = $!filename.IO.basename;
+      my $bname = $!basename = $!filename.IO.basename;
       $fpath = $!filename.IO.abspath;
       $fdir = $fpath;
-      $fdir ~~ s/ '/'? $fname //;
+      $fext = $*PROGRAM.extension;
+      $!basename ~~ s/ '.' $fext //;
+      $fdir ~~ s/ '/'? $bname //;
       $locations = [$fdir];
 
       # 3a) to load SemiXML.TOML from the files location, current dir
@@ -366,8 +373,8 @@ class Sxml {
 
       # 3b) same as in 3a but use the filename now.
       $fext = $!filename.IO.extension;
-      $fname ~~ s/ $fext $/toml/;
-      self!load-config( :config-name($fname), :$locations, :merge);
+      $!basename ~~ s/ $fext $/toml/;
+      self!load-config( :config-name($!basename), :$locations, :merge);
     }
 
     # 4) if filename is not given, the configuration is searched using the
@@ -390,17 +397,17 @@ class Sxml {
     $c<output> = {} unless $c<output>:exists;
 
     if $c<output><filename>:!exists {
-      if ?$fname {
+      if ?$!basename {
         # lop off the extension from the above devised config name
-        $fname ~~ s/ '.toml' $// if ?$fname;
-        $c<output><filename> = $fname;
+        $!basename ~~ s/ '.toml' $// if ?$!basename;
+        $c<output><filename> = $!basename;
       }
 
       else {
-        $fname = $*PROGRAM.basename;
+        $!basename = $*PROGRAM.basename;
         $fext = $*PROGRAM.extension;
-        $fname ~~ s/ '.' $fext //;
-        $c<output><filename> = $fname;
+        $!basename ~~ s/ '.' $fext //;
+        $c<output><filename> = $!basename;
       }
     }
 
@@ -411,12 +418,15 @@ class Sxml {
 
       else {
         $fdir = $*PROGRAM.abspath;
-        $fname = $*PROGRAM.basename;
-        $fdir ~~ s/ '/'? $fname //;
+        my $bname = $!basename = $*PROGRAM.basename;
+        $fdir ~~ s/ '/'? $bname //;
         $c<output><filepath> = $fdir;
       }
     }
 
+    $!refined-config = $!configuration.refine(|( <D>, @$!refine, $!basename));
+note "RA: ", 'D', ', ', $!refine.join(', '), ', ', $!basename;
+note "RC: ", $!refined-config.perl;
 
     # instantiate modules specified in the configuration
     $!actions.process-modules(

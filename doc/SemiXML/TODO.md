@@ -74,7 +74,32 @@
     [ option.xml-prelude.file ]
     ```
 
-  * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. These should be set using the options to the sxml2xml program. E.g **'--in=html --out=html'** or **'--in=docbook5 --out=pdf'**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result.
+  * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. When choosing the proper commandline options one must keep the following in mind. First the document written is always **sxml**. What it represents should be the first option (by default **xml**) and what it should become the next option (by default **xml**). These options are provided by the sxml2xml program. The following **--in** and  **--out** with e.g. **--in=docbook5** and  **--out=pdf**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result. To also use the refine method from Config::DataLang::Refine, the options are used as keys to that method. A third key can be added, the basename of the file being parsed. So the next configuration tables are possible ();
+
+    ```
+    # [D] table is used as a general default
+    [ D ]
+    [ D.in-key ]
+    [ D.in-key.out-key ]
+    [ D.in-key.out-key.file ]
+
+    # [E] Entity table. Only with out-key and file.
+    [ E ]
+    [ E.out-key ]
+    [ E.out-key.file ]
+
+    # [M] Module table, only with in-key
+    [ M ]
+    [ M.in-key ]
+
+    # [R] Run table only with in-key and file. The out-key is used to select
+    # the command line.
+    [ R ]
+    [ R.in-key ]
+    [ R.in-key.file ]
+      out-key   = command line
+
+    ```
 
     ```
     # --out=html

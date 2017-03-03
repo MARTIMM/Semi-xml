@@ -20,7 +20,7 @@ spurt $cfg, qq:to/EOCONFIG/;
 
   #  filename              = 'default basename of sxml file'
   #  filepath              = 'default path of sxml file'
-    fileext               = 'xml'
+  #  fileext               = 'xml'
 
   #[ D.Libraries ]
   #  SxmlCore              = 'lib'
@@ -31,23 +31,22 @@ spurt $cfg, qq:to/EOCONFIG/;
   [ D.Entities ]
     copy                  = '&#xa9;'
 
-  #[ D.Run ]
-  #  xml                   = 'xmllint --format - > %op/%of.%oe'
+  # sxml2xml use
+  #[ D.Dependencies ]
 
 
 
-  # default --in=xml and --out=xml
+  # in = xml, out = xml
   [ D.xml.xml ]
     xml-show              = true
     doctype-show          = true
 
+  #[ D.Run.xml ]
+  #  xml                   = 'xmllint --format - > %op/%of.%oe'
+
   [ D.Run.xml ]
     check                 = 'xmllint --format - > %op/%of.%oe'
-
-  [ D.Run.xml ]
     xsl                   = 'xmllint --format - > %op/Xsl/%of.xsl'
-
-
 
   [ D.http.email ]
     Content-Type          = 'text/html; charset="utf-8"'
@@ -82,15 +81,15 @@ spurt $cfg, qq:to/EOCONFIG/;
   [ D.db5.xhtml ]
     run                   = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
 
-  [ D.db5.chunk ]
-    run                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
+  [ R.db5.chunk ]
+    chunk                 = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
-  [ D.Modules.db5 ]
+  [ M.db5 ]
     lorem                 = 'SxmlLib::LoremIpsum'
     Db5b                  = 'SxmlLib::Docbook5::Basic'
     Db5f                  = 'SxmlLib::Docbook5::FixedLayout'
 
-  [ D.Entities.db5 ]
+  [ E.db5 ]
     copy                  = '&#xa9;'
     nbsp                  = ' '
 
@@ -109,22 +108,23 @@ spurt $f, q:to/EOSXML/;
 #-------------------------------------------------------------------------------
 my SemiXML::Sxml $x;
 
-is 1,1,'yes';
-done-testing;
-exit;
+#is 1,1,'yes';
+#done-testing;
+#exit;
 
-$x .= new( :trace, :merge);
+$x .= new( :trace, :merge, :refine([ <db5>]));
 $x.parse(:filename($f));
 my Str $xml-text = ~$x;
+note $xml-text;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 $x.save;
 
 
-$x.parse(:content(slurp($f)));
-$xml-text = ~$x;
-like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
+#$x.parse(:content(slurp($f)));
+#$xml-text = ~$x;
+#like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 
-note $xml-text;
+#note $xml-text;
 
 
 #-------------------------------------------------------------------------------
