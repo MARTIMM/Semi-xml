@@ -18,8 +18,8 @@ my $g2 = "$gdir/Error messages.html";
 
 
 spurt( $f1, q:to/EOSX/);
-$|html [
-  $|body [
+$html [
+  $body [
     $!list.dir-list header=2,3 directory=t/D106 ref-attr=data_href id=ldir0001 []
   ]
 ]

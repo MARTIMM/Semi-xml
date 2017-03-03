@@ -16,7 +16,15 @@ grammar Grammar {
   # can be nested.
   #
   # Possible comments outside toplevel document
-  rule TOP { <.init-doc> <.comment>* <document> <.comment>* }
+  rule TOP {
+    <.init-doc>
+    (<.ws> <.comment> <.ws>)*           # Needed to make empty lines between
+                                        # comments possible. Only here is needed
+                                        # body*-contents is taking care for the
+                                        # rest.
+    <document>
+    (<.ws> <.comment> <.ws>)*
+  }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
   # possible to use a rule to add the element to this stack. This happens in
@@ -35,7 +43,7 @@ grammar Grammar {
   token tag:sym<$|*>  { <sym> <tag-name> }
   token tag:sym<$*|>  { <sym> <tag-name> }
   token tag:sym<$**>  { <sym> <tag-name> }
-  token tag:sym<$|>   { <sym> <tag-name> }
+  token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
   token sym-name      { <.identifier> }
@@ -81,25 +89,27 @@ grammar Grammar {
   #
   rule body1-contents  { <body2-text> }
   rule body2-contents  { <body2-text> }
-  rule body3-contents  { [ <.comment> || <body1-text> || <document> ]* }
-  rule body4-contents  { [ <.comment> || <body1-text> || <document> ]* }
+  rule body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
+  rule body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
 
   token body1-text {
     [ <.escape-char> ||         # an escaped character e.g. '\$'
+      <.entity> ||              # &some-spec; XML entity spec
       <-[\$\]\#]> ||            # any character not being '$', '#' or ']'
-      '$' <!before <[!|*]>>     # a $ not followed by '!', '|' or '*'
+      '$' <!before [<[!|*]>|<:L>]>
+                                # a $ not followed by '!', '|', '*' or alpha
     ]+
   }
 
-  token escape-char        { '\\' . }
+  token escape-char     { '\\' . }
+  token entity          { '&' <-[;]>+ ';' {note "E: $/";}}
 
-  # No comments allowed in [! ... !]. This works because a nested document is
+  # No comments recognized in [! ... !]. This works because a nested document is
   # not allowed and thus no extra comments are checked and handled as such..
-  token body2-text      { [ .*? <?before <.ws>? '!]'> ] }
+  token body2-text      { [ .*? <?before '!]'> ] }
 
   # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
   # dash within the string is accepted.
-  #
   token identifier { <.ident> [ '-' <.ident> ]* }
 
   token comment { \h* '#' \N* \n }

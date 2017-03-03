@@ -17,28 +17,28 @@ my $f1 = "$dir/test-file.sxml";
 my $f2 = 't/D103/f1.html';
 
 spurt( $f1, q:to/EOSX/);
-$|html [
-  $|head [
-    $|style type=text/css [!=
+$html [
+  $head [
+    $style type=text/css [!=
       green {
         color: #0f0;
         background-color: #f0f;
       }
     !]
-    $|script [!=
+    $script [!=
       var a_tags = $('a');
       var b = a_tags[1];
     !]
   ]
 
-  $|body [
-    $|h1 class=green [ Data from file ]
-    $|table [
-      $|tr [
-        $|th[ header ]
-        $|td[ data at $*|a href='http://example.com/' []
-          $|p [
-            bla bla $|b [bla] bla $*|u [bla $|b [bla]].
+  $body [
+    $h1 class=green [ Data from file ]
+    $table [
+      $tr [
+        $th[ header ]
+        $td[ data at $*|a href='http://example.com/' []
+          $p [
+            bla bla $b [bla] bla $*|u [bla $b [bla]].
           ]
         ]
       ]

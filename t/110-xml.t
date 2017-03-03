@@ -9,10 +9,10 @@ use SemiXML::Sxml;
 # Setup
 #
 my $content = q:to/EOSX/;
-$|html [
-  $|body [
-    $|h1 [burp]
-    $|p [this is it!]
+$html [
+  $body [
+    $h1 [burp]
+    $p [this is it!]
   ]
 ]
 EOSX

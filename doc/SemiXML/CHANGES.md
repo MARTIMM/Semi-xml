@@ -2,8 +2,11 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.28.0
+  * **$|element [ ]** is changed into **$element [ ]**.
 * 0.27.5
   * Rewrote parts of SxmlLib::SxmlCore. Added options to some methods and removed others.
+  * sxml2xml.pl processing of commandline options changed to cope with info from #! line in the sxml file.
   * Pod doc for SxmLib::SxmlCore.
 * 0.27.4
   * Rewrote some parts of Sxml.pm6 to handle the configuration, it is much better now.

@@ -15,22 +15,22 @@ mkdir $dir unless $dir.IO ~~ :e;
 my $f1 = "$dir/test-file.sxml";
 
 spurt( $f1, q:to/EOSX/);
-$|html [
-  $|body [
-    $|h1 [Tests for comments etc]
+$html [
+  $body [
+    $h1 [ Tests for comments etc ]
 
-    $!SxmlCore.comment [comment text]
-    $!SxmlCore.comment [comment text $!SxmlCore.date []]
-    $!SxmlCore.comment [comment text $|p [data in section] $|br []]
+    $!SxmlCore.comment [ comment text ]
+    $!SxmlCore.comment [ comment text $!SxmlCore.date [] ]
+    $!SxmlCore.comment [ comment text $p [ data in section ] $br ]
 
-    $!SxmlCore.cdata [cdata text]
-    $!SxmlCore.cdata [cdata text $!SxmlCore.date []]
-    $!SxmlCore.cdata [cdata text $|p [data in section] $|br []]
+    $!SxmlCore.cdata [ cdata text ]
+    $!SxmlCore.cdata [ cdata text $!SxmlCore.date [] ]
+    $!SxmlCore.cdata [ cdata text $p [ data in section ] $br ]
 
-    $!SxmlCore.pi target=perl6 [instruction text]
+    $!SxmlCore.pi target=perl6 [ instruction text ]
     $!SxmlCore.pi target=xml-stylesheet [ href="mystyle.css" type="text/css" ]
 
-    $|h1 [End of tests]
+    $h1 [ End of tests ]
   ]
 ]
 EOSX

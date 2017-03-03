@@ -3,10 +3,36 @@
 * Parser and actions.
   * Error messages when parser fails can still be improved.
 
+
 * Grammar extensions;
   * Remove '=' directly after '[' to keep text as it is typed. This is often forgotten by me, so others may have the same problem. Also it makes the grammar cleaner. Instead the following can be done to have the same effects;
     * No changes at all when the body content is given to a method.
     * Specific tag can be defined in the config. Most common in html is *script*, *style* and *pre* of which the first two are not really necessary.
+
+
+* Syntax
+  * XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '\_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
+
+```
+      Current syntax          Becomes             Config    Done
+
+      $|xyz []                $xyz                -         x
+      $|xyz [x]               $xyz [x]            -         x
+
+      $*|inline [x]           $inline [x]         x
+      $|*inline [x]           $inline [x]         x
+      $**inline [x]           $inline [x]         x
+
+      $|nonnest [! x !]       $nonnest [x]        x
+      $|spcresrv [= x ]       $spcresrv [x]       x
+
+      Remains the same
+      $!key.method [x]
+
+```
+  The space reserving '=' and non nesting '!' characters at the start of a block does not have to be removed completely but can just be used ocasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
+
+  The inline elements must also check for some non alphanumeric characters following the block. E.g. in case of ',', '.' etc. no space should be placed between the block and the following character.
 
 * External modules located in SxmlLib tree
   * Library paths to find modules are provided

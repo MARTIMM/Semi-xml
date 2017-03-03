@@ -14,10 +14,10 @@ use v6.c;
 =comment -----------------------------------------------------------------------
 =head1 Synopsis
 
-  $|html [
-    $|body [
-      $!SxmlCore.comment [Some of the test follow below]
-      $|p [ The date and time is now $!SxmlCore.date ]
+  $html [
+    $body [
+      $!SxmlCore.comment [Document is described below]
+      $p [ The date and time is now $!SxmlCore.date ]
     ]
   ]
 

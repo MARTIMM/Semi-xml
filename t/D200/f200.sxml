@@ -1,0 +1,6 @@
+$html [
+  $body [
+    $h1 [ Burp ]
+    $p [ this is &what;! ]
+  ]
+]

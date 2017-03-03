@@ -1,16 +1,18 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=db5 --run=pdf
+
 $!Db5b.article [
-  $|title [ Package &pack; to describe and use semi XML ]
+  $title [ Package &pack; to describe and use semi XML ]
   $!Db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
               city=Haarlem country=Netherlands
               copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
-    $|para [
+    $para [
       The &pack; package comprises a set of Perl 6 modules to convert a
       language coined 'semi xml' or &lang; text into $**emphasis[XML]
       languages such as $*|emphasis[HTML], $**emphasis[SOAP],
       $**emphasis[Docbook] or $*|emphasis[XSL].
     ]
 
-    $|para [
+    $para [
       In the package there is also a program called &prog; which uses &pack;
       to transform &lang; text from a given file into XML after which it
       is stored in another file. The generated XML can also be send to any
@@ -18,50 +20,50 @@ $!Db5b.article [
       xsltproc, xmllint, rnv, wkhtmltopdf, xep etcetera.
     ]
 
-    $|para [
+    $para [
       Furthermore there are modules designed to generate html, docbook or other
       specific constucts like epub and testing reports. Much of this code need
       some more refinements but it give the programmer a good insight in the
       strength of this package.
     ]
 
-    $|para [
+    $para [
       The latest version of this document is generated on date $!SxmlCore.date.
     ]
   ]
 
-  $|sect1 xml:id=Introduction [
-    $|title [ Introduction of package &pack; ]
-    $|para [
+  $sect1 xml:id=Introduction [
+    $title [ Introduction of package &pack; ]
+    $para [
       Welcome to the $*|emphasis[&pack;] package. As mentioned in the abstract, the 
       modules and programs in the package help to convert &lang; text
       into $*|emphasis[XML].
     ]
 
-    $|para [
+    $para [
       An example will speak for itself when Sxml is compared with the generated
       HTML. The generated html is shown here is pretty printed but would
       normally be a oneliner.
 
-      $|example [
-        $|title [Input &lang; text]
-        $|programlisting language=sxml [!=
-          $|html [
-            $|head [
-              $|title [ My First Sxml Document ]
+      $example [
+        $title [Input &lang; text]
+        $programlisting language=sxml [!=
+          $html [
+            $head [
+              $title [ My First Sxml Document ]
             ]
 
-            $|body [
-              $|h1 [ My First Sxml Document ]
-              $|p [ Hello world ]
+            $body [
+              $h1 [ My First Sxml Document ]
+              $p [ Hello world ]
             ]
           ]
         !]
       ]
 
-      $|example [
-        $|title [Generated html text]
-        $|programlisting language=html [!=
+      $example [
+        $title [Generated html text]
+        $programlisting language=html [!=
           <html>
             <head>
               <title> My First Sxml Document </title>
@@ -75,11 +77,11 @@ $!Db5b.article [
       ]
     ]
 
-    $|sect2 [
-      $|title [Advantages using this language]
-      $|itemizedlist [
-        $|listitem [
-          $|para [!
+    $sect2 [
+      $title [Advantages using this language]
+      $itemizedlist [
+        $listitem [
+          $para [!
             It is more clear to read the text which is where you want to focus on
             and therefor more maintainable than XML is. One of those thing I find
             annoying is writing the end tag. This is solved by using '[' and ']'
@@ -87,16 +89,16 @@ $!Db5b.article [
           !]
         ]
 
-        $|listitem [
-          $|para [
+        $listitem [
+          $para [
             Some language constructs will help inserting predefined text. An
             example of this might be to insert a lot of attributes of some element
             and hide it under a name.
           ]
         ]
 
-        $|listitem [
-          $|para [
+        $listitem [
+          $para [
             There are also constructs which are able to call code in modules to
             simplify things. An example is the use of one of the core methods
             to insert a date or time-stamp in the text. As an example above at the
@@ -106,8 +108,8 @@ $!Db5b.article [
           ]
         ]
 
-        $|listitem [
-          $|para [
+        $listitem [
+          $para [
             The language is extensible. Developers can add their own libraries
             to load for example data from a database and inserting it in the text
             as a HTML table.
@@ -116,17 +118,17 @@ $!Db5b.article [
       ]
     ]
 
-    $|sect2 [
-      $|title [Disadvantages]
-      $|itemizedlist [
-        $|listitem [
-          $|para [
+    $sect2 [
+      $title [Disadvantages]
+      $itemizedlist [
+        $listitem [
+          $para [
             There is an extra level of processing. If the XML text is simple
             one should not be bothered learning this language. Especially when
             the dynamic constructs aren't used.
           ]
 
-          $|para [
+          $para [
             Pointing to the proper spot in the sxml text when an error occurs
             has been proven difficult because the only thing the parser has is
             matching brackets. When the parser arrives at the end it may miss a
@@ -137,8 +139,8 @@ $!Db5b.article [
           ]
         ]
 
-        $|listitem [
-          $|para [
+        $listitem [
+          $para [
             This project is only just started. There are many things left on the
             wish list. E.g. I would like to give proper messages when mistakes are
             made in the syntax.
@@ -147,30 +149,30 @@ $!Db5b.article [
       ]
     ]
 
-    $|sect2 [
-      $|title [Information given in this manual]
-      $|itemizedlist [
-        $|listitem [
-          $|para [
-            $|emphasis[The basics]. Explanation of the SemiXML module and the
+    $sect2 [
+      $title [Information given in this manual]
+      $itemizedlist [
+        $listitem [
+          $para [
+            $emphasis[The basics]. Explanation of the SemiXML module and the
             program sxml2xml.
             
-            $|emphasis[The language]. Here the basic layout will be explained,
+            $emphasis[The language]. Here the basic layout will be explained,
             the terminology and meaning of the syntax. The start will be gentle
             showing simple cases first..
 
-            $|itemizedlist [
-              $|listitem [
-                $|para [
-                  $|emphasis[The document]. The document is where text
+            $itemizedlist [
+              $listitem [
+                $para [
+                  $emphasis[The document]. The document is where text
                   is written for the specific documents together with the
                   elements to format the text. Some of the special elements will
                   need the prelude section explained in the next section.
                 ]
               ]
-              $|listitem [
-                $|para [
-                  $|emphasis[Configuration]. The toml configuration file will be
+              $listitem [
+                $para [
+                  $emphasis[Configuration]. The toml configuration file will be
                   explained. In this section you can control the output of the
                   result. Some options are only used by the program &prog;.
                   Defaults are also explained.
@@ -180,30 +182,30 @@ $!Db5b.article [
           ]
         ]
 
-        $|listitem [
-          $|para [
-            $|emphasis[The programmers view]. Developers can write new modules
+        $listitem [
+          $para [
+            $emphasis[The programmers view]. Developers can write new modules
             with methods to process tasks not yet captured by this package.
 
-            $|itemizedlist [
-              $|listitem [
-                $|para [
-                  $|emphasis[Classes data and methods]. An explanation of the
+            $itemizedlist [
+              $listitem [
+                $para [
+                  $emphasis[Classes data and methods]. An explanation of the
                   layout of a users module and an explanation of how to specify
                   the options in the configuration file.
                 ]
               ]
 $!SxmlCore.comment [
-              $|listitem [
-                $|para [
-                  $|emphasis[Substitution data]. Declarations of data which
+              $listitem [
+                $para [
+                  $emphasis[Substitution data]. Declarations of data which
                   can be used to substitute into the text.
                 ]
               ]
 ]
-              $|listitem [
-                $|para [
-                  $|emphasis[Methods]. Methods which help inserting new text
+              $listitem [
+                $para [
+                  $emphasis[Methods]. Methods which help inserting new text
                   and entities into the text.
                 ]
               ]
@@ -211,44 +213,44 @@ $!SxmlCore.comment [
           ]
         ]
 
-        $|listitem [
-          $|para [
-            $|emphasis[Using the program]. The program is used to read
+        $listitem [
+          $para [
+            $emphasis[Using the program]. The program is used to read
             &lang; from a file and saved or send away. Explanation of
             arguments and prelude options can be found here.
           ]
         ]
-        $|listitem [
-          $|para [
-            $|emphasis[Examples]. Many short examples to show its use of sxml.
+        $listitem [
+          $para [
+            $emphasis[Examples]. Many short examples to show its use of sxml.
           ]
         ]
 
 $!SxmlCore.comment [
-        $|listitem [
-          $|emphasis[].
+        $listitem [
+          $emphasis[].
         ]
 ]
       ]
     ]
   ]
 
-  $|sect1 xml:id=Language [
+  $sect1 xml:id=Language [
 
-    $|title [The language]
+    $title [The language]
 
-    $|para [
+    $para [
       The language exists of two parts, a prelude and the document. The prelude
       is used to set options to introduce external modules or to define ways
       to output the resulting xml. The prelude is also optional. 
     ]
 
-    $|para [
+    $para [
       The prelude starts with 3 dashes and ends with it. The prelude itself
       consists of a series of key-value pairs to control the way output is to be
       delivered. The prelude part is also optional. In that case defaults will
       be applied.
-      $|programlisting [!=
+      $programlisting [!=
 ---
 ... prelude area ...
 ---
@@ -256,12 +258,12 @@ $!SxmlCore.comment [
       !]
     ]
 
-    $|para [
+    $para [
       The document follows the prelude and is the thing you want to publish. It
       has a similar look as any xml typed language but is easier to read.
     ]
 
-    $|para [
+    $para [
       Below you see a simple example where the prelude is not used. When
       the prelude is missing the default action is to write the result into a
       second file. The name of the file is kept the same but with an extension
@@ -276,29 +278,29 @@ $!SxmlCore.comment [
          callout-rows=0,2,10
          callout-col=64
 
-      $|calloutlist [
-        $|callout arearefs=BE-001.a01 [
-          $|para [!
+      $calloutlist [
+        $callout arearefs=BE-001.a01 [
+          $para [!
             An element which becomes <html> with a body starting with '['
             enclosing other elements and text.
           !]
         ]
 
-        $|callout arearefs=BE-001.a02 [
-          $|para [
+        $callout arearefs=BE-001.a02 [
+          $para [
             The title element only contains text and no other elements.
           ]
         ]
 
-        $|callout arearefs=BE-001.a03 [
-          $|para [!
+        $callout arearefs=BE-001.a03 [
+          $para [!
             The html element ends here with the ']' generating </html>.
           !]
         ]
       ]
     ]
 
-    $|para [
+    $para [
       The result after running through &prog; is shown below. Importend to
       note that this text is nicely formatted for this example and the output
       would be more like a one-liner.
@@ -312,34 +314,34 @@ $!SxmlCore.comment [
          callout-rows=0,2,8
          callout-col=64
 
-      $|calloutlist [
-        $|callout arearefs=BE-001.b01 [
-          $|para [!
+      $calloutlist [
+        $callout arearefs=BE-001.b01 [
+          $para [!
             Result of '$html \[' starts with <html>.
           !]
         ]
 
-        $|callout arearefs=BE-001.b02 [
-          $|para [!
+        $callout arearefs=BE-001.b02 [
+          $para [!
             The title element is generated as <title>... text ... </title>.
           !]
         ]
 
-        $|callout arearefs=BE-001.b03 [
-          $|para [!
+        $callout arearefs=BE-001.b03 [
+          $para [!
             The html element ends here with the generated </html>.
           !]
         ]
       ]
     ]
 
-    $|sect2 [
-      $|title [Document]
-      $|para [
+    $sect2 [
+      $title [Document]
+      $para [
         The document is where the text comes in the same way as in a normal XML
         document. The elements most of us are aware of all start with a dollar
         '\$'. Above in an example we have seen the expression $*|emphasis [!
-        $|title [ Hello World ] !]. The body of the element is enclosed between
+        $title [ Hello World ] !]. The body of the element is enclosed between
         square brackets '\[' and '\]'. Within these brackets you can write new
         elements intermittent with normal text. The methods in the library will
         not check if a particular element may be used on such place, you will
@@ -347,12 +349,12 @@ $!SxmlCore.comment [
         syntax of writing an element structure is quite simple.
       ]
 
-      $|para [
+      $para [
         However, &lang; is capable of doing more than just entering XML
         elements in an alternative way. E.g. an element might need attributes.
         Below you see in a not too strict $**emphasis[BNF] variant a part of the
         syntax;
-        $|programlisting [!=
+        $programlisting [!=
 <document> ::= <prefix> <element> ( <attribute> '=' <attr-value> )*
                '[' <body-start-control> <body> <body-end-control>
                ']';
@@ -378,43 +380,43 @@ $!SxmlCore.comment [
         must be used with the '!\] combination.
       ]
 
-      $|sect3 [
-        $|title [Element types]
-        $|para [
+      $sect3 [
+        $title [Element types]
+        $para [
 
         ]
       ]
 
-      $|sect3 [
-        $|title [Escaping characters]
-        $|para [
+      $sect3 [
+        $title [Escaping characters]
+        $para [
 
         ]
       ]
 
-      $|sect3 [
-        $|title [Unicode characters]
-        $|para [
+      $sect3 [
+        $title [Unicode characters]
+        $para [
 
         ]
       ]
 
-      $|sect3 [
-        $|title [Core elements]
-        $|para [
+      $sect3 [
+        $title [Core elements]
+        $para [
 
         ]
       ]
     ]
 
-    $|sect2 [
-      $|title [Prelude]
-      $|para [
+    $sect2 [
+      $title [Prelude]
+      $para [
         The prelude is used to e.g. control to output of the result. Other
         usages are referencing libraries to be used in the document.
       ]
 
-      $|para [
+      $para [
         The prelude consists of a series of key-value pairs. The keys are
         defined as a series of catagories and subcatagories. The value can be
         anything. The key value pair is separated by a colon ':' and the pair
@@ -422,10 +424,10 @@ $!SxmlCore.comment [
         will be applied.
       ]
 
-      $|para [
+      $para [
         Below you see an example of two options to let the xml prelude be
         written as well as a doctype at the start of the result.
-        $|programlisting [!=
+        $programlisting [!=
 ---
 option/xml-prelude/show:      1;
 option/doctype/show:          1;
@@ -434,26 +436,26 @@ option/doctype/show:          1;
       ]
 
 $!SxmlCore.comment [
-        $|sect4 [
-          $|title [  ]
-          $|para [
+        $sect4 [
+          $title [  ]
+          $para [
           ]
         ]
 ]
 
-      $|sect3 [
-        $|title [ Options used by the library &pack; ]
+      $sect3 [
+        $title [ Options used by the library &pack; ]
 
-        $|sect4 [
-          $|title [ module ]
-          $|para [
+        $sect4 [
+          $title [ module ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ option/doctype/definition ]
-          $|para [
-            $|programlisting [!=
+        $sect4 [
+          $title [ option/doctype/definition ]
+          $para [
+            $programlisting [!=
 option/doctype/definition: \[
   <!ENTITY company "Acme Mc Carpenter, Inc">
   <!ENTITY program "sxml2xml">
@@ -464,58 +466,58 @@ option/doctype/definition: \[
           ]
         ]
 
-        $|sect4 [
-          $|title [ option/doctype/show ]
-          $|para [
+        $sect4 [
+          $title [ option/doctype/show ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ option/http-header ]
-          $|para [
+        $sect4 [
+          $title [ option/http-header ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ option/xml-prelude/encoding ]
-          $|para [
+        $sect4 [
+          $title [ option/xml-prelude/encoding ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ option/xml-prelude/show ]
-          $|para [
+        $sect4 [
+          $title [ option/xml-prelude/show ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ option/xml-prelude/version ]
-          $|para [
+        $sect4 [
+          $title [ option/xml-prelude/version ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ output/fileext ]
-          $|para [
+        $sect4 [
+          $title [ output/fileext ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ output/filename ]
-          $|para [
+        $sect4 [
+          $title [ output/filename ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ output/filepath ]
-          $|para [
+        $sect4 [
+          $title [ output/filepath ]
+          $para [
           ]
         ]
 
-        $|sect4 [
-          $|title [ output/program ]
-          $|para [
-            $|programlisting [!=
+        $sect4 [
+          $title [ output/program ]
+          $para [
+            $programlisting [!=
 output/program/pdf:
   | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
   | xep -fo - -pdf sxml2xml.pdf
@@ -527,78 +529,78 @@ output/program/pdf:
     ]
   ]
 
-  $|sect1 xml:id=Prog-view [
-    $|title [The programmers view]
-    $|para [
+  $sect1 xml:id=Prog-view [
+    $title [The programmers view]
+    $para [
     ]
 
-    $|sect2 [
-      $|title [Classes data and methods]
-      $|para [
+    $sect2 [
+      $title [Classes data and methods]
+      $para [
 
       ]
     ]
 
-    $|sect2 [
-      $|title [Substitution data]
-      $|para [
+    $sect2 [
+      $title [Substitution data]
+      $para [
 
       ]
     ]
 
-    $|sect2 [
-      $|title [Methods]
-      $|para [
+    $sect2 [
+      $title [Methods]
+      $para [
 
       ]
     ]
   ]
 
-  $|sect1 xml:id=Use-prog [
-    $|title [Using program &prog;]
-    $|para [
+  $sect1 xml:id=Use-prog [
+    $title [Using program &prog;]
+    $para [
 
     ]
 
-    $|sect2 [
-      $|title [Program arguments]
-      $|para [
-        $|synopsis [!=
+    $sect2 [
+      $title [Program arguments]
+      $para [
+        $synopsis [!=
 sxml2xml [--run=<run-selector>] <sxml-file>
         !]
       ]
     ]
 
-    $|sect2 [
-      $|title [Prelude options]
-      $|sect3 [
-        $|title [dependencies/files]
-        $|para [
+    $sect2 [
+      $title [Prelude options]
+      $sect3 [
+        $title [dependencies/files]
+        $para [
           The value of this option is a list of paths to semi-xml
           documents which must be processed after the current one.
         ]
       ]
     ]
 
-    $|sect2 [
-      $|title [Unix she-bang usage]
-      $|para [
+    $sect2 [
+      $title [Unix she-bang usage]
+      $para [
       ]
     ]
   ]
 
 $!SxmlCore.comment [
-    $|sect2 [
-      $|title []
-      $|para [
+    $sect2 [
+      $title []
+      $para [
       ]
     ]
 ]
 
-  $|sect1 xml:id=syntax [
-    $|title [Syntax]
-    $|para [
-      $|programlisting [!=
+  $sect1 xml:id=syntax [
+    $title [Syntax]
+    $para [
+      $programlisting [!=
 <sxml-syntax> ::= <prelude-section>? <document>;
 
 <prelude-section> ::= '---' <new-line> <key-value-pairs>* '---' <new-line>;
@@ -626,13 +628,13 @@ $!SxmlCore.comment [
     ]
   ]
 
-  $|sect1 xml:id=Examples [
-    $|title [Examples]
-    $|para [
+  $sect1 xml:id=Examples [
+    $title [Examples]
+    $para [
 
     # comment on its own in 1st body
     ]
   ]
 
-  $|index
+  $index
 ]

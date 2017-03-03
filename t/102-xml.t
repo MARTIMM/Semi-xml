@@ -24,13 +24,13 @@ my $f2 = "$dir/$f2bn.html";
 
 
 spurt( $filename, q:to/EOSX/);
-$|html [
-  $|body [
-    $|h1 [ Data from file ]
-    $|table [
-      $|tr [
-        $|th[ header ]
-        $|td[ data ]
+$html [
+  $body [
+    $h1 [ Data from file ]
+    $table [
+      $tr [
+        $th[ header ]
+        $td[ data ]
       ]
     ]
   ]

@@ -141,17 +141,17 @@ class Actions {
 
     # Try to find indent level to match up open '[' with close ']'.
     #
-    # 1) $|x                  no body at all
-    # 2) $|x [ ]              no newline in body
-    # 3) $|x [                with newline, the ']' should line up with $|x.
+    # 1) $x                     no body at all
+    # 2) $x [ ]                 no newline in body
+    # 3) $x [                   with newline, the ']' should line up with $x.
     #    ]
-    # 4) $|x [ ] [ ]          multiple bodies no newline
-    # 5) $|x [                idem with newline in first body. 1st ']'
-    #    ] [                  lines up with $|x. When in 2nd, the 2nd ']'
-    #    ]                    should also line up with $|x
-    # 6) $|x [ $|y [ ] ]      nested bodies no newline
-    # 7) $|x [                with newline, outer ']' should line up
-    #      $|y [              with $|x and inner ']' with $|y.
+    # 4) $x [ ] [ ]             multiple bodies no newline
+    # 5) $x [                   idem with newline in first body. 1st ']'
+    #    ] [                    lines up with $x. When in 2nd, the 2nd ']'
+    #    ]                      should also line up with $x
+    # 6) $x [ $y [ ] ]          nested bodies no newline
+    # 7) $x [                   with newline, outer ']' should line up
+    #      $y [                 with $x and inner ']' with $y.
     #      ]
     #    ]
     #
@@ -200,7 +200,7 @@ class Actions {
         $orig.substr( $bstart, $bend - $bstart).index("\n")
       ).defined;
 
-#say "BE: $bstart, $bend, $has-nl";
+#note "BE: $bstart, $bend, $has-nl";
       # if there is a newline, check alignment
       if $has-nl {
 
@@ -210,7 +210,7 @@ class Actions {
 
         my Int $indent-end = $bend
                       - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
-#say "NLDoc  $tag-loc, $indent-start, $indent-end, $bstart, $bend";
+#note "NLDoc  $tag-loc, $indent-start, $indent-end, $bstart, $bend";
 
         # make a note when indents are not the same, it might point to a
         # missing bracket.
@@ -252,7 +252,7 @@ class Actions {
     given $tt {
 
       # Any normal tag
-      when any(< $| $** $*| $|* >) {
+      when any(< $** $*| $|* $ >) {
 
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
 
@@ -336,10 +336,10 @@ class Actions {
 
         # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
         when Hash {
-#say "Ast hash: ", $_.keys;
-#say "Ast tag: ", $_<tag-ast>;
-#say "Ast body: ", $_<body-ast>;
-#say "Ast doc: ", $_<doc-ast>;
+#note "Ast hash: ", $_.keys;
+#note "Ast tag: ", $_<tag-ast>;
+#note "Ast body: ", $_<body-ast>;
+#note "Ast doc: ", $_<doc-ast>;
           # tag ast: [ tag type, namespace, tag name, module, method, attributes
           my Array $tag-ast = $_<tag-ast>;
 
@@ -362,8 +362,6 @@ class Actions {
   #-----------------------------------------------------------------------------
   method tag-spec ( $match ) {
 
-#say ~$match;
-
     self!current-state( $match, 'tag specification');
 
     # Name of element or method to be saved in array $!tag-list on $!level
@@ -373,7 +371,7 @@ class Actions {
 
     my Str $symbol = $match<tag><sym>.Str;
     $ast.push: $symbol;
-#say "Tag symbol: $symbol";
+#note "Tag: ", $match<tag>.kv;
 
     # find level of indent
 
@@ -385,7 +383,7 @@ class Actions {
       $attrs{$a<attr-key>.Str} = $av;
     }
 
-    if $symbol ~~ any(< $** $|* $*| $| >) {
+    if $symbol ~~ any(< $** $|* $*| $ >) {
 
       my $tn = $match<tag><tag-name>;
       $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
@@ -398,7 +396,6 @@ class Actions {
       $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
       $tag-name = $tn<meth-name>.Str;
 
-
       # Check if there is a method initialize in the module. If so call it
       # with the found attributes.
       my $module = self!can-method( $tn<mod-name>.Str, 'initialize');
@@ -407,7 +404,7 @@ class Actions {
 
     # Add to the list
     $!tag-list.push($tag-name);
-#say "Tag name: $tag-name";
+#note "Tag name: $tag-name";
 
     $ast.push: $attrs;
 

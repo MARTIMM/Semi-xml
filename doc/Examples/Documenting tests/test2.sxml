@@ -1,11 +1,13 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=html --run=pdf
+
 $!report.run
     title='Code Nesting' package=SxmlLib::Testing class=Sxml::Testing::Report
     label=test2,report
     highlight-lang='lang-perl6' highlight-skin='desert' linenumbers=1
     distribution=SemiXML [
 
-  $|h2 class=t1                                 [ $!lorem.sentence ]
-  $|p                                           [ $!lorem.samuel-ipsum ]
+  $h2 class=t1                                  [ $!lorem.sentence ]
+  $p                                            [ $!lorem.samuel-ipsum ]
 
   $!code.add [=
     my Int $x = 10;
@@ -14,7 +16,7 @@ $!report.run
     $!test.add t='is $x, 10'                    [ $!lorem.sentences n=3 ]
   ]
 
-  $|h3                                          [ $!lorem.sentence ]
+  $h3                                           [ $!lorem.sentence ]
   $!lorem.paragraph n=2
 
   $!code.add [=

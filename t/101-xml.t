@@ -16,14 +16,14 @@ mkdir $dir unless $dir.IO ~~ :e;
 
 spurt( $filename, q:to/EOSX/);
 
-$|html [
-  $|body [                                       # Body
-    $|h1 [ Data from file \# h1 ]                # outside h1
-    $|table [ data                               # table
-      $|tr [ trrr                                # trrr
-        $|th[header \# th ]                      # outside th
-        $|td[data \# td ]                        # outside td
-        $|td [! # inside protected body !]
+$html [
+  $body [                                       # Body
+    $h1 [ Data from file \# h1 ]                # outside h1
+    $table [ data                               # table
+      $tr [ trrr                                # trrr
+        $th[header \# th ]                      # outside th
+        $td[data \# td ]                        # outside td
+        $td [! # inside protected body !]
       ]
     ][
     # comment on its own in 2nd body

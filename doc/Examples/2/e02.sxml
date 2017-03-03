@@ -1,45 +1,45 @@
-$|html lang=en-US dir=ltr [
-  $|head [
-    $|meta charset=utf-8 []
-    $|title [ Example 2, Html5 and Css styling ]
+$html lang=en-US dir=ltr [
+  $head [
+    $meta charset=utf-8 []
+    $title [ Example 2, Html5 and Css styling ]
     $!file.include type=include reference=doc/Examples/2/e02-style.sxml []
   ]
 
-  $|body [
-    $|section id=posts [
-      $|article class=posts [
-        $|header [
-          $|h1 [ First page from HTML5 and CSS3 ]
-          $|nav [
-            $|ul [
-              $|li [ Contact ]
-              $|li [ Download ]
-              $|li [ Help ]
+  $body [
+    $section id=posts [
+      $article class=posts [
+        $header [
+          $h1 [ First page from HTML5 and CSS3 ]
+          $nav [
+            $ul [
+              $li [ Contact ]
+              $li [ Download ]
+              $li [ Help ]
             ]
           ]
         ]
 
-        $|aside [ $|p [ $!Lorem.sentences n=4 ] ]
+        $aside [ $p [ $!Lorem.sentences n=4 ] ]
 
-        $|p [ $!Lorem.veggie-ipsum ]
+        $p [ $!Lorem.veggie-ipsum ]
 
-        $|footer [
-          $|p [ &#xA9; mt1957 ]
+        $footer [
+          $p [ &#xA9; mt1957 ]
 
-          $|nav [
-            $|ul [
-              $|li [ Contact ]
+          $nav [
+            $ul [
+              $li [ Contact ]
             ]
           ]
         ]
       ]
     ]
 
-    $|section [
-      $|nav [
-        $|ul [
-          $|li [ Oct 2010 ]
-          $|li [ Nov 2010 ]
+    $section [
+      $nav [
+        $ul [
+          $li [ Oct 2010 ]
+          $li [ Nov 2010 ]
         ]
       ]
     ]

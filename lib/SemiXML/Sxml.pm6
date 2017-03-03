@@ -19,7 +19,6 @@ class Sxml {
   has SemiXML::Grammar $!grammar;
   has SemiXML::Actions $.actions handles < get-sxml-object >;
 
-  has Bool $!new-style;
   has Config::DataLang::Refine $!configuration;
 
   has Str $!filename;

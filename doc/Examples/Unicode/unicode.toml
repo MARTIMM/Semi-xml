@@ -8,6 +8,6 @@
   fileext       = 'html'
 
 [ output.program ]
-  pdf           = 'wkhtmltopdf - %of.pdf'
-  lint          = 'xmllint --format - > unicode.html'
+  pdf           = 'wkhtmltopdf - %op/%of.pdf'
+  lint          = 'xmllint --format - > %op%of.%oe'
 

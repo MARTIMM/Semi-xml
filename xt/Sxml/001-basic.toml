@@ -3,6 +3,13 @@
 
 [ module ]
   SxmlCore      = 'SxmlLib::SxmlCore'
+  report        = 'SxmlLib::Testing::Report'
+  code          = 'SxmlLib::Testing::Code'
+  test          = 'SxmlLib::Testing::Test'
+  todo          = 'SxmlLib::Testing::Todo'
+  bug           = 'SxmlLib::Testing::Bug'
+  skip          = 'SxmlLib::Testing::Skip'
+  lorem         = 'SxmlLib::LoremIpsum'
 
 #[ option ]
 
@@ -26,7 +33,7 @@
   fileext       = 'xml'
 
 [ output.program ]
-#  pdf           = 'wkhtmltopdf - %op/%of.pdf'
+  pdf           = 'wkhtmltopdf - %op/%of.pdf'
 #  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
 #  chk           = 'tidy -'
 
