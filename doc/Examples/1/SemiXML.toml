@@ -6,8 +6,8 @@
 #  filepath      = '.'
 
 [output.program]
-  pdf           = 'wkhtmltopdf - %of.pdf'
-  xml           = 'cat > %of.xml'
+  pdf           = 'wkhtmltopdf - %op/%of.pdf'
+  xml           = 'cat > %op/%of.xml'
 
 [module]
   lorem         = 'SxmlLib::LoremIpsum'
