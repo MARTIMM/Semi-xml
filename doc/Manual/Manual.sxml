@@ -173,9 +173,9 @@ $!Db5b.article [
               $listitem [
                 $para [
                   $emphasis[Configuration]. The toml configuration file will be
-                  explained. In this section you can control the output of the
-                  result. Some options are only used by the program &prog;.
-                  Defaults are also explained.
+                  explained. This section explains how to control the output
+                  of the result. Some options are only used by the program
+                  &prog;. Defaults are also explained.
                 ]
               ]
             ]
@@ -269,6 +269,7 @@ $!SxmlCore.comment [
       second file. The name of the file is kept the same but with an extension
       of '.xml'.
 
+$!SxmlCore.comment [
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.sxml
          start='$!SxmlCore.comment [Start]'
@@ -298,12 +299,15 @@ $!SxmlCore.comment [
           !]
         ]
       ]
+]
     ]
 
     $para [
       The result after running through &prog; is shown below. Importend to
       note that this text is nicely formatted for this example and the output
       would be more like a one-liner.
+
+$!SxmlCore.comment [
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.xml
          start='<!--Start-->'
@@ -333,10 +337,11 @@ $!SxmlCore.comment [
           !]
         ]
       ]
+]
     ]
 
     $sect2 [
-      $title [Document]
+      $title [Sxml Document]
       $para [
         The document is where the text comes in the same way as in a normal XML
         document. The elements most of us are aware of all start with a dollar
@@ -354,6 +359,8 @@ $!SxmlCore.comment [
         elements in an alternative way. E.g. an element might need attributes.
         Below you see in a not too strict $**emphasis[BNF] variant a part of the
         syntax;
+
+$!SxmlCore.comment [
         $programlisting [!=
 <document> ::= <prefix> <element> ( <attribute> '=' <attr-value> )*
                '[' <body-start-control> <body> <body-end-control>
@@ -378,6 +385,7 @@ $!SxmlCore.comment [
         brackets and <body-start-control> and <body-end-control> are also no
         spaces. In the BNF above is not appearant that the '\[!' combination
         must be used with the '!\] combination.
+]
       ]
 
       $sect3 [
@@ -410,10 +418,64 @@ $!SxmlCore.comment [
     ]
 
     $sect2 [
-      $title [Prelude]
+      $title [Configuration]
+
+#TODO toml in glossary
       $para [
-        The prelude is used to e.g. control to output of the result. Other
-        usages are referencing libraries to be used in the document.
+        The configuration is defined in a separate file which is in the TOML
+        format. The data from the configuration is used to e.g. control the
+        output of the result. Other usages are referencing libraries to be used
+        while parsing the document and to specify te dependncy list. The
+        information is specified in a number of tables. Each of these tables are
+        used in one specific phase of the whole process. The phases in this
+        transformation process and the used tables are;
+
+        $itemizedlist [
+          $listitem [
+            $para [
+              $emphasis[Pre transformation phase]. In this phase dependencies,
+              if any, can be checked and solved before transformation starts.
+              The $emphasis[X] table is used to find the dependencies.
+            ]
+          ]
+
+          $listitem [
+            $para [
+              $emphasis[Transformation phase]. This is the phase where parsing
+              and transformation of the document takes place. The tables used
+              here are the libraries table $emphasis[L] and modules $emphasis[M]
+              table to initialize objects needed in this proces.
+            ]
+          ]
+
+          $listitem [
+            $para [
+#TODO http in glossary
+# See also http://www.iana.org/assignments/message-headers/message-headers.xml#perm-headers%7CMessage
+              $emphasis[Post transformation phase]. When the document is
+              translated, the result can be prefixed with extra data. The table
+              used for this is the prefix table $emphasis[P]. When the result is
+              generated on a server and needs to be returned, extra data must be
+              prefixed. These are the so called message headers of which that of
+              the http protocol are the most commonly used headers. The table
+              $emphasis[H] is used for this.
+            ]
+          ]
+
+          $listitem [
+            $para [
+              $emphasis[Storage phase]. The next phase is storing the data in a
+              file. For this the staorage table $emphasis[S] is used where the
+              files basename, path and extension is found.
+            ]
+          ]
+
+          $listitem [
+            $para [
+              $emphasis[ ].
+            ]
+          ]
+        ]
       ]
 
       $para [
@@ -428,10 +490,6 @@ $!SxmlCore.comment [
         Below you see an example of two options to let the xml prelude be
         written as well as a doctype at the start of the result.
         $programlisting [!=
----
-option/xml-prelude/show:      1;
-option/doctype/show:          1;
----
         !]
       ]
 

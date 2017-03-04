@@ -19,7 +19,8 @@
 
 # Testing
 ### Testing report module comprising Bug, Code, Report, Skip, Test, Testing and Todo
-* Make benchmark reports
+* Make benchmark reports with Bench
+* Make code coverage reports with Rakudo::Perl6::Tracer.
 
 # Other modules independent of xml languages
 

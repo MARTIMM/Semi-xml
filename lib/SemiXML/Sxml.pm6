@@ -20,7 +20,10 @@ class Sxml {
   has SemiXML::Actions $.actions handles < get-sxml-object >;
 
   has Config::DataLang::Refine $!configuration;
+
+  enum RKeys <<:IN(0) :OUT(1)>>;
   has Array $!refine;
+  has Array $!refine-tables;
   has Hash $!refined-config;
 
   has Str $!filename;
@@ -37,8 +40,13 @@ class Sxml {
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
 
-    $!refine[0] = 'xml' unless ?$!refine[0];
-    $!refine[1] = 'xml' unless ?$!refine[1];
+    # Make sure that in and out keys are defined with defaults
+    $!refine[0] = 'xml' unless ?$!refine[IN];
+    $!refine[1] = 'xml' unless ?$!refine[OUT];
+
+    # Initialize the refined config tables
+    $!refine-tables = [<E H L M P R S X>];
+    $!refined-config = %(@$!refine-tables Z=> ( {} xx $!refine-tables.elems ));
   }
 
   #-----------------------------------------------------------------------------
@@ -424,14 +432,41 @@ class Sxml {
       }
     }
 
-    $!refined-config = $!configuration.refine(|( <D>, @$!refine, $!basename));
-note "RA: ", 'D', ', ', $!refine.join(', '), ', ', $!basename;
-note "RC: ", $!refined-config.perl;
+    # Fill the special purpose tables with the refined searches in the config
+    for @$!refine-tables {
+      when any(<P E>) {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine(|( $table, $!refine[OUT], $!basename));
+note "\nRA: ", $table, ', ', $!refine[OUT], ', ', $!basename;
+note "RC: $table, ", $!refined-config{$table}.perl;
+      }
+
+      when any(<H L M R>) {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine(|( $table, $!refine[IN], $!basename));
+note "\nRA: ", $table, ', ', $!refine[IN], ', ', $!basename;
+note "RC: $table, ", $!refined-config{$table}.perl;
+      }
+
+      when any(<S X>) {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine(|( $table, $!basename));
+note "\nRA: ", $table, ', ', $!refine[IN], ', ', $!basename;
+note "RC: $table, ", $!refined-config{$table}.perl;
+      }
+    }
 
     # instantiate modules specified in the configuration
+#    $!actions.process-modules(
+#      :lib($!configuration.config<library> // {}),
+#      :mod($!configuration.config<module> // {}),
+#    );
+
     $!actions.process-modules(
-      :lib($!configuration.config<library> // {}),
-      :mod($!configuration.config<module> // {}),
+      :lib($!refined-config<L>), :mod($!refined-config<M>)
     );
 
     note "\nConfiguration: ", $!configuration.perl if $!trace;
