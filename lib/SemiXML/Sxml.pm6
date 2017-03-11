@@ -21,9 +21,15 @@ class Sxml {
 
   has Config::DataLang::Refine $!configuration;
 
-  has Str $!filename;
-  has Bool $!drop-cfg-filename;
+  enum RKeys <<:IN(0) :OUT(1)>>;
   has Array $!refine;
+  has Array $!refine-tables;
+  has Hash $!refined-config;
+
+  has Str $!filename;
+  has Str $!basename;
+
+  has Bool $!drop-cfg-filename;
   has Hash $!user-config;
   has Bool $!trace;
   has Bool $!merge;
@@ -33,6 +39,14 @@ class Sxml {
 
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
+
+    # Make sure that in and out keys are defined with defaults
+    $!refine[0] = 'xml' unless ?$!refine[IN];
+    $!refine[1] = 'xml' unless ?$!refine[OUT];
+
+    # Initialize the refined config tables
+    $!refine-tables = [<E H L M P R S X>];
+    $!refined-config = %(@$!refine-tables Z=> ( {} xx $!refine-tables.elems ));
   }
 
   #-----------------------------------------------------------------------------
@@ -349,15 +363,16 @@ class Sxml {
     # 3) if filename is given, use its path also
     my Array $locations;
     my Str $fpath;
-    my Str $fname;
     my Str $fdir;
     my Str $fext;
     if ?$!filename and $!filename.IO ~~ :r {
 
-      $fname = $!filename.IO.basename;
+      my $bname = $!basename = $!filename.IO.basename;
       $fpath = $!filename.IO.abspath;
       $fdir = $fpath;
-      $fdir ~~ s/ '/'? $fname //;
+      $fext = $*PROGRAM.extension;
+      $!basename ~~ s/ '.' $fext //;
+      $fdir ~~ s/ '/'? $bname //;
       $locations = [$fdir];
 
       # 3a) to load SemiXML.TOML from the files location, current dir
@@ -366,8 +381,8 @@ class Sxml {
 
       # 3b) same as in 3a but use the filename now.
       $fext = $!filename.IO.extension;
-      $fname ~~ s/ $fext $/toml/;
-      self!load-config( :config-name($fname), :$locations, :merge);
+      $!basename ~~ s/ $fext $/toml/;
+      self!load-config( :config-name($!basename), :$locations, :merge);
     }
 
     # 4) if filename is not given, the configuration is searched using the
@@ -390,17 +405,17 @@ class Sxml {
     $c<output> = {} unless $c<output>:exists;
 
     if $c<output><filename>:!exists {
-      if ?$fname {
+      if ?$!basename {
         # lop off the extension from the above devised config name
-        $fname ~~ s/ '.toml' $// if ?$fname;
-        $c<output><filename> = $fname;
+        $!basename ~~ s/ '.toml' $// if ?$!basename;
+        $c<output><filename> = $!basename;
       }
 
       else {
-        $fname = $*PROGRAM.basename;
+        $!basename = $*PROGRAM.basename;
         $fext = $*PROGRAM.extension;
-        $fname ~~ s/ '.' $fext //;
-        $c<output><filename> = $fname;
+        $!basename ~~ s/ '.' $fext //;
+        $c<output><filename> = $!basename;
       }
     }
 
@@ -411,17 +426,47 @@ class Sxml {
 
       else {
         $fdir = $*PROGRAM.abspath;
-        $fname = $*PROGRAM.basename;
-        $fdir ~~ s/ '/'? $fname //;
+        my $bname = $!basename = $*PROGRAM.basename;
+        $fdir ~~ s/ '/'? $bname //;
         $c<output><filepath> = $fdir;
       }
     }
 
+    # Fill the special purpose tables with the refined searches in the config
+    for @$!refine-tables {
+      when any(<P E>) {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine(|( $table, $!refine[OUT], $!basename));
+note "\nRA: ", $table, ', ', $!refine[OUT], ', ', $!basename;
+note "RC: $table, ", $!refined-config{$table}.perl;
+      }
+
+      when any(<H L M R>) {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine(|( $table, $!refine[IN], $!basename));
+note "\nRA: ", $table, ', ', $!refine[IN], ', ', $!basename;
+note "RC: $table, ", $!refined-config{$table}.perl;
+      }
+
+      when any(<S X>) {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine(|( $table, $!basename));
+note "\nRA: ", $table, ', ', $!refine[IN], ', ', $!basename;
+note "RC: $table, ", $!refined-config{$table}.perl;
+      }
+    }
 
     # instantiate modules specified in the configuration
+#    $!actions.process-modules(
+#      :lib($!configuration.config<library> // {}),
+#      :mod($!configuration.config<module> // {}),
+#    );
+
     $!actions.process-modules(
-      :lib($!configuration.config<library> // {}),
-      :mod($!configuration.config<module> // {}),
+      :lib($!refined-config<L>), :mod($!refined-config<M>)
     );
 
     note "\nConfiguration: ", $!configuration.perl if $!trace;

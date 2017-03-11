@@ -102,7 +102,7 @@ grammar Grammar {
   }
 
   token escape-char     { '\\' . }
-  token entity          { '&' <-[;]>+ ';' {note "E: $/";}}
+  token entity          { '&' <-[;]>+ ';' }
 
   # No comments recognized in [! ... !]. This works because a nested document is
   # not allowed and thus no extra comments are checked and handled as such..
