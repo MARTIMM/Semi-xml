@@ -68,7 +68,7 @@ my ParseResult $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 my $xml = $x.get-xml-text;
-note "Xml: $xml";
+#note "Xml: $xml";
 like $xml, /'<p'/, "generated start of paragraph";
 like $xml, /'class="top-method"'/, "found class attribute in '$xml'";
 

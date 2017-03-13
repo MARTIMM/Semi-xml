@@ -31,7 +31,7 @@ spurt $cfg, qq:to/EOCONFIG/;
 
   # Module tables --------------------------------------------------------------
   [ M ]
-  #  SxmlCore              = 'SxmlLib::SxmlCore'
+    SxmlCore              = 'SxmlLib::SxmlCore'
 
   # in = email
   [ M.html ]
@@ -113,10 +113,12 @@ my SemiXML::Sxml $x;
 
 $x .= new( :trace, :merge, :refine([ <db5 pdf>]));
 isa-ok $x, 'SemiXML::Sxml';
+
+$x.parse(:filename($f));
+
 done-testing;
 exit;
 
-$x.parse(:filename($f));
 my Str $xml-text = ~$x;
 note $xml-text;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
