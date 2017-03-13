@@ -21,6 +21,9 @@ install:
 #  - zef --depsonly install .
   - zef --/test --depsonly install .
 
+script:
+  - prove -v --exec=perl6 -Ilib t/030-methods.t
+
 cache:
   directories:
 #    - $TRAVIS_BUILD_DIR/.rakudobrew
