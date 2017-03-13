@@ -58,8 +58,9 @@ my Hash $config = {
   module        => {:mod1<T030::m1>}
 }
 
+#TODO spaces around brackets seems needed.
 # setup the contents to be parsed with a substitution item in it
-my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsence[ ]';
+my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsence [ ] ';
 
 # instantiate parser and parse with contents and config
 my SemiXML::Sxml $x .= new(:trace);
