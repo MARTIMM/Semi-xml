@@ -87,18 +87,17 @@ $!Db5b.article [
             purpose of this language.
 
             In this language, constructs are created to call methods coded in
-            modules to generate xml elements. An example of this is shown above
-            to insert a date. This date will always be the
-            current date when the text is processed again. This specific part
-            adds dynamism to your text.
+            modules to generate xml elements. An example of this is shown in the
+            example above to insert a date. This date will always be the
+            current date when the text is processed.
           ]
         ]
 
         $listitem [
           $para [
             The language is extensible. Developers can add their own libraries
-            to load for example data from a database and inserting it in the text
-            as a HTML table.
+            to load for example data from a database and inserting it in the
+            text as a HTML table.
           ]
         ]
       ]
@@ -117,11 +116,13 @@ $!Db5b.article [
           $para [
             Pointing to the proper spot in the sxml text when an error occurs
             has been proven difficult because the only thing the parser has is
-            matching brackets. When the parser arrives at the end it may miss a
+            the element format, attributes and
+            matching brackets. When the parser arrives at the end of the
+            document it may miss a
             closing bracket or seeing one too many. It is not easy to show where
             the bracket is missing or where there is one typed too many.
-            However, there are a few solutions implemented to help finding the
-            error if there is one.
+            However, a few solutions are implemented to help finding the
+            error if there is one. This also needs some attention.
           ]
         ]
 
@@ -129,38 +130,49 @@ $!Db5b.article [
           $para [
             This project is only just started. There are many things left on the
             wish list. E.g. I would like to give proper messages when mistakes are
-            made in the syntax.
+            made in the syntax or from within a method in a module.
+          ]
+
+          $para [
+            Well, I would say it can only improve when modules and methods are
+            added.
           ]
         ]
       ]
     ]
 
     $sect2 [
-      $title [Information given in this manual]
+      $title [What the manual will explain]
       $itemizedlist [
         $listitem [
           $para [
-            $emphasis[The basics]. Explanation of the SemiXML module and the
-            program sxml2xml.
+            $emphasis[The package]. Explanating the parts comprising the
+            package.
+# parsing module, xml generating modules, program and config
+          ]
+        ]
 
+        $listitem [
+          $para [
             $emphasis[The language]. Here the basic layout will be explained,
-            the terminology and meaning of the syntax. The start will be gentle
-            showing simple cases first..
-
+            the terminology and meaning of the syntax.
+# syntax, configuration
             $itemizedlist [
               $listitem [
                 $para [
-                  $emphasis[The document]. The document is where text
+                  $emphasis[Syntax]. The document is where text
                   is written for the specific documents together with the
-                  elements to format the text. Some of the special elements will
-                  need the prelude section explained in the next section.
+                  elements to format the text. This part explains the element
+                  types which makeup the document.
                 ]
               ]
+
               $listitem [
                 $para [
                   $emphasis[Configuration]. The toml configuration file will be
                   explained. This section explains how to control the output
-                  of the result. Some options are only used by the program
+                  of the result and where modules are to be found. Some options
+                  are only used by the program
                   &prog;. Defaults are also explained.
                 ]
               ]
@@ -176,7 +188,7 @@ $!Db5b.article [
             $itemizedlist [
               $listitem [
                 $para [
-                  $emphasis[Classes data and methods]. An explanation of the
+                  $emphasis[Classes, data and methods]. An explanation of the
                   layout of a users module and an explanation of how to specify
                   the options in the configuration file.
                 ]
