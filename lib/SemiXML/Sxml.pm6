@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<https://github.com/MARTIMM>;
@@ -667,6 +667,21 @@ note "RC: $table, ", $!refined-config{$table}.perl;
     $node.after($element);
     $element;
   }
+
+  #-----------------------------------------------------------------------------
+  sub std-attrs (
+    XML::Element $node, Hash $attributes
+  ) is export {
+
+    return unless ?$attributes;
+
+    for $attributes.keys {
+      when /'class'|'style'|'id'/ {
+        $node.set( $_, $attributes{$_};
+        $attributes{$_}:delete;
+      }
+    }
+  }
 }
 
 #-------------------------------------------------------------------------------
@@ -674,4 +689,3 @@ note "RC: $table, ", $!refined-config{$table}.perl;
 multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) is export {
   return ~$x.get-xml-text;
 }
-

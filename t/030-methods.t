@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 use Test;
 use SemiXML::Sxml;
@@ -11,7 +11,7 @@ my $mod = "$dir/m1.pm6";
 mkdir($dir) unless $dir.IO ~~ :e;
 
 spurt( $mod, q:to/EOMOD/);
-  use v6.c;
+  use v6;
   use SemiXML::Sxml;
   use SemiXML::Text;
   use XML;
@@ -23,9 +23,9 @@ spurt( $mod, q:to/EOMOD/);
       XML::Element $parent, Hash $attrs, XML::Element :$content-body
       --> XML::Element
     ) {
-      # my XML::Element $p .= new(:name('p'));
-      # $parent.append($p);
-      append-element( $parent, 'p');
+
+      my XML::Element $p = append-element( $parent, 'p');
+      std-attrs( $p, $attrs);
       $parent;
     }
 
@@ -35,10 +35,6 @@ spurt( $mod, q:to/EOMOD/);
       XML::Element $parent, Hash $attrs, XML::Element :$content-body
       --> XML::Element
     ) {
-      #my XML::Element $p .= new(:name('p'));
-      #$parent.append($p);
-      #$p .= new(:name('p'));
-      #$parent.append($p);
 
       append-element( $parent, 'p');
       my XML::Element $p = append-element( $parent, 'p');
@@ -63,7 +59,7 @@ my Hash $config = {
 }
 
 # setup the contents to be parsed with a substitution item in it
-my Str $content = '$!mod1.mth1 [ ]';
+my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsence[ ]';
 
 # instantiate parser and parse with contents and config
 my SemiXML::Sxml $x .= new(:trace);
@@ -71,8 +67,9 @@ my ParseResult $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 my $xml = $x.get-xml-text;
-is $xml, '<p/>', "generated $xml";
-
+note "Xml: $xml";
+like $xml, /'<p'/, "generated start of paragraph";
+like $xml, /'class="top-method"'/, found "class attribute in '$xml'";
 
 
 $content = '$!mod1.mth2 [ ]';
