@@ -677,7 +677,7 @@ note "RC: $table, ", $!refined-config{$table}.perl;
 
     for $attributes.keys {
       when /'class'|'style'|'id'/ {
-        $node.set( $_, $attributes{$_};
+        $node.set( $_, $attributes{$_});
         $attributes{$_}:delete;
       }
     }
