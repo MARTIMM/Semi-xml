@@ -21,9 +21,10 @@ $!Db5b.article [
     ]
 
     $para [
-      Furthermore there are modules designed to generate html, docbook or other
+      Furthermore there are modules designed to generate fragments of html,
+      docbook or other
       specific constucts like epub and testing reports. Much of this code need
-      some more refinements but it give the programmer a good insight in the
+      some more refinements but it gives the programmer a good insight in the
       strength of this package.
     ]
 
@@ -35,18 +36,18 @@ $!Db5b.article [
   $sect1 xml:id=Introduction [
     $title [ Introduction of package &pack; ]
     $para [
-      Welcome to the $*|emphasis[&pack;] package. As mentioned in the abstract, the 
-      modules and programs in the package help to convert &lang; text
+      Welcome to the $*|emphasis[&pack;] package. As mentioned in the abstract, the
+      modules and programs in this package help to convert &lang; text
       into $*|emphasis[XML].
     ]
 
     $para [
       An example will speak for itself when Sxml is compared with the generated
-      HTML. The generated html is shown here is pretty printed but would
-      normally be a oneliner.
+      HTML. The generated html shown here is pretty printed but would
+      normally be as compact as possible.
 
       $example [
-        $title [Input &lang; text]
+        $title [ Input &lang; text ]
         $programlisting language=sxml [!=
           $html [
             $head [
@@ -55,22 +56,22 @@ $!Db5b.article [
 
             $body [
               $h1 [ My First Sxml Document ]
-              $p [ Hello world ]
+              $p [ Hello world! And it is said on $!SxmlCore.date. ]
             ]
           ]
         !]
       ]
 
       $example [
-        $title [Generated html text]
+        $title [ Generated html text ]
         $programlisting language=html [!=
           <html>
             <head>
-              <title> My First Sxml Document </title>
+              <title>My First Sxml Document</title>
             </head>
             <body>
-              <h1> My First Sxml Document </h1>
-              <p> Hello world </p>
+              <h1>My First Sxml Document</h1>
+              <p>Hello world! And it is said on 2016-03-22.</p>
             </body>
           </html>
         !]
@@ -81,28 +82,13 @@ $!Db5b.article [
       $title [Advantages using this language]
       $itemizedlist [
         $listitem [
-          $para [!
-            It is more clear to read the text which is where you want to focus on
-            and therefor more maintainable than XML is. One of those thing I find
-            annoying is writing the end tag. This is solved by using '[' and ']'
-            to enclose a deeper level of nesting.
-          !]
-        ]
-
-        $listitem [
           $para [
-            Some language constructs will help inserting predefined text. An
-            example of this might be to insert a lot of attributes of some element
-            and hide it under a name.
-          ]
-        ]
+            While I find this &lang; more clear to read, this is not the main
+            purpose of this language.
 
-        $listitem [
-          $para [
-            There are also constructs which are able to call code in modules to
-            simplify things. An example is the use of one of the core methods
-            to insert a date or time-stamp in the text. As an example above at the
-            end of the abstract a date is generated. This date will always be the
+            In this language, constructs are created to call methods coded in
+            modules to generate xml elements. An example of this is shown above
+            to insert a date. This date will always be the
             current date when the text is processed again. This specific part
             adds dynamism to your text.
           ]
@@ -156,7 +142,7 @@ $!Db5b.article [
           $para [
             $emphasis[The basics]. Explanation of the SemiXML module and the
             program sxml2xml.
-            
+
             $emphasis[The language]. Here the basic layout will be explained,
             the terminology and meaning of the syntax. The start will be gentle
             showing simple cases first..
@@ -242,7 +228,7 @@ $!SxmlCore.comment [
     $para [
       The language exists of two parts, a prelude and the document. The prelude
       is used to set options to introduce external modules or to define ways
-      to output the resulting xml. The prelude is also optional. 
+      to output the resulting xml. The prelude is also optional.
     ]
 
     $para [
@@ -380,7 +366,7 @@ $!SxmlCore.comment [
 <body-end-control> ::= '!';
         !]
 
-        White space is forbidden between the <prefix> and <element> as well as 
+        White space is forbidden between the <prefix> and <element> as well as
         between the <attribute>, '=' and <attr-value>. Furthermore between the
         brackets and <body-start-control> and <body-end-control> are also no
         spaces. In the BNF above is not appearant that the '\[!' combination
