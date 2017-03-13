@@ -31,7 +31,7 @@ spurt $cfg, qq:to/EOCONFIG/;
 
   # Module tables --------------------------------------------------------------
   [ M ]
-    SxmlCore              = 'SxmlLib::SxmlCore'
+  #  SxmlCore              = 'SxmlLib::SxmlCore'
 
   # in = email
   [ M.html ]
