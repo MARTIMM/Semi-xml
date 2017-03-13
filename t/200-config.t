@@ -112,6 +112,10 @@ my SemiXML::Sxml $x;
 #exit;
 
 $x .= new( :trace, :merge, :refine([ <db5 pdf>]));
+isa-ok $x, 'SemiXML::Sxml';
+done-testing;
+exit;
+
 $x.parse(:filename($f));
 my Str $xml-text = ~$x;
 note $xml-text;
