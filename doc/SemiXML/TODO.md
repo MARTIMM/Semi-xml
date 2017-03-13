@@ -3,36 +3,31 @@
 * Parser and actions.
   * Error messages when parser fails can still be improved.
 
-
-* Grammar extensions;
-  * Remove '=' directly after '[' to keep text as it is typed. This is often forgotten by me, so others may have the same problem. Also it makes the grammar cleaner. Instead the following can be done to have the same effects;
-    * No changes at all when the body content is given to a method.
-    * Specific tag can be defined in the config. Most common in html is *script*, *style* and *pre* of which the first two are not really necessary.
-
-
 * Syntax
   * XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '\_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
 
 ```
-      Current syntax          Becomes             Config    Done
+      Current syntax          Becomes             Note    Done
 
-      $|xyz []                $xyz                -         x
-      $|xyz [x]               $xyz [x]            -         x
+      $|xyz []                $xyz                        x
+      $|xyz [x]               $xyz [x]            2       x
 
-      $*|inline [x]           $inline [x]         x
-      $|*inline [x]           $inline [x]         x
-      $**inline [x]           $inline [x]         x
+      $*|inline [x]           $inline [x]         1,3
+      $|*inline [x]           $inline [x]         1,3
+      $**inline [x]           $inline [x]         1,3
 
-      $|nonnest [! x !]       $nonnest [x]        x
-      $|spcresrv [= x ]       $spcresrv [x]       x
+      $|nonnest [! x !]       $nonnest [x]        3,5
+      $|spcresrv [= x ]       $spcresrv [x]       3,5
 
-      Remains the same
-      $!key.method [x]
+      $!key.method [x]        Remains the same    4
 
 ```
-  The space reserving '=' and non nesting '!' characters at the start of a block does not have to be removed completely but can just be used ocasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
-
-  The inline elements must also check for some non alphanumeric characters following the block. E.g. in case of ',', '.' etc. no space should be placed between the block and the following character.
+  Notes;
+  * 1) `$*|`, `$|*` and `$**` might still be used when other spacing around elements is desired then the configuration prescribes. These will then mean; add space to the left, add space to the right and add spaces to the left and right resp.
+  * 2) `$|` can also be used now to change spacing around elements when needed. Here the meaning is to remove all spacing around the element.
+  * 3) The configurtion will be searched for those elements which are inline and need a special treatment of spacing around elements. Also nonnestable and space reserving elements are searched for in the configuration. The inline elements must also check for some non-alphanumeric characters following the block. E.g. in case of `,` or `.` etc. no space should be placed between the block and the following character.
+  * 4) The key is a label mapped to the module in the configuration. The method must of course be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call. Perhaps a method in the module like `method is-method-inline ( Str $method-name --> Bool ) { }` returning True or False for handling top level element as inlining or block element. When method is unavailable it is always assumed False. A long name is chosen to prevent name clashes. An example is made in SxmlCore but not called yet from the Actions module.
+  * 5) The space reserving '=' and non nesting '!' characters at the start of a block does not have to be removed completely but can just be used ocasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
 
 * External modules located in SxmlLib tree
   * Library paths to find modules are provided
@@ -40,10 +35,11 @@
   * Use a plugin system for the modules.
   * Store SxmlLib modules in the resources directory.
 
-* Items needed in program sxml2xml or SemiXML.pm6
+* Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * Dependencies on other files
   * Store internal representation back into sxml.
   * Load any xml based source to convert back to sxml. Can be used as a start for templating things using pages from a nice website.
+  * Add conveneance method to Sxml.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $e, %attrs ) { }`
 
 * Tests
   * tags without body but with attributes
@@ -111,16 +107,19 @@
     [ R ]
     [ R.in-key ]
     [ R.in-key.file ]
-      out-key   = command line
+      out-key = 'command line'
 
     # [S] Storage table, only with file. Looked up after parsing.
     [ S ]
     [ S.file ]
 
-    # [X] Dependencies table, only with file. Looked up before
-    # everything is started. Used by sxml2xml program.
+    # [X] Dependencies table, only with in-key. The file
+    # is used to delect the array of files on which this
+    # file depends. Looked up before everything is
+    # started. Used by sxml2xml program.
     [ X ]
-    [ X.file ]
+    [ X.in-key ]
+      file = [ f1, f2, f3, ...]
 
     ```
   All these ideas could also replace the one option --run from the program which only had a selective influence on the [output.program] table. Also less files might be searched through as opposed to the list shown above.
