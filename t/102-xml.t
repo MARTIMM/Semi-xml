@@ -40,11 +40,13 @@ EOSX
 #-------------------------------------------------------------------------------
 my Hash $config = {
   C => {
-    doctype-show => 1,
-    xml-show => 1,
+    html => {
+      doctype-show => True,
+    },
+    xml-show => True,
     xml-version => 1.1,
     xml-encoding => 'UTF-8',
-    http-show => 0,
+    header-show => False,
   },
 
   S => {
@@ -75,15 +77,15 @@ my Hash $config = {
 }
 
 # Parse
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new( :trace, :merge, :refine([ <html pdf>]));
 $x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-#note $xml-text;
+note $xml-text;
 
-ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
+like $xml-text, /:s '<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
-ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
+like $xml-text, /:s '<!DOCTYPE' 'html>'/, 'Doctype found';
 
 # Write xml out to file. Basename explicitly set.
 $x.save(:filename($f1bn));
