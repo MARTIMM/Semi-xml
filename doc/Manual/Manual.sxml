@@ -33,6 +33,7 @@ $!Db5b.article [
     ]
   ]
 
+  #----------------------------------------------------------------------------
   $sect1 xml:id=Introduction [
     $title [ Introduction of package &pack; ]
     $para [
@@ -119,7 +120,8 @@ $!Db5b.article [
             the element format, attributes and
             matching brackets. When the parser arrives at the end of the
             document it may miss a
-            closing bracket or seeing one too many. It is not easy to show where
+            closing bracket or seeing one too many. It is not easy to show
+            where
             the bracket is missing or where there is one typed too many.
             However, a few solutions are implemented to help finding the
             error if there is one. This also needs some attention.
@@ -128,55 +130,54 @@ $!Db5b.article [
 
         $listitem [
           $para [
-            This project is only just started. There are many things left on the
-            wish list. E.g. I would like to give proper messages when mistakes are
+            This project is only just started. There are many things left on
+            the wish list. E.g. I would like to give proper messages when
+            mistakes are
             made in the syntax or from within a method in a module.
           ]
 
           $para [
             Well, I would say it can only improve when modules and methods are
-            added.
+            added and syntax evolve.
           ]
         ]
       ]
     ]
 
     $sect2 [
-      $title [What the manual will explain]
+      $title [What the manual explains]
       $itemizedlist [
         $listitem [
           $para [
-            $emphasis[The package]. Explanating the parts comprising the
-            package.
-# parsing module, xml generating modules, program and config
+            $emphasis[The package]. An overview of the parts comprising the
+            package. This will be about the parsing modules, the included xml
+            generating modules, the program and configuration.
           ]
         ]
 
         $listitem [
           $para [
-            $emphasis[The language]. Here the basic layout will be explained,
-            the terminology and meaning of the syntax.
-# syntax, configuration
-            $itemizedlist [
-              $listitem [
-                $para [
-                  $emphasis[Syntax]. The document is where text
-                  is written for the specific documents together with the
-                  elements to format the text. This part explains the element
-                  types which makeup the document.
-                ]
-              ]
+            $emphasis[The language]. Here the basic layout is explained,
+            the terminology of parts in the document and the used syntax.
+          ]
+        ]
 
-              $listitem [
-                $para [
-                  $emphasis[Configuration]. The toml configuration file will be
-                  explained. This section explains how to control the output
-                  of the result and where modules are to be found. Some options
-                  are only used by the program
-                  &prog;. Defaults are also explained.
-                ]
-              ]
-            ]
+        $listitem [
+          $para [
+            $emphasis[Syntax]. The document is where text
+            is written for the specific documents together with the
+            elements to format the text. This part explains the element
+            types which makeup the document.
+          ]
+        ]
+
+        $listitem [
+          $para [
+            $emphasis[Configuration]. The toml configuration file will be
+            explained. This section explains how to control the output
+            of the result and where modules are to be found. Some options
+            are only used by the program
+            &prog;. Defaults are also explained.
           ]
         ]
 
@@ -184,40 +185,18 @@ $!Db5b.article [
           $para [
             $emphasis[The programmers view]. Developers can write new modules
             with methods to process tasks not yet captured by this package.
-
-            $itemizedlist [
-              $listitem [
-                $para [
-                  $emphasis[Classes, data and methods]. An explanation of the
-                  layout of a users module and an explanation of how to specify
-                  the options in the configuration file.
-                ]
-              ]
-$!SxmlCore.comment [
-              $listitem [
-                $para [
-                  $emphasis[Substitution data]. Declarations of data which
-                  can be used to substitute into the text.
-                ]
-              ]
-]
-              $listitem [
-                $para [
-                  $emphasis[Methods]. Methods which help inserting new text
-                  and entities into the text.
-                ]
-              ]
-            ]
+            This section will talk about classes, data and methods
           ]
         ]
 
         $listitem [
           $para [
-            $emphasis[Using the program]. The program is used to read
+            $emphasis[The program]. The program &prog; is used to read
             &lang; from a file and saved or send away. Explanation of
             arguments and prelude options can be found here.
           ]
         ]
+
         $listitem [
           $para [
             $emphasis[Examples]. Many short examples to show its use of sxml.
@@ -233,8 +212,14 @@ $!SxmlCore.comment [
     ]
   ]
 
-  $sect1 xml:id=Language [
+  #----------------------------------------------------------------------------
+  $sect1 xml:id=package [
+    $title [The package]
 
+  ]
+
+  #----------------------------------------------------------------------------
+  $sect1 xml:id=Language [
     $title [The language]
 
     $para [
@@ -653,6 +638,7 @@ $!SxmlCore.comment [
     ]
 ]
 
+  #----------------------------------------------------------------------------
   $sect1 xml:id=syntax [
     $title [Syntax]
     $para [
@@ -684,6 +670,7 @@ $!SxmlCore.comment [
     ]
   ]
 
+  #----------------------------------------------------------------------------
   $sect1 xml:id=Examples [
     $title [Examples]
     $para [

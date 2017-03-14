@@ -5,6 +5,7 @@ Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md w
 * 0.28.1
   * Added sub std-attrs to Sxml.pm6 to easily scan attrs and for id,class, style and the like and add those to the provided XML element. The attributes are then removed from the attrs hash.
   * Added new table entries to the default config file in preparation of later changes.
+  * New configuration tables are implemented and refinable.
 * 0.28.0
   * **$|element [ ]** is changed into **$element [ ]**.
 * 0.27.5
