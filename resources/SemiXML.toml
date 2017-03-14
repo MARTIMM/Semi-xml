@@ -30,34 +30,52 @@
 #  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
 #  chk           = 'tidy -'
 
-
+#------------------------------------------------------------------------------
 # New style of configuration tables
 [ C ]
-  xml-show      = false
-  version       = '1.0'
-  encoding      = 'UTF-8'
-  standalone    = 'yes'
+  xml-show        = false
+  xml-version     = '1.0'
+  xml-encoding    = 'UTF-8'
+  xml-standalone  = 'yes'
 
-  doctype-show  = false
-  http-show     = false
+  doctype-show    = false
+  header-show     = false
 
+[ C.xml ]
+  xml-show        = true
+
+[ C.html ]
+  doctype-show    = true
+
+  inline          = [ 'b', 'i', 'strong']
+  non-nesting     = [ 'script', 'style']
+  space-preserve  = [ 'pre' ]
+
+#------------------------------------------------------------------------------
 #[ D ]
 #  file          = [ ]
 
-#[ E ]
-#  copy          = '&#xa9;'
+#------------------------------------------------------------------------------
+[ E.xml ]
+  copy            = '&#xa9;'
 
-# if [ H ] has entries, show http header
+#------------------------------------------------------------------------------
 #[ H ]
+#  Content-Type    = 'text/html; charset="utf-8"'
+#  From            = 'my-addr@gmail.com'
+#  User-Agent      = 'SemiXML'
 
+#------------------------------------------------------------------------------
 [ ML ]
   SxmlCore      = 'SxmlLib::SxmlCore'
 
+#------------------------------------------------------------------------------
 [ R ]
   fmt           = 'xmllint --format - > %op/%of.%oe'
 #  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
 #  pdf           = 'wkhtmltopdf - %op/%of.pdf'
 #  chk           = 'tidy -'
 
+#------------------------------------------------------------------------------
 [ S ]
   fileext       = 'xml'

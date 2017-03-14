@@ -132,17 +132,20 @@ class Sxml {
     }
 
     else {
-      $filename = $config<output><filename>;
+#      $filename = $config<output><filename>;
+      $filename = $!refined-config<S><filename>;
     }
 
     # modify extension
     my Str $ext = $filename.IO.extension;
     $filename ~~ s/ '.' $ext //;
-    $filename ~= "." ~ $config<output><fileext>;
+#    $filename ~= "." ~ $config<output><fileext>;
+    $filename ~= "." ~ $!refined-config<S><fileext>;
 
     # if not absolute prefix the path from the config
     if $filename !~~ m/^ '/' / {
-      my $filepath = $config<output><filepath>;
+#      my $filepath = $config<output><filepath>;
+      my $filepath = $!refined-config<S><filepath>;
       $filename = "$filepath/$filename" if $filepath;
     }
 
@@ -154,7 +157,8 @@ class Sxml {
     # to send the result to.
     #
     if $run-code.defined {
-      my $cmd = $config<output><program>{$run-code};
+#      my $cmd = $config<output><program>{$run-code};
+      my $cmd = $!refined-config<R><program>{$run-code};
 
       if $cmd.defined {
 
@@ -209,7 +213,6 @@ class Sxml {
   method get-xml-text ( :$other-document --> Str ) {
 
     # Get the top element name
-    #
     my $root-element;
     if ?$other-document {
       $root-element = $other-document.root.name;
@@ -230,29 +233,30 @@ class Sxml {
     # the settings from the sxml file.
     #
 #TODO refine
-    my Hash $config = $!configuration.config;
+#    my Hash $config = $!configuration.config;
 
     # If there is one, try to generate the xml
     if ?$root-element {
 
       # Check if a http header must be shown
-      my Hash $http-header = $config<option><http-header> // {};
+#      my Hash $http-header = $config<option><http-header> // {};
 
-      if ? $http-header<show> {
-        for $http-header.kv -> $k, $v {
-          next if $k ~~ 'show';
+#      if ? $http-header<show> {
+      if $!refined-config<C><header-show> and ? $!refined-config<H> {
+        for $!refined-config.kv -> $k, $v {
+#          next if $k ~~ 'show';
           $document ~= "$k: $v\n";
         }
         $document ~= "\n";
       }
 
       # Check if xml prelude must be shown
-      my Hash $xml-prelude = $config<option><xml-prelude> // {};
+#      my Hash $xml-prelude = $config<option><xml-prelude> // {};
 
-      if ? $xml-prelude<show> {
-        my $version = $xml-prelude<version> // '1.0';
-        my $encoding = $xml-prelude<encoding> // 'utf-8';
-        my $standalone = $xml-prelude<standalone>;
+      if ? $!refined-config<C><xml-show> {
+        my $version = $!refined-config<C><xml-version> // '1.0';
+        my $encoding = $!refined-config<C><xml-encoding> // 'utf-8';
+        my $standalone = $!refined-config<C><xml-standalone>;
 
         $document ~= '<?xml version="' ~ $version ~ '"';
         $document ~= ' encoding="' ~ $encoding ~ '"';
@@ -261,10 +265,10 @@ class Sxml {
       }
 
       # Check if doctype must be shown
-      my Hash $doc-type = $config<option><doctype> // {};
+#      my Hash $doc-type = $config<option><doctype> // {};
 
-      if ? $doc-type<show> {
-        my Hash $entities = $doc-type<entities> // {};
+      if ? $!refined-config<C><doctype-show> {
+        my Hash $entities = $!refined-config<E> // {};
         my Str $start = ?$entities ?? " [\n" !! '';
         my Str $end = ?$entities ?? "]>\n" !! ">\n";
         $document ~= "<!DOCTYPE $root-element$start";
@@ -404,33 +408,40 @@ class Sxml {
 
     # set filename and path if not set, extension is set in default config
     my Hash $c := $!configuration.config;
-    $c<output> = {} unless $c<output>:exists;
+#    $c<output> = {} unless $c<output>:exists;
+    $c<S> = {} unless $c<S>:exists;
 
-    if $c<output><filename>:!exists {
+#    if $c<output><filename>:!exists {
+    if $c<S><filename>:!exists {
       if ?$!basename {
         # lop off the extension from the above devised config name
         $!basename ~~ s/ '.toml' $// if ?$!basename;
-        $c<output><filename> = $!basename;
+#        $c<output><filename> = $!basename;
+        $c<S><filename> = $!basename;
       }
 
       else {
         $!basename = $*PROGRAM.basename;
         $fext = $*PROGRAM.extension;
         $!basename ~~ s/ '.' $fext //;
-        $c<output><filename> = $!basename;
+#        $c<output><filename> = $!basename;
+        $c<S><filename> = $!basename;
       }
     }
 
-    if $c<output><filepath>:!exists {
+#    if $c<output><filepath>:!exists {
+    if $c<S><filepath>:!exists {
       if ?$fdir {
-        $c<output><filepath> = $fdir;
+#        $c<output><filepath> = $fdir;
+        $c<S><filepath> = $fdir;
       }
 
       else {
         $fdir = $*PROGRAM.abspath;
         my $bname = $!basename = $*PROGRAM.basename;
         $fdir ~~ s/ '/'? $bname //;
-        $c<output><filepath> = $fdir;
+#        $c<output><filepath> = $fdir;
+        $c<S><filepath> = $fdir;
       }
     }
 
@@ -462,11 +473,6 @@ note "RC: $table, ", $!refined-config{$table}.perl;
     }
 
     # instantiate modules specified in the configuration
-#    $!actions.process-modules(
-#      :lib($!configuration.config<library> // {}),
-#      :mod($!configuration.config<module> // {}),
-#    );
-
     self!process-modules;
 
     note "\nConfiguration: ", $!configuration.perl if $!trace;
@@ -484,10 +490,8 @@ note "RC: $table, ", $!refined-config{$table}.perl;
     my Hash $mod = {};
     for $!refined-config<ML>.keys -> $modkey {
       next unless ? $!refined-config<ML>{$modkey};
-note "modkey: $modkey";
 
       ( my $m, my $l) = $!refined-config<ML>{$modkey}.split(';');
-note "L: {$l//'.'}, M: $m";
       $lib{$modkey} = $l if $l;
       $mod{$modkey} = $m;
     }
@@ -500,9 +504,7 @@ note "L: {$l//'.'}, M: $m";
 
     # load and instantiate
     for $mod.kv -> $key, $value {
-note "MOD KV: $key, $value";
       if $!objects{$key}:!exists {
-note "LIB {$lib{$key}//'-'}";
         if $lib{$key}:exists {
 
           my $repository = CompUnit::Repository::FileSystem.new(
@@ -563,6 +565,7 @@ note "LIB {$lib{$key}//'-'}";
     save-xml( :$filename, :document($root), :$config, :$formatted);
   }
 
+#TODO $config should come indirectly from $!refined-config
   multi sub save-xml (
     Str:D :$filename, XML::Document:D :$document!,
     Hash :$config = {}, Bool :$formatted = False

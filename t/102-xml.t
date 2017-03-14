@@ -39,6 +39,21 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
+  C => {
+    doctype-show => 1,
+    xml-show => 1,
+    xml-version => 1.1,
+    xml-encoding => 'UTF-8',
+    http-show => 0,
+  },
+
+  S => {
+    filename => $f2bn,                  # Default current file
+    filepath => $dir,
+    fileext => 'html',                  # Default xml
+  },
+
+#`{{
   option => {
     doctype => {
       show => 1,                        # Default 0
@@ -56,6 +71,7 @@ my Hash $config = {
     filepath => $dir,
     fileext => 'html',                  # Default xml
   }
+}}
 }
 
 # Parse

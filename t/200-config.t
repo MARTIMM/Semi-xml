@@ -9,27 +9,6 @@ mkdir $dir unless $dir.IO ~~ :d;
 spurt $cfg, qq:to/EOCONFIG/;
 
   # Content tables --------------------------------------------------------------
-  [ C ]
-  xml-show              = false
-  xml-version           = '1.0'
-  xml-encoding          = 'UTF-8'
-  #  xml-standalone        = 'yes'
-  #  doctype-show          = false
-  #  http-show             = false
-
-  # out = xml
-  #[ C.xml ]
-  #  xml-show              = true
-  #  doctype-show          = true
-
-  # out = html
-  #[ C.html ]
-  #  inline                = [ 'b', 'i', 'strong']
-  #  non-nesting           = [ 'script', 'style']
-  #  space-preserve        = [ 'pre' ]
-  #  xml-show              = true
-  #  doctype-show          = true
-
   # out = db5 (for docbook5)
   #[ C.db5 ]
   #  inline                = [ 'emphasis']
@@ -38,35 +17,20 @@ spurt $cfg, qq:to/EOCONFIG/;
   #  doctype-show          = true
 
   # Dependency tables --------------------------------------------------------
-  [ D ]
+  #[ D ]
 
   # Entity tables --------------------------------------------------------------
-  [ DT ]
-    copy                  = '&#xa9;'
+  #[ E.db5 ]
+  #  copy                  = '&#xa9;'
+  #  nbsp                  = ' '
 
-  # out = db5 (for docbook5)
-  [ DT.db5 ]
-    copy                  = '&#xa9;'
-    nbsp                  = ' '
-
-  # Http tables ----------------------------------------------------------------
-  [ H ]
-
-  # out = email
-  [ H.email ]
-    Content-Type          = 'text/html; charset="utf-8"'
-    From                  = 'my-addr@gmail.com'
-    User-Agent            = 'SemiXML'
+  # Header tables ----------------------------------------------------------------
+  #[ H ]
 
   # Module tables --------------------------------------------------------------
-  [ ML ]
-    SxmlCore              = 'SxmlLib::SxmlCore'
-
-  # in = email
   [ ML.html ]
     lorem                 = 'SxmlLib::LoremIpsum'
 
-  # in = db5
   [ ML.db5 ]
     lorem                 = 'SxmlLib::LoremIpsum'
     Db5b                  = 'SxmlLib::Docbook5::Basic'
@@ -82,12 +46,6 @@ spurt $cfg, qq:to/EOCONFIG/;
     pdf                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
     xhtml                 = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
     chunk                 = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
-
-  # Storage tables -------------------------------------------------------------
-  [ S ]
-  #  filename              = 'default is basename of sxml file'
-  #  filepath              = 'default is path of sxml file'
-    fileext               = 'xml'
 
   EOCONFIG
 
