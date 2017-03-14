@@ -12,6 +12,7 @@ mkdir($dir) unless $dir.IO ~~ :e;
 
 spurt( $mod, q:to/EOMOD/);
   use v6;
+  use Test;
   use SemiXML::Sxml;
   use SemiXML::Text;
   use XML;
@@ -26,6 +27,9 @@ spurt( $mod, q:to/EOMOD/);
 
       my XML::Element $p = append-element( $parent, 'p');
       std-attrs( $p, $attrs);
+      ok $attrs<class>:!exist, 'class attribute removed';
+      ok $attrs<id>:!exist, 'id attribute removed';
+      ok $attrs<extra-attr>:exist, 'extra-attr attribute removed';
       $parent;
     }
 

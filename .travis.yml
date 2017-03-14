@@ -22,7 +22,7 @@ install:
   - zef --/test --depsonly install .
 
 script:
-  - PERL6LIB=lib prove -v --exec=perl6 t/200-config.t
+  - PERL6LIB=lib prove -v --exec=perl6 t/030-methods.t t/200-config.t
 
 cache:
   directories:
