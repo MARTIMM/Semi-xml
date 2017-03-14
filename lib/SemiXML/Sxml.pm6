@@ -47,7 +47,7 @@ class Sxml {
     $!refine[1] = 'xml' unless ?$!refine[OUT];
 
     # Initialize the refined config tables
-    $!refine-tables = [<E H L M P R S X>];
+    $!refine-tables = [<C D E H ML R S>];
     $!refined-config = %(@$!refine-tables Z=> ( {} xx $!refine-tables.elems ));
   }
 
