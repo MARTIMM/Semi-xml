@@ -484,8 +484,10 @@ note "RC: $table, ", $!refined-config{$table}.perl;
     my Hash $mod = {};
     for $!refined-config<ML>.keys -> $modkey {
       next unless ? $!refined-config<ML>{$modkey};
+note "modkey: $modkey";
 
       ( my $m, my $l) = $!refined-config<ML>{$modkey}.split(';');
+note "L: {$l//'.'}, M: $m";
       $lib{$modkey} = $l if $l;
       $mod{$modkey} = $m;
     }
@@ -498,7 +500,9 @@ note "RC: $table, ", $!refined-config{$table}.perl;
 
     # load and instantiate
     for $mod.kv -> $key, $value {
+note "MOD KV: $key, $value";
       if $!objects{$key}:!exists {
+note "LIB {$lib{$key}//'-'}";
         if $lib{$key}:exists {
 
           my $repository = CompUnit::Repository::FileSystem.new(
