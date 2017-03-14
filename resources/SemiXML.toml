@@ -4,7 +4,7 @@
   xml-show        = false
   xml-version     = '1.0'
   xml-encoding    = 'UTF-8'
-  xml-standalone  = 'yes'
+#  xml-standalone  = 'yes'
 
   doctype-show    = false
   header-show     = false
