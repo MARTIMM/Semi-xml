@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<https://github.com/MARTIMM>;
@@ -13,7 +13,7 @@ class Actions {
   has $!sxml-obj;
 
   # Objects hash with one predefined object for core methods
-  has Hash $.objects = {};
+  has Hash $.objects is rw = {};
   has XML::Document $!xml-document;
 
   # Keep current state of affairs. Hopefully some info when parsing fails
@@ -613,7 +613,13 @@ class Actions {
   }
 
   #-----------------------------------------------------------------------------
-  method process-modules ( Hash :$lib = {}, Hash :$mod = {} ) {
+  method Xset-objects( Hash:D $objects ) {
+
+    $!objects = $objects;
+  }
+
+  #-----------------------------------------------------------------------------
+  method Xprocess-modules ( Hash :$lib = {}, Hash :$mod = {} ) {
 
     # cleanup old objects
     for $!objects.keys -> $k {

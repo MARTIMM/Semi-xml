@@ -26,6 +26,8 @@ class Sxml {
   has Array $!refine-tables;
   has Hash $!refined-config;
 
+  has Hash $!objects = {};
+
   has Str $!filename;
   has Str $!basename;
 
@@ -465,11 +467,54 @@ note "RC: $table, ", $!refined-config{$table}.perl;
 #      :mod($!configuration.config<module> // {}),
 #    );
 
-    $!actions.process-modules(
-      :lib($!refined-config<L>), :mod($!refined-config<M>)
-    );
+    self!process-modules;
 
     note "\nConfiguration: ", $!configuration.perl if $!trace;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Get modulenames and library paths. Format of an entry in table ML is
+  # mod-key => 'mod-name[;lib-path]'
+  method !process-modules ( ) {
+
+    # no entries, no work
+    return unless ? $!refined-config<ML>;
+
+    my Hash $lib = {};
+    my Hash $mod = {};
+    for $!refined-config<ML>.keys -> $modkey {
+      next unless ? $!refined-config<ML>{$modkey};
+
+      ( my $m, my $l) = $!refined-config<ML>{$modkey}.split(';');
+      $lib{$modkey} = $l if $l;
+      $mod{$modkey} = $m;
+    }
+
+    # cleanup old objects
+    for $!objects.keys -> $k {
+      undefine $!objects{$k};
+      $!objects{$k}:delete;
+    }
+
+    # load and instantiate
+    for $mod.kv -> $key, $value {
+      if $!objects{$key}:!exists {
+        if $lib{$key}:exists {
+
+          my $repository = CompUnit::Repository::FileSystem.new(
+            :prefix($lib{$key})
+          );
+          CompUnit::RepositoryRegistry.use-repository($repository);
+        }
+
+        require ::($value);
+        my $obj = ::($value).new;
+        $!objects{$key} = $obj;
+      }
+    }
+
+    # Place in actions object.
+    $!actions.objects = $!objects;
   }
 
   #-----------------------------------------------------------------------------

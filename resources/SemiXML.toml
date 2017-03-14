@@ -31,4 +31,33 @@
 #  chk           = 'tidy -'
 
 
-#TODO [ styles ]
+# New style of configuration tables
+[ C ]
+  xml-show      = false
+  version       = '1.0'
+  encoding      = 'UTF-8'
+  standalone    = 'yes'
+
+  doctype-show  = false
+  http-show     = false
+
+#[ D ]
+#  file          = [ ]
+
+#[ E ]
+#  copy          = '&#xa9;'
+
+# if [ H ] has entries, show http header
+#[ H ]
+
+[ ML ]
+  SxmlCore      = 'SxmlLib::SxmlCore'
+
+[ R ]
+  fmt           = 'xmllint --format - > %op/%of.%oe'
+#  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
+#  pdf           = 'wkhtmltopdf - %op/%of.pdf'
+#  chk           = 'tidy -'
+
+[ S ]
+  fileext       = 'xml'

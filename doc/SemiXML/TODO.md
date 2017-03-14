@@ -73,6 +73,19 @@
   * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. When choosing the proper commandline options one must keep the following in mind. First the document written is always **sxml**. What it represents should be the first option (by default **xml**) and what it should become the next option (by default **xml**). These options are provided by the sxml2xml program. The following **--in** and  **--out** with e.g. **--in=docbook5** and  **--out=pdf**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result. To also use the refine method from Config::DataLang::Refine, the options are used as keys to that method. A third key can be added, the basename of the file being parsed. So the next configuration tables are possible ();
 
     ```
+    # [C] Content definition table. only used with out-key and file. Looked up after parsing to prefix data to result.
+    [ C ]
+    [ C.out-key ]
+    [ C.out-key.file ]
+
+    # [D] Dependencies table, only with in-key. The file
+    # is used to delect the array of files on which this
+    # file depends. Looked up before everything is
+    # started. Used by sxml2xml program.
+    [ D ]
+    [ D.in-key ]
+      file = [ f1, f2, f3, ...]
+
     # [E] Entity table. Only with out-key and file.
     # Looked up after parsing to prefix data to result.
     [ E ]
@@ -84,21 +97,12 @@
     [ H.in-key ]
     [ H.in-key.file ]
 
-    # [L] Libraries table, only with in-key and file. Looked up just before parsing.
-    [ L ]
-    [ L.in-key ]
-    [ L.in-key.file ]
-
-    # [M] Module table, only with in-key and file. Looked up just before parsing.
-    [ M ]
-    [ M.in-key ]
-    [ M.in-key.file ]
-
-    # [P] Prefix table. only used with out-key and file.
-    # Looked up after parsing to prefix data to result.
-    [ P ]
-    [ P.out-key ]
-    [ P.out-key.file ]
+    # [ML] Combined module and library table. Only with in-key and file.
+    # Looked up just before parsing.
+    [ ML ]
+    [ ML.in-key ]
+    [ ML.in-key.file ]
+      mod-key = 'Module[;library]'
 
     # [R] Run table only with in-key and file. The out-key is used to select
     # the command line. Looked up after parsing. Used to send the total (after
@@ -112,14 +116,6 @@
     # [S] Storage table, only with file. Looked up after parsing.
     [ S ]
     [ S.file ]
-
-    # [X] Dependencies table, only with in-key. The file
-    # is used to delect the array of files on which this
-    # file depends. Looked up before everything is
-    # started. Used by sxml2xml program.
-    [ X ]
-    [ X.in-key ]
-      file = [ f1, f2, f3, ...]
 
     ```
   All these ideas could also replace the one option --run from the program which only had a selective influence on the [output.program] table. Also less files might be searched through as opposed to the list shown above.

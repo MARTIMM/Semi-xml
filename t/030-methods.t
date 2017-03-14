@@ -59,8 +59,9 @@ spurt( $mod, q:to/EOMOD/);
 
 # setup the configuration
 my Hash $config = {
-  L => {:mod1<t>},
-  M => {:mod1<T030::m1>}
+#  L => {:mod1<t>},
+#  M => {:mod1<T030::m1>},
+  ML => {:mod1<T030::m1;t>}
 }
 
 #TODO spaces around brackets seems needed.

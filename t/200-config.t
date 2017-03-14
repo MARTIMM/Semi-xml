@@ -8,12 +8,44 @@ my Str $cfg = "$dir/SemiXML.toml";
 mkdir $dir unless $dir.IO ~~ :d;
 spurt $cfg, qq:to/EOCONFIG/;
 
+  # Content tables --------------------------------------------------------------
+  [ C ]
+  xml-show              = false
+  xml-version           = '1.0'
+  xml-encoding          = 'UTF-8'
+  #  xml-standalone        = 'yes'
+  #  doctype-show          = false
+  #  http-show             = false
+
+  # out = xml
+  #[ C.xml ]
+  #  xml-show              = true
+  #  doctype-show          = true
+
+  # out = html
+  #[ C.html ]
+  #  inline                = [ 'b', 'i', 'strong']
+  #  non-nesting           = [ 'script', 'style']
+  #  space-preserve        = [ 'pre' ]
+  #  xml-show              = true
+  #  doctype-show          = true
+
+  # out = db5 (for docbook5)
+  #[ C.db5 ]
+  #  inline                = [ 'emphasis']
+  #  space-preserve        = [ 'programlisting']
+  #  xml-show              = true
+  #  doctype-show          = true
+
+  # Dependency tables --------------------------------------------------------
+  [ D ]
+
   # Entity tables --------------------------------------------------------------
-  [ E ]
+  [ DT ]
     copy                  = '&#xa9;'
 
   # out = db5 (for docbook5)
-  [ E.db5 ]
+  [ DT.db5 ]
     copy                  = '&#xa9;'
     nbsp                  = ' '
 
@@ -26,51 +58,19 @@ spurt $cfg, qq:to/EOCONFIG/;
     From                  = 'my-addr@gmail.com'
     User-Agent            = 'SemiXML'
 
-  # Library tables -------------------------------------------------------------
-  [ L ]
-
   # Module tables --------------------------------------------------------------
-  [ M ]
+  [ ML ]
     SxmlCore              = 'SxmlLib::SxmlCore'
 
   # in = email
-  [ M.html ]
+  [ ML.html ]
     lorem                 = 'SxmlLib::LoremIpsum'
 
   # in = db5
-  [ M.db5 ]
+  [ ML.db5 ]
     lorem                 = 'SxmlLib::LoremIpsum'
     Db5b                  = 'SxmlLib::Docbook5::Basic'
     Db5f                  = 'SxmlLib::Docbook5::FixedLayout'
-
-  # Prefix tables --------------------------------------------------------------
-  [ P ]
-    xml-show              = false
-    xml-version           = '1.0'
-    xml-encoding          = 'UTF-8'
-  #  xml-standalone        = 'yes'
-    doctype-show          = false
-    http-show             = false
-
-  # out = xml
-  [ P.xml ]
-    xml-show              = true
-    doctype-show          = true
-
-  # out = html
-  [ P.html ]
-    inline                = [ 'b', 'i', 'strong']
-    non-nesting           = [ 'script', 'style']
-    space-preserve        = [ 'pre' ]
-    xml-show              = true
-    doctype-show          = true
-
-  # out = db5 (for docbook5)
-  [ P.db5 ]
-    inline                = [ 'emphasis']
-    space-preserve        = [ 'programlisting']
-    xml-show              = true
-    doctype-show          = true
 
   # Run tables -----------------------------------------------------------------
   [ R ]
@@ -87,10 +87,7 @@ spurt $cfg, qq:to/EOCONFIG/;
   [ S ]
   #  filename              = 'default is basename of sxml file'
   #  filepath              = 'default is path of sxml file'
-  fileext               = 'xml'
-
-  # X dependency tables --------------------------------------------------------
-  [ X ]
+    fileext               = 'xml'
 
   EOCONFIG
 
