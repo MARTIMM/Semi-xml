@@ -3,11 +3,11 @@ branches:
     - master
     - develop
 
-language: perl6
+#language: perl6
 
-#perl6:
-#  - latest
-#  - '2017.02'
+perl6:
+  - latest
+  - '2017.02'
 
 before-install:
 #  - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
