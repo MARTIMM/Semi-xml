@@ -29,7 +29,8 @@ spurt( $mod, q:to/EOMOD/);
       std-attrs( $p, $attrs);
       ok $attrs<class>:!exists, 'class attribute removed';
       ok $attrs<id>:!exists, 'id attribute removed';
-      ok $attrs<extra-attr>:exists, 'extra-attr attribute removed';
+      ok $attrs<extra-attr>:exists, 'extra-attr attribute not removed';
+
       $parent;
     }
 
