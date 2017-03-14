@@ -40,12 +40,8 @@ EOSX
 #-------------------------------------------------------------------------------
 my Hash $config = {
   C => {
-    html => {
-      doctype-show => True,
-    },
     xml-show => True,
     xml-version => 1.1,
-    xml-encoding => 'UTF-8',
     header-show => False,
   },
 
@@ -54,30 +50,10 @@ my Hash $config = {
     filepath => $dir,
     fileext => 'html',                  # Default xml
   },
-
-#`{{
-  option => {
-    doctype => {
-      show => 1,                        # Default 0
-    },
-
-    xml-prelude => {
-      show => 1,                        # Default 0
-      version => 1.1,                   # Default 1.0
-      encoding => 'UTF-8',              # Default UTF-8
-    }
-  },
-
-  output => {
-    filename => $f2bn,                  # Default current file
-    filepath => $dir,
-    fileext => 'html',                  # Default xml
-  }
-}}
 }
 
 # Parse
-my SemiXML::Sxml $x .= new( :trace, :merge, :refine([ <html pdf>]));
+my SemiXML::Sxml $x .= new( :trace, :merge, :refine([ <html html>]));
 $x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
