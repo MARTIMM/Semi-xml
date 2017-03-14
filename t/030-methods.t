@@ -27,9 +27,9 @@ spurt( $mod, q:to/EOMOD/);
 
       my XML::Element $p = append-element( $parent, 'p');
       std-attrs( $p, $attrs);
-      ok $attrs<class>:!exist, 'class attribute removed';
-      ok $attrs<id>:!exist, 'id attribute removed';
-      ok $attrs<extra-attr>:exist, 'extra-attr attribute removed';
+      ok $attrs<class>:!exists, 'class attribute removed';
+      ok $attrs<id>:!exists, 'id attribute removed';
+      ok $attrs<extra-attr>:exists, 'extra-attr attribute removed';
       $parent;
     }
 
