@@ -3,13 +3,14 @@ branches:
     - master
     - develop
 
-#language: perl6
+language: perl6
 
-perl6:
-  - latest
-  - '2017.02'
+#perl6:
+#  - latest
+#  - '2017.02'
 
-before-install:
+#before-install:
+install:
 #  - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
 #  - rakudobrew build-zef 2017.02
 
@@ -22,7 +23,7 @@ before-install:
 #  - zef --depsonly install .
   - zef --/test --depsonly install .
 
-install: true
+#install: true
 
 script:
   - PERL6LIB=lib prove -v --exec=perl6 t/030-methods.t t/200-config.t
