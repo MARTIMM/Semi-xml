@@ -1,37 +1,5 @@
-#[ dependencies ]
-#  file          = [ ]
-
-[ module ]
-  SxmlCore      = 'SxmlLib::SxmlCore'
-
-#[ option ]
-
-[ option.http-header ]
-  show          = false
-
-[ option.xml-prelude ]
-  show          = false
-  version       = '1.0'
-  encoding      = 'UTF-8'
-#  standalone    = 'yes'
-
-[ option.doctype ]
-  show          = false
-
-#[ option.doctype.entities ]
-#  copy          = '&#xa9;'
-
-
-[ output ]
-  fileext       = 'xml'
-
-[ output.program ]
-#  pdf           = 'wkhtmltopdf - %op/%of.pdf'
-#  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
-#  chk           = 'tidy -'
-
 #------------------------------------------------------------------------------
-# New style of configuration tables
+# Content definition tables
 [ C ]
   xml-show        = false
   xml-version     = '1.0'
@@ -52,24 +20,29 @@
   space-preserve  = [ 'pre' ]
 
 #------------------------------------------------------------------------------
+# Dependency tables
 #[ D ]
 #  file          = [ ]
 
 #------------------------------------------------------------------------------
+# Doctype entity tables
 [ E.xml ]
   copy            = '&#xa9;'
 
 #------------------------------------------------------------------------------
+# Header table
 #[ H ]
 #  Content-Type    = 'text/html; charset="utf-8"'
 #  From            = 'my-addr@gmail.com'
 #  User-Agent      = 'SemiXML'
 
 #------------------------------------------------------------------------------
+# Module and library path tables
 [ ML ]
   SxmlCore      = 'SxmlLib::SxmlCore'
 
 #------------------------------------------------------------------------------
+# Running programs tables
 [ R ]
   fmt           = 'xmllint --format - > %op/%of.%oe'
 #  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
@@ -77,5 +50,6 @@
 #  chk           = 'tidy -'
 
 #------------------------------------------------------------------------------
+# Storage tables
 [ S ]
   fileext       = 'xml'
