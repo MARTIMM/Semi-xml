@@ -456,7 +456,7 @@ class Sxml {
           $!configuration.refine(|( $table, $!refine[OUT], $!basename));
 
         note "\nTable $table: out=", $!refine[OUT], ', basename=', $!basename,
-        "\n", $!configuration.perl($!refined-config{$table}) if $!trace;
+        "\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
       when any(<D H ML R>) {
@@ -465,7 +465,7 @@ class Sxml {
           $!configuration.refine(|( $table, $!refine[IN], $!basename));
 
         note "\nTable $table: in=", $!refine[IN], ', basename=', $!basename,
-        "\n", $!configuration.perl($!refined-config{$table}) if $!trace;
+        "\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
       when any(<S>) {
@@ -474,7 +474,7 @@ class Sxml {
           $!configuration.refine(|( $table, $!basename));
 
         note "\nTable $table: basename=", $!basename,
-        "\n", $!configuration.perl($!refined-config{$table}) if $!trace;
+        "\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
     }
 
