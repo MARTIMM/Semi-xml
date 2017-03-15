@@ -33,7 +33,7 @@ $html [
 EOSX
 
 # Parse
-my SemiXML::Sxml $x .= new( :trace, :merge, :refine(<xml xml>));
+my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<xml xml>]));
 $x.parse(:$filename);
 
 my Str $xml-text = ~$x;

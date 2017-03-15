@@ -53,7 +53,7 @@ my Hash $config = {
 }
 
 # Parse
-my SemiXML::Sxml $x .= new( :trace, :merge, :refine([ <html html>]));
+my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<html html>]));
 $x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
