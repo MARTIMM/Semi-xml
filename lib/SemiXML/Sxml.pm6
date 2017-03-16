@@ -168,10 +168,12 @@ class Sxml {
         $filename = $filename.IO.basename;
         $cmd ~~ s:g/ '%of' /'$filename'/;
 
-        my Str $path = $config<output><filepath>;
+#        my Str $path = $config<output><filepath>;
+        my Str $path = $config<S><filepath>;
         $cmd ~~ s:g/ '%op' /'$path'/;
 
-        $ext = $config<output><fileext>;
+#        $ext = $config<output><fileext>;
+        $ext = $config<S><fileext>;
         $cmd ~~ s:g/ '%oe' /'$ext'/;
 
         say "Sent file to program: $cmd";
