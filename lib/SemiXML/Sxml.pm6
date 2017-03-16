@@ -226,6 +226,7 @@ class Sxml {
     }
     return '' unless $root-element.defined;
 
+    # remove namespace part from root element
     $root-element ~~ s/^(<-[:]>+\:)//;
 
     my Str $document = '';
@@ -272,7 +273,7 @@ class Sxml {
       if ? $!refined-config<C><doctype-show> {
         my Hash $entities = $!refined-config<E> // {};
         my Str $start = ?$entities ?? " [\n" !! '';
-        my Str $end = ?$entities ?? "]>\n" !! ">\n";
+        my Str $end = ?$entities ?? "]>" !! ">";
         $document ~= "<!DOCTYPE $root-element$start";
         for $entities.kv -> $k, $v {
           $document ~= "<!ENTITY $k \"$v\">\n";
