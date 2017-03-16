@@ -122,33 +122,25 @@ class Sxml {
     Str :$filename is copy, Str :$run-code, XML::Document :$other-document
   ) {
 
-#TODO refine
-    my Hash $config = $!configuration.config;
-
-
     # set the filename if needed
     if ?$filename {
       $filename = $filename.IO.basename;
     }
 
     else {
-#      $filename = $config<output><filename>;
       $filename = $!refined-config<S><filename>;
     }
 
     # modify extension
     my Str $ext = $filename.IO.extension;
     $filename ~~ s/ '.' $ext //;
-#    $filename ~= "." ~ $config<output><fileext>;
     $filename ~= "." ~ $!refined-config<S><fileext>;
 
     # if not absolute prefix the path from the config
     if $filename !~~ m/^ '/' / {
-#      my $filepath = $config<output><filepath>;
       my $filepath = $!refined-config<S><filepath>;
       $filename = "$filepath/$filename" if $filepath;
     }
-
 
     # Get the document text
     my $document = self.get-xml-text(:$other-document);
@@ -157,7 +149,6 @@ class Sxml {
     # to send the result to.
     #
     if $run-code.defined {
-#      my $cmd = $config<output><program>{$run-code};
       my $cmd = $!refined-config<R><program>{$run-code};
 
       if $cmd.defined {
@@ -168,11 +159,9 @@ class Sxml {
         $filename = $filename.IO.basename;
         $cmd ~~ s:g/ '%of' /'$filename'/;
 
-#        my Str $path = $config<output><filepath>;
         my Str $path = $config<S><filepath>;
         $cmd ~~ s:g/ '%op' /'$path'/;
 
-#        $ext = $config<output><fileext>;
         $ext = $config<S><fileext>;
         $cmd ~~ s:g/ '%oe' /'$ext'/;
 
@@ -231,31 +220,18 @@ class Sxml {
 
     my Str $document = '';
 
-    # Get all configuration items in one hash, later settings overrides
-    # previous Therefore defaults first, then from user config in roles then
-    # the settings from the sxml file.
-    #
-#TODO refine
-#    my Hash $config = $!configuration.config;
-
-    # If there is one, try to generate the xml
+    # If there is a root element, try to generate the xml
     if ?$root-element {
 
       # Check if a http header must be shown
-#      my Hash $http-header = $config<option><http-header> // {};
-
-#      if ? $http-header<show> {
       if $!refined-config<C><header-show> and ? $!refined-config<H> {
         for $!refined-config.kv -> $k, $v {
-#          next if $k ~~ 'show';
           $document ~= "$k: $v\n";
         }
         $document ~= "\n";
       }
 
       # Check if xml prelude must be shown
-#      my Hash $xml-prelude = $config<option><xml-prelude> // {};
-
       if ? $!refined-config<C><xml-show> {
         my $version = $!refined-config<C><xml-version> // '1.0';
         my $encoding = $!refined-config<C><xml-encoding> // 'utf-8';
@@ -268,8 +244,6 @@ class Sxml {
       }
 
       # Check if doctype must be shown
-#      my Hash $doc-type = $config<option><doctype> // {};
-
       if ? $!refined-config<C><doctype-show> {
         my Hash $entities = $!refined-config<E> // {};
         my Str $start = ?$entities ?? " [\n" !! '';
@@ -290,6 +264,7 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
+#TODO must change this yet.
   multi method get-option ( Array $hashes, Str $option --> Any ) {
     for $hashes.list -> $h {
       if $h{$option}:exists {
@@ -341,10 +316,11 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
+#TODO check if still needed
   method get-current-filename ( --> Str ) {
-#TODO refine
-    return [~] $!configuration.config<output><filepath>,
-               '/', $!configuration.config<output><filename>;
+
+    my Hash $C = $!refined-config<C>;
+    return "$C<filepath>/$C<filename>.$C<fileext>";
   }
 
   #-----------------------------------------------------------------------------
@@ -356,7 +332,8 @@ class Sxml {
     # 2) load the SemiXML.toml from resources directory
 
 # There is a bug locally to this package. Resources get wrong path when using
-# local distribution. However, strange as it is, not on Travis!
+# local distribution. However, strange as it is, not on Travis! This is Caused
+# by wrong? use of PERL6LIB env variable.
 #note "\nR: ", %?RESOURCES.perl;
 #note "\nC: ", %?RESOURCES<SemiXML.toml>;
 
@@ -364,7 +341,7 @@ class Sxml {
 #if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
 #  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
 #}
-# pickup only one config file. Will always be there.
+# pick only one config file. Will always be there.
 #self!load-config( :config-name($rp.IO.abspath), :!merge);
 
     self!load-config( :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge);
@@ -411,15 +388,12 @@ class Sxml {
 
     # set filename and path if not set, extension is set in default config
     my Hash $c := $!configuration.config;
-#    $c<output> = {} unless $c<output>:exists;
     $c<S> = {} unless $c<S>:exists;
 
-#    if $c<output><filename>:!exists {
     if $c<S><filename>:!exists {
       if ?$!basename {
         # lop off the extension from the above devised config name
         $!basename ~~ s/ '.toml' $// if ?$!basename;
-#        $c<output><filename> = $!basename;
         $c<S><filename> = $!basename;
       }
 
@@ -427,15 +401,12 @@ class Sxml {
         $!basename = $*PROGRAM.basename;
         $fext = $*PROGRAM.extension;
         $!basename ~~ s/ '.' $fext //;
-#        $c<output><filename> = $!basename;
         $c<S><filename> = $!basename;
       }
     }
 
-#    if $c<output><filepath>:!exists {
     if $c<S><filepath>:!exists {
       if ?$fdir {
-#        $c<output><filepath> = $fdir;
         $c<S><filepath> = $fdir;
       }
 
@@ -443,7 +414,6 @@ class Sxml {
         $fdir = $*PROGRAM.abspath;
         my $bname = $!basename = $*PROGRAM.basename;
         $fdir ~~ s/ '/'? $bname //;
-#        $c<output><filepath> = $fdir;
         $c<S><filepath> = $fdir;
       }
     }
@@ -458,8 +428,8 @@ class Sxml {
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[OUT], $!basename));
 
-        note "\nTable $table: out=", $!refine[OUT], ', basename=', $!basename,
-        "\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+        note "Table $table: out=", $!refine[OUT], ', basename=', $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
       when any(<D H ML R>) {
@@ -467,8 +437,8 @@ class Sxml {
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[IN], $!basename));
 
-        note "\nTable $table: in=", $!refine[IN], ', basename=', $!basename,
-        "\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+        note "Table $table: in=", $!refine[IN], ', basename=', $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
       when any(<S>) {
@@ -476,8 +446,8 @@ class Sxml {
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!basename));
 
-        note "\nTable $table: basename=", $!basename,
-        "\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+        note "Table $table: basename=", $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
     }
 
@@ -564,6 +534,7 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   #-----------------------------------------------------------------------------
+#TODO $config should come indirectly from $!refined-config
   multi sub save-xml (
     Str:D :$filename, XML::Element:D :$document!,
     Hash :$config = {}, Bool :$formatted = False,
@@ -572,7 +543,6 @@ class Sxml {
     save-xml( :$filename, :document($root), :$config, :$formatted);
   }
 
-#TODO $config should come indirectly from $!refined-config
   multi sub save-xml (
     Str:D :$filename, XML::Document:D :$document!,
     Hash :$config = {}, Bool :$formatted = False
@@ -746,5 +716,5 @@ class Sxml {
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) is export {
-  return ~$x.get-xml-text;
+  return $x.get-xml-text;
 }

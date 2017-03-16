@@ -46,7 +46,9 @@ my Hash $config = {
   },
 
   H => {
-    Content-Type => 'text/html; charset="utf-8"',
+    html => {
+      Content-Type => 'text/html; charset="utf-8"',
+    },
   },
 
   S => {
@@ -61,7 +63,7 @@ my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<html html>]));
 $x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-note $xml-text;
+note "Xml:\n", $xml-text;
 
 like $xml-text, /:s 'text/html; charset="utf-8"'/, 'header found';
 like $xml-text, /:s '<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
