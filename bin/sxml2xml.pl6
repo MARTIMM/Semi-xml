@@ -30,23 +30,25 @@ sub MAIN (
   Bool :$trace = False, Bool :$merge = False
 ) {
 
-  my $dep = process-sxml(
+#TODO procss dependencies before parsing
+#TODO check for duplicate dependencies
+  my Array $dep-list = process-sxml(
     $filename, :$run, :refine([ $in, $out]), :$trace, :$merge
   );
 
-  if $dep.defined {
-    my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
-    for $dep-list.list -> $dependency is copy {
+  if ? $dep-list {
+#    my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
+    for @$dep-list -> $dependency { #is copy {
 
-      $dependency ~~ s/^\s+//;
-      $dependency ~~ s/\s+$//;
+#      $dependency ~~ s/^\s+//;
+#      $dependency ~~ s/\s+$//;
 
       say "Processing dependency $dependency";
-      my $dep = process-sxml(
+      my Array $new-dep-list = process-sxml(
         $dependency, :$run, :refine([ $in, $out]), :$trace, :$merge
       ) if ? $dependency;
 
-      $dep-list.push: |$dep.split(/\s* ',' \s*/) if ? $dep;
+      $dep-list.push: |@$new-dep-list if ? $new-dep-list;
     }
   }
 }
@@ -54,20 +56,24 @@ sub MAIN (
 #-------------------------------------------------------------------------------
 sub process-sxml (
   Str:D $filename is copy, Str :$run, Array :$refine,
-  Bool :$trace = False, Bool :$merge = False, 
+  Bool :$trace = False, Bool :$merge = False,
+
+  --> Array
 ) {
 
+  my Str $deps;
   my SemiXML::Sxml $x .= new( :$trace, :$merge, :$refine);
 
   if $filename.IO ~~ :r {
     $x.parse(:$filename);
     $filename ~~ s/ '.' $filename.IO.extention //;
     $x.save( :run-code($run), :$filename);
-    my $deps = $x.get-option( :section('dependencies'), :option('files')) // '';
-    return $deps;
+    $deps = $x.get-config( :table<D>, :key<files>) // '';
   }
 
   else {
     die "File $filename not readable";
   }
+
+  return $deps;
 }

@@ -264,44 +264,13 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-#TODO must change this yet.
-  multi method get-option ( Array $hashes, Str $option --> Any ) {
-    for $hashes.list -> $h {
-      if $h{$option}:exists {
-        return $h{$option};
-      }
-    }
+  multi method get-config ( Str:D :$table, Str:D :$key --> Any ) {
 
-    return Any;
-  }
-
-
-  multi method get-option (
-    Str :$section = '', Str :$sub-section = '', Str :$option = ''
-    --> Any
-  ) {
-    my Array $hashes;
-    for ( $!configuration.config) -> $h {
-      if $h{$section}:exists {
-        my $e = $h{$section};
-
-        if $e{$sub-section}:exists {
-          $hashes.push($e{$sub-section});
-        }
-
-        else {
-          $hashes.push($e);
-        }
-      }
-    }
-
-    for $hashes.list -> $h {
-      if $h{$option}:exists {
-        return $h{$option};
-      }
-    }
-
-    return Any;
+    return (
+      $!refined-config{$table}:exists
+        ?? $!refined-config{$table}{$key}
+        !! Any
+    );
   }
 
   #-----------------------------------------------------------------------------
