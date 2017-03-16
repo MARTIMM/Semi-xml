@@ -453,6 +453,7 @@ class Sxml {
       if $!objects{$key}:!exists {
         if $lib{$key}:exists {
 
+#TODO test for duplicate paths
           my $repository = CompUnit::Repository::FileSystem.new(
             :prefix($lib{$key})
           );
@@ -501,6 +502,7 @@ class Sxml {
     }
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   #-----------------------------------------------------------------------------
 #TODO $config should come indirectly from $!refined-config
@@ -680,6 +682,7 @@ class Sxml {
       }
     }
   }
+}}
 }
 
 #-------------------------------------------------------------------------------

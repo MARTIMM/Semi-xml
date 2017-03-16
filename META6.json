@@ -17,6 +17,14 @@
     "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
     "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
 
+
+    "SxmlLib::SxmlHelper":              "lib/SxmlLib/SxmlHelper",
+
+    "SxmlLib::SxmlCore":                "lib/SxmlLib/SxmlCore.pm6",
+    "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
+    "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6",
+
+
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
 
@@ -33,11 +41,7 @@
     "SxmlLib::Testing::Skip":           "lib/SxmlLib/Testing/Skip.pm6",
     "SxmlLib::Testing::Test":           "lib/SxmlLib/Testing/Test.pm6",
     "SxmlLib::Testing::Testing":        "lib/SxmlLib/Testing/Testing.pm6",
-    "SxmlLib::Testing::Todo":           "lib/SxmlLib/Testing/Todo.pm6",
-
-    "SxmlLib::SxmlCore":                "lib/SxmlLib/SxmlCore.pm6",
-    "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
-    "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6"
+    "SxmlLib::Testing::Todo":           "lib/SxmlLib/Testing/Todo.pm6"
   },
   "resources": [
     "SemiXML.toml",
