@@ -1,10 +1,11 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML::Text;
+#use SemiXML::Text;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Docbook5::FixedLayout {
@@ -147,4 +148,3 @@ class Docbook5::FixedLayout {
     $parent;
   }
 }
-

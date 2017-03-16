@@ -4,7 +4,8 @@ use v6.c;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML::Sxml;
+#use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
@@ -323,7 +324,7 @@ class Report:ver<0.2.2> {
             my Int $tentry = ([~] $code-node[0].nodes).Int;
             if $x.name eq 'test' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!test-obj.get-code-text($tentry));
 
               # add test to the <pre> block
@@ -338,7 +339,7 @@ class Report:ver<0.2.2> {
 
             elsif $x.name eq 'todo' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!todo-obj.get-code-text($tentry));
 
               # add todo to the <pre> block
@@ -353,7 +354,7 @@ class Report:ver<0.2.2> {
 
             elsif $x.name eq 'bug' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!bug-obj.get-code-text($tentry));
 
               # add bug issue to the <pre> block
@@ -368,7 +369,7 @@ class Report:ver<0.2.2> {
 
             elsif $x.name eq 'skip' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!skip-obj.get-code-text($tentry));
 
               # add skip to the <pre> block
@@ -462,7 +463,7 @@ class Report:ver<0.2.2> {
     # metrics
     $!test-metrics = { T => [0,0], D => [0,0], B => [0,0], S => [0,0]};
 
-    # Finish up the test text and write the text to a file 
+    # Finish up the test text and write the text to a file
     $!test-program ~= "\ndone-testing;\n";
 
     # get a filename for the tests and write
@@ -1144,6 +1145,3 @@ class Report:ver<0.2.2> {
     }
   }
 }
-
-
-
