@@ -35,6 +35,8 @@
   * Use a plugin system for the modules.
   * Store SxmlLib modules in the resources directory.
 
+* attribute grammar addition for boolean =x =!x or even change into named attributes of perl. Possible to have hashes, array and more. Values will always be string or perhaps boolean. 
+
 * Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * Dependencies on other files
   * Store internal representation back into sxml.
