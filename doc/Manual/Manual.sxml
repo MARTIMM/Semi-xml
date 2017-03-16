@@ -87,7 +87,7 @@ $!Db5b.article [
             While I find this &lang; more clear to read, this is not the main
             purpose of this language.
 
-            In this language, constructs are created to call methods coded in
+            In this language, constructs are introduced to call methods coded in
             modules to generate xml elements. An example of this is shown in the
             example above to insert a date. This date will always be the
             current date when the text is processed.
@@ -97,8 +97,9 @@ $!Db5b.article [
         $listitem [
           $para [
             The language is extensible. Developers can add their own libraries
-            to load for example data from a database and inserting it in the
-            text as a HTML table.
+            to insert xml elements. Humble ideas such as inserting simple html
+            elements to alleviate repetative tasks or more eleborate
+            projects to insert tables with data loaded from a database.
           ]
         ]
       ]
@@ -109,8 +110,8 @@ $!Db5b.article [
       $itemizedlist [
         $listitem [
           $para [
-            There is an extra level of processing. If the XML text is simple
-            one should not be bothered learning this language. Especially when
+            There is an extra level of processing. If the XML text is simple,
+            you should not be bothered learning this language. Especially when
             the dynamic constructs aren't used.
           ]
 
@@ -216,6 +217,13 @@ $!SxmlCore.comment [
   $sect1 xml:id=package [
     $title [The package]
 
+    $para [
+      There are several parts in this package. First there is the core consisting
+      of several modules which handle loading the configuration, handling the
+      external modules aiding the dynamic parts while parsing, the parsing of
+      sxml text, saving results to a file or sending it to programs for Further
+      processing.
+    ]
   ]
 
   #----------------------------------------------------------------------------
