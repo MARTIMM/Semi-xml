@@ -43,6 +43,7 @@ grammar Grammar {
   token tag:sym<$|*>  { <sym> <tag-name> }
   token tag:sym<$*|>  { <sym> <tag-name> }
   token tag:sym<$**>  { <sym> <tag-name> }
+  #TODO token tag:sym<$|> { <sym> <tag-name> }
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
@@ -58,7 +59,12 @@ grammar Grammar {
   #
   token attributes    { [ <.ws>? <attribute> ]* }
 
-  token attribute     { <attr-key> '=' <attr-value-spec> }
+  token attribute     {
+    <attr-key> '=' <attr-value-spec>
+# ||
+#    '=' <attr-key> ||
+#    '=!' <attr-key>
+  }
 
   token attr-key      { [<.key-ns> ':' ]? <.key-name> }
   token key-ns        { <.identifier> }
@@ -114,4 +120,3 @@ grammar Grammar {
 
   token comment { \h* '#' \N* \n }
 }
-
