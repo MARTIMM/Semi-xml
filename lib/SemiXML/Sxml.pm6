@@ -225,7 +225,7 @@ class Sxml {
 
       # Check if a http header must be shown
       if $!refined-config<C><header-show> and ? $!refined-config<H> {
-        for $!refined-config.kv -> $k, $v {
+        for $!refined-config<H>.kv -> $k, $v {
           $document ~= "$k: $v\n";
         }
         $document ~= "\n";
