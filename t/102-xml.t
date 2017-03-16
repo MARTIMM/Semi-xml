@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 use Test;
 use SemiXML::Sxml;
 
@@ -42,7 +42,11 @@ my Hash $config = {
   C => {
     xml-show => True,
     xml-version => 1.1,
-    header-show => False,
+    header-show => True,
+  },
+
+  H => {
+    Content-Type => 'text/html; charset="utf-8"',
   },
 
   S => {
@@ -59,6 +63,7 @@ $x.parse( :$filename, :$config);
 my Str $xml-text = ~$x;
 note $xml-text;
 
+like $xml-text, /:s 'text/html; charset="utf-8"'/, 'header found';
 like $xml-text, /:s '<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
 like $xml-text, /:s '<!DOCTYPE' 'html>'/, 'Doctype found';
