@@ -649,18 +649,4 @@ class Actions {
 
     return $!xml-document;
   }
-
-  #-----------------------------------------------------------------------------
-  method get-sxml-object ( Str $class-name ) {
-
-    my $object;
-    for $!objects.keys -> $ok {
-      if $!objects{$ok}.^name eq $class-name {
-        $object = $!objects{$ok};
-        last;
-      }
-    }
-
-    $object;
-  }
 }

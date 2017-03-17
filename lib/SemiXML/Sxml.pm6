@@ -17,7 +17,7 @@ subset ParseResult is export where $_ ~~ any(Match|Nil);
 class Sxml {
 
   has SemiXML::Grammar $!grammar;
-  has SemiXML::Actions $.actions handles < get-sxml-object >;
+  has SemiXML::Actions $!actions;
 
   has Config::DataLang::Refine $!configuration;
 
@@ -468,6 +468,20 @@ class Sxml {
 
     # Place in actions object.
     $!actions.objects = $!objects;
+  }
+
+  #-----------------------------------------------------------------------------
+  method get-sxml-object ( Str $class-name ) {
+
+    my $object;
+    for $!objects.keys -> $ok {
+      if $!objects{$ok}.^name eq $class-name {
+        $object = $!objects{$ok};
+        last;
+      }
+    }
+
+    $object;
   }
 
   #-----------------------------------------------------------------------------
