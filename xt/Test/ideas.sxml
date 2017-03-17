@@ -1,0 +1,39 @@
+# Sxml document with ideas on what syntax to use. Not all is implented.
+
+# Normal element with all types of attributes(string, list, bool).
+$x ak1=av ak2='abc def ghi' ak3="p q r"
+   ak4=<l1 l2 l3> =ak5 =!ak6 [
+
+  # method calls
+  $!mod-key.method-name a=v [ ]
+
+  # specific spacing control around normal elements
+  $|x []  # no spacing
+  $*|x [] # space left
+  $|*x [] # space right if next char is not punctuation.
+  $**x [] # both sides have spaces.
+
+  # variable declaration, templating? (methods in it cannot run until later)
+  $@v [ $b [ Hello World! ] ]
+
+  # variable use
+  $x [ The well known message is ... @v ]
+
+  # v repeated 10 times, counter is used at @@v starting from 0
+  $@v r=10 [ $!mod.m1 n=@@v [ $b [ @@v ] ] ]
+  # or range from 1 to 20
+  $@v r=1..20 [...]
+
+  # loops
+  $table [
+    $tr [
+      $th [...] $th [...]
+    ]
+
+    # Would be nice to have a loop here
+    $tr [
+      # or here
+      $td [...] $td [...]
+    ]
+  ]
+]
