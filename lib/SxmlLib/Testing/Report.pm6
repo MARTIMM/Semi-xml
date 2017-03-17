@@ -47,9 +47,7 @@ class Report:ver<0.2.2> {
   has Int $!line-number;
 
   #-----------------------------------------------------------------------------
-  method initialize ( SemiXML::Sxml $sxml, Hash $attrs ) {
-
-    $!sxml = $sxml;
+  method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
 
     $!test-program = Q:to/EOINIT/;
       use v6;
@@ -67,8 +65,7 @@ class Report:ver<0.2.2> {
     $!highlight-code = ?$attrs<highlight-lang> // False;
     $!highlight-language = $attrs<highlight-lang> // '';
     $!highlight-skin = lc($attrs<highlight-skin> // 'prettify');
-    $!highlight-skin = $!highlight-skin eq 'default'
-                       ?? 'prettify' !! $!highlight-skin;
+    $!highlight-skin = 'prettify' if $!highlight-skin eq 'default';
     $!linenumbers = ?$attrs<linenumbers> // False;
 
     self!setup-report-doc($attrs);
