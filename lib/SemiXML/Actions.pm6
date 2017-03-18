@@ -167,7 +167,7 @@ class Actions {
 #note "ORBody $b-from, $b-to";
 
 #note $tag-bodies[$mi].from, '--', $tag-bodies[$mi].to, ': ',
-  $orig.substr( $tag-bodies[$mi].to - 3, 3);
+#      $orig.substr( $tag-bodies[$mi].to - 3, 3);
 
       # test for special body
       my Bool $special-body = ?$orig.substr(
@@ -399,7 +399,9 @@ class Actions {
       # Check if there is a method initialize in the module. If so call it
       # with the found attributes.
       my $module = self!can-method( $tn<mod-name>.Str, 'initialize');
-      $module.initialize( $!sxml-obj, $attrs) if $module;
+      $module.initialize(
+        $!sxml-obj, $attrs, :method($tn<meth-name>.Str)
+      ) if $module;
     }
 
     # Add to the list
