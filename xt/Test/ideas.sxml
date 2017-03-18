@@ -15,26 +15,38 @@ $x ak1=av ak2='abc def ghi' ak3="p q r"
 
   # variable declaration, templating? (methods in it cannot run until later)
   $@v [ $b [ Hello World! ] ]
-
   # variable use
   $x [ The well known message is ... @v ]
+  # produces
+  $x [ The well known message is ... [ $b [ Hello World! ] ] ]
 
-  # v repeated 10 times, counter is used at @@v starting from 0
-  $@v r=10 [ $!mod.m1 n=@@v [ $b [ @@v ] ] ]
-  # or range from -1 to 20
-  $@v r=-1..20 [...]
+  # variable declaration with count from range 0 to 10 (exclusive like perl 6 ^10)
+  # @w is use of the body content repeated the number of times in the range and
+  # @@w is the use of count.
+  $@w r=4 [ $!mod.m1 n=@@w [ $b [ @@w ] ] ]
+  # this
+  $x [ @w ]
+  # produces
+  $x [
+    $!mod.m1 n=0 [ $b [ 0 ] ]
+    $!mod.m1 n=1 [ $b [ 1 ] ]
+    $!mod.m1 n=2 [ $b [ 2 ] ]
+    $!mod.m1 n=3 [ $b [ 3 ] ]
+  ]
 
-  # loops
+  # variable declaration with a range from -1 to 20 (inclusive)
+  $@z r=-1..20 [...]
+
+  # variable declaration where the value is retrieved from content. the result
+  # can be a number or a range.
+  $@nrecs r=c [ $!db.nrecs db=x tbl=y ]
+  $@recs [ $tr [ $td [ $!db.rec col=col1 row=@@nrecs ] ] ]
   $table [
     $tr [
-      # $!SxmlCore.repeat element=th t1=<th1 th2> t2='spaced header' []
-      $th [...] $th [...]
+      # not implement but could be
+      $!SxmlCore.repeat element=th t1=<col2 col2> t2='spaced header col3' []
     ]
 
-    # Would be nice to have a loop here
-    $tr [
-      # or here
-      $td [...] $td [...]
-    ]
+    @recs []
   ]
 ]
