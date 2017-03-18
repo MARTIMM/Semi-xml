@@ -28,7 +28,7 @@ grammar Grammar {
 
   # Rule to pop the current bottomlevel element from the stack. It is not
   # possible to use a rule to add the element to this stack. This happens in
-  # the actions method for <tag-spac>.
+  # the actions method for <tag-spec>.
   #
   rule pop-tag-from-list { <?> }
   rule document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
