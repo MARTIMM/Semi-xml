@@ -328,9 +328,9 @@ class Actions {
         when Str {
 
           my Str $txt = $_;
-          if ? $$txt {
+          if ? $txt {
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
-            $parent.append(SemiXML::Text.new(:text($$txt)));
+            $parent.append(SemiXML::Text.new(:text($txt)));
           }
         }
 
