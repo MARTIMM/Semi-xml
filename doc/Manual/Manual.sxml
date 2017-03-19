@@ -219,10 +219,10 @@ $!SxmlCore.comment [
 
     $para [
       There are several parts in this package. First there is the core consisting
-      of several modules which handle loading the configuration, handling the
-      external modules aiding the dynamic parts while parsing, the parsing of
-      sxml text, saving results to a file or sending it to programs for Further
-      processing.
+      of several modules. These modules handle the loading of the configuration,
+      instantiating the external modules aiding the dynamic parts while parsing,
+      the parsing of sxml text, saving results to a file or sending it to
+      programs for further processing.
     ]
   ]
 

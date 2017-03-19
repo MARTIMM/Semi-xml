@@ -1,11 +1,13 @@
 # Sxml document with ideas on what syntax to use. Not all is implented.
+$top-of-ideas [
 
-# Normal element with all types of attributes(string, list, bool).
-$x ak1=av ak2='abc def ghi' ak3="p q r"
-   ak4=<l1 l2 l3> =ak5 =!ak6 [
+  # Normal element where all attribute types are coersed to string. E.g. k=<a b>
+  # will be the same as k='a b', =k will be k='1' and =!k will be k='0'.
+  $x ak1=av ak2='abc def ghi' ak3="p q r" [ ]
 
-  # method calls
-  $!mod-key.method-name a=v [ ]
+  # Method call element with all types of attributes; string, list, bool.
+  $!mod-key.method-name
+    ak1=av ak2='abc def ghi' ak3="p q r" ak4=<l1 l2 l3> =ak5 =!ak6 [ ]
 
   # specific spacing control around normal elements
   $|x []  # no spacing
@@ -20,7 +22,8 @@ $x ak1=av ak2='abc def ghi' ak3="p q r"
   # produces
   $x [ The well known message is ... [ $b [ Hello World! ] ] ]
 
-  # variable declaration with count from range 0 to 10 (exclusive like perl 6 ^10)
+  # variable declaration with count from range 0 to 10 (exclusive like perl 6
+  # uses ^10). Default for r will be then 1 and counting only 0.
   # @w is use of the body content repeated the number of times in the range and
   # @@w is the use of count.
   $@w r=4 [ $!mod.m1 n=@@w [ $b [ @@w ] ] ]
@@ -39,14 +42,19 @@ $x ak1=av ak2='abc def ghi' ak3="p q r"
 
   # variable declaration where the value is retrieved from content. the result
   # can be a number or a range.
-  $@nrecs r=c [ $!db.nrecs db=x tbl=y ]
-  $@recs [ $tr [ $td [ $!db.rec col=col1 row=@@nrecs ] ] ]
+  $@nrecs r=c [ $!db.nrecs select='t1 where t1.a < 10' ]
+  $@recs [ $tr [ $td [ $!db.rec col=col1 row=row@@nrecs ] ] ]
   $table [
     $tr [
-      # not implement but could be
-      $!SxmlCore.repeat element=th t1=<col2 col2> t2='spaced header col3' []
+      # not implemented but could be
+      $!SxmlCore.repeat element=th t1=<col1 col2> t2='spaced header col3'
     ]
 
-    @recs []
+    @recs
   ]
+  # @recs would then produce in steps;
+  $tr [ $td [ $!db.rec col=col1 row=row0 ] ]
+  $tr [ $td [ $!db.rec col=col1 row=row1 ] ]
+  ...
+  $tr [ $td [ $!db.rec col=col1 row=row(nth) ] ]
 ]
