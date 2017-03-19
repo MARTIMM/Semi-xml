@@ -219,10 +219,46 @@ $!SxmlCore.comment [
 
     $para [
       There are several parts in this package. First there is the core consisting
-      of several modules. These modules handle the loading of the configuration,
+      of several modules. These modules handle tasks to load the configuration,
       instantiating the external modules aiding the dynamic parts while parsing,
       the parsing of sxml text, saving results to a file or sending it to
       programs for further processing.
+    ]
+
+    $sect2 [
+      $title [Configuration]
+      $para [
+        The configuration is needed to control the several phases of the Translation
+        process. For exmple, there is the addition of extra text upfront of the xml
+        result text such as xml description, doctype and header messages. Other
+        parts control the output to a file or sending the result to another
+        program. The format of the configuration file and how the data is processed
+        is described in a separate chapter.
+      ]
+    ]
+
+    $sect2 [
+      $title [External modules]
+      $para [
+        External modules can be written to add functionality to the language. This
+        package comes with few modules to insert text, read text from files,
+        specific html or docbook tasks, epub generation and test report documents.
+        How to write the module is explained also in a separate chapter.
+      ]
+    ]
+
+    $sect2 [
+      $title [Parsing]
+      $para [
+
+      ]
+    ]
+
+    $sect2 [
+      $title [Saving results]
+      $para [
+
+      ]
     ]
   ]
 
