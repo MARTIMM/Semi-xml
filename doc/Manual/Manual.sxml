@@ -158,7 +158,7 @@ $!Db5b.article [
 
         $listitem [
           $para [
-            $emphasis[The language]. Here the basic layout is explained,
+            $emphasis[The language]. Here the &lang; language is explained,
             the terminology of parts in the document and the used syntax.
           ]
         ]
@@ -243,21 +243,37 @@ $!SxmlCore.comment [
         External modules can be written to add functionality to the language. This
         package comes with few modules to insert text, read text from files,
         specific html or docbook tasks, epub generation and test report documents.
-        How to write the module is explained also in a separate chapter.
+        The modules Delivered in this package and how to write such a module is
+        explained also in a separate chapter.
       ]
     ]
 
     $sect2 [
-      $title [Parsing]
+      $title [Parsing and translation]
       $para [
-
+        Parsing is the the process of taking the text and checking it for the &lang;
+        language. Together with this process translation of the text takes place.
+        How this translation takes place is depending on the way parsing is done.
+        Roughly it starts with the toplevel element and arriving at the first
+        bracket '[' it may see a mix of text and new elements before the closing
+        bracket ']'. The new elements
+        content (between the elements brackets) is looked into in turn. So the
+        translation of the deepest level must be done first before the second
+        deepest etc. up to the toplevel. This knowledge is not important when
+        using the simple element form and the predefined methods. However, when
+        designing your own methods your method will get the processed xml of
+        the content between its brackets.
       ]
     ]
 
     $sect2 [
       $title [Saving results]
       $para [
-
+        After the translation the result is extended with some extra textlines.
+        This result can be saved into a file on disk. The other option to saving
+        is sending the result to program for further processing. For example if
+        the result happens to be html, this can be converted to pdf using a
+        program like wkhtmltopdf.
       ]
     ]
   ]
@@ -267,34 +283,24 @@ $!SxmlCore.comment [
     $title [The language]
 
     $para [
-      The language exists of two parts, a prelude and the document. The prelude
-      is used to set options to introduce external modules or to define ways
-      to output the resulting xml. The prelude is also optional.
     ]
 
     $para [
-      The prelude starts with 3 dashes and ends with it. The prelude itself
-      consists of a series of key-value pairs to control the way output is to be
-      delivered. The prelude part is also optional. In that case defaults will
-      be applied.
+$!SxmlCore.comment [
       $programlisting [!=
 ---
 ... prelude area ...
 ---
 ... document area ...
       !]
+]
     ]
 
     $para [
-      The document follows the prelude and is the thing you want to publish. It
-      has a similar look as any xml typed language but is easier to read.
     ]
 
     $para [
-      Below you see a simple example where the prelude is not used. When
-      the prelude is missing the default action is to write the result into a
-      second file. The name of the file is kept the same but with an extension
-      of '.xml'.
+      Below you see a simple example.
 
 $!SxmlCore.comment [
       $!Db5f.load-test-example
