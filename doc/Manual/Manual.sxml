@@ -282,21 +282,64 @@ $!SxmlCore.comment [
   $sect1 xml:id=Language [
     $title [The language]
 
-    $para [
-    ]
+    $sect2 [
+      $title [The document]
+      $para [
+        A document always starts with an element as you probably know from any XML
+        dialect. At the toplevel there may be only one element. The first example
+        shows the most simple html document ever.
+        $programlisting [!
+          $html
+        !]
+        Something to mention here is that there is no need to add a xml description
+        or doctype. These are all controlled by the configuration data.
+      ]
 
-    $para [
-$!SxmlCore.comment [
-      $programlisting [!=
----
-... prelude area ...
----
-... document area ...
-      !]
-]
-    ]
-
-    $para [
+      $para [
+#TODO RSS in glossary
+        A more complex example shows a part of RSS or Really Simple Syndication.
+        $programlisting [!
+          $rss version=2.0 [
+            $channel [
+              $title [W3Schools Home Page]
+              $link [https://www.w3schools.com]
+              $description [Free web building tutorials]
+              $item [
+                $title [RSS Tutorial]
+                $link [https://www.w3schools.com/xml/xml_rss.asp]
+                $description [New RSS tutorial on W3Schools]
+              ]
+            ]
+          ]
+        !]
+#TODO link to w3schools
+        As you might have guessed it the example is taken from w3schools where
+        all sorts of xml languages are described.
+      ]
+      $para [
+        The example shows how nesting is done using brackets ('[' and ']') and
+        that between brackets there can be a mix of text and other elements.
+        What we learn from this example are:
+        $itemizedlist [
+          $listitem [
+            $para [
+              $emphasis[Simple elements]. A simple element is created by using
+              a dollar in front of an identifier like $emphasis[\$rss].
+            ]
+          ]
+          $listitem [
+            $para [
+              $emphasis[attributes]. Elements may have any number of attributes
+              and are written as a key value pair separated by an equal ('='). like
+              $emphasis[version=2.0] on the \$rss element. The keyname cannot be
+              repeated on the same element, only one attribute of the duplicated
+              keynames will survive. The values do not have to be quoted if there
+              are no spaces in the value. If there are any, single an double
+              quote characters (' and ") can be used.
+            ]
+          ]
+        ]
+      ]
     ]
 
     $para [

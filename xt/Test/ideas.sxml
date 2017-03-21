@@ -1,4 +1,4 @@
-# Sxml document with ideas on what syntax to use. Not all is implented.
+# Sxml document with ideas on what syntax to use. Not all is implemented.
 $top-of-ideas [
 
   # Normal element where all attribute types are coersed to string. E.g. k=<a b>

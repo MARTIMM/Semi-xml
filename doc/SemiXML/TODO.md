@@ -4,7 +4,7 @@
   * Error messages when parser fails can still be improved.
 
 * Syntax
-  * XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '\_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
+  * XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
 
 ```
       Current syntax          Becomes             Note    Done
@@ -20,6 +20,7 @@
       $|spcresrv [= x ]       $spcresrv [x]       3,5
 
       $!key.method [x]        Remains the same    4
+                              or perhaps $key:method.
 
 ```
   Notes;
@@ -35,7 +36,7 @@
   * Use a plugin system for the modules.
   * Store SxmlLib modules in the resources directory.
 
-* attribute grammar addition for boolean =x =!x or even change into named attributes of perl. Possible to have hashes, array and more. Values will always be string or perhaps boolean. 
+* attribute grammar addition for boolean =x =!x or even change into named attributes of perl. Possible to have hashes, array and more. Values will always be string or perhaps boolean.
 
 * Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * Dependencies on other files
