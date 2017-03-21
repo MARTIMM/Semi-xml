@@ -101,9 +101,9 @@ grammar Grammar {
   token body1-text {
     [ <.escape-char> ||         # an escaped character e.g. '\$'
       <.entity> ||              # &some-spec; XML entity spec
+#      '$' <!before [<[!|*]>|<:L>]>
+#                                # a $ not followed by '!', '|', '*' or alpha
       <-[\$\]\#]> ||            # any character not being '$', '#' or ']'
-      '$' <!before [<[!|*]>|<:L>]>
-                                # a $ not followed by '!', '|', '*' or alpha
     ]+
   }
 
