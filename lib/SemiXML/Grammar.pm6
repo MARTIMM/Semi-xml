@@ -47,11 +47,11 @@ grammar Grammar {
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
-  token sym-name      { <.identifier> }
+#  token sym-name      { <.identifier> }
   token meth-name     { <.identifier> }
   token tag-name      { [ <namespace> ':' ]? <element> }
-  token element       { <.identifier> }
-  token namespace     { <.identifier> }
+  token element       { <.xml-identifier> }
+  token namespace     { <.xml-ns-identifier> }
 
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
@@ -114,9 +114,29 @@ grammar Grammar {
   # not allowed and thus no extra comments are checked and handled as such..
   token body2-text      { [ .*? <?before '!]'> ] }
 
-  # See STD.pm6 of perl6. A tenee bit simplefied. .ident is precooked and a
+  # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.
   token identifier { <.ident> [ '-' <.ident> ]* }
+
+  # From w3c https://www.w3.org/TR/xml11/#NT-NameChar
+  token xml-identifier { <.name-start-char> <.name-char>* }
+  token name-start-char { ':' | <.ns-name-start-char> }
+  token name-char { ':' | <.ns-name-char> }
+
+  # From w3c https://www.w3.org/TR/2004/REC-xml-names11-20040204/#ns-decl
+  token xml-ns-identifier { <.ns-name-start-char> <.ns-name-char>* }
+  # Don't know which characters are covered by the :Alpha definition so I take
+  # the description from the w3c
+  token ns-name-start-char {
+    <[_A..Za..z]> | <[\xC0..\xD6]> | <[\xD8..\xF6]> | <[\xF8..\x2FF]> |
+    <[\x370..\x37D]> | <[\x37..\x1FFF]> | <[\x200C..\x200D]> | <[\x2070..\x218F]> |
+    <[\x2C00..\x2FEF]> | <[\x3001..\xd7ff]> | <[\xf900..\xfdcf]> |
+    <[\xFDF0..\xFFFD]> | <[\x10000..\xEFFFF]>
+  }
+  token ns-name-char {
+    <.name-start-char> | <[-.0..9]> | <[\xB7]> |
+    <[\x0300..\x036F]> | <[\x203F..\x2040]>
+  }
 
   token comment { \h* '#' \N* \n }
 }
