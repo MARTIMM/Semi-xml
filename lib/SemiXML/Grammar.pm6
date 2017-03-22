@@ -103,7 +103,7 @@ grammar Grammar {
       <.entity> ||              # &some-spec; XML entity spec
 #      '$' <!before [<[!|*]>|<:L>]>
 #                                # a $ not followed by '!', '|', '*' or alpha
-      <-[\$\]\#]>               # any character not being '$', '#' or ']'
+      [ .* <before [\$\]\#]> ]  # any character not being '$', '#' or ']'
     ]+
   }
 
