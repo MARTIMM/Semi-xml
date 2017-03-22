@@ -98,7 +98,7 @@ grammar Grammar {
   rule body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
   rule body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
 
-  rule body1-text {
+  token body1-text {
     [ <.escape-char> ||         # an escaped character e.g. '\$'
       <.entity> ||              # &some-spec; XML entity spec
 #      '$' <!before [<[!|*]>|<:L>]>
