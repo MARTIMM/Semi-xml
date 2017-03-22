@@ -313,13 +313,13 @@ $!SxmlCore.comment [
           ]
         !]
 #TODO link to w3schools
-        As you might have guessed it the example is taken from w3schools where
+        As you might have guessed it, the example is taken from w3schools where
         all sorts of xml languages are described.
       ]
       $para [
         The example shows how nesting is done using brackets ('[' and ']') and
         that between brackets there can be a mix of text and other elements.
-        What we learn from this example are:
+        What we learn from this example is:
         $itemizedlist [
           $listitem [
             $para [
