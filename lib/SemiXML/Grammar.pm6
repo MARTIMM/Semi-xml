@@ -98,7 +98,7 @@ grammar Grammar {
   rule body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
   rule body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
 
-  token body1-text {
+  rule body1-text {
     [ <.escape-char> ||         # an escaped character e.g. '\$'
       <.entity> ||              # &some-spec; XML entity spec
 #      '$' <!before [<[!|*]>|<:L>]>
@@ -119,22 +119,22 @@ grammar Grammar {
   token identifier { <.ident> [ '-' <.ident> ]* }
 
   # From w3c https://www.w3.org/TR/xml11/#NT-NameChar
-  token xml-identifier { <.name-start-char> <.name-char>* }
-  token name-start-char { ':' | <.ns-name-start-char> }
-  token name-char { ':' | <.ns-name-char> }
+  token xml-identifier { (<.name-start-char> <.name-char>*) {note "xml id: $0";}}
+  token name-start-char { ':' || <.ns-name-start-char> }
+  token name-char { ':' || <.ns-name-char> }
 
   # From w3c https://www.w3.org/TR/2004/REC-xml-names11-20040204/#ns-decl
   token xml-ns-identifier { <.ns-name-start-char> <.ns-name-char>* }
   # Don't know which characters are covered by the :Alpha definition so I take
   # the description from the w3c
   token ns-name-start-char {
-    <[_A..Za..z]> | <[\xC0..\xD6]> | <[\xD8..\xF6]> | <[\xF8..\x2FF]> |
-    <[\x370..\x37D]> | <[\x37..\x1FFF]> | <[\x200C..\x200D]> | <[\x2070..\x218F]> |
-    <[\x2C00..\x2FEF]> | <[\x3001..\xd7ff]> | <[\xf900..\xfdcf]> |
-    <[\xFDF0..\xFFFD]> | <[\x10000..\xEFFFF]>
+    <[_ A..Z a..z]> || <[\xC0..\xD6]> || <[\xD8..\xF6]> || <[\xF8..\x2FF]> ||
+    <[\x370..\x37D]> || <[\x37..\x1FFF]> || <[\x200C..\x200D]> ||
+    <[\x2070..\x218F]> || <[\x2C00..\x2FEF]> || <[\x3001..\xd7ff]> ||
+    <[\xf900..\xfdcf]> || <[\xFDF0..\xFFFD]> || <[\x10000..\xEFFFF]>
   }
   token ns-name-char {
-    <.name-start-char> | <[-.0..9]> | <[\xB7]> |
+    <.name-start-char> | <[- . 0..9]> | <[\xB7]> |
     <[\x0300..\x036F]> | <[\x203F..\x2040]>
   }
 
