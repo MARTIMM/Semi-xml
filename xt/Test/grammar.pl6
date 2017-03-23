@@ -140,10 +140,12 @@ my Match $m = $g.subparse(Q:to/EOSXML/);
     text e.d. $!m.n [=
       dus $ns1:str a='b c' d="e f"
       en $ns1:int p=sdf [ blok1 ][! blok2 !]
+      $p[ d ]
       $x[$y[$z[]]]
     ]
   ]
+
   EOSXML
 
-say "Match: ", ~$m;
+say "Match: $m.from(), $m.to(), $m.chars()\n", ~$m;
 #say $m<document><tag-body>;
