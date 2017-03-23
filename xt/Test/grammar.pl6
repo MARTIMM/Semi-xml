@@ -9,12 +9,11 @@ grammar Grammar {
   #
   # Possible comments outside toplevel document
   rule TOP {
-    (<.ws> <.comment> <.ws>)*           # Needed to make empty lines between
-                                        # comments possible. Only here is needed
-                                        # body*-contents is taking care for the
-                                        # rest.
+    <.comment>*         # Needed to make empty lines between comments possible.
+                        # Only here is needed body*-contents is taking care for
+                        # the rest.
     <document>
-    (<.ws> <.comment> <.ws>)*
+    <.comment>*
   }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
@@ -46,7 +45,7 @@ grammar Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   #
-  rule attributes    { [ <attribute> ]* }
+  rule attributes     { [ <attribute> ]* }
 
   token attribute     {
     <attr-key> '=' <attr-value-spec>
@@ -132,7 +131,7 @@ grammar Grammar {
     <[\x0300..\x036F]> | <[\x203F..\x2040]>
   }
 
-  token comment { \h* '#' \N* \n }
+  token comment { \s* '#' \N* \n }
 }
 
 
@@ -158,6 +157,30 @@ say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 $m = $g.subparse($c = Q:to/EOSXML/);
   $x [ $!mod1.mth2 [ $h[abc] $h[def]]]
   EOSXML
+
+$last-bracket-index = $c.rindex(']');
+say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+
+#------------------------------------------------------------------------------
+$m = $g.subparse($c = Q:to/EOSXML/);
+
+# ab
+
+$html [
+  $body [                                       # Body
+    $h1 [ Data from file \# h1 ]                # outside h1
+    $table [ data                               # table
+      $tr [ trrr                                # trrr
+        $th[header \# th ]                      # outside th
+        $td[data \# td ]                        # outside td
+        $td [! # inside protected body !]
+      ]
+    ][
+    # comment on its own in 2nd body
+    ]
+  ]
+]
+EOSXML
 
 $last-bracket-index = $c.rindex(']');
 say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;

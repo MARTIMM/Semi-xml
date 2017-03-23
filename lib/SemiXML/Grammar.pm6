@@ -18,12 +18,11 @@ grammar Grammar {
   # Possible comments outside toplevel document
   rule TOP {
     <.init-doc>
-    (<.ws> <.comment> <.ws>)*           # Needed to make empty lines between
-                                        # comments possible. Only here is needed
-                                        # body*-contents is taking care for the
-                                        # rest.
+    <.comment>*         # Needed to make empty lines between comments possible.
+                        # Only here is needed body*-contents is taking care for
+                        # the rest.
     <document>
-    (<.ws> <.comment> <.ws>)*
+    <.comment>*
   }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
@@ -144,5 +143,5 @@ grammar Grammar {
     <[\x0300..\x036F]> | <[\x203F..\x2040]>
   }
 
-  token comment { \h* '#' \N* \n }
+  token comment { \s* '#' \N* \n }
 }

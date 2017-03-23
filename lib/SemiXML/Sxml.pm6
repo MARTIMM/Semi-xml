@@ -85,7 +85,8 @@ class Sxml {
     # Throw an exception when there is a parsing failure
     my $last-bracket-index = $content.rindex(']') // $content.chars;
 note "Match: $m.from(), $m.to(), $content.chars(), $last-bracket-index\n", ~$m;
-    if $m.to != $last-bracket-index {
+#    if $m.to != $last-bracket-index {
+    if $m.to != $content.chars {
       my Str $before = $!actions.prematch();
       my Str $after = $!actions.postmatch();
       my Str $current = $content.substr( $!actions.from, $!actions.to - $!actions.from);
