@@ -334,7 +334,7 @@ $!SxmlCore.comment [
               $emphasis[version=2.0] on the \$rss element. The keyname cannot be
               repeated on the same element, only one attribute of the duplicated
               keynames will survive. The values do not have to be quoted if there
-              are no spaces in the value. If there are any, single an double
+              are no spaces in the value. If there are any, single and double
               quote characters (' and ") can be used.
             ]
           ]
@@ -342,10 +342,10 @@ $!SxmlCore.comment [
       ]
     ]
 
+$!SxmlCore.comment [
     $para [
       Below you see a simple example.
 
-$!SxmlCore.comment [
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.sxml
          start='$!SxmlCore.comment [Start]'
@@ -375,15 +375,15 @@ $!SxmlCore.comment [
           !]
         ]
       ]
-]
     ]
+]
 
+$!SxmlCore.comment [
     $para [
       The result after running through &prog; is shown below. Importend to
       note that this text is nicely formatted for this example and the output
       would be more like a one-liner.
 
-$!SxmlCore.comment [
       $!Db5f.load-test-example
          path=Book-Examples/BE-001.xml
          start='<!--Start-->'
@@ -413,8 +413,8 @@ $!SxmlCore.comment [
           !]
         ]
       ]
-]
     ]
+]
 
     $sect2 [
       $title [Sxml Document]
