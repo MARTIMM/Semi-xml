@@ -81,10 +81,11 @@ class Sxml {
 
     # Parse the content. Parse can be recursively called
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
-note "Match: $m.from(), $m.to(), $m.chars()\n", ~$m;
 
     # Throw an exception when there is a parsing failure
-    if $m.to != $content.chars {
+    my $last-bracket-index = $content.rindex(']') // $content.chars;
+note "Match: $m.from(), $m.to(), $content.chars(), $last-bracket-index\n", ~$m;
+    if $m.to != $last-bracket-index {
       my Str $before = $!actions.prematch();
       my Str $after = $!actions.postmatch();
       my Str $current = $content.substr( $!actions.from, $!actions.to - $!actions.from);

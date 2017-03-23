@@ -135,7 +135,7 @@ grammar Grammar {
 
 #------------------------------------------------------------------------------
 my Grammar $g .= new;
-my Match $m = $g.subparse(Q:to/EOSXML/);
+my Match $m = $g.subparse(my $c = Q:to/EOSXML/);
   $x1 a=b xmlns:ns1='x:y:z' [
     text e.d. $!m.n [=
       dus $ns1:str a='b c' d="e f"
@@ -144,8 +144,8 @@ my Match $m = $g.subparse(Q:to/EOSXML/);
       $x[$y[$z[]]]
     ]
   ]
-
   EOSXML
 
-say "Match: $m.from(), $m.to(), $m.chars()\n", ~$m;
+my $last-bracket-index = $c.rindex(']');
+say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 #say $m<document><tag-body>;
