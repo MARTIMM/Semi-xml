@@ -1,15 +1,7 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
-
-#use Grammar::Tracer;
-
-#-------------------------------------------------------------------------------
 grammar Grammar {
-
-  # Actions initialize
-  rule init-doc { <?> }
 
   # A document is only a tag with its content in a body. Defined like this
   # there can only be one toplevel document. In the following body documents
@@ -17,7 +9,6 @@ grammar Grammar {
   #
   # Possible comments outside toplevel document
   rule TOP {
-    <.init-doc>
     (<.ws> <.comment> <.ws>)*           # Needed to make empty lines between
                                         # comments possible. Only here is needed
                                         # body*-contents is taking care for the
@@ -30,8 +21,7 @@ grammar Grammar {
   # possible to use a rule to add the element to this stack. This happens in
   # the actions method for <tag-spec>.
   #
-  rule pop-tag-from-list { <?> }
-  rule document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
+  rule document { <tag-spec> <tag-body>* }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
@@ -47,7 +37,6 @@ grammar Grammar {
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
-#  token sym-name      { <.identifier> }
   token meth-name     { <.identifier> }
   token tag-name      { [ <namespace> ':' ]? <element> }
   token element       { <.xml-identifier> }
@@ -61,9 +50,9 @@ grammar Grammar {
 
   token attribute     {
     <attr-key> '=' <attr-value-spec>
-# ||
-#    '=' <attr-key> ||
-#    '=!' <attr-key>
+    # ||
+    #'=' <attr-key>  || #{ make $/<attr-value> = '1'; } ||
+    #'=!' <attr-key> #{ make $/<attr-value> = '0'; }
   }
 
   token attr-key      { [<.key-ns> ':' ]? <.key-name> }
@@ -97,14 +86,14 @@ grammar Grammar {
   rule body2-contents  { <body2-text> }
   rule body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
   rule body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
+#  rule body4-contents  { [ <body1-text> ] }
 
   token body1-text {
-    [ <.escaped-char> ||        # an escaped character
+    [ <.escaped-char> ||         # an escaped character e.g. '\$'
 #      <.entity> ||              # &some-spec; XML entity spec
 #      '$' <!before [<[!|*]>|<:L>]>
 #                                # a $ not followed by '!', '|', '*' or alpha
-#      [ .* <before [\$\]\#]> ]  # any character not being '$', '#' or ']'
-      <-[\$\]\#\\]>             # any character not being '\', '$', '#' or ']'
+      <-[\$\]\#\\]>  # any character not being '$', '#' or ']'
     ]+
   }
 
@@ -120,7 +109,7 @@ grammar Grammar {
   token identifier { <.ident> [ '-' <.ident> ]* }
 
   # From w3c https://www.w3.org/TR/xml11/#NT-NameChar
-  token xml-identifier { (<.name-start-char> <.name-char>*) {note "xml id: $0";}}
+  token xml-identifier { (<.name-start-char> <.name-char>*) }
   token name-start-char { ':' || <.ns-name-start-char> }
   token name-char { ':' || <.ns-name-char> }
 
@@ -141,3 +130,20 @@ grammar Grammar {
 
   token comment { \h* '#' \N* \n }
 }
+
+
+
+#------------------------------------------------------------------------------
+my Grammar $g .= new;
+my Match $m = $g.subparse(Q:to/EOSXML/);
+  $x1 a=b xmlns:ns1='x:y:z' [
+    text e.d. $!m.n [=
+      dus $ns1:str a='b c' d="e f"
+      en $ns1:int p=sdf [ blok1 ][! blok2 !]
+      $x[$y[$z[]]]
+    ]
+  ]
+  EOSXML
+
+say "Match: ", ~$m;
+#say $m<document><tag-body>;
