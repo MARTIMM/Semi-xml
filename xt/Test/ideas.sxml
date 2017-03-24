@@ -5,11 +5,16 @@ $top-of-ideas [
   # will be the same as k='a b', =k will be k='1' and =!k will be k='0'.
   $x ak1=av ak2='abc def ghi' ak3="p q r" [ ]
 
+  # With body, more than one or without
+  $x []
+  $y [][! !]
+  $z
+
   # Method call element with all types of attributes; string, list, bool.
   $!mod-key.method-name
     ak1=av ak2='abc def ghi' ak3="p q r" ak4=<l1 l2 l3> =ak5 =!ak6 [ ]
 
-  # specific spacing control around normal elements
+  # Specific spacing control around normal elements
   $|x []  # no spacing
   $*|x [] # space left
   $|*x [] # space right if next char is not punctuation.
@@ -43,7 +48,10 @@ $top-of-ideas [
   # variable declaration where the value is retrieved from content. the result
   # can be a number or a range.
   $@nrecs r=c [ $!db.nrecs select='t1 where t1.a < 10' ]
-  $@recs [ $tr [ $td [ $!db.rec col=col1 row=row@@nrecs ] ] ]
+  # variable declaration where the range translates to list of strings
+  $@fields r=s [ $!db.fields ]
+  $@datacol [ $td [ $!db.rec col=@@fields row=row@@nrecs ] ]
+  $@recs [ $tr [ @datacol ] ]
   $table [
     $tr [
       # not implemented but could be
@@ -57,4 +65,28 @@ $top-of-ideas [
   $tr [ $td [ $!db.rec col=col1 row=row1 ] ]
   ...
   $tr [ $td [ $!db.rec col=col1 row=row(nth) ] ]
+
+
+
+  $table [
+    $tr [
+      $@loop f=<field1 ... fieldn> [
+        $!db.headers field=@f
+      ]
+    ]
+
+    # Set fields nrecs and data
+    $!db.query
+      sxml:nrecs=1 sxml:data=1
+      collecion=mydb.mycoll criteria='field1 > 10'
+      filter='_id=0,field1=1,...,fieldn=1'
+
+    $@loop r=@nrecs [
+      $tr [
+        $@loop f=<field1 ... fieldn> [
+          $dt [ @data rec=@r field=@f ]
+        ]
+      ]
+    ]
+  ]
 ]
