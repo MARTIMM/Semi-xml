@@ -5,6 +5,7 @@ unit package SemiXML:auth<https://github.com/MARTIMM>;
 
 use XML;
 use SemiXML::Text;
+use SemiXML::StringList;
 
 #-------------------------------------------------------------------------------
 class Actions {
@@ -330,7 +331,7 @@ class Actions {
           my Str $txt = $_;
           if ? $txt {
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
-            $parent.append(SemiXML::Text.new(:text($txt)));
+            $parent.append(SemiXML::Text.new(:text($$txt)));
           }
         }
 
@@ -380,6 +381,7 @@ class Actions {
       next unless $as<attribute>:exists;
       my $a = $as<attribute>;
       my $av = $a<attr-value-spec><attr-value>.Str;
+#      my Bool $al = ?($a<attr-value-spec><attr-list-value> // False);
       $attrs{$a<attr-key>.Str} = $av;
     }
 

@@ -50,8 +50,8 @@ grammar Grammar {
   token attribute     {
     <attr-key> '=' <attr-value-spec>
     # ||
-    #'=' <attr-key>  || #{ make $/<attr-value> = '1'; } ||
-    #'=!' <attr-key> #{ make $/<attr-value> = '0'; }
+    #'='  <attr-key> $<attr-value>=1 ||
+    #'=!' <attr-key> $<attr-value>=0
   }
 
   token attr-key      { [<.key-ns> ':' ]? <.key-name> }
@@ -61,12 +61,12 @@ grammar Grammar {
   token attr-value-spec {
     [ "'" ~ "'" $<attr-value>=<.attr-q-value> ]  ||
     [ '"' ~ "'" $<attr-value>=<.attr-qq-value> ] ||
-#    [\^ $<attr-value>=<.attr-pw-value> \^] ||
+    [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||
     $<attr-value>=<.attr-s-value>
   }
   token attr-q-value  { [ <.escaped-char> || <-[\']> ]+ }
   token attr-qq-value { [ <.escaped-char> || <-[\"]> ]+ }
-#  token attr-pw-value { [ <.escaped-char> || <-[\^]> ]+ }
+  token attr-pw-value { [ <.escaped-char> || <-[\>]> ]+ }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
   rule tag-body { [
@@ -151,7 +151,6 @@ my Match $m = $g.subparse(my $c = Q:to/EOSXML/);
 
 my $last-bracket-index = $c.rindex(']');
 say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
-#say $m<document><tag-body>;
 
 #------------------------------------------------------------------------------
 $m = $g.subparse($c = Q:to/EOSXML/);
@@ -184,3 +183,12 @@ EOSXML
 
 $last-bracket-index = $c.rindex(']');
 say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+
+#------------------------------------------------------------------------------
+$m = $g.subparse($c = Q:to/EOSXML/);
+  $x [ $h0 a=<ab ac ad ae> [ $h1 []] $h2[def]]
+  EOSXML
+
+$last-bracket-index = $c.rindex(']');
+say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say $m<document><tag-body>[0]<body4-contents><document>[0]<tag-spec>;

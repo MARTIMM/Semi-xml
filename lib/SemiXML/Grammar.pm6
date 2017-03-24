@@ -72,13 +72,16 @@ grammar Grammar {
   token attr-value-spec {
     [ "'" ~ "'" $<attr-value>=<.attr-q-value> ]  ||
     [ '"' ~ "'" $<attr-value>=<.attr-qq-value> ] ||
+#TODO somewhere in a test the following is still used
 #    [\^ $<attr-value>=<.attr-pw-value> \^] ||
+    [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||
     $<attr-value>=<.attr-s-value>
   }
   token attr-q-value  { [ <.escaped-char> || <-[\']> ]+ }
   token attr-qq-value { [ <.escaped-char> || <-[\"]> ]+ }
-#TODO somewhere in a test the following is used
+#TODO somewhere in a test the following is still used
 #  token attr-pw-value { [ <.escaped-char> || <-[\^]> ]+ }
+  token attr-pw-value { [ <.escaped-char> || <-[\>]> ]+ }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
   rule tag-body { [
