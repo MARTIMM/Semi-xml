@@ -2,6 +2,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.29.0
+  * Added attribute value type list to write like a=<v1 v2 v3>. Attributes are stored in StringList class now with a boolean 'use-as-list' to control output.
 * 0.28.1
   * Added sub std-attrs to Sxml.pm6 to easily scan attrs and for id,class, style and the like and add those to the provided XML element. The attributes are then removed from the attrs hash.
   * Added new table entries to the default config file in preparation of later changes.
