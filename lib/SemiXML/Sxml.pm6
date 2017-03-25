@@ -204,6 +204,11 @@ note "Match: $m.from(), $m.to(), $content.chars(), $last-bracket-index\n", ~$m;
   }
 
   #-----------------------------------------------------------------------------
+  method Str ( --> Str ) {
+    return self.get-xml-text;
+  }
+
+  #-----------------------------------------------------------------------------
   method get-xml-text ( :$other-document --> Str ) {
 
     # Get the top element name
@@ -280,11 +285,6 @@ note "Match: $m.from(), $m.to(), $content.chars(), $last-bracket-index\n", ~$m;
   method root-element ( --> XML::Element ) {
     my $doc = $!actions.get-document;
     return ?$doc ?? $doc.root !! XML::Element;
-  }
-
-  #-----------------------------------------------------------------------------
-  method Str ( --> Str ) {
-    return self.get-xml-text;
   }
 
   #-----------------------------------------------------------------------------
@@ -702,8 +702,10 @@ note "Match: $m.from(), $m.to(), $content.chars(), $last-bracket-index\n", ~$m;
 }}
 }
 
+#`{{
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) is export {
   return $x.get-xml-text;
 }
+}}
