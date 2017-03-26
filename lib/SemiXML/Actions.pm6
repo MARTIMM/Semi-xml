@@ -330,6 +330,7 @@ class Actions {
 
           my Str $txt = $_;
           if ? $txt {
+#TODO maybe all lines prefixed with a space and one at the end.
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
             $parent.append(SemiXML::Text.new(:text($$txt)));
           }
@@ -341,15 +342,17 @@ class Actions {
 #note "Ast tag: ", $_<tag-ast>;
 #note "Ast body: ", $_<body-ast>;
 #note "Ast doc: ", $_<doc-ast>;
-          # tag ast: [ tag type, namespace, tag name, module, method, attributes
+          # tag ast: [ tag type, namespace, tag name, module, method, attributes ]
           my Array $tag-ast = $_<tag-ast>;
 
+#TODO see above
           # Test if spaces are needed before the document
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $*| >);
 
           $parent.append($_<doc-ast>);
 
+#TODO see above
           # Test if spaces are needed after the document
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $|* >);
@@ -367,21 +370,23 @@ class Actions {
 
     # Name of element or method to be saved in array $!tag-list on $!level
     my Str $tag-name;
-
     my Array $ast = [];
-
     my Str $symbol = $match<tag><sym>.Str;
     $ast.push: $symbol;
 #note "Tag: ", $match<tag>.kv;
 
-    # find level of indent
-
+    # define the attributes for the element. attr value is of type StringList
+    # where ~$strlst gives string, @$strlst returns list and $strlist.value
+    # either string or list depending on :use-as-list which in turn depends
+    # on the way an attribute is defined att='val1 val2' or att=<val1 val2>.
     my Hash $attrs = {};
     for $match<attributes>.caps -> $as {
       next unless $as<attribute>:exists;
       my $a = $as<attribute>;
-      my $av = $a<attr-value-spec><attr-value>.Str;
-#      my Bool $al = ?($a<attr-value-spec><attr-list-value> // False);
+      my SemiXML::StringList $av .= new(
+        :string($a<attr-value-spec><attr-value>.Str),
+        :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
+      );
       $attrs{$a<attr-key>.Str} = $av;
     }
 

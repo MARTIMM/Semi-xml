@@ -54,6 +54,18 @@ spurt( $mod, q:to/EOMOD/);
 
       $parent;
     }
+
+    method mth3 (
+      XML::Element $parent, Hash $attrs, XML::Element :$content-body
+      --> XML::Element
+    ) {
+      my XML::Element $ul = append-element( $parent, 'ul');
+      $ul.set( 'çlass', $attrs<a>);
+      for @($attrs<b>) -> $li-txt {
+        append-element( $ul, 'li', :text($li-text));
+      }
+      $parent;
+    }
   }
 
   EOMOD
@@ -104,10 +116,17 @@ $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 $xml = $x.get-xml-text;
-say $xml;
 like $xml, /'<x><p/><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>'/,
      "generated: $xml";
 
+
+$content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
+$r = $x.parse( :$config, :$content);
+ok $r ~~ Match, "match $content";
+$xml = $x.get-xml-text;
+say $xml;
+is $xml, '<ul><li class="v1 v2"><li>head1</li><li>head2</li></ul>',
+"generated: $xml";
 
 #-------------------------------------------------------------------------------
 # Cleanup
