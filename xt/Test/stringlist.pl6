@@ -19,3 +19,6 @@ note (@$lt)[3];
 note @$lt[2];
 note [+](@$lt[*]);
 note "Value: $lt.value().join('--')";
+
+note $lt(:delimiter(' '));
+note $lt(:string('3 4 5 6 7')).join('=');
