@@ -122,7 +122,7 @@ ok $r ~~ Match, "match $content";
 
 $xml = $x.get-xml-text;
 like $xml, /'<x><p/><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>'/,
-     "generated: $xml";
+           "generated: $xml";
 
 
 $content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
@@ -130,9 +130,8 @@ $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 $xml = $x.get-xml-text;
 say $xml;
-is $xml, ([~] '<?xml version="1.0" encoding="UTF-8"?>',
-         "\n", '<ul class="v1 v2"><li>head1</li><li>head2</li></ul>'),
-   "generated: $xml";
+like $xml, /'<ul class="v1 v2"><li>head1</li><li>head2</li></ul>'/,
+           "generated: $xml";
 
 #-------------------------------------------------------------------------------
 # Cleanup
