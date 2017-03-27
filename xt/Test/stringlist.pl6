@@ -22,3 +22,8 @@ note "Value: $lt.value().join('--')";
 
 note $lt(:delimiter(' '));
 note $lt(:string('3 4 5 6 7')).join('=');
+
+note 'Add 2: ', 2 + $lt;
+
+note 'What is $ls: ', $lt;
+note 'What is @$ls: ', @$lt;
