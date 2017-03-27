@@ -129,8 +129,9 @@ $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 $xml = $x.get-xml-text;
 say $xml;
-is $xml, '<ul><li class="v1 v2"><li>head1</li><li>head2</li></ul>',
-"generated: $xml";
+is $xml, ([~] '<?xml version="1.0" encoding="UTF-8"?>',
+         "\n", '<ul><li class="v1 v2"><li>head1</li><li>head2</li></ul>'),
+   "generated: $xml";
 
 #-------------------------------------------------------------------------------
 # Cleanup

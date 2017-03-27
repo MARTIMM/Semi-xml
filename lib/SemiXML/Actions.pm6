@@ -284,7 +284,7 @@ class Actions {
 
         # Otherwise it is the module on which method can be called
         else {
-note "Method call attribs: ", $attrs;
+#note "Method call attribs: ", $attrs;
 
           # call user method and expect result in $x
           $x = $module."$meth"(
@@ -388,7 +388,7 @@ note "Method call attribs: ", $attrs;
         :string($a<attr-value-spec><attr-value>.Str),
         :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
       );
-note "AV $a<attr-key>: ", $av;
+#note "AV $a<attr-key>: ", $av;
       $attrs{$a<attr-key>.Str} = $av;
     }
 
