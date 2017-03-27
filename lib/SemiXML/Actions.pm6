@@ -215,7 +215,7 @@ class Actions {
             $bend - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
 #note "NLDoc  $tag-loc, $indent-start, $indent-end, $bstart, $bend";
 
-        # make a note when indents are not the same, it might point to a
+        # make a note when indents are not the same, it might reveal a
         # missing bracket.
         if $indent-start != $indent-end {
 
@@ -246,7 +246,7 @@ class Actions {
     ( my $tt,                 # tag type
       my $ns, my $tn,         # namespace and tag name
       my $mod, my $meth,      # module and method
-      my $att                 # attributes
+      my $attrs               # attributes
     ) = @($match<tag-spec>.made);
 
     # Check the node type
@@ -257,13 +257,13 @@ class Actions {
 
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
 
-        $x .= new( :name($tag), :attribs(%$att));
+        $x .= new( :name($tag), :attribs(%$attrs));
 
         # Check for xmlns uri definitions and set them on the current node
-        for $att.keys {
+        for $attrs.keys {
           when m/^ 'xmlns:' ( <before '='>* ) $/ {
             my $ns-prefix = $0;
-            $x.setNamespace( $att{$_}, $0);
+            $x.setNamespace( ~$attrs{$_}, $0);
           }
         }
 
@@ -284,11 +284,12 @@ class Actions {
 
         # Otherwise it is the module on which method can be called
         else {
+note "Method call attribs: ", $attrs;
 
           # call user method and expect result in $x
           $x = $module."$meth"(
             XML::Element.new(:name('__PARENT_CONTAINER__')),
-            $att,
+            $attrs,
             :content-body(
               self!build-content-body(
                 $match,
@@ -387,6 +388,7 @@ class Actions {
         :string($a<attr-value-spec><attr-value>.Str),
         :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
       );
+note "AV $a<attr-key>: ", $av;
       $attrs{$a<attr-key>.Str} = $av;
     }
 
