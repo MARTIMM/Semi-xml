@@ -56,7 +56,7 @@ grammar Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   #
-  rule attributes    { [ <attribute> ]* {note "Attrs: $/"}}
+  rule attributes     { [ <attribute> ]* {note "Attrs: $/"}}
 
   token attribute     {
     <attr-key> '=' <attr-value-spec>
@@ -71,7 +71,7 @@ grammar Grammar {
 
   token attr-value-spec {
     [ "'" ~ "'" $<attr-value>=<.attr-q-value> ]  ||
-    [ '"' ~ "'" $<attr-value>=<.attr-qq-value> ] ||
+    [ '"' ~ '"' $<attr-value>=<.attr-qq-value> ] ||
 #TODO somewhere in a test the following is still used
 #    [\^ $<attr-value>=<.attr-pw-value> \^] ||
     [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||

@@ -45,7 +45,7 @@ grammar Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   #
-  rule attributes     { [ <attribute> ]* }
+  rule attributes     { [ <attribute> ]* {note "Attrs: $/";}}
 
   token attribute     {
     <attr-key> '=' <attr-value-spec>
@@ -60,7 +60,7 @@ grammar Grammar {
 
   token attr-value-spec {
     [ "'" ~ "'" $<attr-value>=<.attr-q-value> ]  ||
-    [ '"' ~ "'" $<attr-value>=<.attr-qq-value> ] ||
+    [ '"' ~ '"' $<attr-value>=<.attr-qq-value> ] ||
     [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||
     $<attr-value>=<.attr-s-value>
   }
@@ -186,7 +186,7 @@ say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 
 #------------------------------------------------------------------------------
 $m = $g.subparse($c = Q:to/EOSXML/);
-  $x [ $h0 a=<ab ac ad ae> [ $h1 []] $h2[def]]
+  $x [ $h0 a="a1 b1" b=<ab ac ad ae> [ $h1 []] $h2[def]]
   EOSXML
 
 $last-bracket-index = $c.rindex(']');
