@@ -56,7 +56,7 @@ grammar Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   #
-  rule attributes    { [ <attribute> ]* }
+  rule attributes    { [ <attribute> ]* {note "Attrs: $/"}}
 
   token attribute     {
     <attr-key> '=' <attr-value-spec>
