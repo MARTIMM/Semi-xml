@@ -95,7 +95,7 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   sub append-element (
-    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
+    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text = ''
     --> XML::Node
   ) is export {
 
@@ -103,11 +103,11 @@ class SxmlHelper {
     my XML::Node $element =
        XML::Element.new( :$name, :attribs(%$attributes)) if ? $name;
 
-    if ? $name and ? $text {
+    if ? $element and ? $text-element {
       $element.append($text-element);
     }
 
-    elsif ? $text {
+    elsif ? $text-element {
       $element = $text-element;
     }
 
@@ -119,7 +119,7 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   sub insert-element (
-    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
+    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text = ''
     --> XML::Node
   ) is export {
 
@@ -139,7 +139,7 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   sub before-element (
-    XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
+    XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text = ''
     --> XML::Node
   ) is export {
 
@@ -159,7 +159,7 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   sub after-element (
-    XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
+    XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text = ''
     --> XML::Node
   ) is export {
 
@@ -186,7 +186,9 @@ class SxmlHelper {
 
     for $attributes.keys {
       when /'class'|'style'|'id'/ {
-        $node.set( $_, $attributes{$_});
+        # attribute value must be stringified because it is now of
+        # type StringList
+        $node.set( $_, ~$attributes{$_});
         $attributes{$_}:delete;
       }
     }
