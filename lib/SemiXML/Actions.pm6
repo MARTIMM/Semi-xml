@@ -140,6 +140,8 @@ class Actions {
   #-----------------------------------------------------------------------------
   method document ( $match ) {
 
+    self!current-state( $match, 'document');
+
     # Try to find indent level to match up open '[' with close ']'.
     #
     # 1) $x                     no body at all
@@ -206,11 +208,11 @@ class Actions {
       if $has-nl {
 
         my Int $tag-loc = $match<tag-spec>.from;
-        my Int $indent-start = $tag-loc
-                      - ($orig.substr( 0, $tag-loc).rindex("\n") // -1) - 1;
+        my Int $indent-start =
+            $tag-loc - ($orig.substr( 0, $tag-loc).rindex("\n") // -1) - 1;
 
-        my Int $indent-end = $bend
-                      - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
+        my Int $indent-end =
+            $bend - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
 #note "NLDoc  $tag-loc, $indent-start, $indent-end, $bstart, $bend";
 
         # make a note when indents are not the same, it might point to a
@@ -238,8 +240,6 @@ class Actions {
         }
       }
     }
-
-    self!current-state( $match, 'document');
 
     my XML::Element $x;
 

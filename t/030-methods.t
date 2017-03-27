@@ -60,7 +60,11 @@ spurt( $mod, q:to/EOMOD/);
       --> XML::Element
     ) {
       my XML::Element $ul = append-element( $parent, 'ul');
-      $ul.set( 'çlass', $attrs<a>);
+      $ul.set( 'çlass', ~$attrs<a>);
+
+      note "attributes: ", $attrs;
+      note "B should be a list or <> does not work: ", $attrs<b>;
+
       for @($attrs<b>)[*] -> $li-text {
         append-element( $ul, 'li', :text($li-text));
       }
