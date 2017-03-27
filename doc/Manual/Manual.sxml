@@ -163,6 +163,7 @@ $!Db5b.article [
           ]
         ]
 
+$!SxmlCore.comment [
         $listitem [
           $para [
             $emphasis[Syntax]. The document is where text
@@ -171,7 +172,7 @@ $!Db5b.article [
             types which makeup the document.
           ]
         ]
-
+]
         $listitem [
           $para [
             $emphasis[Configuration]. The toml configuration file will be
@@ -316,6 +317,7 @@ $!SxmlCore.comment [
         As you might have guessed it, the example is taken from w3schools where
         all sorts of xml languages are described.
       ]
+
       $para [
         The example shows how nesting is done using brackets ('[' and ']') and
         that between brackets there can be a mix of text and other elements.
@@ -323,13 +325,14 @@ $!SxmlCore.comment [
         $itemizedlist [
           $listitem [
             $para [
-              $emphasis[Simple elements]. A simple element is created by using
+              $emphasis[Elements]. A simple element is created by using
               a dollar in front of an identifier like $emphasis[\$rss].
             ]
           ]
+
           $listitem [
             $para [
-              $emphasis[attributes]. Elements may have any number of attributes
+              $emphasis[Attributes]. Elements may have any number of attributes
               and are written as a key value pair separated by an equal ('='). like
               $emphasis[version=2.0] on the \$rss element. The keyname cannot be
               repeated on the same element, only one attribute of the duplicated
@@ -416,70 +419,65 @@ $!SxmlCore.comment [
     ]
 ]
 
-    $sect2 [
-      $title [Sxml Document]
-      $para [
-        The document is where the text comes in the same way as in a normal XML
-        document. The elements most of us are aware of all start with a dollar
-        '\$'. Above in an example we have seen the expression $*|emphasis [!
-        $title [ Hello World ] !]. The body of the element is enclosed between
-        square brackets '\[' and '\]'. Within these brackets you can write new
-        elements intermittent with normal text. The methods in the library will
-        not check if a particular element may be used on such place, you will
-        need to look into the specifics of the XML language at hand.. So the
-        syntax of writing an element structure is quite simple.
-      ]
-
-      $para [
-        However, &lang; is capable of doing more than just entering XML
-        elements in an alternative way. E.g. an element might need attributes.
-        Below you see in a not too strict $**emphasis[BNF] variant a part of the
-        syntax;
-
-$!SxmlCore.comment [
-        $programlisting [!=
-<document> ::= <prefix> <element> ( <attribute> '=' <attr-value> )*
-               '[' <body-start-control> <body> <body-end-control>
-               ']';
-
-<prefix> ::= '$.' | '$!' | '$*<' | '$*>' | '$*' | '$';
-
-<element> ::= <identifier>;
-<attribute> ::= <identifier>;
-<attr-value> ::= '"' <ws-text> '"' | "'" <ws-text> "'"
-                 | <non-ws-text>;
-
-<identifier> ::=  <letter> (<letter>|<number>)*
-                  ( '-' (<letter> (<letter>|<number>)+) )*;
-
-<body-start-control> ::= '!=' | '!' | '=';
-<body-end-control> ::= '!';
-        !]
-
-        White space is forbidden between the <prefix> and <element> as well as
-        between the <attribute>, '=' and <attr-value>. Furthermore between the
-        brackets and <body-start-control> and <body-end-control> are also no
-        spaces. In the BNF above is not appearant that the '\[!' combination
-        must be used with the '!\] combination.
-]
-      ]
-
       $sect3 [
-        $title [Element types]
+        $title [Comment]
         $para [
-
+          Comments are possible on several places and starts with '#'. To be
+          more exact, all space before '#', the character '#' and characters
+          after it up to the end of line includeing the end of line characters
+          are removed.
         ]
       ]
 
       $sect3 [
         $title [Escaping characters]
         $para [
-
+          When you want to use a character which is used as a delimiter ('[')
+          or start of an element ('$') you must escape that character to prevent
+          the action that takes place when encountering that character. Writing
+          '\' before that character escapes them from that interpretation.
+          Examples are '\[' or '\$'.
         ]
       ]
 
       $sect3 [
         $title [Unicode characters]
+        $para [
+          All available unicode characters from the utf-8 set may be used in the
+          text. These can be inserted directly by cut and paste, using special
+          keyboards, entity codes when describing html text such symbol &copy;
+          as &amp;copy;, or using numeric codes symbol &#9986; as
+          &amp;\#9986; or &amp;\#x2702;.
+        ]
+      ]
+
+      $sect3 [
+        $title [Content types]
+        $para [
+          There are several ways to contain the text between delimiters
+          depending on the contents or even the absence of content.
+          Take, for example the html break element <br/>. This element does not
+          have content. We could write this as $**emphasis[!$br []!]. But we can
+          leave off the brackets to make it shorter like so; $**emphasis[!$br!].
+        ]
+
+        $para [
+          As described above under $**emphasis[Escaping characters] it is possible
+          to insert characters which are otherwise interpreted as something
+          special. However, it gets annoying when there are many of them like in
+          a piece of javascript or perl code. There is a solution for that luckily,
+#TODO tests for all characters like '!'.
+          just enclose the text between '[!' and '!]'. Nothing gets interpreted
+          between these delimiters as well as comments are kept in the text.
+        ]
+
+        $para [
+          Multiple content bodies are also possible ...
+        ]
+      ]
+
+      $sect3 [
+        $title [Element types]
         $para [
 
         ]
