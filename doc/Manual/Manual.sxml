@@ -459,6 +459,9 @@ $!SxmlCore.comment [
           Take, for example the html break element <br/>. This element does not
           have content. We could write this as $**emphasis[!$br []!]. But we can
           leave off the brackets to make it shorter like so; $**emphasis[!$br!].
+          There are however situations where you must use the brackets when the
+          following text is in a argument=value format to prevent them to be
+          interpreted as such. E.g. $**emphasis [! $br [] after=break !].
         ]
 
         $para [
@@ -467,12 +470,14 @@ $!SxmlCore.comment [
           special. However, it gets annoying when there are many of them like in
           a piece of javascript or perl code. There is a solution for that luckily,
 #TODO tests for all characters like '!'.
-          just enclose the text between '[!' and '!]'. Nothing gets interpreted
+          just enclose the text between '[!' and '!\]'. Nothing gets interpreted
           between these delimiters as well as comments are kept in the text.
         ]
 
         $para [
-          Multiple content bodies are also possible ...
+          Multiple content bodies are also possible when there are parts which
+          need protection and in other parts, elements are needed. E.g.
+          $**emphasis[! $p [The line; ][! my Int $x = 10; \!\][ is an $b[Int] declaration\] !]
         ]
       ]
 
