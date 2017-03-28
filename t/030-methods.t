@@ -60,7 +60,7 @@ spurt( $mod, q:to/EOMOD/);
       --> XML::Element
     ) {
       my XML::Element $ul = append-element( $parent, 'ul');
-      $ul.set( 'çlass', ~$attrs<a>);
+      $ul.set( 'class', ~$attrs<a>);
 
       note "attributes: ", $attrs;
       note "B should be a list or <> does not work: ", $attrs<b>;
@@ -129,9 +129,9 @@ $content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
 $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 $xml = $x.get-xml-text;
-say $xml;
+#say $xml;
 like $xml, /'<ul class="v1 v2"><li>head1</li><li>head2</li></ul>'/,
-           "generated: $xml";
+           "generated content from mth3";
 
 #-------------------------------------------------------------------------------
 # Cleanup
