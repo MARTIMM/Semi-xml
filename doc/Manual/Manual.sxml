@@ -163,16 +163,6 @@ $!Db5b.article [
           ]
         ]
 
-$!SxmlCore.comment [
-        $listitem [
-          $para [
-            $emphasis[Syntax]. The document is where text
-            is written for the specific documents together with the
-            elements to format the text. This part explains the element
-            types which makeup the document.
-          ]
-        ]
-]
         $listitem [
           $para [
             $emphasis[Configuration]. The toml configuration file will be
@@ -452,7 +442,7 @@ $!SxmlCore.comment [
       ]
 
       $sect3 [
-        $title [Content types]
+        $title [Container types]
         $para [
           There are several ways to contain the text between delimiters
           depending on the contents or even the absence of content.
@@ -475,6 +465,15 @@ $!SxmlCore.comment [
         ]
 
         $para [
+          In html the text is justified automatically except in sertain sections
+          such as within <pre> elements. Sxml does not have any notion of these
+          sections and treat those as xml and all excess of space is removed. To
+          cope with these sections another set of container delimiters are used.
+          These are $**emphasis[! [= ... \] !] and $*|emphasis[! [!= ... \!\] ].
+          With these brackets, all indenting and newlines are fixed and protected.
+        ]
+
+        $para [
           Multiple content bodies are also possible when there are parts which
           need protection and in other parts, elements are needed. E.g.
           $**emphasis[! $p [The line; ][! my Int $x = 10; \!\][ is an $b[Int] declaration\] !]
@@ -484,12 +483,22 @@ $!SxmlCore.comment [
       $sect3 [
         $title [Element types]
         $para [
+          Some examples of elements are already shown at the start
+          of this chapter like $**emphasis[! $html !] for instance. It is written
+          as a name with a dollar prefixed to it. Normally, spacing around an
+          element is nullified but
+        ]
+      ]
+
+      $sect3 [
+        $title [Attribute types]
+        $para [
 
         ]
       ]
 
       $sect3 [
-        $title [Core elements]
+        $title [Core element methods]
         $para [
 
         ]
