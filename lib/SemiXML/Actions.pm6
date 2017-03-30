@@ -384,10 +384,25 @@ class Actions {
     for $match<attributes>.caps -> $as {
       next unless $as<attribute>:exists;
       my $a = $as<attribute>;
-      my SemiXML::StringList $av .= new(
-        :string($a<attr-value-spec><attr-value>.Str),
-        :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
-      );
+      my SemiXML::StringList $av;
+
+      # when =attr is same as attr=1
+      if ? $a<bool-true-attr> {
+        $av .= new( :string<1>, :!use-as-list);
+      }
+
+      # when =!attr is same as attr=0
+      elsif ? $a<bool-false-attr> {
+        $av .= new( :string<0>, :!use-as-list);
+      }
+
+      else {
+        # when attr=<a b c> attr-list-value is set
+        $av .= new(
+          :string($a<attr-value-spec><attr-value>.Str),
+          :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
+        );
+      }
 #note "AV $a<attr-key>: ", $av;
       $attrs{$a<attr-key>.Str} = $av;
     }

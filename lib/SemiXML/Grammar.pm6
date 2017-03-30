@@ -59,10 +59,9 @@ grammar Grammar {
   rule attributes     { [ <attribute> ]* }
 
   token attribute     {
-    <attr-key> '=' <attr-value-spec>
-# ||
-#    '=' <attr-key> ||
-#    '=!' <attr-key>
+    <attr-key> '=' <attr-value-spec> ||
+    '='  $<bool-true-attr>=<attr-key> ||
+    '=!' $<bool-false-attr>=<attr-key>
   }
 
   token attr-key      { [<.key-ns> ':' ]? <.key-name> }
