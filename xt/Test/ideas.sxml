@@ -67,7 +67,7 @@ $top-of-ideas [
   $tr [ $td [ $!db.rec col=col1 row=row(nth) ] ]
 
 
-
+  # or ...
   $table [
     $tr [
       $@loop f=<field1 ... fieldn> [
