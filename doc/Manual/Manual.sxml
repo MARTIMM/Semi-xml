@@ -486,8 +486,25 @@ $!SxmlCore.comment [
           Some examples of elements are already shown at the start
           of this chapter like $**emphasis[! $html !] for instance. It is written
           as a name with a dollar prefixed to it. Normally, spacing around an
-          element is nullified but
+          element is minimized but at some places there must be a space before
+          or after the element. Examples from html are <a>, <b> and <strong> among
+          other inline elements. To get this spacing right one can use
+          $**empasis[! $**element !],
+          $**emphasis[! $*|element !] or $**emphasis[! $|*element !] to have a
+          space on both sides, on the left side or on the right side respectively.
+#TODO $|element no spaces.
         ]
+
+        $para [
+          Another type is a special one. It is defined as
+          $**emphasis[! $!module-key.method-name !] where the module-key is mapped
+          to a real module in the configuration file. One key is predefined: SxmlCore
+          and is mapped to SxmlLib::SxmlCore. The methods defined in that module
+          are explained in a separate chapter. How a module is initialized and
+          called for its services is also enaugh stuff to have an extra chapter.
+        ]
+#TODO $@element templates, @element template inserts.
+#TODO
       ]
 
       $sect3 [
