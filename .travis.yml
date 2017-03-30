@@ -1,7 +1,7 @@
 branches:
   only:
     - master
-#    - develop
+    - develop
 
 language: perl6
 
@@ -26,8 +26,9 @@ install:
 #install: true
 
 script:
+  - PERL6LIB=lib prove -v --exec=perl6 t/030-methods.t t/101-xml.t t/102-xml.t
 #  - PERL6LIB=lib prove -v --exec=perl6 t/001-stringlist.t t/030-methods.t t/101-xml.t t/102-xml.t t/200-config.t
-  - PERL6LIB=lib prove -v --exec=perl6 t/001-stringlist.t t/030-methods.t t/200-config.t
+#  - PERL6LIB=lib prove -v --exec=perl6 t/001-stringlist.t t/030-methods.t t/200-config.t
 
 cache:
   directories:
