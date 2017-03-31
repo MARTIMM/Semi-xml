@@ -67,11 +67,11 @@ $top-of-ideas [
   $tr [ $td [ $!db.rec col=col1 row=row(nth) ] ]
 
 
-  # or ...
+  # or use $@ for control statements
   $table [
     $tr [
-      $@loop f=<field1 ... fieldn> [
-        $!db.headers field=@f
+      $@loop sxml:control=<field1 ... fieldn> [
+        $!db.headers field=@control
       ]
     ]
 
