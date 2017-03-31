@@ -35,9 +35,8 @@ class Actions {
   has Array $!tag-list = [];
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( :$sxml-obj ) {
-    $!sxml-obj = $sxml-obj;
-  }
+#TODO can we remove the BUILD?
+  submethod BUILD ( :$!sxml-obj ) { }
 
   #-----------------------------------------------------------------------------
   method init-doc ( $match ) {
@@ -104,10 +103,11 @@ class Actions {
     # Conversion to xml escapes is done as late as possible
     my Sub $after-math = sub ( XML::Element $x ) {
 
-      # Process attributes to escape special chars
+      # Process attributes to escape special chars, Stringify attr value because
+      # of its type: StringList
       my %a = $x.attribs;
       for %a.kv -> $k, $v {
-        $x.set( $k, self!process-esc( $v, :is-attr));
+        $x.set( $k, self!process-esc( ~$v, :is-attr));
       }
 
       # Process body text to escape special chars
@@ -125,7 +125,7 @@ class Actions {
 
     &$after-math($parent);
 
-    # Return the completed report
+    # Return the completed document
     $!xml-document .= new($parent);
   }
 
