@@ -28,18 +28,24 @@ grammar Grammar {
   rule tag-spec { <tag> <attributes> }
 
   proto token tag { * }
+
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
+
   token tag:sym<$|*>  { <sym> <tag-name> }
   token tag:sym<$*|>  { <sym> <tag-name> }
   token tag:sym<$**>  { <sym> <tag-name> }
   #TODO token tag:sym<$|> { <sym> <tag-name> }
   token tag:sym<$>    { <sym> <tag-name> }
 
+  token tag:sym<$@>   { <sym> <control-name> }
+
   token mod-name      { <.identifier> }
   token meth-name     { <.identifier> }
   token tag-name      { [ <namespace> ':' ]? <element> }
   token element       { <.xml-identifier> }
   token namespace     { <.xml-ns-identifier> }
+
+  token control-name  { 'loop' || 'set' }
 
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in

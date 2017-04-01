@@ -89,4 +89,13 @@ $top-of-ideas [
       ]
     ]
   ]
+
+  # assignment forms. parsing and substitution can all take place in Grammar.
+  $@set =a1 [ ... ]               # content set to a1, content is not interpreted
+  $!mod.meth =sxml:v1 =sxml:v2    # variables v1 and v2 set by meth()
+
+  # use of asigned value
+  @a1                             # replace by value of a1 and interprete
+  $element attr=@a1               # value of attribute. stays string and not
+                                  # interpreted
 ]
