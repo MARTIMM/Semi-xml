@@ -3,12 +3,23 @@ use v6;
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
+  enum Commands <Nop Loop Set>;
+
+  my Commands $current-command = Nop;
+  my Str $set-attr;
+  my Hash $set = {};
+
+  #----------------------------------------------------------------------------
+  # Actions initialize
+  rule init-doc { <?> }
+
   # A document is only a tag with its content in a body. Defined like this
   # there can only be one toplevel document. In the following body documents
   # can be nested.
   #
   # Possible comments outside toplevel document
   rule TOP {
+    <.init-doc>
     <.comment>*         # Needed to make empty lines between comments possible.
                         # Only here is needed body*-contents is taking care for
                         # the rest.
@@ -20,7 +31,10 @@ grammar Grammar {
   # possible to use a rule to add the element to this stack. This happens in
   # the actions method for <tag-spec>.
   #
-  rule document { <tag-spec> <tag-body>* }
+  rule document {
+    <tag-spec> <tag-body>* ||
+    <ctrl-spec> <ctrl-body>*
+  }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
@@ -28,7 +42,6 @@ grammar Grammar {
   rule tag-spec { <tag> <attributes> }
 
   proto token tag { * }
-
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
 
   token tag:sym<$|*>  { <sym> <tag-name> }
@@ -37,15 +50,11 @@ grammar Grammar {
   #TODO token tag:sym<$|> { <sym> <tag-name> }
   token tag:sym<$>    { <sym> <tag-name> }
 
-  token tag:sym<$@>   { <sym> <control-name> }
-
   token mod-name      { <.identifier> }
   token meth-name     { <.identifier> }
   token tag-name      { [ <namespace> ':' ]? <element> }
   token element       { <.xml-identifier> }
   token namespace     { <.xml-ns-identifier> }
-
-  token control-name  { 'loop' || 'set' }
 
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
@@ -102,7 +111,7 @@ grammar Grammar {
 
   # No comments recognized in [! ... !]. This works because a nested documents
   # are not recognized and thus no extra comments are checked and handled as such.
-  token body2-text      {
+  token body2-text {
     [ <.escaped-char> ||         # an escaped character
 #    [ .*? <?before '!]'> ]
       <-[\!\\]>  # any character not being '\' or '!'
@@ -137,6 +146,29 @@ grammar Grammar {
   }
 
   token comment { \s* '#' \N* \n }
+
+  # rules to manage to templates, loops etc.
+  rule ctrl-spec { { $current-command = Nop; } <ctrl> <ctrl-attrs> }
+  proto token ctrl { * }
+  token ctrl:sym<$@>   { <sym> <control-name> }
+  token control-name  {
+    'loop'    { $current-command = Loop; } ||
+    'set'     { $current-command = Set; }
+  }
+
+  rule ctrl-attrs     { [ <ctrl-attr> ]* {note "Ctrl attrs: $/";}}
+
+  token ctrl-attr     {
+#    <attr-key> '=' <attr-value-spec> ||
+    '='  $<bool-true-attr>=<attr-key>
+# ||
+#    '=!' $<bool-false-attr>=<attr-key>
+  }
+
+  # body should not be interpreted
+  rule ctrl-body {
+    '[' ~    ']'    <body1-contents>
+  }
 }
 
 
@@ -177,6 +209,18 @@ say $m<document><tag-body>[0]<body4-contents><document>[0]<tag-spec>;
 #------------------------------------------------------------------------------
 $m = $g.subparse($c = Q:to/EOSXML/);
   $x =a =!b []
+  EOSXML
+
+$last-bracket-index = $c.rindex(']');
+say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say $m<document>;
+
+#------------------------------------------------------------------------------
+$m = $g.subparse($c = Q:to/EOSXML/);
+  $@set =x [ content to use later ]
+
+  # Use it twice
+  $x [ @x @x ]
   EOSXML
 
 $last-bracket-index = $c.rindex(']');
