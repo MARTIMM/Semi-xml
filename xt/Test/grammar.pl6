@@ -30,15 +30,11 @@ grammar Grammar {
   # Rule to pop the current bottomlevel element from the stack. It is not
   # possible to use a rule to add the element to this stack. This happens in
   # the actions method for <tag-spec>.
-  #
-  rule document {
-    <tag-spec> <tag-body>* ||
-    <ctrl-spec> <ctrl-body>*
-  }
+  rule document { <tag-specification> || <control-specification> }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
-  #
+  rule tag-specification { <tag-spec> <tag-body>* }
   rule tag-spec { <tag> <attributes> }
 
   proto token tag { * }
@@ -59,7 +55,6 @@ grammar Grammar {
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
-  #
   rule attributes     { [ <attribute> ]* {note "Attrs: $/";}}
 
   token attribute     {
@@ -101,24 +96,20 @@ grammar Grammar {
   rule body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
 
   token body1-text {
-    [ <.escaped-char> ||         # an escaped character
-#      <.entity> ||              # &some-spec; XML entity spec
-#      '$' <!before [<[!|*]>|<:L>]>
-#                                # a $ not followed by '!', '|', '*' or alpha
-      <-[\$\]\#\\]>  # any character not being '$', '#' or ']'
+    [ <.escaped-char> ||    # an escaped character
+      <-[\@\$\]\#\\]>       # any character not being '@', '$', '#' or ']'
     ]+
   }
 
   # No comments recognized in [! ... !]. This works because a nested documents
   # are not recognized and thus no extra comments are checked and handled as such.
   token body2-text {
-    [ <.escaped-char> ||         # an escaped character
-#    [ .*? <?before '!]'> ]
-      <-[\!\\]>  # any character not being '\' or '!'
+    [ <.escaped-char> ||    # an escaped character
+      <-[\!\\]>             # any character not being '\' or '!'
     ]+
   }
 
-  token escaped-char     { '\\' . }
+  token escaped-char { '\\' . }
   #  token entity          { '&' <-[;]>+ ';' }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
@@ -147,27 +138,33 @@ grammar Grammar {
 
   token comment { \s* '#' \N* \n }
 
-  # rules to manage to templates, loops etc.
-  rule ctrl-spec { { $current-command = Nop; } <ctrl> <ctrl-attrs> }
+  # rules to manage templates, loops etc.
+  rule control-specification { {note "ctrl spec:"; } <ctrl-spec> <ctrl-body> }
+  rule ctrl-spec { { $current-command = Nop; } <ctrl> { note "ctrl: $/"} }
+
   proto token ctrl { * }
-  token ctrl:sym<$@>   { <sym> <control-name> }
-  token control-name  {
-    'loop'    { $current-command = Loop; } ||
-    'set'     { $current-command = Set; }
+  token ctrl:sym<@$>  { <sym> <ctrl-name> \s+ <ctrl-attr> }
+  token ctrl:sym<@>   { <sym> <ctrl-attr> }
+
+  token ctrl-name {
+    'loop'    { $current-command = Loop; note "Loop ..."; } ||
+    'set'     { $current-command = Set; note "Set ..."; }
   }
 
-  rule ctrl-attrs     { [ <ctrl-attr> ]* {note "Ctrl attrs: $/";}}
+#  rule ctrl-attrs     { [ <ctrl-attr> ]*}
 
-  token ctrl-attr     {
-#    <attr-key> '=' <attr-value-spec> ||
-    '='  $<bool-true-attr>=<attr-key>
-# ||
-#    '=!' $<bool-false-attr>=<attr-key>
-  }
+  token ctrl-attr { <attr-key> {note "Ctrl attr: $/";} }
 
   # body should not be interpreted
   rule ctrl-body {
-    '[' ~    ']'    <body1-contents>
+    '[' ~ ']' <ctrl-body1-contents> { note "ctrl body $/"; }
+  }
+
+  rule ctrl-body1-contents  { <ctrl-body2-text> }
+  token ctrl-body2-text {
+    [ <.escaped-char> ||    # an escaped character
+    <-[\\\]]>               # any character not being '\' or ']'
+    ]+
   }
 }
 
@@ -187,7 +184,7 @@ my Match $m = $g.subparse(my $c = Q:to/EOSXML/);
   EOSXML
 
 my $last-bracket-index = $c.rindex(']');
-say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 
 #------------------------------------------------------------------------------
 $m = $g.subparse($c = Q:to/EOSXML/);
@@ -195,7 +192,7 @@ $m = $g.subparse($c = Q:to/EOSXML/);
   EOSXML
 
 $last-bracket-index = $c.rindex(']');
-say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 
 #------------------------------------------------------------------------------
 $m = $g.subparse($c = Q:to/EOSXML/);
@@ -203,7 +200,7 @@ $m = $g.subparse($c = Q:to/EOSXML/);
   EOSXML
 
 $last-bracket-index = $c.rindex(']');
-say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 say $m<document><tag-body>[0]<body4-contents><document>[0]<tag-spec>;
 
 #------------------------------------------------------------------------------
@@ -212,17 +209,19 @@ $m = $g.subparse($c = Q:to/EOSXML/);
   EOSXML
 
 $last-bracket-index = $c.rindex(']');
-say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 say $m<document>;
 
 #------------------------------------------------------------------------------
 $m = $g.subparse($c = Q:to/EOSXML/);
-  $@set =x [ content to use later ]
+  $x [
+    @$set x [ content to use later ]
 
-  # Use it twice
-  $x [ @x @x ]
-  EOSXML
+    # Use it twice
+    $y [ @x @x ]
+  ]
+EOSXML
 
 $last-bracket-index = $c.rindex(']');
-say "Match: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
 say $m<document>;
