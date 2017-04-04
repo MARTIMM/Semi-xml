@@ -30,7 +30,7 @@ grammar Grammar {
   # Rule to pop the current bottomlevel element from the stack. It is not
   # possible to use a rule to add the element to this stack. This happens in
   # the actions method for <tag-spec>.
-  rule document { <tag-specification> || <control-specification> }
+  rule document { [<tag-specification> || <control-specification>] {note "doc: $/";}}
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
@@ -139,11 +139,11 @@ grammar Grammar {
   token comment { \s* '#' \N* \n }
 
   # rules to manage templates, loops etc.
-  rule control-specification { {note "ctrl spec:"; } <ctrl-spec> <ctrl-body> }
+  rule control-specification { <ctrl-spec> <ctrl-body> }
   rule ctrl-spec { { $current-command = Nop; } <ctrl> { note "ctrl: $/"} }
 
   proto token ctrl { * }
-  token ctrl:sym<@$>  { <sym> <ctrl-name> \s+ <ctrl-attr> }
+  token ctrl:sym<@$>  { <sym> <ctrl-name> { } \s+ <ctrl-attr> }
   token ctrl:sym<@>   { <sym> <ctrl-attr> }
 
   token ctrl-name {
@@ -160,7 +160,7 @@ grammar Grammar {
     '[' ~ ']' <ctrl-body1-contents> { note "ctrl body $/"; }
   }
 
-  rule ctrl-body1-contents  { <ctrl-body2-text> }
+  rule ctrl-body1-contents  { <ctrl-body2-text> { note "ctrl b1: $/"; } }
   token ctrl-body2-text {
     [ <.escaped-char> ||    # an escaped character
     <-[\\\]]>               # any character not being '\' or ']'
