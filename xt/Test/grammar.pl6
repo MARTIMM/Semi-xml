@@ -1,13 +1,15 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
-
-#use Grammar::Tracer;
-
-#-------------------------------------------------------------------------------
 grammar Grammar {
 
+  enum Commands <Nop Loop Set>;
+
+  my Commands $current-command = Nop;
+  my Str $set-attr;
+  my Hash $set = {};
+
+  #----------------------------------------------------------------------------
   # Actions initialize
   rule init-doc { <?> }
 
@@ -28,17 +30,16 @@ grammar Grammar {
   # Rule to pop the current bottomlevel element from the stack. It is not
   # possible to use a rule to add the element to this stack. This happens in
   # the actions method for <tag-spec>.
-  #
-  rule pop-tag-from-list { <?> }
-  rule document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
+  rule document { [<tag-specification> || <control-specification>] {note "doc: $/";}}
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
-  #
+  rule tag-specification { <tag-spec> <tag-body>* }
   rule tag-spec { <tag> <attributes> }
 
   proto token tag { * }
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
+
   token tag:sym<$|*>  { <sym> <tag-name> }
   token tag:sym<$*|>  { <sym> <tag-name> }
   token tag:sym<$**>  { <sym> <tag-name> }
@@ -46,7 +47,6 @@ grammar Grammar {
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
-#  token sym-name      { <.identifier> }
   token meth-name     { <.identifier> }
   token tag-name      { [ <namespace> ':' ]? <element> }
   token element       { <.xml-identifier> }
@@ -55,8 +55,7 @@ grammar Grammar {
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
-  #
-  rule attributes     { [ <attribute> ]* }
+  rule attributes     { [ <attribute> ]* {note "Attrs: $/";}}
 
   token attribute     {
     <attr-key> '=' <attr-value-spec> ||
@@ -71,15 +70,11 @@ grammar Grammar {
   token attr-value-spec {
     [ "'" ~ "'" $<attr-value>=<.attr-q-value> ]  ||
     [ '"' ~ '"' $<attr-value>=<.attr-qq-value> ] ||
-#TODO somewhere in a test the following is still used
-#    [\^ $<attr-value>=<.attr-pw-value> \^] ||
     [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||
     $<attr-value>=<.attr-s-value>
   }
   token attr-q-value  { [ <.escaped-char> || <-[\']> ]+ }
   token attr-qq-value { [ <.escaped-char> || <-[\"]> ]+ }
-#TODO somewhere in a test the following is still used
-#  token attr-pw-value { [ <.escaped-char> || <-[\^]> ]+ }
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]+ }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
@@ -102,31 +97,27 @@ grammar Grammar {
 
   token body1-text {
     [ <.escaped-char> ||    # an escaped character
-      <-[\$\]\#\\]>         # any character not being '\', '$', '#' or ']'
-                            # to stop at escaped char, a document
-                            # comment or end of current document.
+      <-[\@\$\]\#\\]>       # any character not being '@', '$', '#' or ']'
     ]+
   }
 
   # No comments recognized in [! ... !]. This works because a nested documents
   # are not recognized and thus no extra comments are checked and handled as such.
-  token body2-text      {
+  token body2-text {
     [ <.escaped-char> ||    # an escaped character
       <-[\!\\]>             # any character not being '\' or '!'
-                            # to stop at escaped char or end of
-                            # current document
     ]+
   }
 
-  token escaped-char     { '\\' . }
+  token escaped-char { '\\' . }
   #  token entity          { '&' <-[;]>+ ';' }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.
-  token identifier { <.ident> [ '-' <.ident> ]* }
+  token identifier { <.ident> [ '-' <.ident> ]* {note "id: $/";} }
 
   # From w3c https://www.w3.org/TR/xml11/#NT-NameChar
-  token xml-identifier { <.name-start-char> <.name-char>* }
+  token xml-identifier { (<.name-start-char> <.name-char>*) {note "xml id: $0";} }
   token name-start-char { ':' || <.ns-name-start-char> }
   token name-char { ':' || <.ns-name-char> }
 
@@ -146,4 +137,91 @@ grammar Grammar {
   }
 
   token comment { \s* '#' \N* \n }
+
+  # rules to manage templates, loops etc.
+  rule control-specification { <ctrl-spec> <ctrl-body> }
+  rule ctrl-spec { { $current-command = Nop; } <ctrl> { note "ctrl: $/"} }
+
+  proto token ctrl { * }
+  token ctrl:sym<@$>  { <sym> <ctrl-name> { } \s+ <ctrl-attr> }
+  token ctrl:sym<@>   { <sym> <ctrl-attr> }
+
+  token ctrl-name {
+    'loop'    { $current-command = Loop; note "Loop ..."; } ||
+    'set'     { $current-command = Set; note "Set ..."; }
+  }
+
+#  rule ctrl-attrs     { [ <ctrl-attr> ]*}
+
+  token ctrl-attr { <attr-key> {note "Ctrl attr: $/";} }
+
+  # body should not be interpreted
+  rule ctrl-body {
+    '[' ~ ']' <ctrl-body1-contents> { note "ctrl body $/"; }
+  }
+
+  rule ctrl-body1-contents  { <ctrl-body2-text> { note "ctrl b1: $/"; } }
+  token ctrl-body2-text {
+    [ <.escaped-char> ||    # an escaped character
+    <-[\\\]]>               # any character not being '\' or ']'
+    ]+
+  }
 }
+
+
+
+#------------------------------------------------------------------------------
+my Grammar $g .= new;
+my Match $m = $g.subparse(my $c = Q:to/EOSXML/);
+  $x1 a1=b xmlns:ns1='x:y:z' [
+    text e.d. $!m.n [=
+      dus $ns1:str a2='b c' a3="e f"
+      en $ns1:int a4=sdf [ blok1 ][! blok2 !]
+      $p[ d ]
+      $x[$y[$z[a]]]
+    ]
+  ]
+  EOSXML
+
+my $last-bracket-index = $c.rindex(']');
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+
+#------------------------------------------------------------------------------
+$m = $g.subparse($c = Q:to/EOSXML/);
+  $x [ $!mod1.mth2 [ $h[abc] $h[def]]]
+  EOSXML
+
+$last-bracket-index = $c.rindex(']');
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+
+#------------------------------------------------------------------------------
+$m = $g.subparse($c = Q:to/EOSXML/);
+  $x [ $h0 a="a1 b1" b=<ab ac ad ae> [ $h1 []] $h2[def]]
+  EOSXML
+
+$last-bracket-index = $c.rindex(']');
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say $m<document><tag-body>[0]<body4-contents><document>[0]<tag-spec>;
+
+#------------------------------------------------------------------------------
+$m = $g.subparse($c = Q:to/EOSXML/);
+  $x =a =!b []
+  EOSXML
+
+$last-bracket-index = $c.rindex(']');
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say $m<document>;
+
+#------------------------------------------------------------------------------
+$m = $g.subparse($c = Q:to/EOSXML/);
+  $x [
+    @$set x [ content to use later ]
+
+    # Use it twice
+    $y [ @x @x ]
+  ]
+EOSXML
+
+$last-bracket-index = $c.rindex(']');
+say "\nMatch: $m.from(), $m.to(), $c.chars(), $last-bracket-index\n", ~$m;
+say $m<document>;

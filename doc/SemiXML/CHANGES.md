@@ -2,6 +2,16 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.30.0
+  * Boolean attributes as =attr and =!attr meaning attr=1 and attr=0 resp.
+* 0.29.0
+  * Added attribute value type list to write like a=<v1 v2 v3>. Attributes are stored in StringList class now with a boolean 'use-as-list' to control output.
+  * StringList can do .value(), .List(), .Str(), .Bool(), new(), CALL-ME(), Int(), Numerical()
+* 0.28.1
+  * Added sub std-attrs to Sxml.pm6 to easily scan attrs and for id,class, style and the like and add those to the provided XML element. The attributes are then removed from the attrs hash.
+  * Added new table entries to the default config file in preparation of later changes.
+  * New configuration tables are implemented and refinable.
+  * XML generating modules could use helper subs from SemiXML::Sxml. These subs are moved into a separate module SxmlLib::SxmlHelper.
 * 0.28.0
   * **$|element [ ]** is changed into **$element [ ]**.
 * 0.27.5

@@ -7,7 +7,8 @@ use v6.c;
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML::Sxml;
+#use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Html::List {

@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 use Test;
 use SemiXML::Sxml;
@@ -11,8 +11,10 @@ my $mod = "$dir/m1.pm6";
 mkdir($dir) unless $dir.IO ~~ :e;
 
 spurt( $mod, q:to/EOMOD/);
-  use v6.c;
-  use SemiXML::Sxml;
+  use v6;
+  use Test;
+  #use SemiXML::Sxml;
+  use SxmlLib::SxmlHelper;
   use SemiXML::Text;
   use XML;
 
@@ -23,9 +25,13 @@ spurt( $mod, q:to/EOMOD/);
       XML::Element $parent, Hash $attrs, XML::Element :$content-body
       --> XML::Element
     ) {
-      # my XML::Element $p .= new(:name('p'));
-      # $parent.append($p);
-      append-element( $parent, 'p');
+
+      my XML::Element $p = append-element( $parent, 'p');
+      std-attrs( $p, $attrs);
+      ok $attrs<class>:!exists, 'class attribute removed';
+      ok $attrs<id>:!exists, 'id attribute removed';
+      ok $attrs<extra-attr>:exists, 'extra-attr attribute not removed';
+
       $parent;
     }
 
@@ -35,10 +41,6 @@ spurt( $mod, q:to/EOMOD/);
       XML::Element $parent, Hash $attrs, XML::Element :$content-body
       --> XML::Element
     ) {
-      #my XML::Element $p .= new(:name('p'));
-      #$parent.append($p);
-      #$p .= new(:name('p'));
-      #$parent.append($p);
 
       append-element( $parent, 'p');
       my XML::Element $p = append-element( $parent, 'p');
@@ -52,18 +54,35 @@ spurt( $mod, q:to/EOMOD/);
 
       $parent;
     }
+
+    method mth3 (
+      XML::Element $parent, Hash $attrs, XML::Element :$content-body
+      --> XML::Element
+    ) {
+      my XML::Element $ul = append-element( $parent, 'ul');
+      $ul.set( 'class', ~$attrs<a>);
+
+      note "attributes: ", $attrs;
+      note "B should be a list or <> does not work: ", $attrs<b>;
+
+      for @($attrs<b>)[*] -> $li-text {
+        append-element( $ul, 'li', :text($li-text));
+      }
+
+      $parent;
+    }
   }
 
   EOMOD
 
 # setup the configuration
 my Hash $config = {
-  library       => {:mod1<t>},
-  module        => {:mod1<T030::m1>}
+  ML => {:mod1<T030::m1;t>}
 }
 
+#TODO spaces around brackets seems needed.
 # setup the contents to be parsed with a substitution item in it
-my Str $content = '$!mod1.mth1 [ ]';
+my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsense [ ] ';
 
 # instantiate parser and parse with contents and config
 my SemiXML::Sxml $x .= new(:trace);
@@ -71,8 +90,9 @@ my ParseResult $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 my $xml = $x.get-xml-text;
-is $xml, '<p/>', "generated $xml";
-
+#note "Xml: $xml";
+like $xml, /'<p'/, "generated start of paragraph";
+like $xml, /'class="top-method"'/, "found class attribute in '$xml'";
 
 
 $content = '$!mod1.mth2 [ ]';
@@ -91,18 +111,27 @@ $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 $xml = $x.get-xml-text;
-is $xml, '<x><p/><p>Added 0 xml nodes</p></x>', "generated: $xml";
+note "XML: \n$xml";
+like $xml, /'<?xml version="1.0" encoding="UTF-8"?>'/, 'found prelude';
+like $xml, /'<x><p/><p>Added 0 xml nodes</p></x>'/, "generated content from mth2";
 
 
-
-$content = '$x [ $!mod1.mth2 [ $h [abc] $h[def]]]';
+$content = '$x =a =!b [ $!mod1.mth2 [ $h [abc] $h[def]]]';
 $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 $xml = $x.get-xml-text;
-say $xml;
-is $xml, '<x><p/><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>', "generated: $xml";
+like $xml, /'<x a="1" b="0"><p/><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>'/,
+           "generated: $xml";
 
+
+$content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
+$r = $x.parse( :$config, :$content);
+ok $r ~~ Match, "match $content";
+$xml = $x.get-xml-text;
+#say $xml;
+like $xml, /'<ul class="v1 v2"><li>head1</li><li>head2</li></ul>'/,
+           "generated content from mth3";
 
 #-------------------------------------------------------------------------------
 # Cleanup

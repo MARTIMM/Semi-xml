@@ -1,0 +1,101 @@
+# Sxml document with ideas on what syntax to use. Not all is implemented.
+$top-of-ideas [
+
+  # Normal element where all attribute types are coersed to string. E.g. k=<a b>
+  # will be the same as k='a b', =k will be k='1' and =!k will be k='0'.
+  $x ak1=av ak2='abc def ghi' ak3="p q r" [ ]
+
+  # With body, more than one or without
+  $x []
+  $y [][! !]
+  $z
+
+  # Method call element with all types of attributes; string, list, bool.
+  $!mod-key.method-name
+    ak1=av ak2='abc def ghi' ak3="p q r" ak4=<l1 l2 l3> =ak5 =!ak6 [ ]
+
+  # Specific spacing control around normal elements
+  $|x []  # no spacing
+  $*|x [] # space left
+  $|*x [] # space right if next char is not punctuation.
+  $**x [] # both sides have spaces.
+
+  # variable declaration, templating? (methods in it cannot run until later)
+  $@v [ $b [ Hello World! ] ]
+  # variable use
+  $x [ The well known message is ... @v ]
+  # produces
+  $x [ The well known message is ... [ $b [ Hello World! ] ] ]
+
+  # variable declaration with count from range 0 to 10 (exclusive like perl 6
+  # uses ^10). Default for r will be then 1 and counting only 0.
+  # @w is use of the body content repeated the number of times in the range and
+  # @@w is the use of count.
+  $@w r=4 [ $!mod.m1 n=@@w [ $b [ @@w ] ] ]
+  # this
+  $x [ @w ]
+  # produces
+  $x [
+    $!mod.m1 n=0 [ $b [ 0 ] ]
+    $!mod.m1 n=1 [ $b [ 1 ] ]
+    $!mod.m1 n=2 [ $b [ 2 ] ]
+    $!mod.m1 n=3 [ $b [ 3 ] ]
+  ]
+
+  # variable declaration with a range from -1 to 20 (inclusive)
+  $@z r=-1..20 [...]
+
+  # variable declaration where the value is retrieved from content. the result
+  # can be a number or a range.
+  $@nrecs r=c [ $!db.nrecs select='t1 where t1.a < 10' ]
+  # variable declaration where the range translates to list of strings
+  $@fields r=s [ $!db.fields ]
+  $@datacol [ $td [ $!db.rec col=@@fields row=row@@nrecs ] ]
+  $@recs [ $tr [ @datacol ] ]
+  $table [
+    $tr [
+      # not implemented but could be
+      $!SxmlCore.repeat element=th t1=<col1 col2> t2='spaced header col3'
+    ]
+
+    @recs
+  ]
+  # @recs would then produce in steps;
+  $tr [ $td [ $!db.rec col=col1 row=row0 ] ]
+  $tr [ $td [ $!db.rec col=col1 row=row1 ] ]
+  ...
+  $tr [ $td [ $!db.rec col=col1 row=row(nth) ] ]
+
+
+  # or use $@ for control statements
+  $table [
+    $tr [
+      $@loop sxml:control=<field1 ... fieldn> [
+        $!db.headers field=@control
+      ]
+    ]
+
+    # Set fields nrecs and data
+    $!db.query
+      sxml:nrecs=1 sxml:data=1
+      collecion=mydb.mycoll criteria='field1 > 10'
+      filter='_id=0,field1=1,...,fieldn=1'
+
+    $@loop r=@nrecs [
+      $tr [
+        $@loop f=<field1 ... fieldn> [
+          $dt [ @data rec=@r field=@f ]
+        ]
+      ]
+    ]
+  ]
+
+  # assignment forms. parsing and substitution can all take place in Grammar.
+  $@set =a1 [ ... ]               # content set to a1, content is not interpreted
+  $!mod.meth =sxml:v1 =sxml:v2    # variables v1 and v2 set by meth()
+
+  # use of asigned value
+  @a1                             # replace by value of a1 and interprete
+  $element attr=@a1               # value of attribute. stays string and not
+                                  # interpreted
+]

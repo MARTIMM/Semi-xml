@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<https://github.com/MARTIMM>;
@@ -17,7 +17,7 @@ subset ParseResult is export where $_ ~~ any(Match|Nil);
 class Sxml {
 
   has SemiXML::Grammar $!grammar;
-  has SemiXML::Actions $.actions handles < get-sxml-object >;
+  has SemiXML::Actions $!actions;
 
   has Config::DataLang::Refine $!configuration;
 
@@ -25,6 +25,8 @@ class Sxml {
   has Array $!refine;
   has Array $!refine-tables;
   has Hash $!refined-config;
+
+  has Hash $!objects = {};
 
   has Str $!filename;
   has Str $!basename;
@@ -45,7 +47,7 @@ class Sxml {
     $!refine[1] = 'xml' unless ?$!refine[OUT];
 
     # Initialize the refined config tables
-    $!refine-tables = [<E H L M P R S X>];
+    $!refine-tables = [<C D E H ML R S>];
     $!refined-config = %(@$!refine-tables Z=> ( {} xx $!refine-tables.elems ));
   }
 
@@ -81,6 +83,9 @@ class Sxml {
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
 
     # Throw an exception when there is a parsing failure
+    my $last-bracket-index = $content.rindex(']') // $content.chars;
+note "Match: $m.from(), $m.to(), $content.chars(), $last-bracket-index\n", ~$m;
+#    if $m.to != $last-bracket-index {
     if $m.to != $content.chars {
       my Str $before = $!actions.prematch();
       my Str $after = $!actions.postmatch();
@@ -120,30 +125,25 @@ class Sxml {
     Str :$filename is copy, Str :$run-code, XML::Document :$other-document
   ) {
 
-#TODO refine
-    my Hash $config = $!configuration.config;
-
-
     # set the filename if needed
     if ?$filename {
       $filename = $filename.IO.basename;
     }
 
     else {
-      $filename = $config<output><filename>;
+      $filename = $!refined-config<S><filename>;
     }
 
     # modify extension
     my Str $ext = $filename.IO.extension;
     $filename ~~ s/ '.' $ext //;
-    $filename ~= "." ~ $config<output><fileext>;
+    $filename ~= "." ~ $!refined-config<S><fileext>;
 
     # if not absolute prefix the path from the config
     if $filename !~~ m/^ '/' / {
-      my $filepath = $config<output><filepath>;
+      my $filepath = $!refined-config<S><filepath>;
       $filename = "$filepath/$filename" if $filepath;
     }
-
 
     # Get the document text
     my $document = self.get-xml-text(:$other-document);
@@ -152,7 +152,7 @@ class Sxml {
     # to send the result to.
     #
     if $run-code.defined {
-      my $cmd = $config<output><program>{$run-code};
+      my $cmd = $!refined-config<R><program>{$run-code};
 
       if $cmd.defined {
 
@@ -162,10 +162,10 @@ class Sxml {
         $filename = $filename.IO.basename;
         $cmd ~~ s:g/ '%of' /'$filename'/;
 
-        my Str $path = $config<output><filepath>;
+        my Str $path = $!refined-config<S><filepath>;
         $cmd ~~ s:g/ '%op' /'$path'/;
 
-        $ext = $config<output><fileext>;
+        $ext = $!refined-config<S><fileext>;
         $cmd ~~ s:g/ '%oe' /'$ext'/;
 
         say "Sent file to program: $cmd";
@@ -204,10 +204,14 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
+  method Str ( --> Str ) {
+    return self.get-xml-text;
+  }
+
+  #-----------------------------------------------------------------------------
   method get-xml-text ( :$other-document --> Str ) {
 
     # Get the top element name
-    #
     my $root-element;
     if ?$other-document {
       $root-element = $other-document.root.name;
@@ -219,38 +223,27 @@ class Sxml {
     }
     return '' unless $root-element.defined;
 
+    # remove namespace part from root element
     $root-element ~~ s/^(<-[:]>+\:)//;
 
     my Str $document = '';
 
-    # Get all configuration items in one hash, later settings overrides
-    # previous Therefore defaults first, then from user config in roles then
-    # the settings from the sxml file.
-    #
-#TODO refine
-    my Hash $config = $!configuration.config;
-
-    # If there is one, try to generate the xml
+    # If there is a root element, try to generate the xml
     if ?$root-element {
 
       # Check if a http header must be shown
-      my Hash $http-header = $config<option><http-header> // {};
-
-      if ? $http-header<show> {
-        for $http-header.kv -> $k, $v {
-          next if $k ~~ 'show';
+      if $!refined-config<C><header-show> and ? $!refined-config<H> {
+        for $!refined-config<H>.kv -> $k, $v {
           $document ~= "$k: $v\n";
         }
         $document ~= "\n";
       }
 
       # Check if xml prelude must be shown
-      my Hash $xml-prelude = $config<option><xml-prelude> // {};
-
-      if ? $xml-prelude<show> {
-        my $version = $xml-prelude<version> // '1.0';
-        my $encoding = $xml-prelude<encoding> // 'utf-8';
-        my $standalone = $xml-prelude<standalone>;
+      if ? $!refined-config<C><xml-show> {
+        my $version = $!refined-config<C><xml-version> // '1.0';
+        my $encoding = $!refined-config<C><xml-encoding> // 'utf-8';
+        my $standalone = $!refined-config<C><xml-standalone>;
 
         $document ~= '<?xml version="' ~ $version ~ '"';
         $document ~= ' encoding="' ~ $encoding ~ '"';
@@ -259,12 +252,10 @@ class Sxml {
       }
 
       # Check if doctype must be shown
-      my Hash $doc-type = $config<option><doctype> // {};
-
-      if ? $doc-type<show> {
-        my Hash $entities = $doc-type<entities> // {};
+      if ? $!refined-config<C><doctype-show> {
+        my Hash $entities = $!refined-config<E> // {};
         my Str $start = ?$entities ?? " [\n" !! '';
-        my Str $end = ?$entities ?? "]>\n" !! ">\n";
+        my Str $end = ?$entities ?? "]>" !! ">";
         $document ~= "<!DOCTYPE $root-element$start";
         for $entities.kv -> $k, $v {
           $document ~= "<!ENTITY $k \"$v\">\n";
@@ -281,43 +272,13 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  multi method get-option ( Array $hashes, Str $option --> Any ) {
-    for $hashes.list -> $h {
-      if $h{$option}:exists {
-        return $h{$option};
-      }
-    }
+  multi method get-config ( Str:D :$table, Str:D :$key --> Any ) {
 
-    return Any;
-  }
-
-
-  multi method get-option (
-    Str :$section = '', Str :$sub-section = '', Str :$option = ''
-    --> Any
-  ) {
-    my Array $hashes;
-    for ( $!configuration.config) -> $h {
-      if $h{$section}:exists {
-        my $e = $h{$section};
-
-        if $e{$sub-section}:exists {
-          $hashes.push($e{$sub-section});
-        }
-
-        else {
-          $hashes.push($e);
-        }
-      }
-    }
-
-    for $hashes.list -> $h {
-      if $h{$option}:exists {
-        return $h{$option};
-      }
-    }
-
-    return Any;
+    return (
+      $!refined-config{$table}:exists
+        ?? $!refined-config{$table}{$key}
+        !! Any
+    );
   }
 
   #-----------------------------------------------------------------------------
@@ -327,15 +288,11 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  method Str ( --> Str ) {
-    return self.get-xml-text;
-  }
-
-  #-----------------------------------------------------------------------------
+#TODO check if still needed
   method get-current-filename ( --> Str ) {
-#TODO refine
-    return [~] $!configuration.config<output><filepath>,
-               '/', $!configuration.config<output><filename>;
+
+    my Hash $C = $!refined-config<C>;
+    return "$C<filepath>/$C<filename>.$C<fileext>";
   }
 
   #-----------------------------------------------------------------------------
@@ -347,7 +304,8 @@ class Sxml {
     # 2) load the SemiXML.toml from resources directory
 
 # There is a bug locally to this package. Resources get wrong path when using
-# local distribution. However, strange as it is, not on Travis!
+# local distribution. However, strange as it is, not on Travis! This is Caused
+# by wrong? use of PERL6LIB env variable.
 #note "\nR: ", %?RESOURCES.perl;
 #note "\nC: ", %?RESOURCES<SemiXML.toml>;
 
@@ -355,7 +313,7 @@ class Sxml {
 #if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
 #  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
 #}
-# pickup only one config file. Will always be there.
+# pick only one config file. Will always be there.
 #self!load-config( :config-name($rp.IO.abspath), :!merge);
 
     self!load-config( :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge);
@@ -402,74 +360,131 @@ class Sxml {
 
     # set filename and path if not set, extension is set in default config
     my Hash $c := $!configuration.config;
-    $c<output> = {} unless $c<output>:exists;
+    $c<S> = {} unless $c<S>:exists;
 
-    if $c<output><filename>:!exists {
+    if $c<S><filename>:!exists {
       if ?$!basename {
         # lop off the extension from the above devised config name
         $!basename ~~ s/ '.toml' $// if ?$!basename;
-        $c<output><filename> = $!basename;
+        $c<S><filename> = $!basename;
       }
 
       else {
         $!basename = $*PROGRAM.basename;
         $fext = $*PROGRAM.extension;
         $!basename ~~ s/ '.' $fext //;
-        $c<output><filename> = $!basename;
+        $c<S><filename> = $!basename;
       }
     }
 
-    if $c<output><filepath>:!exists {
+    if $c<S><filepath>:!exists {
       if ?$fdir {
-        $c<output><filepath> = $fdir;
+        $c<S><filepath> = $fdir;
       }
 
       else {
         $fdir = $*PROGRAM.abspath;
         my $bname = $!basename = $*PROGRAM.basename;
         $fdir ~~ s/ '/'? $bname //;
-        $c<output><filepath> = $fdir;
+        $c<S><filepath> = $fdir;
       }
     }
 
+    note "\nComplete configuration: ", $!configuration.perl,
+         "\nRefined configuration tables" if $!trace;
+
     # Fill the special purpose tables with the refined searches in the config
     for @$!refine-tables {
-      when any(<P E>) {
+      when any(<C E>) {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[OUT], $!basename));
-note "\nRA: ", $table, ', ', $!refine[OUT], ', ', $!basename;
-note "RC: $table, ", $!refined-config{$table}.perl;
+
+        note "Table $table: out=", $!refine[OUT], ', basename=', $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
-      when any(<H L M R>) {
+      when any(<D H ML R>) {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[IN], $!basename));
-note "\nRA: ", $table, ', ', $!refine[IN], ', ', $!basename;
-note "RC: $table, ", $!refined-config{$table}.perl;
+
+        note "Table $table: in=", $!refine[IN], ', basename=', $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
-      when any(<S X>) {
+      when any(<S>) {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!basename));
-note "\nRA: ", $table, ', ', $!refine[IN], ', ', $!basename;
-note "RC: $table, ", $!refined-config{$table}.perl;
+
+        note "Table $table: basename=", $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
     }
 
     # instantiate modules specified in the configuration
-#    $!actions.process-modules(
-#      :lib($!configuration.config<library> // {}),
-#      :mod($!configuration.config<module> // {}),
-#    );
+    self!process-modules;
+  }
 
-    $!actions.process-modules(
-      :lib($!refined-config<L>), :mod($!refined-config<M>)
-    );
+  #-----------------------------------------------------------------------------
+  # Get modulenames and library paths. Format of an entry in table ML is
+  # mod-key => 'mod-name[;lib-path]'
+  method !process-modules ( ) {
 
-    note "\nConfiguration: ", $!configuration.perl if $!trace;
+    # no entries, no work
+    return unless ? $!refined-config<ML>;
+
+    my Hash $lib = {};
+    my Hash $mod = {};
+    for $!refined-config<ML>.keys -> $modkey {
+      next unless ? $!refined-config<ML>{$modkey};
+
+      ( my $m, my $l) = $!refined-config<ML>{$modkey}.split(';');
+      $lib{$modkey} = $l if $l;
+      $mod{$modkey} = $m;
+    }
+
+    # cleanup old objects
+    for $!objects.keys -> $k {
+      undefine $!objects{$k};
+      $!objects{$k}:delete;
+    }
+
+    # load and instantiate
+    for $mod.kv -> $key, $value {
+      if $!objects{$key}:!exists {
+        if $lib{$key}:exists {
+
+#TODO test for duplicate paths
+          my $repository = CompUnit::Repository::FileSystem.new(
+            :prefix($lib{$key})
+          );
+          CompUnit::RepositoryRegistry.use-repository($repository);
+        }
+
+        require ::($value);
+        my $obj = ::($value).new;
+        $!objects{$key} = $obj;
+      }
+    }
+
+    # Place in actions object.
+    $!actions.objects = $!objects;
+  }
+
+  #-----------------------------------------------------------------------------
+  method get-sxml-object ( Str $class-name ) {
+
+    my $object;
+    for $!objects.keys -> $ok {
+      if $!objects{$ok}.^name eq $class-name {
+        $object = $!objects{$ok};
+        last;
+      }
+    }
+
+    $object;
   }
 
   #-----------------------------------------------------------------------------
@@ -504,8 +519,10 @@ note "RC: $table, ", $!refined-config{$table}.perl;
     }
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   #-----------------------------------------------------------------------------
+#TODO $config should come indirectly from $!refined-config
   multi sub save-xml (
     Str:D :$filename, XML::Element:D :$document!,
     Hash :$config = {}, Bool :$formatted = False,
@@ -667,11 +684,28 @@ note "RC: $table, ", $!refined-config{$table}.perl;
     $node.after($element);
     $element;
   }
+
+  #-----------------------------------------------------------------------------
+  sub std-attrs (
+    XML::Element $node, Hash $attributes
+  ) is export {
+
+    return unless ?$attributes;
+
+    for $attributes.keys {
+      when /'class'|'style'|'id'/ {
+        $node.set( $_, $attributes{$_});
+        $attributes{$_}:delete;
+      }
+    }
+  }
+}}
 }
 
+#`{{
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) is export {
-  return ~$x.get-xml-text;
+  return $x.get-xml-text;
 }
-
+}}

@@ -4,7 +4,8 @@ use v6.c;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML::Sxml;
+#use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
@@ -87,4 +88,3 @@ class Bug {
     $parts[$entry]<code>;
   }
 }
-

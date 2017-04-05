@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 use Test;
 use SemiXML::Sxml;
 
@@ -33,7 +33,7 @@ $html [
 EOSX
 
 # Parse
-my SemiXML::Sxml $x .= new(:trace);
+my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<xml xml>]));
 $x.parse(:$filename);
 
 my Str $xml-text = ~$x;

@@ -1,10 +1,10 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Docbook5::Basic:ver<0.3.1> {
@@ -139,4 +139,3 @@ class Docbook5::Basic:ver<0.3.1> {
     $parent;
   }
 }
-

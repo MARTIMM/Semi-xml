@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 use Test;
 use SemiXML::Sxml;
 
@@ -39,35 +39,36 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-  option => {
-    doctype => {
-      show => 1,                        # Default 0
-    },
-
-    xml-prelude => {
-      show => 1,                        # Default 0
-      version => 1.1,                   # Default 1.0
-      encoding => 'UTF-8',              # Default UTF-8
-    }
+  C => {
+    xml-show => True,
+    xml-version => 1.1,
+    header-show => True,
   },
 
-  output => {
+  H => {
+    html => {
+      Content-Type => 'text/html; charset="utf-8"',
+    },
+  },
+
+  S => {
     filename => $f2bn,                  # Default current file
     filepath => $dir,
     fileext => 'html',                  # Default xml
-  }
+  },
 }
 
 # Parse
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<html html>]));
 $x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;
-#note $xml-text;
+note "Xml:\n", $xml-text;
 
-ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
+like $xml-text, /:s 'text/html; charset="utf-8"'/, 'header found';
+like $xml-text, /:s '<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
-ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
+like $xml-text, /:s '<!DOCTYPE' 'html>'/, 'Doctype found';
 
 # Write xml out to file. Basename explicitly set.
 $x.save(:filename($f1bn));

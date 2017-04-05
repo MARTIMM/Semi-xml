@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 use Test;
 use SemiXML::Sxml;
 
@@ -8,69 +8,33 @@ my Str $cfg = "$dir/SemiXML.toml";
 mkdir $dir unless $dir.IO ~~ :d;
 spurt $cfg, qq:to/EOCONFIG/;
 
-  # Entity tables --------------------------------------------------------------
-  [ E ]
-    copy                  = '&#xa9;'
-
+  # Content tables --------------------------------------------------------------
   # out = db5 (for docbook5)
-  [ E.db5 ]
-    copy                  = '&#xa9;'
-    nbsp                  = ' '
+  #[ C.db5 ]
+  #  inline                = [ 'emphasis']
+  #  space-preserve        = [ 'programlisting']
+  #  xml-show              = true
+  #  doctype-show          = true
 
-  # Http tables ----------------------------------------------------------------
-  [ H ]
+  # Dependency tables --------------------------------------------------------
+  #[ D ]
 
-  # out = email
-  [ H.email ]
-    Content-Type          = 'text/html; charset="utf-8"'
-    From                  = 'my-addr@gmail.com'
-    User-Agent            = 'SemiXML'
+  # Entity tables --------------------------------------------------------------
+  #[ E.db5 ]
+  #  copy                  = '&#xa9;'
+  #  nbsp                  = ' '
 
-  # Library tables -------------------------------------------------------------
-  [ L ]
+  # Header tables ----------------------------------------------------------------
+  #[ H ]
 
   # Module tables --------------------------------------------------------------
-  [ M ]
-    SxmlCore              = 'SxmlLib::SxmlCore'
-
-  # in = email
-  [ M.html ]
+  [ ML.html ]
     lorem                 = 'SxmlLib::LoremIpsum'
 
-  # in = db5
-  [ M.db5 ]
+  [ ML.db5 ]
     lorem                 = 'SxmlLib::LoremIpsum'
     Db5b                  = 'SxmlLib::Docbook5::Basic'
     Db5f                  = 'SxmlLib::Docbook5::FixedLayout'
-
-  # Prefix tables --------------------------------------------------------------
-  [ P ]
-    xml-show              = false
-    xml-version           = '1.0'
-    xml-encoding          = 'UTF-8'
-  #  xml-standalone        = 'yes'
-    doctype-show          = false
-    http-show             = false
-
-  # out = xml
-  [ P.xml ]
-    xml-show              = true
-    doctype-show          = true
-
-  # out = html
-  [ P.html ]
-    inline                = [ 'b', 'i', 'strong']
-    non-nesting           = [ 'script', 'style']
-    space-preserve        = [ 'pre' ]
-    xml-show              = true
-    doctype-show          = true
-
-  # out = db5 (for docbook5)
-  [ P.db5 ]
-    inline                = [ 'emphasis']
-    space-preserve        = [ 'programlisting']
-    xml-show              = true
-    doctype-show          = true
 
   # Run tables -----------------------------------------------------------------
   [ R ]
@@ -82,15 +46,6 @@ spurt $cfg, qq:to/EOCONFIG/;
     pdf                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
     xhtml                 = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
     chunk                 = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
-
-  # Storage tables -------------------------------------------------------------
-  [ S ]
-  #  filename              = 'default is basename of sxml file'
-  #  filepath              = 'default is path of sxml file'
-  fileext               = 'xml'
-
-  # X dependency tables --------------------------------------------------------
-  [ X ]
 
   EOCONFIG
 
@@ -112,7 +67,13 @@ my SemiXML::Sxml $x;
 #exit;
 
 $x .= new( :trace, :merge, :refine([ <db5 pdf>]));
+isa-ok $x, 'SemiXML::Sxml';
+
 $x.parse(:filename($f));
+
+done-testing;
+exit;
+
 my Str $xml-text = ~$x;
 note $xml-text;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';

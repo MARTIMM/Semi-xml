@@ -1,8 +1,9 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 use XML;
-use SemiXML::Sxml;
+#use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
@@ -10,6 +11,11 @@ unit package SxmlLib:auth<https://github.com/MARTIMM>;
 #-------------------------------------------------------------------------------
 # Core module with common used methods
 class SxmlCore {
+
+  #-----------------------------------------------------------------------------
+  method is-method-inline ( Str $method-name --> Bool ) {
+    $method-name ~~ any(<date date-time>);
+  }
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
