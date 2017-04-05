@@ -87,7 +87,7 @@ subtest 'test multi liners', {
 #-------------------------------------------------------------------------------
 sub parse ( Str $content --> Str ) {
 
-  state SemiXML::Sxml $x .= new;
+  state SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
   my ParseResult $r = $x.parse(:$content);
   ok $r ~~ Match, "match $content";
 
@@ -119,4 +119,3 @@ parse('$|*body [ ]');
 parse('$.Mod.meth a=b c="a b" [ ]');
 
 parse('$!Mod.meth a=b c="a b" [ ]');
-
