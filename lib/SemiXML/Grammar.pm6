@@ -82,9 +82,9 @@ grammar Grammar {
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
   rule tag-body { [
-      '[!=' ~ '!]'    <body1-contents> ||
+      '[!=' ~ '!]'    <body1-contents> {note "fixed 1: $/";}||
       '[!' ~  '!]'    <body2-contents> ||
-      '[=' ~   ']'    <body3-contents> ||
+      '[=' ~   ']'    <body3-contents> {note "fixed 3: $/";}||
       '[' ~    ']'    <body4-contents>
     ]
   }

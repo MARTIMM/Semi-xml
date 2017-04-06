@@ -49,30 +49,30 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-  option => {
-    doctype => {
-      show => 1,                        # Default 0
-    },
-
-    xml-prelude => {
-      show => 1,                        # Default 0
-      version => 1.1,                   # Default 1.0
-      encoding => 'UTF-8',              # Default UTF-8
+  C => {
+    out-fmt => {
+      doctype-show => True,
+      xml-show => True,
+      xml-version => 1.1,
+      xml-encoding => 'UTF-8',
     }
   },
 
-  output => {
-    filename => 'f1',                   # Default current file
-    filepath => 't/D103',               # Default path '.'
-    fileext => 'html',                  # Default xml
+  S => {
+    test-file => {
+      filename => 'f1',
+      filepath => 't/D103',
+      fileext => 'html',
+    }
   }
 }
 
 # Parse
-my SemiXML::Sxml $x .= new;     #(:trace);
+my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config);
+
 my Str $xml-text = ~$x;
-#note $xml-text;
+note $xml-text;
 
 
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
