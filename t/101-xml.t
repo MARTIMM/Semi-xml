@@ -33,10 +33,12 @@ $html [
 EOSX
 
 # Parse
-my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<xml xml>]));
+my SemiXML::Sxml $x .= new( :merge, :refine([<xml xml>]));
 $x.parse(:$filename);
 
 my Str $xml-text = ~$x;
+#note $xml-text;
+
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text !~~ m/\<head\>/, 'Head not found';
 ok $xml-text ~~ ms/Data from file/, 'Section text found';
@@ -45,9 +47,6 @@ unlike $xml-text, /:s '#' 'outside' 'h1' /, 'comment removed';
 unlike $xml-text, /:s '#' 'trrr' /, 'comment also removed';
 like $xml-text, /:s '#' 'inside' 'protected' 'body' /, 'comment not removed';
 like $xml-text, /:s 'header' '#' 'th' /, 'escaped # not removed';
-
-#note $xml-text;
-
 
 # Write xml out to file. Default extention is .xml
 my $fout = $filename;

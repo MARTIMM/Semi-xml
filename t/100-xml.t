@@ -12,7 +12,7 @@ use SemiXML::Sxml;
 #   test attributes
 #-------------------------------------------------------------------------------
 # Setup
-my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<in-fmt out-fmt>]));
+my SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
 isa-ok $x, 'SemiXML::Sxml', $x.^name;
 
 # Setup the text to parse
@@ -36,16 +36,18 @@ EOSX
 $x.parse(
   content => $sx-text,
   config => {
-    'C.out-fmt' => {
-      xml-show => True,
-      doctype-show => True
-    },
+      C => {
+        out-fmt => {
+        xml-show => True,
+        doctype-show => True
+      },
+    }
   }
 );
 
 # See the result
 my Str $xml-text = ~$x;
-note $xml-text;
+#note $xml-text;
 
 like $xml-text, /:s '<?xml' 'version="1.0"' 'encoding="UTF-8"?>'/,
    'Xml prelude found';
