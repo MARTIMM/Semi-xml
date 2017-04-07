@@ -1,7 +1,7 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
+unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use SemiXML::Text;
 use XML;
