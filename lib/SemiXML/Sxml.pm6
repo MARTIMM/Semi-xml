@@ -396,7 +396,7 @@ class Sxml {
 
     # Fill the special purpose tables with the refined searches in the config
     for @$!refine-tables {
-      when any(<C E>) {
+      when any(<C E H R>) {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[OUT], $!basename));
@@ -405,7 +405,7 @@ class Sxml {
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
-      when any(<D H ML R>) {
+      when any(<D ML>) {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[IN], $!basename));
@@ -413,8 +413,20 @@ class Sxml {
         note "Table $table: in=", $!refine[IN], ', basename=', $!basename,
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
+#`{{
+      when 'R' {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine(
+            |( $table, $!refine[IN], $!refine[OUT], $!basename)
+          );
 
-      when any(<S>) {
+        note "Table $table: basename=", $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+      }
+}}
+
+      when 'S' {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!basename));
