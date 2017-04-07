@@ -81,10 +81,11 @@ grammar Grammar {
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]+ }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
-  rule tag-body { [
-      '[!=' ~ '!]'    <body1-contents> {note "fixed 1: $/";}||
+  # important to use token instead of rule to get spaces in the body*-contents
+  token tag-body { [
+      '[!=' ~ '!]'    <body1-contents> ||
       '[!' ~  '!]'    <body2-contents> ||
-      '[=' ~   ']'    <body3-contents> {note "fixed 3: $/";}||
+      '[=' ~   ']'    <body3-contents> ||
       '[' ~    ']'    <body4-contents>
     ]
   }
