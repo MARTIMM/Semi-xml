@@ -200,7 +200,7 @@ class Sxml {
     else {
 
       spurt( $filename, $document);
-      note "Saved file in $filename";
+      note "Saved file in $filename" if $!trace;
     }
   }
 
