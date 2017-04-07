@@ -328,12 +328,11 @@ class Actions {
 
         # Any piece of found text in bodies. Filter out any comments.
         when Str {
-
           my Str $txt = $_;
           if ? $txt {
 #TODO maybe all lines prefixed with a space and one at the end.
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
-            $parent.append(SemiXML::Text.new(:text($$txt)));
+            $parent.append(SemiXML::Text.new(:text($txt)));
           }
         }
 
