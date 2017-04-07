@@ -97,8 +97,8 @@
 
     # [H] Http table, only with out-key and file. Looked up after parsing.
     [ H ]
-    [ H.in-key ]
-    [ H.in-key.file ]
+    [ H.out-key ]
+    [ H.out-key.file ]
 
     # [ML] Combined module and library table. Only with in-key and file.
     # Looked up just before parsing.
@@ -107,14 +107,14 @@
     [ ML.in-key.file ]
       mod-key = 'Module[;library]'
 
-    # [R] Run table only with in-key and file. The out-key is used to select
-    # the command line. Looked up after parsing. Used to send the total (after
-    # looking into D and E) to a program further processing instead of saving
+    # [R] Run table only with in-key and file. The run-key is used to select
+    # the command line. Looked up after parsing. Used to send the total
+    # finished document to a program for further processing instead of saving
     # it to disk.
     [ R ]
     [ R.in-key ]
     [ R.in-key.file ]
-      out-key = 'command line'
+      run-key = 'command line'
 
     # [S] Storage table, only with file. Looked up after parsing.
     [ S ]
