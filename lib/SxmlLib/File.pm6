@@ -4,8 +4,7 @@ use v6.c;
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-#use SemiXML::Sxml;
-use SxmlLib::SxmlHelper;
+use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 class File {
@@ -18,8 +17,8 @@ class File {
                    XML::Element :$content-body
                  ) {
 
-    my $type = $attrs<type> // 'reference';
-    my $reference = $attrs<reference> // '';
+    my $type = ~$attrs<type> // 'reference';
+    my $reference = ~$attrs<reference> // '';
     my $document;
     given $type {
 
