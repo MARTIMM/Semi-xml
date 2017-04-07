@@ -4,10 +4,9 @@ use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing http-header
-# Options under 
+# Options under
 #-------------------------------------------------------------------------------
 # Setup
-#
 my $content = q:to/EOSX/;
 $html [
   $body [
@@ -19,35 +18,32 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-  option => {
-    http-header => {
-      show => 1,
-      content-type => 'text/html',
-      content-language => 'en'
-    },
-
-    doctype => {
-      show => 1,                        # Default 0
-    },
-
-    xml-prelude => {
-      show => 1,                        # Default 0
+  C => {
+    out-fmt => {
+      header-show =>  True,
+      doctype-show => True,
+      xml-show => True
     }
   },
-}
+
+  H => {
+    out-fmt => {
+      content-type => 'text/html',
+      content-language => 'en'
+    }
+  }
+};
 
 #-------------------------------------------------------------------------------
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :$content, :$config);
-
 my Str $xml-text = ~$x;
-#say $xml-text;
+#note $xml-text;
 
-ok $xml-text ~~ m:s/ 'content-type' ':' 'text/html' /, 'Http content type';
-ok $xml-text ~~ m:s/ 'content-language' ':' 'en' /, 'Http content language';
+like $xml-text, /:s 'content-type' ':' 'text/html' /, 'Http content type';
+like $xml-text, /:s 'content-language' ':' 'en' /, 'Http content language';
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#
 done-testing();
 exit(0);

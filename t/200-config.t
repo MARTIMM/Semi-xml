@@ -47,6 +47,8 @@ spurt $cfg, qq:to/EOCONFIG/;
     xhtml                 = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
     chunk                 = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
+  [ S.f200 ]
+    filename              = 'target200'
   EOCONFIG
 
 my Str $f = "$dir/f200.sxml";
@@ -60,29 +62,28 @@ spurt $f, q:to/EOSXML/;
   EOSXML
 
 #-------------------------------------------------------------------------------
+#TODO spacing around $!mod.methods()
+
 my SemiXML::Sxml $x;
 
 #is 1,1,'yes';
 #done-testing;
 #exit;
 
-$x .= new( :trace, :merge, :refine([ <db5 pdf>]));
+$x .= new( :!trace, :merge, :refine([ <db5 pdf>]));
 isa-ok $x, 'SemiXML::Sxml';
 
 $x.parse(:filename($f));
 
-done-testing;
-exit;
-
 my Str $xml-text = ~$x;
-note $xml-text;
+#note $xml-text;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 $x.save;
 
 
-#$x.parse(:content(slurp($f)));
-#$xml-text = ~$x;
-#like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
+$x.parse(:content(slurp($f)));
+$xml-text = ~$x;
+like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 
 #note $xml-text;
 
@@ -91,7 +92,7 @@ $x.save;
 # cleanup
 done-testing;
 
-#unlink $cfg;
-#unlink $f;
-#unlink "$dir/target200.xml";
-#rmdir $dir;
+unlink $cfg;
+unlink $f;
+unlink "$dir/target200.xml";
+rmdir $dir;
