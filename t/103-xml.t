@@ -68,11 +68,11 @@ my Hash $config = {
 }
 
 # Parse
-my SemiXML::Sxml $x .= new( :trace, :merge, :refine([<in-fmt out-fmt>]));
+my SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config);
 
 my Str $xml-text = ~$x;
-note $xml-text;
+#note $xml-text;
 
 
 ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
