@@ -29,14 +29,14 @@ class Html::List {
                     XML::Node :$content-body   # Ignored
                   ) {
 
-    $!directory = $attrs<directory>:delete // '.';
-    $!ref-attr = $attrs<ref-attr>:delete // 'href';
+    $!directory = ~($attrs<directory>:delete) // '.';
+    $!ref-attr = ~($attrs<ref-attr>:delete) // 'href';
 
     # Set the numbers into the array and fill it up using the last number
     # to the maximum length of C-MAX-LEVEL. So if arrey = [2,3] then
     # result will be [2,3,3,3,3,3,3]
     #
-    my @list = map {.Int}, ($attrs<header>:delete).split(',');
+    my @list = map {.Int}, (~($attrs<header>:delete)).split(',');
     @!header.push: |@list;
     @!header.push: |(@list[@list.end] xx (C-MAX-LEVEL - +@list));
 
