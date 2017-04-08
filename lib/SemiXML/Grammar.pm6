@@ -2,6 +2,7 @@ use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<https://github.com/MARTIMM>;
+#parser fails when: use Grammar::Tracer;
 
 #-------------------------------------------------------------------------------
 grammar Grammar {
@@ -93,11 +94,10 @@ grammar Grammar {
   # The content can be anything mixed with document tags except following the
   # no-elements character. To use the brackets and other characters in the
   # text, the characters must be escaped.
-  #
-  rule body1-contents  { <body2-text> }
-  rule body2-contents  { <body2-text> }
-  rule body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
-  rule body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
+  token body1-contents  { <body2-text> }
+  token body2-contents  { <body2-text> }
+  token body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
+  token body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
 
   token body1-text {
     [ <.escaped-char> ||    # an escaped character
