@@ -82,6 +82,15 @@ subtest 'test multi liners', {
     EOXML
 
   is $xml, '<aa><bb><cc/></bb></aa>', "3 tags: $xml";
+
+  $xml = parse(Q:q:to/EOXML/);
+    $aa [
+      $bb [!$x[abc]!]
+    ]
+    EOXML
+
+  is $xml, '<aa><bb>$x[abc]</bb></aa>', "2 tags and preserving content: $xml";
+
 }
 
 #-------------------------------------------------------------------------------
