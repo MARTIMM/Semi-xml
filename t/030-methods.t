@@ -62,8 +62,8 @@ spurt( $mod, q:to/EOMOD/);
       my XML::Element $ul = append-element( $parent, 'ul');
       $ul.set( 'class', ~$attrs<a>);
 
-      note "attributes: ", $attrs;
-      note "B should be a list or <> does not work: ", $attrs<b>;
+#      note "attributes: ", $attrs;
+#      note "B should be a list or <> does not work: ", ~$attrs<b>;
 
       for @($attrs<b>)[*] -> $li-text {
         append-element( $ul, 'li', :text($li-text));
@@ -85,7 +85,7 @@ my Hash $config = {
 my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsense [ ] ';
 
 # instantiate parser and parse with contents and config
-my SemiXML::Sxml $x .= new(:trace);
+my SemiXML::Sxml $x .= new(:!trace);
 my ParseResult $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
@@ -111,7 +111,7 @@ $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 $xml = $x.get-xml-text;
-note "XML: \n$xml";
+#note "XML: \n$xml";
 like $xml, /'<?xml version="1.0" encoding="UTF-8"?>'/, 'found prelude';
 like $xml, /'<x><p/><p>Added 0 xml nodes</p></x>'/, "generated content from mth2";
 
@@ -129,7 +129,7 @@ $content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
 $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 $xml = $x.get-xml-text;
-#say $xml;
+#note $xml;
 like $xml, /'<ul class="v1 v2"><li>head1</li><li>head2</li></ul>'/,
            "generated content from mth3";
 
