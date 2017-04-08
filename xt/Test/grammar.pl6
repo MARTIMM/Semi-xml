@@ -80,7 +80,7 @@ grammar Grammar {
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]+ }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
-  rule tag-body { [
+  token tag-body { [
       '[!=' ~ '!]'    <body1-contents> ||
       '[!' ~  '!]'    <body2-contents> ||
       '[=' ~   ']'    <body3-contents> ||
@@ -92,10 +92,10 @@ grammar Grammar {
   # no-elements character. To use the brackets and other characters in the
   # text, the characters must be escaped.
   #
-  rule body1-contents  { <body2-text> }
-  rule body2-contents  { <body2-text> }
-  rule body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
-  rule body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
+  token body1-contents  { <body2-text> }
+  token body2-contents  { <body2-text> }
+  token body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
+  token body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
 
   token body1-text {
     [ <.escaped-char> ||    # an escaped character
@@ -158,7 +158,7 @@ grammar Grammar {
   token ctrl-attr { <attr-key> {note "Ctrl attr: $/";} }
 
   # body should not be interpreted
-  rule ctrl-body {
+  token ctrl-body {
     '[' ~ ']' <ctrl-body1-contents> { note "ctrl body $/"; }
   }
 
