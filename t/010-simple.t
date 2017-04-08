@@ -85,10 +85,12 @@ subtest 'test multi liners', {
 }
 
 #-------------------------------------------------------------------------------
-sub parse ( Str $content --> Str ) {
+sub parse ( Str $content is copy --> Str ) {
 
-  state SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
+  state SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
   my ParseResult $r = $x.parse(:$content);
+  $content ~~ s:g/\n/ /;
+  $content ~~ s:g/\s+/ /;
   ok $r ~~ Match, "match $content";
 
   my Str $xml = ~$x;
