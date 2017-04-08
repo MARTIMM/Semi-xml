@@ -61,14 +61,14 @@ sub process-sxml (
   --> Array
 ) {
 
-  my Str $deps;
+  my Array $deps;
   my SemiXML::Sxml $x .= new( :$trace, :$merge, :$refine);
 
   if $filename.IO ~~ :r {
     $x.parse(:$filename);
     $filename ~~ s/ '.' $filename.IO.extention //;
     $x.save( :run-code($run), :$filename);
-    $deps = $x.get-config( :table<D>, :key<files>) // '';
+    $deps = $x.get-config( :table<D>, :key<files>) // [];
   }
 
   else {
