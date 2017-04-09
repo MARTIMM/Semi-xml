@@ -53,6 +53,11 @@ my Hash $config = {
     out-fmt => {
       doctype-show => True,
       xml-show => True,
+    },
+  },
+
+  X => {
+    out-fmt => {
       xml-version => 1.1,
       xml-encoding => 'UTF-8',
     }
@@ -68,7 +73,7 @@ my Hash $config = {
 }
 
 # Parse
-my SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
+my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config);
 
 my Str $xml-text = ~$x;

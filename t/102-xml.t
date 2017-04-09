@@ -41,8 +41,11 @@ EOSX
 my Hash $config = {
   C => {
     xml-show => True,
-    xml-version => 1.1,
     header-show => True,
+  },
+
+  X => {
+    xml-version => 1.1,
   },
 
   H => {
@@ -59,7 +62,7 @@ my Hash $config = {
 }
 
 # Parse
-my SemiXML::Sxml $x .= new( :merge, :refine([<html html>]));
+my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<html html>]));
 $x.parse( :$filename, :$config);
 
 my Str $xml-text = ~$x;

@@ -47,7 +47,7 @@ class Sxml {
     $!refine[1] = 'xml' unless ?$!refine[OUT];
 
     # Initialize the refined config tables
-    $!refine-tables = [<C D E H ML R S>];
+    $!refine-tables = [<C D E F H ML R S X>];
     $!refined-config = %(@$!refine-tables Z=> ( {} xx $!refine-tables.elems ));
   }
 
@@ -151,9 +151,9 @@ class Sxml {
 
     # If a run code is defined, use that code as a key to find the program
     # to send the result to.
-    #
     if $run-code.defined {
-      my $cmd = $!refined-config<R><program>{$run-code};
+#      my $cmd = $!refined-config<R><program>{$run-code};
+      my $cmd = $!refined-config<R>{$run-code};
 
       if $cmd.defined {
 
@@ -242,9 +242,9 @@ class Sxml {
 
       # Check if xml prelude must be shown
       if ? $!refined-config<C><xml-show> {
-        my $version = $!refined-config<C><xml-version> // '1.0';
-        my $encoding = $!refined-config<C><xml-encoding> // 'utf-8';
-        my $standalone = $!refined-config<C><xml-standalone>;
+        my $version = $!refined-config<X><xml-version> // '1.0';
+        my $encoding = $!refined-config<X><xml-encoding> // 'utf-8';
+        my $standalone = $!refined-config<X><xml-standalone>;
 
         $document ~= '<?xml version="' ~ $version ~ '"';
         $document ~= ' encoding="' ~ $encoding ~ '"';
@@ -396,16 +396,8 @@ class Sxml {
 
     # Fill the special purpose tables with the refined searches in the config
     for @$!refine-tables {
-      when any(<C E H R>) {
-        my $table = $_;
-        $!refined-config{$table} =
-          $!configuration.refine(|( $table, $!refine[OUT], $!basename));
-
-        note "Table $table: out=", $!refine[OUT], ', basename=', $!basename,
-        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
-      }
-
-      when any(<D ML>) {
+      # document control
+      when any(<D F ML R>) {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[IN], $!basename));
@@ -413,6 +405,17 @@ class Sxml {
         note "Table $table: in=", $!refine[IN], ', basename=', $!basename,
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
+
+      # output control
+      when any(<C E H X>) {
+        my $table = $_;
+        $!refined-config{$table} =
+        $!configuration.refine(|( $table, $!refine[OUT], $!basename));
+
+        note "Table $table: out=", $!refine[OUT], ', basename=', $!basename,
+        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+      }
+
 #`{{
       when 'R' {
         my $table = $_;
@@ -425,7 +428,6 @@ class Sxml {
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 }}
-
       when 'S' {
         my $table = $_;
         $!refined-config{$table} =
