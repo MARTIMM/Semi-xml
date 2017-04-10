@@ -12,18 +12,6 @@
   doctype-show      = true
 
 #------------------------------------------------------------------------------
-[ F.html ]
-  inline            = [
-    'a', 'b', 'big', 'i', 'strong', 'small', 'tt', 'abbr', 'acronym', 'cite',
-    'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'time', 'var', 'bdo', 'br',
-    'img', 'map', 'object', 'q', 'script', 'span', 'sub', 'sup', 'button',
-    'input', 'label', 'select', 'textarea'
-  ]
-
-  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
-  space-preserve    = [ 'pre' ]
-
-#------------------------------------------------------------------------------
 # Dependency tables
 #[ D ]
 #  files             = [ ]
@@ -32,6 +20,18 @@
 # Doctype entity tables
 [ E.xml ]
   copy              = '&#xa9;'
+
+#------------------------------------------------------------------------------
+[ F.html ]
+  inline            = [
+  'a', 'b', 'big', 'i', 'strong', 'small', 'tt', 'abbr', 'acronym', 'cite',
+  'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'time', 'var', 'bdo', 'br',
+  'img', 'map', 'object', 'q', 'script', 'span', 'sub', 'sup', 'button',
+  'input', 'label', 'select', 'textarea'
+  ]
+
+  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
+  space-preserve    = [ 'pre' ]
 
 #------------------------------------------------------------------------------
 # Header table
@@ -63,4 +63,6 @@
 [ X ]
   xml-version     = '1.0'
   xml-encoding    = 'UTF-8'
-#  xml-standalone  = 'yes'
+
+  # Default for xml is 'no'. Is only relevant when a DTD is used.
+#  xml-standalone  = 'no'

@@ -73,11 +73,7 @@ like $xml-text, /:s '<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
    'Xml prelude found';
 like $xml-text, /:s '<!DOCTYPE' 'html>'/, 'Doctype found';
 
-# Write xml out to file. Basename explicitly set.
-$x.save(:filename($f1bn));
-ok "$f1".IO ~~ :e, "File $f1 written";
-
-# Write xml out to file. Filename named in prelude
+# Write xml out to file.
 $x.save;
 ok $f2.IO ~~ :e, "File $f2 written";
 

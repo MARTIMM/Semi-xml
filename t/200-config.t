@@ -43,11 +43,11 @@ spurt $cfg, qq:to/EOCONFIG/;
 
   # in = db5
   [ R.db5 ]
-    pdf                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
+  #  pdf                   = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
     xhtml                 = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
     chunk                 = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
-  [ S.f200 ]
+  [ S.pdf.f200 ]
     filename              = 'target200'
   EOCONFIG
 
@@ -65,21 +65,14 @@ spurt $f, q:to/EOSXML/;
 #TODO spacing around $!mod.methods()
 
 my SemiXML::Sxml $x;
-
-#is 1,1,'yes';
-#done-testing;
-#exit;
-
 $x .= new( :!trace, :merge, :refine([ <db5 pdf>]));
 isa-ok $x, 'SemiXML::Sxml';
 
 $x.parse(:filename($f));
-
 my Str $xml-text = ~$x;
 #note $xml-text;
 like $xml-text, /:s '<body><h1>Burp'/, 'Found a piece of xml';
 $x.save;
-
 
 $x.parse(:content(slurp($f)));
 $xml-text = ~$x;

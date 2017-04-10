@@ -29,7 +29,6 @@ class Sxml {
   has Hash $!objects = {};
 
   has Str $!filename;
-  has Str $!basename;
 
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
@@ -121,39 +120,25 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  # Save file to filename or devise filename from config
-  method save (
-    Str :$filename is copy, Str :$run-code, XML::Document :$other-document
-  ) {
+  # Save file using config
+  method save ( ) {
 
-    # set the filename if needed
-    if ?$filename {
-      $filename = $filename.IO.basename;
-    }
+    # filename is basename + extention
+    my Str $filename = $!refined-config<S><filename> ~
+                       '.' ~ $!refined-config<S><fileext>;
 
-    else {
-      $filename = $!refined-config<S><filename>;
-    }
-
-    # modify extension
-    my Str $ext = $filename.IO.extension;
-    $filename ~~ s/ '.' $ext //;
-    $filename ~= "." ~ $!refined-config<S><fileext>;
-
-    # if not absolute prefix the path from the config
-    if $filename !~~ m/^ '/' / {
-      my $filepath = $!refined-config<S><filepath>;
-      $filename = "$filepath/$filename" if $filepath;
-    }
-
+    # prefix filename with path when filename is relative
+    $filename = $!refined-config<S><filepath> ~
+                '/' ~ $filename unless $filename ~~ m/^ '/' /;
+#note "F: $filename";
     # Get the document text
-    my $document = self.get-xml-text(:$other-document);
+    my $document = self.get-xml-text;
 
     # If a run code is defined, use that code as a key to find the program
     # to send the result to.
-    if $run-code.defined {
+#    if $run-code.defined {
 #      my $cmd = $!refined-config<R><program>{$run-code};
-      my $cmd = $!refined-config<R>{$run-code};
+      my $cmd = $!refined-config<R>{$!refine[OUT]};
 
       if $cmd.defined {
 
@@ -189,12 +174,12 @@ class Sxml {
         $p.in.close;
 
 #          $send-it.result;
-      }
+#      }
 
-      else {
-
-        note "Code '$run-code' to select command not found, Choosen to dump to $filename";
-      }
+#      else {
+#
+#        note "Code '$run-code' to select command not found, Choosen to dump to $filename";
+#      }
     }
 
     else {
@@ -324,15 +309,16 @@ class Sxml {
     my Str $fpath;
     my Str $fdir;
     my Str $fext;
+    my Str $basename;
+
     if ?$!filename and $!filename.IO ~~ :r {
 
-      my $bname = $!basename = $!filename.IO.basename;
+      $basename = $!filename.IO.basename;
       $fpath = $!filename.IO.abspath;
       $fdir = $fpath;
-      $fext = $*PROGRAM.extension;
-      $!basename ~~ s/ '.' $fext //;
-      $fdir ~~ s/ '/'? $bname //;
+      $fdir ~~ s/ '/'? $basename //;
       $locations = [$fdir];
+#      $fext = $*PROGRAM.extension;
 
       # 3a) to load SemiXML.TOML from the files location, current dir
       #     (also hidden), and in $HOME. merge is controlled by user.
@@ -340,15 +326,15 @@ class Sxml {
 
       # 3b) same as in 3a but use the filename now.
       $fext = $!filename.IO.extension;
-      $!basename ~~ s/ $fext $/toml/;
-      self!load-config( :config-name($!basename), :$locations, :merge);
+      $basename ~~ s/ $fext $/toml/;
+      self!load-config( :config-name($basename), :$locations, :merge);
     }
 
     # 4) if filename is not given, the configuration is searched using the
     # program name
     else {
 
-      # in case it was set but not found/readable
+      # in case it was set by previous parse actions but not found or readable
       $!filename = Str;
 
       self!load-config(:merge);
@@ -359,22 +345,25 @@ class Sxml {
       $!configuration.merge-hash($!user-config) if ?$!user-config;
 
 
-    # set filename and path if not set, extension is set in default config
+    # set filename and path if not set, extension is set in default config.
+    # $c is bound to the config in the configuration object.
     my Hash $c := $!configuration.config;
     $c<S> = {} unless $c<S>:exists;
 
     if $c<S><filename>:!exists {
-      if ?$!basename {
+      # take filename of sxml source
+      if ?$basename {
         # lop off the extension from the above devised config name
-        $!basename ~~ s/ '.toml' $// if ?$!basename;
-        $c<S><filename> = $!basename;
+        $basename ~~ s/ '.toml' $// if ?$basename;
+        $c<S><filename> = $basename;
       }
 
       else {
-        $!basename = $*PROGRAM.basename;
+        # take filename of program
+        $basename = $*PROGRAM.basename;
         $fext = $*PROGRAM.extension;
-        $!basename ~~ s/ '.' $fext //;
-        $c<S><filename> = $!basename;
+        $basename ~~ s/ '.' $fext //;
+        $c<S><filename> = $basename;
       }
     }
 
@@ -385,8 +374,8 @@ class Sxml {
 
       else {
         $fdir = $*PROGRAM.abspath;
-        my $bname = $!basename = $*PROGRAM.basename;
-        $fdir ~~ s/ '/'? $bname //;
+        my $basename = $*PROGRAM.basename;
+        $fdir ~~ s/ '/'? $basename //;
         $c<S><filepath> = $fdir;
       }
     }
@@ -400,19 +389,19 @@ class Sxml {
       when any(<D F ML R>) {
         my $table = $_;
         $!refined-config{$table} =
-          $!configuration.refine(|( $table, $!refine[IN], $!basename));
+          $!configuration.refine(|( $table, $!refine[IN], $basename));
 
-        note "Table $table: in=", $!refine[IN], ', basename=', $!basename,
+        note "Table $table: in=", $!refine[IN], ', basename=', $basename,
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
       # output control
-      when any(<C E H X>) {
+      when any(<C E H S X>) {
         my $table = $_;
         $!refined-config{$table} =
-        $!configuration.refine(|( $table, $!refine[OUT], $!basename));
+        $!configuration.refine(|( $table, $!refine[OUT], $basename));
 
-        note "Table $table: out=", $!refine[OUT], ', basename=', $!basename,
+        note "Table $table: out=", $!refine[OUT], ', basename=', $basename,
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
@@ -421,21 +410,21 @@ class Sxml {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(
-            |( $table, $!refine[IN], $!refine[OUT], $!basename)
+            |( $table, $!refine[IN], $!refine[OUT], $basename)
           );
 
-        note "Table $table: basename=", $!basename,
+        note "Table $table: basename=", $basename,
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
-}}
       when 'S' {
         my $table = $_;
         $!refined-config{$table} =
-          $!configuration.refine(|( $table, $!basename));
+          $!configuration.refine(|( $table, $basename));
 
-        note "Table $table: basename=", $!basename,
+        note "Table $table: basename=", $basename,
         ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
+}}
     }
 
     # instantiate modules specified in the configuration

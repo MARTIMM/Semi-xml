@@ -64,7 +64,7 @@ my Hash $config = {
   },
 
   S => {
-    test-file => {
+    out-fmt => {
       filename => 'f1',
       filepath => 't/D103',
       fileext => 'html',

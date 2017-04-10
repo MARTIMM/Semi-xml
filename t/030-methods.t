@@ -85,7 +85,7 @@ my Hash $config = {
 my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsense [ ] ';
 
 # instantiate parser and parse with contents and config
-my SemiXML::Sxml $x .= new(:!trace);
+my SemiXML::Sxml $x .= new( :!trace, :merge);
 my ParseResult $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 

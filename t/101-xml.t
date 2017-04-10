@@ -33,9 +33,8 @@ $html [
 EOSX
 
 # Parse
-my SemiXML::Sxml $x .= new( :merge, :refine([<xml xml>]));
+my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<xml xml>]));
 $x.parse(:$filename);
-
 my Str $xml-text = ~$x;
 #note $xml-text;
 
@@ -48,16 +47,16 @@ unlike $xml-text, /:s '#' 'trrr' /, 'comment also removed';
 like $xml-text, /:s '#' 'inside' 'protected' 'body' /, 'comment not removed';
 like $xml-text, /:s 'header' '#' 'th' /, 'escaped # not removed';
 
-# Write xml out to file. Default extention is .xml
 my $fout = $filename;
-$fout ~~ s/\.sxml//;
-$x.save(:$fout);
-ok "$fout.xml".IO ~~ :e, "File $fout.xml written";
+my $ext = $fout.IO.extension;
+$fout ~~ s/ \. $ext $/.xml/;
+$x.save;
+ok "$fout".IO ~~ :e, "File $fout written";
 
 #-------------------------------------------------------------------------------
 # Cleanup
 unlink $filename;
-unlink "$fout.xml";
+unlink "$fout";
 rmdir $dir;
 
 done-testing;

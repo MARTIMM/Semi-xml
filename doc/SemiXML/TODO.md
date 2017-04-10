@@ -126,7 +126,8 @@
 
     # [S] Storage table, only with file. Looked up after parsing.
     [ S ]
-    [ S.file ]
+    [ S.out-key ]
+    [ S.out-key.file ]
 
     # [X] xml description table
     [ X ]
