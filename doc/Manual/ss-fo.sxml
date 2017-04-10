@@ -1,24 +1,20 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=xml --run=xsl
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=xml --out=xsl
 
-# Stylesheet for use with setup.sxml
+# Stylesheet to generate XML-FO
 $xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
 
   # Get the docbook formatting objects stylesheet
-  #
   $xsl:import href=/usr/share/sgml/docbook/xsl-ns-stylesheets/fo/docbook.xsl
 
   # Set paper size to european A4 format
-  #
   $xsl:param name=paper.type select="'A4'"
 
   # Numbering chapters, appendixes and sections
-  #
   $xsl:param name=chapter.autolabel select=1
   $xsl:param name=appendix.autolabel select="'A'"
   $xsl:param name=section.autolabel select=1
 
   # Keep chapter number in front of sectionnumbers
-  #
   $xsl:param name=section.label.includes.component.label select=1
 
   # Maximum depth of section numbering
@@ -28,7 +24,6 @@ $xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
   $xsl:param name=insert.xref.page.number select="'yes'"
 
   # Callout graphics
-  #
 #   $xsl:param name=callout.graphics select=0
   $xsl:param name=callout.graphics select=1
   $xsl:param name=callout.graphics.path
@@ -39,14 +34,12 @@ $xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
   $xsl:param name=callout.icon.size select=8
 
   # Admonition graphics
-  #
   $xsl:param name=admon.graphics select=1
   $xsl:param name=admon.graphics.path
     select="'/home/marcel/Graphics/IconsArchive/Icons/32x32/Docbook/'"
   $xsl:param name=admon.graphics.extension select="'.png'"
 
   # Fonts and sizes
-  #
 #   $xsl:param name=body.font.family select="'Courier'"
 #   $xsl:param name=body.font.size select=12
 #   $xsl:param name=title.font.size select=20
@@ -69,5 +62,3 @@ $xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
     ]
   ]
 ]
-
-

@@ -42,8 +42,8 @@ class Sxml {
     $!actions .= new(:sxml-obj(self));
 
     # Make sure that in and out keys are defined with defaults
-    $!refine[0] = 'xml' unless ?$!refine[IN];
-    $!refine[1] = 'xml' unless ?$!refine[OUT];
+    $!refine[IN] = 'xml' unless ?$!refine[IN];
+    $!refine[OUT] = 'xml' unless ?$!refine[OUT];
 
     # Initialize the refined config tables
     $!refine-tables = [<C D E F H ML R S X>];
@@ -457,8 +457,53 @@ class Sxml {
 }}
     }
 
+    # before continuing, process dependencies first
+    self!run-dependencies;
+
     # instantiate modules specified in the configuration
     self!process-modules;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !run-dependencies ( ) {
+
+#TODO check for duplicate and circular dependencies
+
+    # get D-table
+    my Hash $D = $!refined-config<D> // {};
+    my Array $dependencies = $D{$!refine[OUT]} // [];
+note $D;
+note $!refine[OUT];
+note $dependencies;
+    for @$dependencies -> $d-spec {
+      my @d = $d-spec.split(';');
+      if @d.elems == 3 {
+        my Array $refine = [@d[ IN, OUT]];
+        my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
+
+        note "Process dependency @d[*]" if $!trace;
+
+        # Bind to S table
+        my Hash $S := $!refined-config<S>;
+
+        # filename is basename + extension
+        my Str $filename = @d[2];
+
+        # prefix filename with path when filename is relative
+        if ?$S<filepath> {
+          $filename = $S<rootpath> ~ '/' ~ $S<filepath> ~ '/' ~ $filename;
+        }
+
+        else {
+          $filename = $S<rootpath> ~ '/' ~ $filename;
+        }
+
+note "$filename, $refine";
+        $x.parse(:$filename);
+        $x.save;
+        exit 0;
+      }
+    }
   }
 
   #-----------------------------------------------------------------------------

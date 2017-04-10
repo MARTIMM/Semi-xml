@@ -3,9 +3,9 @@
   doctype-show  = true
 
 [ D.Db5 ]
-  pdf        = [ 'ss-fo.sxml']
-  chunk      = [ 'ss-chunk.sxml']
-  xhtml      = [ 'ss-xhtml.sxml']
+  pdf        = [ 'xml;xsl;ss-fo.sxml']
+  chunk      = [ 'xml;xsl;ss-chunk.sxml']
+  xhtml      = [ 'xml;xsl;ss-xhtml.sxml']
 
 [ E.Db5.Manual ]
   pack          = 'SemiXML'
