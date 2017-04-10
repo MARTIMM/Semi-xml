@@ -1,4 +1,4 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=db5 --run=pdf
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=Db5 --out=pdf
 
 $!Db5b.article [
   $title [ Package &pack; to describe and use semi XML ]
@@ -247,7 +247,7 @@ $!SxmlCore.comment [
         How this translation takes place is depending on the way parsing is done.
         Roughly it starts with the toplevel element and arriving at the first
         bracket '[' it may see a mix of text and new elements before the closing
-        bracket ']'. The new elements
+        bracket '\]'. The new elements
         content (between the elements brackets) is looked into in turn. So the
         translation of the deepest level must be done first before the second
         deepest etc. up to the toplevel. This knowledge is not important when
@@ -309,7 +309,7 @@ $!SxmlCore.comment [
       ]
 
       $para [
-        The example shows how nesting is done using brackets ('[' and ']') and
+        The example shows how nesting is done using brackets ('[' and '\]') and
         that between brackets there can be a mix of text and other elements.
         What we learn from this example is:
         $itemizedlist [
@@ -333,7 +333,7 @@ $!SxmlCore.comment [
           ]
         ]
       ]
-    ]
+#    ]
 
 $!SxmlCore.comment [
     $para [
@@ -421,13 +421,13 @@ $!SxmlCore.comment [
 
       $sect3 [
         $title [Escaping characters]
-        $para [
+        $para [!
           When you want to use a character which is used as a delimiter ('[')
           or start of an element ('$') you must escape that character to prevent
           the action that takes place when encountering that character. Writing
-          '\' before that character escapes them from that interpretation.
-          Examples are '\[' or '\$'.
-        ]
+          '\\' before that character escapes them from that interpretation.
+          Examples are '\\[' or '$'.
+        !]
       ]
 
       $sect3 [
@@ -469,14 +469,15 @@ $!SxmlCore.comment [
           such as within <pre> elements. Sxml does not have any notion of these
           sections and treat those as xml and all excess of space is removed. To
           cope with these sections another set of container delimiters are used.
-          These are $**emphasis[! [= ... \] !] and $*|emphasis[! [!= ... \!\] ].
+          These are $**emphasis[! [= ... \] !] and $*|emphasis[! [!= ... \!] !].
           With these brackets, all indenting and newlines are fixed and protected.
         ]
 
         $para [
           Multiple content bodies are also possible when there are parts which
           need protection and in other parts, elements are needed. E.g.
-          $**emphasis[! $p [The line; ][! my Int $x = 10; \!\][ is an $b[Int] declaration\] !]
+          $**emphasis[! $p [The line; ][! my Int $x = 10; \!][ is an $b[Int]
+          declaration] !]
         ]
       ]
 
@@ -729,7 +730,7 @@ output/program/pdf:
       $title [Program arguments]
       $para [
         $synopsis [!=
-sxml2xml [--run=<run-selector>] <sxml-file>
+          sxml2xml [--run=<run-selector>] <sxml-file>
         !]
       ]
     ]
@@ -752,13 +753,13 @@ sxml2xml [--run=<run-selector>] <sxml-file>
     ]
   ]
 
-$!SxmlCore.comment [
+$!SxmlCore.comment [!
     $sect2 [
       $title []
       $para [
       ]
     ]
-]
+!]
 
   #----------------------------------------------------------------------------
   $sect1 xml:id=syntax [
@@ -776,7 +777,7 @@ $!SxmlCore.comment [
                '[' <body-start-control> <body> <body-end-control>
                ']';
 
-<prefix> ::= '$.' | '$!' | '$*<' | '$*>' | '$*' | '$';
+<prefix> ::= '$.' | '$\!' | '$*|' | '$|*' | '$**' | '$';
 
 <element> ::= <identifier>;
 <attribute> ::= <identifier>;
@@ -786,8 +787,8 @@ $!SxmlCore.comment [
 <identifier> ::=  <letter> (<letter>|<number>)*
                   ( '-' (<letter> (<letter>|<number>)+) )*;
 
-<body-start-control> ::= '!=' | '!' | '=';
-<body-end-control> ::= '!';
+<body-start-control> ::= '\!=' | '\!' | '=';
+<body-end-control> ::= '\!';
       !]
     ]
   ]

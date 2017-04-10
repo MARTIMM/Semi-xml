@@ -1,10 +1,13 @@
-[ option.xml-prelude ]
-  show          = 1
+[ C ]
+  xml-show      = true
+  doctype-show  = true
 
-[ option.doctype ]
-  show          = 1
+[ D.Db5 ]
+  pdf        = [ 'ss-fo.sxml']
+  chunk      = [ 'ss-chunk.sxml']
+  xhtml      = [ 'ss-xhtml.sxml']
 
-[ option.doctype.entities ]
+[ E.Db5.Manual ]
   pack          = 'SemiXML'
   mod           = 'SemiXML::Sxml'
   act           = 'SemiXML::Actions'
@@ -13,26 +16,42 @@
   prog          = 'sxml2xml'
   lang          = 'sxml'
   nbsp          = ' '
+  copy          = '&#xa9;'
   E             = 'element'
 
-[ output ]
-  fileext       = 'xml'
+[ ML.Db5 ]
+  lorem         = 'SxmlLib::LoremIpsum'
+  Db5b          = 'SxmlLib::Docbook5::Basic'
+  Db5f          = 'SxmlLib::Docbook5::FixedLayout'
 
-[ output.program ]
-  pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
-  xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
+[ R.Db5 ]
+  pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/%of.%oe'
+  xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/$of.%oe'
   chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
   xml           = 'xmllint --format - > %op/%of.%oe'
-  xsl           = 'xmllint --format - > %op/Xsl/%of.xsl'
+  xsl           = 'xmllint --format - > %op/%of.%0e'
 
   # Generate formatted xml first and save it on disk (tee command)
   # then send formatted xml to rnc for checking. This way the errors
   # can be found at the proper line in the save xml file.
   check         = 'xmllint --format - | tee %op/%of.%oe |rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
 
-[ module ]
-  lorem         = 'SxmlLib::LoremIpsum'
-  Db5b          = 'SxmlLib::Docbook5::Basic'
-  Db5f          = 'SxmlLib::Docbook5::FixedLayout'
-#  SxmlCore      = 'SxmlLib::SxmlCore'
+# Default name of the file
+[ S ]
+#  filename      = 'Manual'
+  rootpath      = 'doc/Manual'
+
+[ S.pdf ]
+  fileext       = 'pdf'
+
+[ S.xml ]
+  fileext       = 'xml'
+  filepath      = 'Xml'
+
+[ S.xsl ]
+  fileext       = 'xsl'
+  filepath      = 'Xsl'
+
+[ S.xhtml ]
+  fileext       = 'xhtml'
