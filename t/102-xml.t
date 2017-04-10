@@ -56,7 +56,7 @@ my Hash $config = {
 
   S => {
     filename => $f2bn,                  # Default current file
-    filepath => $dir,
+    rootpath => $dir,
     fileext => 'html',                  # Default xml
   },
 }
