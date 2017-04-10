@@ -83,8 +83,12 @@ class Sxml {
 
     # Throw an exception when there is a parsing failure
     my $last-bracket-index = $content.rindex(']') // $content.chars;
-    note "Match: $m.from(), $m.to(), $content.chars(), $last-bracket-index\n",
-         ~$m if $!trace;
+    if $!trace {
+      my $mtrace = ~$m;
+      $mtrace .= substr( 0, 200);
+      $mtrace ~= " ... \n";
+      note "\nMatch: $m.from(), $m.to(), $last-bracket-index\n$mtrace";
+    }
 #    if $m.to != $last-bracket-index {
     if $m.to != $content.chars {
       my Str $before = $!actions.prematch();
@@ -123,13 +127,21 @@ class Sxml {
   # Save file using config
   method save ( ) {
 
-    # filename is basename + extention
-    my Str $filename = $!refined-config<S><filename> ~
-                       '.' ~ $!refined-config<S><fileext>;
+    # Bind to S table
+    my Hash $S := $!refined-config<S>;
+
+    # filename is basename + extension
+    my Str $filename = $S<filename> ~ '.' ~ $S<fileext>;
 
     # prefix filename with path when filename is relative
-    $filename = $!refined-config<S><filepath> ~
-                '/' ~ $filename unless $filename ~~ m/^ '/' /;
+    if ?$S<filepath> {
+      $filename = $S<rootpath> ~ '/' ~ $S<filepath> ~ '/' ~ $filename;
+    }
+
+    else {
+      $filename = $S<rootpath> ~ '/' ~ $filename;
+    }
+
 #note "F: $filename";
     # Get the document text
     my $document = self.get-xml-text;
@@ -148,10 +160,18 @@ class Sxml {
         $filename = $filename.IO.basename;
         $cmd ~~ s:g/ '%of' /'$filename'/;
 
-        my Str $path = $!refined-config<S><filepath>;
+        my Str $path;
+        if ?$S<filepath> {
+          $path = $S<rootpath> ~ '/' ~ $S<filepath>;
+        }
+
+        else {
+          $path = $S<rootpath>;
+        }
+
         $cmd ~~ s:g/ '%op' /'$path'/;
 
-        $ext = $!refined-config<S><fileext>;
+        $ext = $S<fileext>;
         $cmd ~~ s:g/ '%oe' /'$ext'/;
 
         say "Sent file to program: $cmd";
@@ -278,7 +298,13 @@ class Sxml {
   method get-current-filename ( --> Str ) {
 
     my Hash $C = $!refined-config<C>;
-    return "$C<filepath>/$C<filename>.$C<fileext>";
+    if ?$C<filepath> {
+      "$C<rootpath>/$C<filepath>/$C<filename>.$C<fileext>";
+    }
+
+    else {
+     "$C<rootpath>/$C<filename>.$C<fileext>";
+    }
   }
 
   #-----------------------------------------------------------------------------
@@ -345,7 +371,7 @@ class Sxml {
       $!configuration.merge-hash($!user-config) if ?$!user-config;
 
 
-    # set filename and path if not set, extension is set in default config.
+    # set filename, path etc. if not set, extension is set in default config.
     # $c is bound to the config in the configuration object.
     my Hash $c := $!configuration.config;
     $c<S> = {} unless $c<S>:exists;
@@ -367,17 +393,21 @@ class Sxml {
       }
     }
 
-    if $c<S><filepath>:!exists {
+    if $c<S><rootpath>:!exists {
       if ?$fdir {
-        $c<S><filepath> = $fdir;
+        $c<S><rootpath> = $fdir;
       }
 
       else {
         $fdir = $*PROGRAM.abspath;
         my $basename = $*PROGRAM.basename;
         $fdir ~~ s/ '/'? $basename //;
-        $c<S><filepath> = $fdir;
+        $c<S><rootpath> = $fdir;
       }
+    }
+
+    if $c<S><filepath>:!exists {
+      $c<S><filepath> = '';
     }
 
     note "\nComplete configuration: ", $!configuration.perl,
@@ -386,7 +416,7 @@ class Sxml {
     # Fill the special purpose tables with the refined searches in the config
     for @$!refine-tables {
       # document control
-      when any(<D F ML R>) {
+      when any(<D E F ML R>) {
         my $table = $_;
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[IN], $basename));
@@ -396,7 +426,7 @@ class Sxml {
       }
 
       # output control
-      when any(<C E H S X>) {
+      when any(<C H S X>) {
         my $table = $_;
         $!refined-config{$table} =
         $!configuration.refine(|( $table, $!refine[OUT], $basename));
@@ -522,194 +552,4 @@ class Sxml {
       }
     }
   }
-
-#`{{
-  #-----------------------------------------------------------------------------
-  #-----------------------------------------------------------------------------
-#TODO $config should come indirectly from $!refined-config
-  multi sub save-xml (
-    Str:D :$filename, XML::Element:D :$document!,
-    Hash :$config = {}, Bool :$formatted = False,
-  ) is export {
-    my XML::Document $root .= new($document);
-    save-xml( :$filename, :document($root), :$config, :$formatted);
-  }
-
-  multi sub save-xml (
-    Str:D :$filename, XML::Document:D :$document!,
-    Hash :$config = {}, Bool :$formatted = False
-  ) is export {
-
-    # Get the document text
-    my Str $text;
-
-    # Get the top element name
-    my Str $root-element = $document.root.name;
-#      $root-element ~~ s/^(<-[:]>+\:)//;
-
-
-    # If there is one, try to generate the xml
-    if ?$root-element {
-
-      # Check if a http header must be shown
-      my Hash $http-header = $config<option><http-header> // {};
-
-      if ? $http-header<show> {
-        for $http-header.kv -> $k, $v {
-          next if $k ~~ 'show';
-          $text ~= "$k: $v\n";
-        }
-        $text ~= "\n";
-      }
-
-      # Check if xml prelude must be shown
-      my Hash $xml-prelude = $config<option><xml-prelude> // {};
-
-      if ? $xml-prelude<show> {
-        my $version = $xml-prelude<version> // '1.0';
-        my $encoding = $xml-prelude<encoding> // 'utf-8';
-        my $standalone = $xml-prelude<standalone>;
-
-        $text ~= '<?xml version="' ~ $version ~ '"';
-        $text ~= ' encoding="' ~ $encoding ~ '"';
-        $text ~= ' standalone="' ~ $standalone ~ '"' if $standalone;
-        $text ~= "?>\n";
-      }
-
-      # Check if doctype must be shown
-      my Hash $doc-type = $config<option><doctype> // {};
-
-      if ? $doc-type<show> {
-        my Hash $entities = $doc-type<entities> // {};
-        my Str $start = ?$entities ?? " [\n" !! '';
-        my Str $end = ?$entities ?? "]>\n" !! ">\n";
-        $text ~= "<!DOCTYPE $root-element$start";
-        for $entities.kv -> $k, $v {
-          $text ~= "<!ENTITY $k \"$v\">\n";
-        }
-        $text ~= "$end\n";
-      }
-
-      $text ~= ? $document ?? $document.root !! '';
-    }
-
-    # Save the text to file
-    if $formatted {
-      my Proc $p = shell "xmllint -format - > $filename", :in;
-      $p.in.say($text);
-      $p.in.close;
-    }
-
-    else {
-      spurt( $filename, $text);
-    }
-  }
-
-  #-----------------------------------------------------------------------------
-  sub append-element (
-    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
-    --> XML::Node
-  ) is export {
-
-    my XML::Node $text-element = SemiXML::Text.new(:$text) if ? $text;
-    my XML::Node $element =
-       XML::Element.new( :$name, :attribs(%$attributes)) if ? $name;
-
-    if ? $name and ? $text {
-      $element.append($text-element);
-    }
-
-    elsif ? $text {
-      $element = $text-element;
-    }
-
-    # else $name -> no change to $element. No name and no text is an error.
-
-    $parent.append($element);
-    $element;
-  }
-
-  #-----------------------------------------------------------------------------
-  sub insert-element (
-    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
-    --> XML::Node
-  ) is export {
-
-    my XML::Node $element;
-
-    if ? $text {
-      $element = SemiXML::Text.new(:$text);
-    }
-
-    else {
-      $element = XML::Element.new( :$name, :attribs(%$attributes));
-    }
-
-    $parent.insert($element);
-    $element;
-  }
-
-  #-----------------------------------------------------------------------------
-  sub before-element (
-    XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
-    --> XML::Node
-  ) is export {
-
-    my XML::Node $element;
-
-    if ? $text {
-      $element = SemiXML::Text.new(:$text);
-    }
-
-    else {
-      $element = XML::Element.new( :$name, :attribs(%$attributes));
-    }
-
-    $node.before($element);
-    $element;
-  }
-
-  #-----------------------------------------------------------------------------
-  sub after-element (
-    XML::Element $node, Str $name = '', Hash $attributes = {}, Str :$text
-    --> XML::Node
-  ) is export {
-
-    my XML::Node $element;
-
-    if ? $text {
-      $element = SemiXML::Text.new(:$text);
-    }
-
-    else {
-      $element = XML::Element.new( :$name, :attribs(%$attributes));
-    }
-
-    $node.after($element);
-    $element;
-  }
-
-  #-----------------------------------------------------------------------------
-  sub std-attrs (
-    XML::Element $node, Hash $attributes
-  ) is export {
-
-    return unless ?$attributes;
-
-    for $attributes.keys {
-      when /'class'|'style'|'id'/ {
-        $node.set( $_, $attributes{$_});
-        $attributes{$_}:delete;
-      }
-    }
-  }
-}}
 }
-
-#`{{
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-multi sub prefix:<~>( SemiXML::Sxml $x --> Str ) is export {
-  return $x.get-xml-text;
-}
-}}
