@@ -91,17 +91,17 @@
     [ F.in-key.file ]
 
     # [D] Dependencies table, only with in-key. The file is used to
-    # delect the array of files on which this file depends.
+    # specify the array of files on which this file depends.
     # Looked up before everything is started. Used by sxml2xml program.
     [ D ]
     [ D.in-key ]
       file = [ f1, f2, f3, ...]
 
-    # [E] Entity table. Only with out-key and file.
+    # [E] Entity table. Only with in-key and file.
     # Looked up after parsing to prefix data to result.
     [ E ]
-    [ E.out-key ]
-    [ E.out-key.file ]
+    [ E.in-key ]
+    [ E.in-key.file ]
 
     # [H] Http table, only with out-key and file. Looked up after parsing.
     [ H ]
