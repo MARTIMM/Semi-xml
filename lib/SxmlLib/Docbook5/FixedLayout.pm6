@@ -4,6 +4,7 @@ use v6;
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
+use SemiXML::Text;
 use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
@@ -22,16 +23,17 @@ class Docbook5::FixedLayout {
   # keep-literal=<0/1>  Substitute < > characters with &lt; and &gr;
   # fix-indent=<n>      Remove some space in front of every line.
   #
-  method load-test-example ( XML::Element $parent, Hash $attrs is copy ) {
-    my Str $path = $attrs<path>:delete // '';
-    my Str $ltype = $attrs<ltype>:delete // '';
-    my Str $start = $attrs<start>:delete // '#`{{Example-Start}}';
-    my Str $stop = $attrs<stop>:delete // '#`{{Example-Stop}}';
-    my Bool $keep-literal = $attrs<keep-literal>:delete ?? True !! False;
-    my $fix-indent = $attrs<fix-indent>:delete // '0';
-    my $callout-prefix = $attrs<callout-prefix>:delete // 'c.';
-    my $callout-rows = $attrs<callout-rows>:delete // '';
-    my $callout-col = $attrs<callout-col>:delete // '80';
+  method load-test-example ( XML::Element $parent, Hash $attrs ) {
+    my Str $path = ~($attrs<path> // '');
+    my Str $ltype = ~($attrs<ltype> // '');
+    my Str $start = ~($attrs<start> // '#`{{Example-Start}}');
+    my Str $stop = ~($attrs<stop> // '#`{{Example-Stop}}');
+    my Bool $keep-literal =
+       ($attrs<keep-literal>:exists and ?$attrs<keep-literal>) ?? True !! False;
+    my $fix-indent = ~($attrs<fix-indent> // '0');
+    my $callout-prefix = ~($attrs<callout-prefix> // 'c.');
+    my $callout-rows = ~($attrs<callout-rows> // '');
+    my $callout-col = ~($attrs<callout-col> // '80');
 
     my $text;
     if $path.IO ~~ :r {
