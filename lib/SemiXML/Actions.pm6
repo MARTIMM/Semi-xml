@@ -159,23 +159,18 @@ class Actions {
     #    ]
     #
     my Str $orig = $match.orig;
-#      my Int $from = $match.from;
-#      my Int $to = $match.to;
 
     my Array $tag-bodies = $match<tag-body>;
     loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
       my Int $b-from = $match.from;
       my Int $b-to = $match.to;
-#note "ORBody $b-from, $b-to";
 
-#note $tag-bodies[$mi].from, '--', $tag-bodies[$mi].to, ': ',
-#      $orig.substr( $tag-bodies[$mi].to - 3, 3);
-
+#TODO test for ] in special bodies and for !] in non-special ones
       # test for special body
       my Bool $special-body = ?$orig.substr(
         $b-from, $b-to - $b-from
-      ).index('[!');
+      ) ~~ m/^ '[!' /;
 
       $orig.substr( $tag-bodies[$mi].to - 3, 3);
 
@@ -187,9 +182,16 @@ class Actions {
       # find end of body, search from the end
       my Int $bend;
       if $special-body {
-        $bend = $orig.substr(
-          $bstart, $b-to - $bstart
-        ).rindex('!]') + $bstart;
+        $bend = $orig.substr( $bstart, $b-to - $bstart).rindex('!]');
+
+        if ?$bend {
+           $bend += $bstart;
+        }
+
+        else {
+          note "special body $special-body, $bstart, $b-to - $bstart";
+          note "$orig.substr( $bstart, $b-to - $bstart)";
+        }
       }
 
       else {
