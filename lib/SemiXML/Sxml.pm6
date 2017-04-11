@@ -32,11 +32,14 @@ class Sxml {
 
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
-  has Bool $!trace;
+  has Bool $!trace = False;
   has Bool $!merge;
 
+  # structure to check for dependencies
+  my Hash $processed-dependencies = {};
+
   #-----------------------------------------------------------------------------
-  submethod BUILD ( Array :$!refine = [], :$!trace = False, :$!merge = False ) {
+  submethod BUILD ( Array :$!refine = [], :$!merge = False ) {
 
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
@@ -46,7 +49,7 @@ class Sxml {
     $!refine[OUT] = 'xml' unless ?$!refine[OUT];
 
     # Initialize the refined config tables
-    $!refine-tables = [<C D E F H ML R S X>];
+    $!refine-tables = [<C D E F H ML R S T X>];
     $!refined-config = %(@$!refine-tables Z=> ( {} xx $!refine-tables.elems ));
   }
 
@@ -62,7 +65,8 @@ class Sxml {
     }
 
     else {
-      die "Filename $!filename not readable";
+      note "Filename $!filename not readable";
+      exit(1);
     }
 
     $pr;
@@ -76,14 +80,21 @@ class Sxml {
 
     $!user-config = $config;
     $!filename = Str if $!drop-cfg-filename;
-    self!prepare-config;
+
+    # Prepare config and process dependencies. If result is newer than source
+    # prepare returns False to note that further work is not needed.
+    # Generate a proper Match object to return.
+    unless self!prepare-config {
+      'ok' ~~ /ok/;
+      return $/;
+    }
 
     # Parse the content. Parse can be recursively called
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
 
     # Throw an exception when there is a parsing failure
     my $last-bracket-index = $content.rindex(']') // $content.chars;
-    if $!trace {
+    if $!trace and $!refined-config<T><parse-result> {
       my $mtrace = ~$m;
       $mtrace .= substr( 0, 200);
       $mtrace ~= " ... \n";
@@ -142,70 +153,59 @@ class Sxml {
       $filename = $S<rootpath> ~ '/' ~ $filename;
     }
 
-#note "F: $filename";
     # Get the document text
     my $document = self.get-xml-text;
 
     # If a run code is defined, use that code as a key to find the program
     # to send the result to.
-#    if $run-code.defined {
-#      my $cmd = $!refined-config<R><program>{$run-code};
-      my $cmd = $!refined-config<R>{$!refine[OUT]};
+    my $cmd = $!refined-config<R>{$!refine[OUT]};
+    if $cmd.defined {
 
-      if $cmd.defined {
+      # Drop the extension again. Let it be provided by the command
+      my Str $ext = $filename.IO.extension;
+      $filename ~~ s/ '.' $ext //;
+      $filename = $filename.IO.basename;
+      $cmd ~~ s:g/ '%of' /'$filename'/;
 
-        # Drop the extension again. Let it be provided by the command
-        my Str $ext = $filename.IO.extension;
-        $filename ~~ s/ '.' $ext //;
-        $filename = $filename.IO.basename;
-        $cmd ~~ s:g/ '%of' /'$filename'/;
+      my Str $path;
+      if ?$S<filepath> {
+        $path = $S<rootpath> ~ '/' ~ $S<filepath>;
+      }
 
-        my Str $path;
-        if ?$S<filepath> {
-          $path = $S<rootpath> ~ '/' ~ $S<filepath>;
-        }
+      else {
+        $path = $S<rootpath>;
+      }
 
-        else {
-          $path = $S<rootpath>;
-        }
+      $cmd ~~ s:g/ '%op' /'$path'/;
 
-        $cmd ~~ s:g/ '%op' /'$path'/;
+      $ext = $S<fileext>;
+      $cmd ~~ s:g/ '%oe' /'$ext'/;
 
-        $ext = $S<fileext>;
-        $cmd ~~ s:g/ '%oe' /'$ext'/;
-
-        say "Sent file to program: $cmd";
-        my Proc $p = shell "$cmd ", :in;#, :err;
+      say "Sent file to program: $cmd";
+      my Proc $p = shell "$cmd ", :in;#, :err;
 #`{{
-        # wait for promise to finish
-        my Promise $send-it .= start( {
-            my @lines = $p.err.lines;
-            $p.err.close;
+      # wait for promise to finish
+      my Promise $send-it .= start( {
+          my @lines = $p.err.lines;
+          $p.err.close;
 #              note 'done';
-            note "\n---[Output]", '-' x 63 if @lines.elems;
-            .note for @lines;
-            note "---[Finish output]", '-' x 63 if @lines.elems;
-          }
-        );
+          note "\n---[Output]", '-' x 63 if @lines.elems;
+          .note for @lines;
+          note "---[Finish output]", '-' x 63 if @lines.elems;
+        }
+      );
 
-        sleep 0.5;
+      sleep 0.5;
 }}
-        $p.in.print($document);
-        $p.in.close;
-
-#          $send-it.result;
-#      }
-
-#      else {
-#
-#        note "Code '$run-code' to select command not found, Choosen to dump to $filename";
-#      }
+      $p.in.print($document);
+      $p.in.close;
     }
 
     else {
 
       spurt( $filename, $document);
-      note "Saved file in $filename" if $!trace;
+      note "Saved file in $filename"
+        if $!trace and $!refined-config<T><file-handling>;
     }
   }
 
@@ -308,7 +308,7 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  method !prepare-config ( ) {
+  method !prepare-config ( --> Bool ) {
 
     # 1) Cleanup old configs
     $!configuration = Config::DataLang::Refine;
@@ -326,7 +326,7 @@ class Sxml {
 #  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
 #}
 # pick only one config file. Will always be there.
-#self!load-config( :config-name($rp.IO.abspath), :!merge);
+#self!load-config( :config-name($rp.IO.absolute), :!merge);
 
     self!load-config( :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge);
 
@@ -340,7 +340,7 @@ class Sxml {
     if ?$!filename and $!filename.IO ~~ :r {
 
       $basename = $!filename.IO.basename;
-      $fpath = $!filename.IO.abspath;
+      $fpath = $!filename.IO.absolute;
       $fdir = $fpath;
       $fdir ~~ s/ '/'? $basename //;
       $locations = [$fdir];
@@ -370,12 +370,14 @@ class Sxml {
     $!configuration.config =
       $!configuration.merge-hash($!user-config) if ?$!user-config;
 
-
-    # set filename, path etc. if not set, extension is set in default config.
     # $c is bound to the config in the configuration object.
     my Hash $c := $!configuration.config;
-    $c<S> = {} unless $c<S>:exists;
 
+    # Do we need to show things
+    $!trace = $c<C><tracing>;
+
+    # set filename, path etc. if not set, extension is set in default config.
+    $c<S> = {} unless $c<S>:exists;
     if $c<S><filename>:!exists {
       # take filename of sxml source
       if ?$basename {
@@ -399,7 +401,7 @@ class Sxml {
       }
 
       else {
-        $fdir = $*PROGRAM.abspath;
+        $fdir = $*PROGRAM.absolute;
         my $basename = $*PROGRAM.basename;
         $fdir ~~ s/ '/'? $basename //;
         $c<S><rootpath> = $fdir;
@@ -410,9 +412,6 @@ class Sxml {
       $c<S><filepath> = '';
     }
 
-    note "\nComplete configuration: ", $!configuration.perl,
-         "\nRefined configuration tables" if $!trace;
-
     # Fill the special purpose tables with the refined searches in the config
     for @$!refine-tables {
       # document control
@@ -421,8 +420,8 @@ class Sxml {
         $!refined-config{$table} =
           $!configuration.refine(|( $table, $!refine[IN], $basename));
 
-        note "Table $table: in=", $!refine[IN], ', basename=', $basename,
-        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+#        note "Table $table: in=", $!refine[IN], ', basename=', $basename,
+#        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
       # output control
@@ -431,21 +430,20 @@ class Sxml {
         $!refined-config{$table} =
         $!configuration.refine(|( $table, $!refine[OUT], $basename));
 
-        note "Table $table: out=", $!refine[OUT], ', basename=', $basename,
-        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+#        note "Table $table: out=", $!refine[OUT], ', basename=', $basename,
+#        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+      }
+
+      when 'T' {
+        my $table = $_;
+        $!refined-config{$table} =
+          $!configuration.refine( |( $table, $basename));
+
+#        note "Table $table: basename=", $basename,
+#        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
       }
 
 #`{{
-      when 'R' {
-        my $table = $_;
-        $!refined-config{$table} =
-          $!configuration.refine(
-            |( $table, $!refine[IN], $!refine[OUT], $basename)
-          );
-
-        note "Table $table: basename=", $basename,
-        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
-      }
       when 'S' {
         my $table = $_;
         $!refined-config{$table} =
@@ -457,37 +455,54 @@ class Sxml {
 }}
     }
 
+    note "\nComplete configuration: ", $!configuration.perl,
+         "\nRefined configuration tables"
+         if $!trace and $!refined-config<T><config>;
+
+    if $!trace and $!refined-config<T><tables> {
+      note "Refine keys: $!refine[IN], $!refine[OUT]";
+      note "File: $basename";
+      for @$!refine-tables -> $table {
+        note "Table $table:\n",
+          $!configuration.perl(:h($!refined-config{$table}));
+      }
+    }
+
     # before continuing, process dependencies first
     self!run-dependencies;
 
+    #TODO Check exitence and modification time of result to see
+    # if wee need to continue parsing
+    my Bool $continue = True;
+    #if  {
+    #
+    #}
+
     # instantiate modules specified in the configuration
-    self!process-modules;
+    self!process-modules if $continue;
+
+    $continue;
   }
 
   #-----------------------------------------------------------------------------
   method !run-dependencies ( ) {
 
-#TODO check for duplicate and circular dependencies
+#TODO compare modification times of result
 
     # get D-table
     my Hash $D = $!refined-config<D> // {};
     my Array $dependencies = $D{$!refine[OUT]} // [];
-note $D;
-note $!refine[OUT];
-note $dependencies;
     for @$dependencies -> $d-spec {
       my @d = $d-spec.split(';');
       if @d.elems == 3 {
-        my Array $refine = [@d[ IN, OUT]];
-        my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
 
-        note "Process dependency @d[*]" if $!trace;
+        # check if file is seen before. Set before parsing starts on dependency
+        my Str $filename = @d[2];
+        next if $processed-dependencies{$filename}:exists;
+        $processed-dependencies{$filename} = True;
 
         # Bind to S table
         my Hash $S := $!refined-config<S>;
-
-        # filename is basename + extension
-        my Str $filename = @d[2];
 
         # prefix filename with path when filename is relative
         if ?$S<filepath> {
@@ -498,10 +513,14 @@ note $dependencies;
           $filename = $S<rootpath> ~ '/' ~ $filename;
         }
 
-note "$filename, $refine";
+        my Array $refine = [@d[ IN, OUT]];
+        my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
+
+        note "Process dependency @d[*]"
+          if $!trace and $!refined-config<T><file-handling>;
+
         $x.parse(:$filename);
         $x.save;
-        exit 0;
       }
     }
   }
@@ -579,12 +598,15 @@ note "$filename, $refine";
       if ?$!configuration {
         $!configuration .= new(
           :$config-name, :$locations, :other-config($!configuration.config),
-          :$merge, :$!trace
+          :$merge, :trace($!trace and ($!refined-config<T><config-search> // False))
         );
       }
 
       else {
-        $!configuration .= new( :$config-name, :$locations, :$merge, :$!trace);
+        $!configuration .= new(
+          :$config-name, :$locations, :$merge,
+          :trace($!trace and ($!refined-config<T><config-search> // False))
+        );
       }
 
       CATCH {

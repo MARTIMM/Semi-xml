@@ -4,6 +4,7 @@
   xml-show          = false
   doctype-show      = false
   header-show       = false
+  tracing           = false
 
 [ C.xml ]
   xml-show          = true
@@ -57,6 +58,14 @@
 # Storage tables
 [ S ]
   fileext       = 'xml'
+
+#------------------------------------------------------------------------------
+[ T ]
+  config-search = false
+  config        = false
+  tables        = false
+  parse-result  = false
+  file-handling = true
 
 #------------------------------------------------------------------------------
 # XML description tables
