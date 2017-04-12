@@ -21,7 +21,7 @@ class StringList does Callable {
     :$!delimiter where $_ ~~ any(Str|Regex) = ' ',
     Bool :$!use-as-list = False
   ) {
-    $!list = $!string.split($!delimiter);
+    $!list = $!string.split($!delimiter).List;
   }
 
   #-----------------------------------------------------------------------------
