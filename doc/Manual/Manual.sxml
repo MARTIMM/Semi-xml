@@ -371,7 +371,7 @@ $!SxmlCore.comment [
     ]
 ]
 
-$!SxmlCore.comment [
+$!SxmlCore.comment [!
     $para [
       The result after running through &prog; is shown below. Importend to
       note that this text is nicely formatted for this example and the output
@@ -407,7 +407,7 @@ $!SxmlCore.comment [
         ]
       ]
     ]
-]
+!]
 
       $sect3 [
         $title [Comment]
@@ -599,13 +599,13 @@ $!SxmlCore.comment [
         !]
       ]
 
-$!SxmlCore.comment [
+$!SxmlCore.comment [!
         $sect4 [
           $title [  ]
           $para [
           ]
         ]
-]
+!]
 
       $sect3 [
         $title [ Options used by the library &pack; ]
