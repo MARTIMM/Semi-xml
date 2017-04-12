@@ -39,6 +39,8 @@
   xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/$of.%oe'
   chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
+  xml           = 'xmllint --format - > %op/%of.%oe'
+
   # Generate formatted xml first and save it on disk (tee command)
   # then send formatted xml to rnc for checking. This way the errors
   # can be found at the proper line in the saved xml file.
