@@ -84,12 +84,14 @@ class Sxml {
     # Prepare config and process dependencies. If result is newer than source
     # prepare returns False to note that further work is not needed.
     # Generate a proper Match object to return.
-    unless self!prepare-config {
-      'ok' ~~ /ok/;
-      return $/;
+    if not self!prepare-config {
+      note "No need to parse and save data, result is newer than source"
+           if $!trace and $!refined-config<T><parse>;
+      Nil;
     }
 
     # Parse the content. Parse can be recursively called
+    $SemiXML::Grammar::trace = ($!trace and $!refined-config<T><parse>);
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
 
     # Throw an exception when there is a parsing failure
@@ -138,70 +140,38 @@ class Sxml {
   # Save file using config
   method save ( ) {
 
-    # Bind to S table
-    my Hash $S := $!refined-config<S>;
-
-    # filename is basename + extension
-    my Str $filename = $S<filename> ~ '.' ~ $S<fileext>;
-
-    # prefix filename with path when filename is relative
-    if ?$S<filepath> {
-      $filename = $S<rootpath> ~ '/' ~ $S<filepath> ~ '/' ~ $filename;
-    }
-
-    else {
-      $filename = $S<rootpath> ~ '/' ~ $filename;
-    }
-
     # Get the document text
     my $document = self.get-xml-text;
 
     # If a run code is defined, use that code as a key to find the program
-    # to send the result to.
-    my $cmd = $!refined-config<R>{$!refine[OUT]};
-    if $cmd.defined {
+    # to send the result to. If R-table entry is an Array, take the first
+    # element. The second element is a result filename to check for modification
+    # date. Check is done before parsing to see if paqrsing is needed.
+    my $cmd;
+    if $!refined-config<R>{$!refine[OUT]} ~~ Array {
+      $cmd = $!refined-config<R>{$!refine[OUT]}[0];
+    }
 
-      # Drop the extension again. Let it be provided by the command
-      my Str $ext = $filename.IO.extension;
-      $filename ~~ s/ '.' $ext //;
-      $filename = $filename.IO.basename;
-      $cmd ~~ s:g/ '%of' /'$filename'/;
+    else {
+      $cmd = $!refined-config<R>{$!refine[OUT]};
+    }
 
-      my Str $path;
-      if ?$S<filepath> {
-        $path = $S<rootpath> ~ '/' ~ $S<filepath>;
-      }
+    # command is defined and non-empty
+    if ?$cmd {
 
-      else {
-        $path = $S<rootpath>;
-      }
+      $cmd = self!process-cmd-str($cmd);
 
-      $cmd ~~ s:g/ '%op' /'$path'/;
+      say "Send file to program: $cmd"
+        if $!trace and $!refined-config<T><file-handling>;
 
-      $ext = $S<fileext>;
-      $cmd ~~ s:g/ '%oe' /'$ext'/;
-
-      say "Sent file to program: $cmd";
-      my Proc $p = shell "$cmd ", :in;#, :err;
-#`{{
-      # wait for promise to finish
-      my Promise $send-it .= start( {
-          my @lines = $p.err.lines;
-          $p.err.close;
-#              note 'done';
-          note "\n---[Output]", '-' x 63 if @lines.elems;
-          .note for @lines;
-          note "---[Finish output]", '-' x 63 if @lines.elems;
-        }
-      );
-
-      sleep 0.5;
-}}
+      my Proc $p = shell "$cmd", :in;
       $p.in.print($document);
       $p.in.close;
     }
 
     else {
+
+      my $filename = self!process-cmd-str("%op/%of.%oe");
 
       spurt( $filename, $document);
       note "Saved file in $filename"
@@ -305,6 +275,36 @@ class Sxml {
     else {
      "$C<rootpath>/$C<filename>.$C<fileext>";
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !process-cmd-str( Str $cmd-string --> Str ) {
+
+    my $cmd = $cmd-string;
+
+    # Bind to S table
+    my Hash $S := $!refined-config<S>;
+
+    # filename is basename + extension
+#    my Str $filename = $S<filename> ~ '.' ~ $S<fileext>;
+
+    $cmd ~~ s:g/ '%of' /$S<filename>/;
+
+    my Str $path;
+    if ?$S<filepath> {
+      $path = $S<rootpath> ~ '/' ~ $S<filepath>;
+    }
+
+    else {
+      $path = $S<rootpath>;
+    }
+
+    $cmd ~~ s:g/ '%op' /$path/;
+
+#    my Str $ext = $S<fileext>;
+    $cmd ~~ s:g/ '%oe' /$S<fileext>/;
+
+    $cmd;
   }
 
   #-----------------------------------------------------------------------------
@@ -474,9 +474,21 @@ class Sxml {
     #TODO Check exitence and modification time of result to see
     # if wee need to continue parsing
     my Bool $continue = True;
-    #if  {
-    #
-    #}
+
+    # Use the R-table if the entry is an Array. If R-table entry is an Array,
+    # take the second element. It is a result filename to check for modification
+    # date. Check is done before parsing to see if paqrsing is needed.
+    if ?$!filename {
+      if $!refined-config<R>{$!refine[OUT]} ~~ Array {
+        my $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
+        $continue = $!filename.IO.modified > $fn.IO.modified;
+      }
+
+      else {
+        my $fn = self!process-cmd-str("%op/%of.%oe");
+        $continue = $!filename.IO.modified > $fn.IO.modified;
+      }
+    }
 
     # instantiate modules specified in the configuration
     self!process-modules if $continue;
@@ -550,6 +562,7 @@ class Sxml {
     }
 
     # load and instantiate
+    note " " if $!trace and $!refined-config<T><modules>;
     for $mod.kv -> $key, $value {
       if $!objects{$key}:!exists {
         if $lib{$key}:exists {
@@ -561,9 +574,17 @@ class Sxml {
           CompUnit::RepositoryRegistry.use-repository($repository);
         }
 
-        require ::($value);
+        eager require ::($value);
         my $obj = ::($value).new;
-        $!objects{$key} = $obj;
+        $!objects{$key} = $obj if $obj.defined;
+
+        note "Object for key '$key' installed from class $value"
+             if $!trace and $!refined-config<T><modules>;
+      }
+
+      else {
+        note "Object for '$key' already installed from class $value"
+             if $!trace and $!refined-config<T><modules>;
       }
     }
 
@@ -598,18 +619,21 @@ class Sxml {
       if ?$!configuration {
         $!configuration .= new(
           :$config-name, :$locations, :other-config($!configuration.config),
-          :$merge, :trace($!trace and ($!refined-config<T><config-search> // False))
+          :$merge, :trace
+#          :trace($!trace and ($!refined-config<T><config-search> // False))
         );
       }
 
       else {
         $!configuration .= new(
           :$config-name, :$locations, :$merge,
-          :trace($!trace and ($!refined-config<T><config-search> // False))
+          :trace
+#          :trace($!trace and ($!refined-config<T><config-search> // False))
         );
       }
 
       CATCH {
+say "Error catched at $?LINE: ", .message;
         default {
           # Ignore file not found exception
           if .message !~~ m/ :s Config files .* not found / {

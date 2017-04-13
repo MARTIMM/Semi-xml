@@ -2,9 +2,13 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.32.0
+  * --trace is removed. All tracing is controlled by config table T.
+  * Dependencies upon other files is conrolled by config table D.
+  * Parsing and saving is done only after check of result modification time against the source file.
 * 0.31.0
   * sxml2xml.pl6 knows about options --in, --out and --trace. --run is removed.
-  * configuration completely changed using tables and refinements on these tables using the in and out refinement keys.
+  * Configuration completely changed using tables and refinements on these tables using the in and out refinement keys.
   * config key ```rootpath``` in S-table added.
 * 0.30.0
   * Boolean attributes as =attr and =!attr meaning attr=1 and attr=0 resp.

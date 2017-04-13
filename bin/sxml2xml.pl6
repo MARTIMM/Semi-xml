@@ -30,6 +30,7 @@ sub MAIN (
 ) {
 
   my SemiXML::Sxml $x .= new( :$merge, :refine([ $in, $out]));
-  $x.parse(:$filename);
-  $x.save;
+  if $x.parse(:$filename) ~~ Match {
+    $x.save;
+  }
 }
