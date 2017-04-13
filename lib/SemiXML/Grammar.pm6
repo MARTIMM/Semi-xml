@@ -11,7 +11,7 @@ grammar Grammar {
   our $trace = False;
 
   # Actions initialize
-  rule init-doc { <?> }
+  rule init-doc { <?> { note " " if $trace; } }
 
   # A document is only a tag with its content in a body. Defined like this
   # there can only be one toplevel document. In the following body documents
@@ -19,13 +19,14 @@ grammar Grammar {
   #
   # Possible comments outside toplevel document
   rule TOP {
-    { note " " if $trace; }
     <.init-doc>
     <.comment>*         # Needed to make empty lines between comments possible.
                         # Only here is needed body*-contents is taking care for
                         # the rest.
-    [ <document>
-      { note "Parse: Top level >>{$/.Str.substr( $/.from, $/.from+30)} ... <<" if $trace; }
+    [ <document> {
+        note "Parse: Top level >>{$/.Str.substr( $/.from, $/.from+30)} ... <<"
+             if $trace;
+      }
     ]
     <.comment>*
     { note " " if $trace; }
@@ -36,7 +37,12 @@ grammar Grammar {
   # the actions method for <tag-spec>.
   #
   rule pop-tag-from-list { <?> }
-  rule document { <tag-spec> <tag-body>* <.pop-tag-from-list> }
+  rule document {
+    <tag-spec> {
+      note "Parse: Tag $/<tag-spec>" if $trace;
+    }
+    <tag-body>* <.pop-tag-from-list>
+  }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
@@ -91,20 +97,20 @@ grammar Grammar {
 
   # important to use token instead of rule to get spaces in the body*-contents
   token tag-body { [
-      '[!=' ~ '!]'    <body1-contents> ||
-      '[!' ~  '!]'    <body2-contents> ||
-      '[=' ~   ']'    <body3-contents> ||
-      '[' ~    ']'    <body4-contents>
+      '[!=' ~ '!]'    <body1-contents> { note "Parse: body type [!= ... !]" if $trace; } ||
+      '[!' ~  '!]'    <body2-contents> { note "Parse: body type [! ... !]" if $trace; } ||
+      '[=' ~   ']'    <body3-contents> { note "Parse: body type [= ... ]" if $trace; } ||
+      '[' ~    ']'    <body4-contents> { note "Parse: body type [ ... ]" if $trace; }
     ]
   }
 
   # The content can be anything mixed with document tags except following the
   # no-elements character. To use the brackets and other characters in the
   # text, the characters must be escaped.
-  token body1-contents  { <body2-text> }
-  token body2-contents  { <body2-text> }
-  token body3-contents  { [ <body1-text> || <document> || <.comment> ]* }
-  token body4-contents  { [ <body1-text> || <document> || <.comment> ]* }
+  token body1-contents { <body2-text> }
+  token body2-contents { <body2-text> }
+  token body3-contents { [ <body1-text> || <document> || <.comment> ]* }
+  token body4-contents { [ <body1-text> || <document> || <.comment> ]* }
 
   token body1-text {
     [ <.escaped-char> ||    # an escaped character
