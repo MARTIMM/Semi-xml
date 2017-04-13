@@ -87,7 +87,7 @@ class Sxml {
     if not self!prepare-config {
       note "No need to parse and save data, result is newer than source"
            if $!trace and $!refined-config<T><parse>;
-      Nil;
+      return Nil;
     }
 
     # Parse the content. Parse can be recursively called
@@ -531,8 +531,9 @@ class Sxml {
         note "Process dependency @d[*]"
           if $!trace and $!refined-config<T><file-handling>;
 
-        $x.parse(:$filename);
-        $x.save;
+        if $x.parse(:$filename) ~~ Match {
+          $x.save;
+        }
       }
     }
   }
