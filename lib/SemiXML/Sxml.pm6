@@ -84,11 +84,7 @@ class Sxml {
     # Prepare config and process dependencies. If result is newer than source
     # prepare returns False to note that further work is not needed.
     # Generate a proper Match object to return.
-    if not self!prepare-config {
-      note "No need to parse and save data, result is newer than source"
-           if $!trace and $!refined-config<T><parse>;
-      return Nil;
-    }
+    return Nil unless self!prepare-config;
 
     # Parse the content. Parse can be recursively called
     $SemiXML::Grammar::trace = ($!trace and $!refined-config<T><parse>);
@@ -479,21 +475,27 @@ class Sxml {
     # take the second element. It is a result filename to check for modification
     # date. Check is done before parsing to see if paqrsing is needed.
     if ?$!filename {
+      my $fn;
       if $!refined-config<R>{$!refine[OUT]} ~~ Array {
-        my $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
-        $continue = $fn.IO !~~ :e or $!filename.IO.modified > $fn.IO.modified;
+        $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
+        $continue = !$fn.IO.e or ($!filename.IO.modified > $fn.IO.modified);
       }
 
       else {
-        my $fn = self!process-cmd-str("%op/%of.%oe");
-        $continue = $fn.IO !~~ :e or $!filename.IO.modified > $fn.IO.modified;
+        $fn = self!process-cmd-str("%op/%of.%oe");
+        $continue = !$fn.IO.e or ($!filename.IO.modified > $fn.IO.modified);
+      }
+
+      if ! $continue {
+        note "No need to parse and save data, $fn is newer than $!filename"
+           if $!trace and $!refined-config<T><parse>;
       }
     }
 
     # instantiate modules specified in the configuration
     self!process-modules if $continue;
 
-    $continue;
+    $continue = True;
   }
 
   #-----------------------------------------------------------------------------
@@ -531,9 +533,7 @@ class Sxml {
         note "Process dependency @d[*]"
           if $!trace and $!refined-config<T><file-handling>;
 
-        if $x.parse(:$filename) ~~ Match {
-          $x.save;
-        }
+        $x.save if $x.parse(:$filename) ~~ Match;
       }
     }
   }
@@ -575,7 +575,7 @@ class Sxml {
           CompUnit::RepositoryRegistry.use-repository($repository);
         }
 
-        eager require ::($value);
+        (try require ::($value)) === Nil and die "Failed to load $value";
         my $obj = ::($value).new;
         $!objects{$key} = $obj if $obj.defined;
 
