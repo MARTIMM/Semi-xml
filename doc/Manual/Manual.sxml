@@ -57,7 +57,7 @@ $!Db5b.article [
 
             $body [
               $h1 [ My First Sxml Document ]
-              $p [ Hello world! And it is said on $!SxmlCore.date. ]
+              $p [ Hello world\! And it is said on $\!SxmlCore.date. ]
             ]
           ]
         !]
@@ -72,7 +72,7 @@ $!Db5b.article [
             </head>
             <body>
               <h1>My First Sxml Document</h1>
-              <p>Hello world! And it is said on 2016-03-22.</p>
+              <p>Hello world\! And it is said on 2016-03-22.</p>
             </body>
           </html>
         !]
@@ -167,8 +167,7 @@ $!Db5b.article [
           $para [
             $emphasis[Configuration]. The toml configuration file will be
             explained. This section explains how to control the output
-            of the result and where modules are to be found. Some options
-            are only used by the program
+            of the result and where modules are to be found.
             &prog;. Defaults are also explained.
           ]
         ]
@@ -289,7 +288,7 @@ $!SxmlCore.comment [
       $para [
 #TODO RSS in glossary
         A more complex example shows a part of RSS or Really Simple Syndication.
-        $programlisting [!
+        $programlisting [!=
           $rss version=2.0 [
             $channel [
               $title [W3Schools Home Page]
@@ -335,7 +334,7 @@ $!SxmlCore.comment [
       ]
 #    ]
 
-$!SxmlCore.comment [
+$!SxmlCore.comment [!
     $para [
       Below you see a simple example.
 
@@ -369,7 +368,7 @@ $!SxmlCore.comment [
         ]
       ]
     ]
-]
+!]
 
 $!SxmlCore.comment [!
     $para [
@@ -469,14 +468,14 @@ $!SxmlCore.comment [!
           such as within <pre> elements. Sxml does not have any notion of these
           sections and treat those as xml and all excess of space is removed. To
           cope with these sections another set of container delimiters are used.
-          These are $**emphasis[! [= ... \] !] and $*|emphasis[! [!= ... \!] !].
+          These are $**emphasis[! [= ... \] !] and $*|emphasis[! [\!= ... \!] !].
           With these brackets, all indenting and newlines are fixed and protected.
         ]
 
         $para [
           Multiple content bodies are also possible when there are parts which
           need protection and in other parts, elements are needed. E.g.
-          $**emphasis[! $p [The line; ][! my Int $x = 10; \!][ is an $b[Int]
+          $**emphasis[! $p [The line; ][\! my Int $x = 10; \!][ is an $b[Int]
           declaration] !]
         ]
       ]
@@ -490,7 +489,7 @@ $!SxmlCore.comment [!
           element is minimized but at some places there must be a space before
           or after the element. Examples from html are <a>, <b> and <strong> among
           other inline elements. To get this spacing right one can use
-          $**empasis[! $**element !],
+          $*|emphasis[! $**element !],
           $**emphasis[! $*|element !] or $**emphasis[! $|*element !] to have a
           space on both sides, on the left side or on the right side respectively.
 #TODO $|element no spaces.
@@ -498,7 +497,7 @@ $!SxmlCore.comment [!
 
         $para [
           Another type is a special one. It is defined as
-          $**emphasis[! $!module-key.method-name !] where the module-key is mapped
+          $**emphasis[! $\!module-key.method-name !] where the module-key is mapped
           to a real module in the configuration file. One key is predefined: SxmlCore
           and is mapped to SxmlLib::SxmlCore. The methods defined in that module
           are explained in a separate chapter. How a module is initialized and

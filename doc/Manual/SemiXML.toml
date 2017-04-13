@@ -32,11 +32,15 @@
 #------------------------------------------------------------------------------
 [ R.xml ]
   xml           = 'xmllint --format - > %op/%of.%oe'
-  xsl           = 'xmllint --format - > %op/%of.%oe'
+  xsl           = [ 'xmllint --format - > %op/%of.%oe', '%op/%of.%oe']
 
 [ R.Db5 ]
-  pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/%of.%oe'
-  xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/$of.%oe'
+  pdf           = [
+   'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/%of.%oe',
+   '%op/%of.%oe'
+  ]
+
+  xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/%of.%oe'
   chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
 
   xml           = 'xmllint --format - > %op/%of.%oe'
@@ -59,6 +63,10 @@
   fileext       = 'xml'
   filepath      = 'Xml'
 
+[ S.check ]
+  fileext       = 'xml'
+  filepath      = 'Xml'
+
 [ S.xsl ]
   fileext       = 'xsl'
   filepath      = 'Xsl'
@@ -68,8 +76,10 @@
 
 #------------------------------------------------------------------------------
 [ T ]
-  config-search = false
+#  config-search = false
   config        = false
   tables        = false
+  modules       = true
+  parse         = true
   parse-result  = false
   file-handling = true
