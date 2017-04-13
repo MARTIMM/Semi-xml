@@ -39,7 +39,7 @@ class StringList does Callable {
     $!delimiter = $delimiter // $!delimiter;
     $!string = $string // $!string;
     $!use-as-list = $use-as-list // $!use-as-list;
-    $!list = $!string.split($!delimiter);
+    $!list = $!string.split($!delimiter).List;
 
     $!use-as-list ?? $!list !! $!string;
   }
