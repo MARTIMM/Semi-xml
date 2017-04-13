@@ -481,12 +481,12 @@ class Sxml {
     if ?$!filename {
       if $!refined-config<R>{$!refine[OUT]} ~~ Array {
         my $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
-        $continue = $!filename.IO.modified > $fn.IO.modified;
+        $continue = $fn.IO !~~ :e or $!filename.IO.modified > $fn.IO.modified;
       }
 
       else {
         my $fn = self!process-cmd-str("%op/%of.%oe");
-        $continue = $!filename.IO.modified > $fn.IO.modified;
+        $continue = $fn.IO !~~ :e or $!filename.IO.modified > $fn.IO.modified;
       }
     }
 
