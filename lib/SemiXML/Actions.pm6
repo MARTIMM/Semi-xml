@@ -608,7 +608,8 @@ class Actions {
     # Entity must be known in the xml result!
     $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/ unless $is-attr;
     $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
-    $esc ~~ s:g/\</\&lt;/ unless $is-attr;
+    $esc ~~ s:g/ '<' /\&lt;/ unless $is-attr;
+    $esc ~~ s:g/ '>' /\&gt;/ unless $is-attr;
 
     $esc ~~ s:g/\"/\&quot;/ if $is-attr;
     $esc ~~ s:g/'\\'//;
