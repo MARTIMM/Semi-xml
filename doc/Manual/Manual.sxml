@@ -164,6 +164,7 @@ $!Db5b.article [
         ]
 
         $listitem [
+        
           $para [
             $emphasis[Configuration]. The toml configuration file will be
             explained. This section explains how to control the output
