@@ -7,6 +7,9 @@ unit package SemiXML:auth<https://github.com/MARTIMM>;
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
+  # Show what is found
+  our $trace = False;
+
   # Actions initialize
   rule init-doc { <?> }
 
@@ -16,12 +19,16 @@ grammar Grammar {
   #
   # Possible comments outside toplevel document
   rule TOP {
+    { note " " if $trace; }
     <.init-doc>
     <.comment>*         # Needed to make empty lines between comments possible.
                         # Only here is needed body*-contents is taking care for
                         # the rest.
-    <document>
+    [ <document>
+      { note "Parse: Top level >>{$/.Str.substr( $/.from, $/.from+30)} ... <<" if $trace; }
+    ]
     <.comment>*
+    { note " " if $trace; }
   }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
@@ -109,15 +116,20 @@ grammar Grammar {
 
   # No comments recognized in [! ... !]. This works because a nested documents
   # are not recognized and thus no extra comments are checked and handled as such.
-  token body2-text      {
+  token body2-text {
     [ <.escaped-char> ||    # an escaped character
+#      '!' <!before ']'> ||
       <-[\!\\]>             # any character not being '\' or '!'
                             # to stop at escaped char or end of
                             # current document
     ]+
   }
 
-  token escaped-char     { '\\' . }
+  token escaped-char {
+    '\\' .            ||
+    [ "'" ~ "'" [ . || '[!' || '!]' ] ]   ||
+    [ '"' ~ '"' [ . || '[!' || '!]' ] ]
+  }
   #  token entity          { '&' <-[;]>+ ';' }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a

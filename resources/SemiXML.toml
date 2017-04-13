@@ -61,9 +61,11 @@
 
 #------------------------------------------------------------------------------
 [ T ]
-  config-search = false
+#  config-search = false
   config        = false
   tables        = false
+  modules       = false
+  parse         = false
   parse-result  = false
   file-handling = true
 
