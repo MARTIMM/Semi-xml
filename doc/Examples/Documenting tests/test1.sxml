@@ -1,5 +1,3 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=html --run=pdf
-
 $!report.run title='Integer manipulations' class='Int'
              label=test1,integer,report
              highlight-lang='lang-perl6' highlight-skin='default' linenumbers=0
@@ -13,12 +11,12 @@ $!report.run title='Integer manipulations' class='Int'
     integer without a value.
   ]
 
-  $!code.add [=
+  $!code.add [!=
     constant ABC = 10;
     my Int $i;
     my Hash $h;
     $h<test> = $i;
-
+  !][
     $!test.add t="nok $i.defined" [
       Declaration of an integer without an assignment of a value,
       should result in an undefinedness.
@@ -43,8 +41,9 @@ $!report.run title='Integer manipulations' class='Int'
 
   $p [Next a few tests to see if operations can be applied to the integer]
 
-  $!code.add [=
+  $!code.add [!=
     $i = ABC;
+  !][
 
     $!test.add t="is $i, 10" [
       Initialize Int with the constant seems to have done well
@@ -79,7 +78,7 @@ $!report.run title='Integer manipulations' class='Int'
 
     }
 
-    my Int $i2 = 20304;
+    ][!my Int $i2 = 20304;!][
 
     $!bug.add n=2 [ Mentioned a few bugs from the issues list on github ]
     $!test.add t='is $i2, 20304' [ ok, for now ]

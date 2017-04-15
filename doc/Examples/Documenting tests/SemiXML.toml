@@ -1,15 +1,18 @@
-[ option.doctype ]
-  show          = true
+#------------------------------------------------------------------------------
+[ C ]
+  show-doctype  = true
+  tracng        = true
 
-[output]
+#------------------------------------------------------------------------------
+[ S.html ]
   fileext       = 'html'
 
-[output.program]
-  pdf           = 'wkhtmltopdf - %op/%of.pdf'
-#  fmt           = 'xmllint --format --noent - > %of.%oe'
-#  tidy          = 'tidy --output-html 1 - >%of.%oe'
+#------------------------------------------------------------------------------
+[ R.html ]
+  pdf           = 'wkhtmltopdf - "%op/%of.pdf"'
 
-[module]
+#------------------------------------------------------------------------------
+[ ML.html ]
   report        = 'SxmlLib::Testing::Report'
   code          = 'SxmlLib::Testing::Code'
   test          = 'SxmlLib::Testing::Test'
@@ -17,3 +20,13 @@
   bug           = 'SxmlLib::Testing::Bug'
   skip          = 'SxmlLib::Testing::Skip'
   lorem         = 'SxmlLib::LoremIpsum'
+
+#------------------------------------------------------------------------------
+[ T ]
+#  config-search = false
+  config        = false
+  tables        = true
+  modules       = true
+  parse         = false
+  parse-result  = false
+  file-handling = true
