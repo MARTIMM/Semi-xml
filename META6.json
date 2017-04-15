@@ -10,7 +10,7 @@
   "license": "The Artistic License 2.0",
   "description": "Semi xml parser",
   "name": "SemiXML",
-  "perl": "6.c",
+  "perl": "6",
   "provides": {
     "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
     "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
