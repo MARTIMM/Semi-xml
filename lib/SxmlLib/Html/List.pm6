@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 # Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems

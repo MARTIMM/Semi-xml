@@ -4,7 +4,7 @@ use v6.c;
 unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 use XML;
-#use SemiXML::Sxml;
+use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
 use SxmlLib::Testing::Testing;
 
@@ -62,11 +62,11 @@ class Report:ver<0.2.2> {
     $!bug-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Bug');
     $!skip-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Skip');
 
-    $!highlight-code = ?$attrs<highlight-lang> // False;
-    $!highlight-language = $attrs<highlight-lang> // '';
-    $!highlight-skin = lc($attrs<highlight-skin> // 'prettify');
+    $!highlight-code = ? ~$attrs<highlight-lang> // False;
+    $!highlight-language = ~$attrs<highlight-lang> // '';
+    $!highlight-skin = lc(($attrs<highlight-skin> // 'prettify').Str);
     $!highlight-skin = 'prettify' if $!highlight-skin eq 'default';
-    $!linenumbers = ?$attrs<linenumbers> // False;
+    $!linenumbers = ? ~$attrs<linenumbers> // False;
 
     self!setup-report-doc($attrs);
   }
@@ -113,7 +113,7 @@ class Report:ver<0.2.2> {
   ) {
 
     my XML::Element $html = append-element( $parent, 'html');
-    my Str $title = $attrs<title> // '';
+    my Str $title = ~($attrs<title> // '');
     my XML::Element $head = append-element( $html, 'head');
     self!setup-head( $head, $attrs);
     my XML::Element $body = append-element( $html, 'body');
@@ -130,8 +130,8 @@ class Report:ver<0.2.2> {
     --> XML::Node
   ) {
 
-    my Str $metric-dir = $attrs<metric-dir> // '.';
-    my Str $filter = $attrs<filter> // '';
+    my Str $metric-dir = ~($attrs<metric-dir> // '.');
+    my Str $filter = ~($attrs<filter> // '');
 
     my @metric-files = dir($metric-dir).grep(/t.metric/);
     for @metric-files -> $mf {
@@ -219,11 +219,11 @@ class Report:ver<0.2.2> {
 
 
     # if there is a title attribute, make a h1 title
-    if ? $attrs<title> {
+    if ? ~$attrs<title> {
       my XML::Element $h1 = append-element(
         $!body, 'h1', { id => '___top', class => 'title'}
       );
-      insert-element( $h1, :text($attrs<title>));
+      insert-element( $h1, :text(~$attrs<title>));
     }
   }
 
@@ -231,9 +231,9 @@ class Report:ver<0.2.2> {
   # Fill the head element
   method !setup-head ( XML::Element $head, Hash $attrs ) {
 
-    if $attrs<title> {
+    if ? $attrs<title> {
       my XML::Element $title = append-element( $head, 'title');
-      insert-element( $title, :text($attrs<title>));
+      insert-element( $title, :text(~$attrs<title>));
     }
 
     my XML::Element $meta = append-element(
@@ -468,7 +468,8 @@ class Report:ver<0.2.2> {
     $test-file //= ($!sxml.get-current-filename ~ '.t');
     $test-file //= ($*TMPDIR.Str ~ '/perl6-test.t');
 
-    spurt( $test-file, $!test-program);
+note "T: ", $!sxml.get-current-filename;
+    spurt( ~$test-file, $!test-program);
 
     # run the tests using prove and get the result contents through a pipe
 #    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',

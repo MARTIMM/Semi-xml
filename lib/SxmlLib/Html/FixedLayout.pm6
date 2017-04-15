@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
@@ -23,12 +23,12 @@ class Html::FixedLayout {
   # fix-indent=<n>      Remove some space in front of every line.
   #
   method load-test-example ( XML::Element $parent, Hash $attrs is copy ) {
-    my Str $path = $attrs<path>:delete // '';
-    my Str $ltype = $attrs<ltype>:delete // '';
-    my Str $start = $attrs<start>:delete // '#`{{Example-Start}}';
-    my Str $stop = $attrs<stop>:delete // '#`{{Example-Stop}}';
-    my Bool $keep-literal = $attrs<keep-literal>:delete ?? True !! False;
-    my $fix-indent = $attrs<fix-indent>:delete // '0';
+    my Str $path = ~$attrs<path>:delete // '';
+    my Str $ltype = ~$attrs<ltype>:delete // '';
+    my Str $start = ~$attrs<start>:delete // '#`{{Example-Start}}';
+    my Str $stop = ~$attrs<stop>:delete // '#`{{Example-Stop}}';
+    my Bool $keep-literal = ~$attrs<keep-literal>:delete ?? True !! False;
+    my $fix-indent = ~$attrs<fix-indent>:delete // '0';
 
     my $text;
     if $path.IO ~~ :r {

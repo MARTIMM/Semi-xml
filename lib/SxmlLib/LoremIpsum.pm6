@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
@@ -211,7 +211,7 @@ class LoremIpsum {
   method words (XML::Element $parent, Hash $attrs --> XML::Element ) {
 
     # get the number of words
-    my Int $nbr-words = ($attrs<n> // 1).Int;
+    my Int $nbr-words = (~$attrs<n> // 1).Int;
 
     my Str $ipsum;
     $ipsum ~= self!make-word ~ ' ' for ^$nbr-words;
@@ -233,7 +233,7 @@ class LoremIpsum {
   method sentences ( XML::Element $parent, Hash $attrs --> XML::Element ) {
 
     # get the number of sentences
-    my Int $nbr-sentences = ($attrs<n> // 1).Int;
+    my Int $nbr-sentences = (~$attrs<n> // 1).Int;
 
     # use that point to get some words from the text
     my Str $ipsum = '';
@@ -248,7 +248,7 @@ class LoremIpsum {
   method paragraph ( XML::Element $parent, Hash $attrs --> XML::Element ) {
 
     # get the number of sentences
-    my Int $nbr-paragraphs = ($attrs<n> // 1).Int;
+    my Int $nbr-paragraphs = (~$attrs<n> // 1).Int;
 
     my XML::Element $p;
 

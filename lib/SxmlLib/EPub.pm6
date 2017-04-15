@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 # Check sigil, pandoc, perl5 EBook::EPUB,
 
@@ -46,28 +46,28 @@ class EPub:ver<0.4.1> {
     #   nav-doc                 default 'navigation.xhtml'
     $!epub-attrs = %( |%$!epub-attrs,
 
-      :title($attrs<title> // 'No Title'),
-      :creator($attrs<creator> // 'Unknown'),
-      :language($attrs<language> // 'US-en'),
-      :rights($attrs<rights> // 'Public Domain'),
-      :publisher($attrs<publisher> // $attrs<creator> // 'Unknown'),
-      :book-id($attrs<book-id> // 'Unknown should be unique book id'),
-      :id-type($attrs<book-id-type> // 'Unknown'),
+      :title(~$attrs<title> // 'No Title'),
+      :creator(~$attrs<creator> // 'Unknown'),
+      :language(~$attrs<language> // 'US-en'),
+      :rights(~$attrs<rights> // 'Public Domain'),
+      :publisher(~$attrs<publisher> // ~$attrs<creator> // 'Unknown'),
+      :book-id(~$attrs<book-id> // 'Unknown should be unique book id'),
+      :id-type(~$attrs<book-id-type> // 'Unknown'),
 
-      :epub-build-dir($attrs<epub-build-dir> // '/tmp/epub3-build-dir'),
-      :epub-doc-name($attrs<epub-doc-name> // {
-          my Str $name = $attrs<title>;
+      :epub-build-dir(~$attrs<epub-build-dir> // '/tmp/epub3-build-dir'),
+      :epub-doc-name(~$attrs<epub-doc-name> // {
+          my Str $name = ~$attrs<title>;
           $name ~~ s:g/ (<[,.]>|\s)+ /-/;
         }
       ),
 
-      :mimetype($attrs<mimetype> // 'application/epub+zip'),
-      :cleanup(?$attrs<cleanup>),
-      :formatted-xml(?$attrs<formatted-xml>),
+      :mimetype(~$attrs<mimetype> // 'application/epub+zip'),
+      :cleanup(? ~$attrs<cleanup>),
+      :formatted-xml(? ~$attrs<formatted-xml>),
     );
 
     if $version eq 'epub3' {
-      $!epub-attrs<nav-doc> = $attrs<nav-doc> // 'navigation.xhtml'
+      $!epub-attrs<nav-doc> = ~$attrs<nav-doc> // 'navigation.xhtml'
     }
 
     else { # epub2

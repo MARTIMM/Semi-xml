@@ -112,7 +112,7 @@ class EPub::EPub3Builder is SxmlLib::EPub {
   ) {
 
     my XML::Element $manifest .= new(:name<manifest>);
-    my Str $workdir = $attrs<workdir> // '.';
+    my Str $workdir = ~($attrs<workdir> // '.');
     $.epub-attrs<workdir> = $workdir;
 
     # Add the toc ref to it. Name not yet known, so make something up
@@ -174,10 +174,10 @@ class EPub::EPub3Builder is SxmlLib::EPub {
   ) {
 
     my XML::Element $item;
-    my Str $href = $attrs<href>;
+    my Str $href = ~($attrs<href> // '');
     if $!doc-refs{$href}:exists
-       or self!check-href( $href, :prop($attrs<properties> // '')) {
-      $item .= new( :name<i>, :attribs( %( :$href, :spine(?$attrs<spine>),)));
+       or self!check-href( $href, :prop(~($attrs<properties> // ''))) {
+      $item .= new( :name<i>, :attribs( %( :$href, :spine(? ~($attrs<spine> // '')),)));
     }
 
     $item;

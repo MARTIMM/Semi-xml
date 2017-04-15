@@ -46,8 +46,8 @@ class SxmlCore {
                      --> XML::Node
                    ) {
 
-    my Bool $iso = $attrs<iso>:exists ?? ?$attrs<iso>.Int !! True;
-    my Bool $utc = $attrs<utc>:exists ?? ?$attrs<utc>.Int !! False;
+    my Bool $iso = $attrs<iso>:exists ?? ? $attrs<iso>.Int !! True;
+    my Bool $utc = $attrs<utc>:exists ?? ? $attrs<utc>.Int !! False;
     my Int $tz = $attrs<timezone>:exists ?? $attrs<timezone>.Int !! 0;
 
     my DateTime $date-time;
@@ -120,7 +120,7 @@ class SxmlCore {
     $parent.append(
       XML::PI.new(
         :data((
-          (( $attrs<target> // 'no-target'), $content-body.nodes).join(' ')
+          (( ~$attrs<target> // 'no-target'), $content-body.nodes).join(' ')
         ))
       )
     );
