@@ -263,13 +263,13 @@ class Sxml {
 #TODO check if still needed
   method get-current-filename ( --> Str ) {
 
-    my Hash $C = $!refined-config<C>;
-    if ?$C<filepath> {
-      "$C<rootpath>/$C<filepath>/$C<filename>.$C<fileext>";
+    my Hash $S = $!refined-config<S>;
+    if ?$S<filepath> {
+      "$S<rootpath>/$S<filepath>/$S<filename>.$S<fileext>";
     }
 
     else {
-     "$C<rootpath>/$C<filename>.$C<fileext>";
+     "$S<rootpath>/$S<filename>.$S<fileext>";
     }
   }
 
@@ -478,12 +478,12 @@ class Sxml {
       my $fn;
       if $!refined-config<R>{$!refine[OUT]} ~~ Array {
         $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
-        $continue = !$fn.IO.e or ($!filename.IO.modified > $fn.IO.modified);
+        $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
       }
 
       else {
         $fn = self!process-cmd-str("%op/%of.%oe");
-        $continue = !$fn.IO.e or ($!filename.IO.modified > $fn.IO.modified);
+        $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
       }
 
       if ! $continue {
@@ -492,10 +492,12 @@ class Sxml {
       }
     }
 
+#    $continue = True;
+
     # instantiate modules specified in the configuration
     self!process-modules if $continue;
 
-    $continue = True;
+    $continue;
   }
 
   #-----------------------------------------------------------------------------
@@ -549,6 +551,7 @@ class Sxml {
     my Hash $lib = {};
     my Hash $mod = {};
     for $!refined-config<ML>.keys -> $modkey {
+
       next unless ? $!refined-config<ML>{$modkey};
 
       ( my $m, my $l) = $!refined-config<ML>{$modkey}.split(';');
@@ -575,7 +578,7 @@ class Sxml {
           CompUnit::RepositoryRegistry.use-repository($repository);
         }
 
-        (try require ::($value)) === Nil and die "Failed to load $value";
+        (try require ::($value)) === Nil and say "Failed to load $value\n$!";
         my $obj = ::($value).new;
         $!objects{$key} = $obj if $obj.defined;
 
@@ -620,7 +623,7 @@ class Sxml {
       if ?$!configuration {
         $!configuration .= new(
           :$config-name, :$locations, :other-config($!configuration.config),
-          :$merge, :trace
+          :$merge, :!trace
 #          :trace($!trace and ($!refined-config<T><config-search> // False))
         );
       }
@@ -628,7 +631,7 @@ class Sxml {
       else {
         $!configuration .= new(
           :$config-name, :$locations, :$merge,
-          :trace
+          :!trace
 #          :trace($!trace and ($!refined-config<T><config-search> // False))
         );
       }
