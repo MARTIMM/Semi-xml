@@ -56,23 +56,14 @@
 #  filename      = 'Manual'
   rootpath      = 'doc/Manual'
 
-[ S.pdf ]
-  fileext       = 'pdf'
-
 [ S.xml ]
-  fileext       = 'xml'
   filepath      = 'Xml'
 
 [ S.check ]
-  fileext       = 'xml'
   filepath      = 'Xml'
 
 [ S.xsl ]
-  fileext       = 'xsl'
   filepath      = 'Xsl'
-
-[ S.xhtml ]
-  fileext       = 'xhtml'
 
 #------------------------------------------------------------------------------
 [ T ]

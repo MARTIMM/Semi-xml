@@ -59,7 +59,23 @@
 [ S ]
   fileext       = 'xml'
 
+[S.html]
+  fileext       = 'html'
+
+[S.xhtml]
+  fileext       = 'xhtml'
+
+[S.pdf]
+  fileext       = 'pdf'
+
+[S.svg]
+  fileext       = 'svg'
+
+[ S.xsl ]
+  fileext       = 'xsl'
+
 #------------------------------------------------------------------------------
+# Tracing tables
 [ T ]
 #  config-search = false
   config        = false
