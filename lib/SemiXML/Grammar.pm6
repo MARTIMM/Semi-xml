@@ -114,6 +114,7 @@ grammar Grammar {
 
   token body1-text {
     [ <.escaped-char> ||    # an escaped character
+      <entity> ||
       <-[\$\]\#\\]>         # any character not being '\', '$', '#' or ']'
                             # to stop at escaped char, a document
                             # comment or end of current document.
@@ -124,6 +125,7 @@ grammar Grammar {
   # are not recognized and thus no extra comments are checked and handled as such.
   token body2-text {
     [ <.escaped-char> ||    # an escaped character
+      <entity> ||
 #      '!' <!before ']'> ||
       <-[\!\\]>             # any character not being '\' or '!'
                             # to stop at escaped char or end of
@@ -136,7 +138,8 @@ grammar Grammar {
     [ "'" ~ "'" [ . || '[!' || '!]' ] ]   ||
     [ '"' ~ '"' [ . || '[!' || '!]' ] ]
   }
-  #  token entity          { '&' <-[;]>+ ';' }
+
+  token entity          { '&' <-[;]>+ ';' }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.
