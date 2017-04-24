@@ -67,7 +67,7 @@ class EPub:ver<0.4.1> {
     );
 
     if $version eq 'epub3' {
-      $!epub-attrs<nav-doc> = ~$attrs<nav-doc> // 'navigation.xhtml'
+      $!epub-attrs<nav-doc> = ~($attrs<nav-doc> // 'navigation.xhtml')
     }
 
     else { # epub2
