@@ -49,7 +49,7 @@
 #------------------------------------------------------------------------------
 # Running programs tables
 [ R.xml ]
-  fmt             = 'xmllint --format - > %op/%of.%oe'
+  fmt             = 'xmllint --format - > "%op/%of.%oe"'
 #  fmt             = 'xmllint --format --noent - > %op/%of.%oe'
 #  pdf             = 'wkhtmltopdf - %op/%of.pdf'
 #  chk             = 'tidy -'
