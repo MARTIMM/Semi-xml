@@ -3,7 +3,7 @@
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
 * 0.32.0
-  * --trace is removed. All tracing is controlled by config table T.
+  * --trace is removed. All tracing is controlled by config table T and by config entry tracing (true/false) in the C table.
   * Dependencies upon other files is conrolled by config table D.
   * Parsing and saving is done only after check of result modification time against the source file.
 * 0.31.0
