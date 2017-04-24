@@ -88,4 +88,5 @@ done-testing;
 unlink $cfg;
 unlink $f;
 unlink "$dir/target200.xml";
+unlink "$dir/target200.pdf";
 rmdir $dir;
