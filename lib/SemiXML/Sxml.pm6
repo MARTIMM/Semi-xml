@@ -404,9 +404,7 @@ class Sxml {
       }
     }
 
-    if $c<S><filepath>:!exists {
-      $c<S><filepath> = '';
-    }
+    $c<S><filepath> //= '';
 
     # Fill the special purpose tables with the refined searches in the config
     for @$!refine-tables {
@@ -421,7 +419,7 @@ class Sxml {
       when any(<C H S X>) {
         my $table = $_;
         $!refined-config{$table} =
-        $!configuration.refine( $table, $!refine[OUT], $basename);
+          $!configuration.refine( $table, $!refine[OUT], $basename);
       }
 
       when 'T' {
