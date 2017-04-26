@@ -6,13 +6,13 @@ branches:
 language: perl6
 
 perl6:
-#  - latest
-  - '2017.02'
+  - latest
+#  - '2017.02'
 
 #before-install:
 install:
 #  - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
-  - rakudobrew build-zef 2017.02
+  - rakudobrew build-zef
 
   - zef update
 #  - zef --/test install Config::DataLang::Refine

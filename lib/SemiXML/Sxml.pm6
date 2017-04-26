@@ -414,39 +414,27 @@ class Sxml {
       when any(<D E F ML R>) {
         my $table = $_;
         $!refined-config{$table} =
-          $!configuration.refine(|( $table, $!refine[IN], $basename));
-
-#        note "Table $table: in=", $!refine[IN], ', basename=', $basename,
-#        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+          $!configuration.refine( $table, $!refine[IN], $basename);
       }
 
       # output control
       when any(<C H S X>) {
         my $table = $_;
         $!refined-config{$table} =
-        $!configuration.refine(|( $table, $!refine[OUT], $basename));
-
-#        note "Table $table: out=", $!refine[OUT], ', basename=', $basename,
-#        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+        $!configuration.refine( $table, $!refine[OUT], $basename);
       }
 
       when 'T' {
         my $table = $_;
         $!refined-config{$table} =
-          $!configuration.refine( |( $table, $basename));
-
-#        note "Table $table: basename=", $basename,
-#        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+          $!configuration.refine( $table, $basename);
       }
 
 #`{{
       when 'S' {
         my $table = $_;
         $!refined-config{$table} =
-          $!configuration.refine(|( $table, $basename));
-
-        note "Table $table: basename=", $basename,
-        ";\n", $!configuration.perl(:h($!refined-config{$table})) if $!trace;
+          $!configuration.refine( $table, $basename);
       }
 }}
     }
