@@ -88,11 +88,11 @@ grammar Grammar {
     [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||
     $<attr-value>=<.attr-s-value>
   }
-  token attr-q-value  { [ <.escaped-char> || <-[\']> ]+ }
-  token attr-qq-value { [ <.escaped-char> || <-[\"]> ]+ }
+  token attr-q-value  { [ <.escaped-char> || <-[\']> ]* }
+  token attr-qq-value { [ <.escaped-char> || <-[\"]> ]* }
 #TODO somewhere in a test the following is still used
 #  token attr-pw-value { [ <.escaped-char> || <-[\^]> ]+ }
-  token attr-pw-value { [ <.escaped-char> || <-[\>]> ]+ }
+  token attr-pw-value { [ <.escaped-char> || <-[\>]> ]* }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
   # important to use token instead of rule to get spaces in the body*-contents

@@ -1,5 +1,12 @@
 # Bugs and Todo list for the SemiXML::* modules and sxml2xml program
 
+## Bugs
+Attribute values which are empty like '' or "" are translated wrong
+* '' -> "''"  Now fixed
+* "" -> '&quot;&quot;"
+
+## Todo
+
 * Parser and actions.
   * Error messages when parser fails can still be improved.
 
