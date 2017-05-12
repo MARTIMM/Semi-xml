@@ -2,8 +2,8 @@
 
 ## Bugs
 Attribute values which are empty like '' or "" are translated wrong
-* '' -> "''"  Now fixed
-* "" -> '&quot;&quot;"
+* '' -> "''"              Now fixed
+* "" -> '&quot;&quot;"    Now fixed
 
 ## Todo
 

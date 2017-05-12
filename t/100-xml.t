@@ -27,6 +27,8 @@ $html [
     $x class='green blue' [ empty but not ]
     $y data_1='quoted"test"' [ empty but not ]
     $z data_2="double 'quoted' attrs" [ empty but not ]
+    $eq1 empty-single=''
+    $eq2 empty-double=""
     $br
   ]
 ]
@@ -47,7 +49,7 @@ $x.parse(
 
 # See the result
 my Str $xml-text = ~$x;
-#note $xml-text;
+note $xml-text;
 
 like $xml-text, /:s '<?xml' 'version="1.0"' 'encoding="UTF-8"?>'/,
    'Xml prelude found';
@@ -66,6 +68,8 @@ like $xml-text,
      / :s '<z data_2="double' "'quoted'" 'attrs">'/,
      'Class test 4';
 
+like $xml-text, / :s eq1 empty\-single\=\"\" /, "single quotes";
+like $xml-text, / :s eq2 empty\-double\=\"\" /, "double quotes";
 #-------------------------------------------------------------------------------
 # Cleanup
 done-testing();
