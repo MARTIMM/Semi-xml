@@ -23,7 +23,7 @@ Attribute values which are empty like '' or "" are translated wrong
       $|*inline [x]           $inline [x]         1,3
       $**inline [x]           $inline [x]         1,3
 
-      $|nonnest [! x !]       $nonnest [x]        3,5
+      $|nonnest [! x !]       $nonnest [x]        3,5     ?
       $|spcresrv [= x ]       $spcresrv [x]       3,5
 
       $!key.method [x]        Remains the same    4
@@ -33,17 +33,17 @@ Attribute values which are empty like '' or "" are translated wrong
   Notes;
   * 1) `$*|`, `$|*` and `$**` might still be used when other spacing around elements is desired then the configuration prescribes. These will then mean; add space to the left, add space to the right and add spaces to the left and right resp.
   * 2) `$|` can also be used now to change spacing around elements when needed. Here the meaning is to remove all spacing around the element.
-  * 3) The configurtion will be searched for those elements which are inline and need a special treatment of spacing around elements. Also nonnestable and space reserving elements are searched for in the configuration. The inline elements must also check for some non-alphanumeric characters following the block. E.g. in case of `,` or `.` etc. no space should be placed between the block and the following character.
-  * 4) The key is a label mapped to the module in the configuration. The method must of course be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call. Perhaps a method in the module like `method is-method-inline ( Str $method-name --> Bool ) { }` returning True or False for handling top level element as inlining or block element. When method is unavailable it is always assumed False. A long name is chosen to prevent name clashes. An example is made in SxmlCore but not called yet from the Actions module.
-  * 5) The space reserving '=' and non nesting '!' characters at the start of a block does not have to be removed completely but can just be used ocasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
+  * 3) The configuration will be searched for those elements which are inline and need a special treatment of spacing around elements. Also non nest-able and space reserving elements are searched for in the configuration. The inline elements must also check for some non-alphanumeric characters following the block. E.g. in case of `,` or `.` etc. no space should be placed between the block and the following character.
+  * 4) The key is a label mapped to the module in the configuration. The method must of course be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call. Perhaps a method in the module like `method is-method-inline ( Str $method-name --> Bool ) { }` returning True or False for handling top level element as in-lining or block element. When method is unavailable it is always assumed False. A long name is chosen to prevent name clashes. An example is made in SxmlCore but not called yet from the Actions module.
+  * 5) The space reserving '=' and non nesting '!' characters at the start of a block does not have to be removed completely but can just be used occasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
 
 * External modules located in SxmlLib tree
   * Library paths to find modules are provided
-  * A module should be accessable from within another perl6 sxml module. Problem of registration.
+  * A module should be accessible from within another perl6 sxml module. Problem of registration.
   * Use a plugin system for the modules.
   * Store SxmlLib modules in the resources directory.
 
-* attribute grammar addition for boolean =x =!x or even change into named attributes of perl. Possible to have hashes, array and more. Values will always be string or perhaps boolean.
+* attribute grammar addition for Boolean =x =!x or even change into named attributes of perl. Possible to have hashes, array and more. Values will always be string or perhaps boolean.
 
 * Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * Dependencies on other files
@@ -73,42 +73,42 @@ Attribute values which are empty like '' or "" are translated wrong
     [ output.program ]
 
     ```
-  * These tables are used as the defaults. Then for each file processed, these are postfixed with the filename without extention. E.g. assuming file.sxml;
+  * These tables are used as the defaults. Then for each file processed, these are post fixed with the filename without extension. E.g. assuming file.sxml;
 
     ```
     [ dependencies.file ]
     [ option.xml-prelude.file ]
     ```
 
-  * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. When choosing the proper commandline options one must keep the following in mind. First the document written is always **sxml**. What it represents should be the first option (by default **xml**) and what it should become the next option (by default **xml**). These options are provided by the sxml2xml program. The following **--in** and  **--out** with e.g. **--in=docbook5** and  **--out=pdf**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result. To also use the refine method from Config::DataLang::Refine, the options are used as keys to that method. A third key can be added, the basename of the file being parsed. So the next configuration tables are possible ();
+  * Another option is to use the formats the sxml file is supposed to represent and the format it has to become. When choosing the proper command line options one must keep the following in mind. First the document written is always **sxml**. What it represents should be the first option (by default **xml**) and what it should become the next option (by default **xml**). These options are provided by the sxml2xml program. The following **--in** and  **--out** with e.g. **--in=docbook5** and  **--out=pdf**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result. To also use the refine method from Config::DataLang::Refine, the options are used as keys to that method. A third key can be added, the basename of the file being parsed. So the next configuration tables are possible ();
 
     ```
     # [C] Content additions table. only used with out-key and file. Looked
     # up after parsing to prefix data to result. Used for booleans to control
-    # inclusion of xml description(X table), doctype(E table) and message
+    # inclusion of XML description(X table), doctype(E table) and message
     # header(H table)
     [ C ]
     [ C.out-key ]
     [ C.out-key.file ]
-
-    # [F] Formatting table. Used to control formatting of text. Used while
-    # parsing and translating.
-    [ F ]
-    [ F.in-key ]
-    [ F.in-key.file ]
 
     # [D] Dependencies table, only with in-key. The file is used to
     # specify the array of files on which this file depends.
     # Looked up before everything is started. Used by sxml2xml program.
     [ D ]
     [ D.in-key ]
-      file = [ f1, f2, f3, ...]
+    file = [ f1, f2, f3, ...]
 
     # [E] Entity table. Only with in-key and file.
     # Looked up after parsing to prefix data to result.
     [ E ]
     [ E.in-key ]
     [ E.in-key.file ]
+
+    # [F] Formatting table. Used to control formatting of text. Used while
+    # parsing and translating.
+    [ F ]
+    [ F.in-key ]
+    [ F.in-key.file ]
 
     # [H] Http table, only with out-key and file. Looked up after parsing.
     [ H ]
@@ -136,6 +136,10 @@ Attribute values which are empty like '' or "" are translated wrong
     [ S.out-key ]
     [ S.out-key.file ]
 
+    # [T] Trace table. Does not use in or out keys, only the filename
+    [ T ]
+    [ T.file ]
+
     # [X] xml description table
     [ X ]
     [ X.out-key ]
@@ -143,6 +147,7 @@ Attribute values which are empty like '' or "" are translated wrong
 
     ```
   All these ideas could also replace the one option --run from the program which only had a selective influence on the [output.program] table. Also less files might be searched through as opposed to the list shown above.
+  This is now implemented.
 
 * Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
 * Use the resources field from META.info to save the core Sxml pluggable modules.

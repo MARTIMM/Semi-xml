@@ -55,7 +55,7 @@ $x.parse(
 
 # See the result
 my Str $xml-text = ~$x;
-note $xml-text;
+#note $xml-text;
 
 like $xml-text, /:s '<?xml' 'version="1.0"' 'encoding="UTF-8"?>'/,
    'Xml prelude found';
