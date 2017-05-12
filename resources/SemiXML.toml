@@ -33,7 +33,10 @@
 
   non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
   space-preserve    = [ 'pre' ]
-  self-closing      = [ 'br', 'meta', 'link' ]
+  self-closing      = [
+    'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input',
+    'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+  ]
 
 #------------------------------------------------------------------------------
 # Header table
