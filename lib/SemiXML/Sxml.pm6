@@ -142,7 +142,7 @@ class Sxml {
     # If a run code is defined, use that code as a key to find the program
     # to send the result to. If R-table entry is an Array, take the first
     # element. The second element is a result filename to check for modification
-    # date. Check is done before parsing to see if paqrsing is needed.
+    # date. Check is done before parsing to see if parsing is needed.
     my $cmd;
     if $!refined-config<R>{$!refine[OUT]} ~~ Array {
       $cmd = $!refined-config<R>{$!refine[OUT]}[0];
