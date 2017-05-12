@@ -157,7 +157,7 @@ class Sxml {
 
       $cmd = self!process-cmd-str($cmd);
 
-      say "Send file to program: $cmd"
+      note "Send file to program: $cmd"
         if $!trace and $!refined-config<T><file-handling>;
 
       my Proc $p = shell "$cmd", :in;
