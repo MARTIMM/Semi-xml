@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 =begin pod
@@ -6,7 +6,7 @@ use v6.c;
 =comment -----------------------------------------------------------------------
 =TITLE class SxmlLib::SxmlCore
 
-=SUBTITLE 
+=SUBTITLE
 
   unit package SxmlLib;
   class SxmlCore { ... }
@@ -51,7 +51,7 @@ taken. The body of C<date>, when provided, will be ignored and thrown away.
 =head2 date-time
 
   $!SxmlCore.date-time iso=0 utc=1 timezone=1234
-  
+
 B<Attributes>
 
 =item1 B<iso>. Default is 1. When in iso format, the date and time is in the

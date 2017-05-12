@@ -1,23 +1,35 @@
 branches:
   only:
     - master
+    - develop
 
 language: perl6
 
 perl6:
   - latest
+#  - '2017.02'
 
+#before-install:
 install:
-  - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
-#  - zef update
+#  - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
+  - rakudobrew build-zef
+
+  - zef update
 #  - zef --/test install Config::DataLang::Refine
 #  - zef --/test install https://github.com/MARTIMM/config-datalang-refine.git
 #  - zef install XML
 #  - zef install Terminal::ANSIColor
-  - zef --depsonly install .
 
-cache:
-  directories:
+#  - zef --depsonly install .
+  - zef --/test --depsonly install .
+
+#install: true
+
+#script:
+#  - PERL6LIB=lib prove -v --exec=perl6 t/030-methods.t t/101-xml.t t/102-xml.t
+
+#cache:
+#  directories:
 #    - $TRAVIS_BUILD_DIR/.rakudobrew
-    - $HOME/Travis-ci
-    - $HOME/.rakudobrew
+#    - $HOME/Travis-ci
+#    - $HOME/.rakudobrew

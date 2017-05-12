@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
@@ -17,8 +17,8 @@ class File {
                    XML::Element :$content-body
                  ) {
 
-    my $type = $attrs<type> // 'reference';
-    my $reference = $attrs<reference> // '';
+    my $type = ~$attrs<type> // 'reference';
+    my $reference = ~$attrs<reference> // '';
     my $document;
     given $type {
 

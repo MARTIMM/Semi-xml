@@ -1,10 +1,10 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Docbook5::Basic:ver<0.3.1> {
@@ -68,9 +68,9 @@ class Docbook5::Basic:ver<0.3.1> {
     XML::Element :$content-body
   ) {
 
-    my $firstname = $attrs<firstname>;
-    my $surname = $attrs<surname>;
-    my $email = $attrs<email>;
+    my $firstname = ~$attrs<firstname>;
+    my $surname = ~$attrs<surname>;
+    my $email = ~$attrs<email>;
 
     my XML::Element $info = append-element( $parent, 'info');
 
@@ -97,9 +97,9 @@ class Docbook5::Basic:ver<0.3.1> {
       }
     }
 
-    my $city = $attrs<city>;
-    my $country = $attrs<country>;
-#    my $ = $attrs<>;
+    my $city = ~$attrs<city>;
+    my $country = ~$attrs<country>;
+#    my $ = ~$attrs<>;
     if $city.defined or $country.defined {
 
       my XML::Element $address = append-element( $info, 'address');
@@ -114,8 +114,8 @@ class Docbook5::Basic:ver<0.3.1> {
       }
     }
 
-    my $copy-year = $attrs<copy-year>;
-    my $copy-holder = $attrs<copy-holder>;
+    my $copy-year = ~$attrs<copy-year>;
+    my $copy-holder = ~$attrs<copy-holder>;
     if $copy-year.defined or $copy-holder.defined {
       my XML::Element $copyright = append-element( $info, 'copyright');
 
@@ -139,4 +139,3 @@ class Docbook5::Basic:ver<0.3.1> {
     $parent;
   }
 }
-

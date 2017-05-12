@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 # Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
@@ -7,7 +7,8 @@ use v6.c;
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
-use SemiXML::Sxml;
+#use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Html::List {
@@ -28,14 +29,14 @@ class Html::List {
                     XML::Node :$content-body   # Ignored
                   ) {
 
-    $!directory = $attrs<directory>:delete // '.';
-    $!ref-attr = $attrs<ref-attr>:delete // 'href';
+    $!directory = ~($attrs<directory>:delete) // '.';
+    $!ref-attr = ~($attrs<ref-attr>:delete) // 'href';
 
     # Set the numbers into the array and fill it up using the last number
     # to the maximum length of C-MAX-LEVEL. So if arrey = [2,3] then
     # result will be [2,3,3,3,3,3,3]
     #
-    my @list = map {.Int}, ($attrs<header>:delete).split(',');
+    my @list = map {.Int}, (~($attrs<header>:delete)).split(',');
     @!header.push: |@list;
     @!header.push: |(@list[@list.end] xx (C-MAX-LEVEL - +@list));
 

@@ -27,7 +27,7 @@ $!epub3.make
     $!epub3.item spine=1 href=Text/chap02.xhtml
   ]
 
-$!SxmlCore.comment [
+#$!SxmlCore.comment [
   $!epub3.navigation [
     $head [
       $title [This is another title]
@@ -42,6 +42,6 @@ $!SxmlCore.comment [
       ]
     ]
   ]
-]
+#]
 
 ]

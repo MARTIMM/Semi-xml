@@ -5,6 +5,7 @@ unit package SxmlLib::Testing:auth<https://github.com/MARTIMM>;
 
 use XML;
 use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
@@ -46,9 +47,7 @@ class Report:ver<0.2.2> {
   has Int $!line-number;
 
   #-----------------------------------------------------------------------------
-  method initialize ( SemiXML::Sxml $sxml, Hash $attrs ) {
-
-    $!sxml = $sxml;
+  method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
 
     $!test-program = Q:to/EOINIT/;
       use v6;
@@ -63,12 +62,11 @@ class Report:ver<0.2.2> {
     $!bug-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Bug');
     $!skip-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Skip');
 
-    $!highlight-code = ?$attrs<highlight-lang> // False;
-    $!highlight-language = $attrs<highlight-lang> // '';
-    $!highlight-skin = lc($attrs<highlight-skin> // 'prettify');
-    $!highlight-skin = $!highlight-skin eq 'default'
-                       ?? 'prettify' !! $!highlight-skin;
-    $!linenumbers = ?$attrs<linenumbers> // False;
+    $!highlight-code = ? ~$attrs<highlight-lang> // False;
+    $!highlight-language = ~$attrs<highlight-lang> // '';
+    $!highlight-skin = lc(($attrs<highlight-skin> // 'prettify').Str);
+    $!highlight-skin = 'prettify' if $!highlight-skin eq 'default';
+    $!linenumbers = ? ~$attrs<linenumbers> // False;
 
     self!setup-report-doc($attrs);
   }
@@ -115,7 +113,7 @@ class Report:ver<0.2.2> {
   ) {
 
     my XML::Element $html = append-element( $parent, 'html');
-    my Str $title = $attrs<title> // '';
+    my Str $title = ~($attrs<title> // '');
     my XML::Element $head = append-element( $html, 'head');
     self!setup-head( $head, $attrs);
     my XML::Element $body = append-element( $html, 'body');
@@ -132,8 +130,8 @@ class Report:ver<0.2.2> {
     --> XML::Node
   ) {
 
-    my Str $metric-dir = $attrs<metric-dir> // '.';
-    my Str $filter = $attrs<filter> // '';
+    my Str $metric-dir = ~($attrs<metric-dir> // '.');
+    my Str $filter = ~($attrs<filter> // '');
 
     my @metric-files = dir($metric-dir).grep(/t.metric/);
     for @metric-files -> $mf {
@@ -221,11 +219,11 @@ class Report:ver<0.2.2> {
 
 
     # if there is a title attribute, make a h1 title
-    if ? $attrs<title> {
+    if ? ~$attrs<title> {
       my XML::Element $h1 = append-element(
         $!body, 'h1', { id => '___top', class => 'title'}
       );
-      insert-element( $h1, :text($attrs<title>));
+      insert-element( $h1, :text(~$attrs<title>));
     }
   }
 
@@ -233,9 +231,9 @@ class Report:ver<0.2.2> {
   # Fill the head element
   method !setup-head ( XML::Element $head, Hash $attrs ) {
 
-    if $attrs<title> {
+    if ? $attrs<title> {
       my XML::Element $title = append-element( $head, 'title');
-      insert-element( $title, :text($attrs<title>));
+      insert-element( $title, :text(~$attrs<title>));
     }
 
     my XML::Element $meta = append-element(
@@ -323,7 +321,7 @@ class Report:ver<0.2.2> {
             my Int $tentry = ([~] $code-node[0].nodes).Int;
             if $x.name eq 'test' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!test-obj.get-code-text($tentry));
 
               # add test to the <pre> block
@@ -338,7 +336,7 @@ class Report:ver<0.2.2> {
 
             elsif $x.name eq 'todo' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!todo-obj.get-code-text($tentry));
 
               # add todo to the <pre> block
@@ -353,7 +351,7 @@ class Report:ver<0.2.2> {
 
             elsif $x.name eq 'bug' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!bug-obj.get-code-text($tentry));
 
               # add bug issue to the <pre> block
@@ -368,7 +366,7 @@ class Report:ver<0.2.2> {
 
             elsif $x.name eq 'skip' {
 
-              # get test entry number 
+              # get test entry number
               my Str $code-text = self!process-code(~$!skip-obj.get-code-text($tentry));
 
               # add skip to the <pre> block
@@ -462,7 +460,7 @@ class Report:ver<0.2.2> {
     # metrics
     $!test-metrics = { T => [0,0], D => [0,0], B => [0,0], S => [0,0]};
 
-    # Finish up the test text and write the text to a file 
+    # Finish up the test text and write the text to a file
     $!test-program ~= "\ndone-testing;\n";
 
     # get a filename for the tests and write
@@ -470,7 +468,8 @@ class Report:ver<0.2.2> {
     $test-file //= ($!sxml.get-current-filename ~ '.t');
     $test-file //= ($*TMPDIR.Str ~ '/perl6-test.t');
 
-    spurt( $test-file, $!test-program);
+note "T: ", $!sxml.get-current-filename;
+    spurt( ~$test-file, $!test-program);
 
     # run the tests using prove and get the result contents through a pipe
 #    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose', '--merge',
@@ -1144,6 +1143,3 @@ class Report:ver<0.2.2> {
     }
   }
 }
-
-
-

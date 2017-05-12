@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 # Check sigil, pandoc, perl5 EBook::EPUB,
 
@@ -8,7 +8,8 @@ unit package SxmlLib:auth<https://github.com/MARTIMM>;
 use SxmlLib::EPub;
 
 use XML;
-use SemiXML::Sxml;
+#use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 #TODO compatibility with version2 NCX navigation documents?
@@ -65,11 +66,11 @@ class EPub::EPub2Builder is SxmlLib::EPub {
     self.set-epub-attrs( 'epub2', $attrs);
 
 
-    my Str $build-dir = $.epub-attrs<epub-build-dir>;
+    my Str $build-dir = ~$.epub-attrs<epub-build-dir>;
     note "Check build directory $build-dir";
     mkdir( $build-dir, 0o755) unless $build-dir.IO ~~ :e;
 
-    my Str $mimetype = $.epub-attrs<mimetype>;
+    my Str $mimetype = ~$.epub-attrs<mimetype>;
     note "Create mimetype file for '$mimetype'";
     spurt( "$build-dir/mimetype", $mimetype);
 
@@ -112,7 +113,7 @@ class EPub::EPub2Builder is SxmlLib::EPub {
   ) {
 
     my XML::Element $manifest .= new(:name<manifest>);
-    my Str $workdir = $attrs<workdir> // '.';
+    my Str $workdir = ~$attrs<workdir> // '.';
     $.epub-attrs<workdir> = $workdir;
 
     # Add the toc ref to it. Name not yet known, so make something up
@@ -165,10 +166,10 @@ class EPub::EPub2Builder is SxmlLib::EPub {
   ) {
 
     my XML::Element $item;
-    my Str $href = $attrs<href>;
+    my Str $href = ~$attrs<href>;
     if $!doc-refs{$href}:exists
        or self!check-href($href) {
-      $item .= new( :name<i>, :attribs( %( :$href, :spine(?$attrs<spine>),)));
+      $item .= new( :name<i>, :attribs( %( :$href, :spine(?~$attrs<spine>),)));
     }
 
     $item;

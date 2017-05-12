@@ -1,14 +1,22 @@
-[option.doctype]
-  show          = 0
+#------------------------------------------------------------------------------
+[C]
+  tracing       = true
 
-[output]
-  fileext       = 'html'
-#  filepath      = '.'
-
-[output.program]
-  pdf           = 'wkhtmltopdf - %op/%of.pdf'
-  xml           = 'cat > %op/%of.xml'
-
-[module]
+#------------------------------------------------------------------------------
+[ML.svg]
   lorem         = 'SxmlLib::LoremIpsum'
 
+#------------------------------------------------------------------------------
+[R.svg]
+  pdf           = 'wkhtmltopdf - %op/%of.%oe'
+  xml           = 'xmllint --format - > %op/%of.%oe'
+
+#------------------------------------------------------------------------------
+[ T ]
+#  config-search = false
+  config        = false
+  tables        = false
+  modules       = false
+  parse         = false
+  parse-result  = false
+  file-handling = true

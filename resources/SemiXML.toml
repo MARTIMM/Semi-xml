@@ -1,34 +1,99 @@
-#[ dependencies ]
-#  file          = [ ]
+#------------------------------------------------------------------------------
+# Content additions tables
+[ C ]
+  xml-show          = false
+  doctype-show      = false
+  header-show       = false
+  tracing           = false
 
-[ module ]
-  SxmlCore      = 'SxmlLib::SxmlCore'
+[ C.xml ]
+  xml-show          = true
 
-#[ option ]
+[ C.html ]
+  doctype-show      = true
 
-[ option.http-header ]
-  show          = false
+#------------------------------------------------------------------------------
+# Dependency tables
+#[ D ]
+#  files             = [ ]
 
-[ option.xml-prelude ]
-  show          = false
-  version       = '1.0'
-  encoding      = 'UTF-8'
-#  standalone    = 'yes'
+#------------------------------------------------------------------------------
+# Doctype entity tables
+#[ E.xml ]
+#  copy              = '&#xa9;'
 
-[ option.doctype ]
-  show          = false
+#------------------------------------------------------------------------------
+[ F.html ]
+  inline            = [
+    'a', 'b', 'big', 'i', 'strong', 'small', 'tt', 'abbr', 'acronym', 'cite',
+    'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'time', 'var', 'bdo', 'br',
+    'img', 'map', 'object', 'q', 'script', 'span', 'sub', 'sup', 'button',
+    'input', 'label', 'select', 'textarea'
+  ]
 
-#[ option.doctype.entities ]
-#  copy          = '&#xa9;'
+  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
+  space-preserve    = [ 'pre' ]
+  self-closing      = [
+    'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input',
+    'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+  ]
 
+#------------------------------------------------------------------------------
+# Header table
+[ H.html ]
+  Content-Type    = 'text/html; charset="utf-8"'
+#  From            = 'my-addr@gmail.com'
+#  User-Agent      = 'SemiXML'
 
-[ output ]
+#------------------------------------------------------------------------------
+# Module and library path tables
+[ ML ]
+  SxmlCore        = 'SxmlLib::SxmlCore'
+
+#------------------------------------------------------------------------------
+# Running programs tables
+[ R.xml ]
+  fmt             = 'xmllint --format - > "%op/%of.%oe"'
+#  fmt             = 'xmllint --format --noent - > %op/%of.%oe'
+#  pdf             = 'wkhtmltopdf - %op/%of.pdf'
+#  chk             = 'tidy -'
+
+#------------------------------------------------------------------------------
+# Storage tables
+[ S ]
   fileext       = 'xml'
 
-[ output.program ]
-#  pdf           = 'wkhtmltopdf - %op/%of.pdf'
-#  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
-#  chk           = 'tidy -'
+[S.html]
+  fileext       = 'html'
 
+[S.xhtml]
+  fileext       = 'xhtml'
 
-#TODO [ styles ]
+[S.pdf]
+  fileext       = 'pdf'
+
+[S.svg]
+  fileext       = 'svg'
+
+[ S.xsl ]
+  fileext       = 'xsl'
+
+#------------------------------------------------------------------------------
+# Tracing tables
+[ T ]
+#  config-search = false
+  config        = false
+  tables        = false
+  modules       = false
+  parse         = false
+  parse-result  = false
+  file-handling = true
+
+#------------------------------------------------------------------------------
+# XML description tables
+[ X ]
+  xml-version     = '1.0'
+  xml-encoding    = 'UTF-8'
+
+  # Default for xml is 'no'. Is only relevant when a DTD is used.
+#  xml-standalone  = 'no'

@@ -1,10 +1,17 @@
-[ option.xml-prelude ]
-  show          = 1
+#------------------------------------------------------------------------------
+[ C ]
+  xml-show      = true
+  doctype-show  = true
+  tracing       = true
 
-[ option.doctype ]
-  show          = 1
+#------------------------------------------------------------------------------
+[ D.Db5 ]
+  pdf           = [ 'xml;xsl;ss-fo.sxml']
+  chunk         = [ 'xml;xsl;ss-chunk.sxml']
+  xhtml         = [ 'xml;xsl;ss-xhtml.sxml']
 
-[ option.doctype.entities ]
+#------------------------------------------------------------------------------
+[ E.Db5.Manual ]
   pack          = 'SemiXML'
   mod           = 'SemiXML::Sxml'
   act           = 'SemiXML::Actions'
@@ -13,26 +20,57 @@
   prog          = 'sxml2xml'
   lang          = 'sxml'
   nbsp          = ' '
+  copy          = '&#xa9;'
   E             = 'element'
 
-[ output ]
-  fileext       = 'xml'
-
-[ output.program ]
-  pdf           = 'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/Manual.pdf'
-  xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/Manual.xhtml'
-  chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
-
-  xml           = 'xmllint --format - > %op/%of.%oe'
-  xsl           = 'xmllint --format - > %op/Xsl/%of.xsl'
-
-  # Generate formatted xml first and save it on disk (tee command)
-  # then send formatted xml to rnc for checking. This way the errors
-  # can be found at the proper line in the save xml file.
-  check         = 'xmllint --format - | tee %op/%of.%oe |rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
-
-[ module ]
+#------------------------------------------------------------------------------
+[ ML.Db5 ]
   lorem         = 'SxmlLib::LoremIpsum'
   Db5b          = 'SxmlLib::Docbook5::Basic'
   Db5f          = 'SxmlLib::Docbook5::FixedLayout'
-#  SxmlCore      = 'SxmlLib::SxmlCore'
+
+#------------------------------------------------------------------------------
+[ R.xml ]
+  xml           = 'xmllint --format - > %op/%of.%oe'
+  xsl           = [ 'xmllint --format - > %op/%of.%oe', '%op/%of.%oe']
+
+[ R.Db5 ]
+  pdf           = [
+   'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/%of.%oe',
+   '%op/%of.%oe'
+  ]
+
+  xhtml         = 'xsltproc --encoding utf-8 --xinclude %op/Xsl/ss-xhtml.xsl - > %op/%of.%oe'
+  chunk         = 'xsltproc --encoding utf-8 %op/Xsl/ss-chunk.xsl -'
+
+  xml           = 'xmllint --format - > %op/%of.%oe'
+
+  # Generate formatted xml first and save it on disk (tee command)
+  # then send formatted xml to rnc for checking. This way the errors
+  # can be found at the proper line in the saved xml file.
+  check         = 'xmllint --format - | tee %op/%of.%oe |rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc'
+
+#------------------------------------------------------------------------------
+# Default name of the file
+[ S ]
+#  filename      = 'Manual'
+  rootpath      = 'doc/Manual'
+
+[ S.xml ]
+  filepath      = 'Xml'
+
+[ S.check ]
+  filepath      = 'Xml'
+
+[ S.xsl ]
+  filepath      = 'Xsl'
+
+#------------------------------------------------------------------------------
+[ T ]
+#  config-search = false
+  config        = false
+  tables        = false
+  modules       = true
+  parse         = true
+  parse-result  = false
+  file-handling = true

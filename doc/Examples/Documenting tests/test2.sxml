@@ -1,5 +1,3 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=html --run=pdf
-
 $!report.run
     title='Code Nesting' package=SxmlLib::Testing class=Sxml::Testing::Report
     label=test2,report
@@ -9,8 +7,9 @@ $!report.run
   $h2 class=t1                                  [ $!lorem.sentence ]
   $p                                            [ $!lorem.samuel-ipsum ]
 
-  $!code.add [=
+  $!code.add [!=
     my Int $x = 10;
+  !][=
     $!test.add t='ok $x ~~ Int'                 [ $!lorem.sentences n=3 ]
     $!todo.add n=1                              [ $!lorem.cupcake-ipsum ]
     $!test.add t='is $x, 10'                    [ $!lorem.sentences n=3 ]
@@ -19,17 +18,19 @@ $!report.run
   $h3                                           [ $!lorem.sentence ]
   $!lorem.paragraph n=2
 
-  $!code.add [=
+  $!code.add [!=
     my Int $y = 10;
+  !][=
     $!test.add t='ok $y ~~ Int'                 [ $!lorem.sentences n=3 ]
     $!todo.add n=2                              [ $!lorem.cupcake-ipsum ]
     $!test.add t='is $y, 10'                    [ $!lorem.veggie-ipsum ]
     $!test.add t='is $y, 11'                    [ $!lorem.veggie-ipsum ]
   ]
 
-  $!code.add [=
+  $!code.add [!=
     my Int $z = 5;
     for ^$z -> $t {
+  !][=
       $!bug.add n=1                             [ $!lorem.sentence ]
       $!test.add t='ok $t < $z - 3'             [ $!lorem.sentence ]
     }
@@ -51,8 +52,9 @@ $!report.run
 
   $!code.add [!=
     my $k = $*KERNEL;
-  !][
+
     if $k.name eq 'linux' {
+    !][
       $!skip.add n=2                            [ $!lorem.sentences n=2 ]
     }
 

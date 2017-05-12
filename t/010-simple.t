@@ -29,16 +29,16 @@ subtest 'test oneliners', {
   }
 
   $xml = parse('$t1 [ $t2 [] $t3[]]');
-  is $xml, '<t1><t2/><t3/></t1>', "nested tags: $xml";
+  is $xml, '<t1><t2></t2><t3></t3></t1>', "nested tags: $xml";
 
   $xml = parse('$t1 [ $**t2 [] $t3[]]');
-  is $xml, '<t1> <t2/> <t3/></t1>', "nested tags with \$**: $xml";
+  is $xml, '<t1> <t2></t2> <t3></t3></t1>', "nested tags with \$**: $xml";
 
   $xml = parse('$t1 [ $|*t2 [] $t3[]]');
-  is $xml, '<t1><t2/> <t3/></t1>', "nested tags with \$|*: $xml";
+  is $xml, '<t1><t2></t2> <t3></t3></t1>', "nested tags with \$|*: $xml";
 
   $xml = parse('$t1 [ $*|t2 [] $t3[]]');
-  is $xml, '<t1> <t2/><t3/></t1>', "nested tags with \$*|: $xml";
+  is $xml, '<t1> <t2></t2><t3></t3></t1>', "nested tags with \$*|: $xml";
 }
 
 #-------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ subtest 'test multi liners', {
     ]
     EOXML
 
-  is $xml, '<aa><bb/></aa>', "2 tags: $xml";
+  is $xml, '<aa><bb></bb></aa>', "2 tags: $xml";
 
   try {
     $xml = parse(Q:q:to/EOXML/);
@@ -81,14 +81,25 @@ subtest 'test multi liners', {
     ]
     EOXML
 
-  is $xml, '<aa><bb><cc/></bb></aa>', "3 tags: $xml";
+  is $xml, '<aa><bb><cc></cc></bb></aa>', "3 tags: $xml";
+
+  $xml = parse(Q:q:to/EOXML/);
+    $aa [
+      $bb [!$x[abc]!]
+    ]
+    EOXML
+
+  is $xml, '<aa><bb>$x[abc]</bb></aa>', "2 tags and preserving content: $xml";
+
 }
 
 #-------------------------------------------------------------------------------
-sub parse ( Str $content --> Str ) {
+sub parse ( Str $content is copy --> Str ) {
 
-  state SemiXML::Sxml $x .= new;
+  state SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
   my ParseResult $r = $x.parse(:$content);
+  $content ~~ s:g/\n/ /;
+  $content ~~ s:g/\s+/ /;
   ok $r ~~ Match, "match $content";
 
   my Str $xml = ~$x;
@@ -119,4 +130,3 @@ parse('$|*body [ ]');
 parse('$.Mod.meth a=b c="a b" [ ]');
 
 parse('$!Mod.meth a=b c="a b" [ ]');
-

@@ -1,10 +1,11 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<https://github.com/MARTIMM>;
 
 use XML;
 use SemiXML::Text;
+use SemiXML::StringList;
 
 #-------------------------------------------------------------------------------
 class Actions {
@@ -13,8 +14,11 @@ class Actions {
   has $!sxml-obj;
 
   # Objects hash with one predefined object for core methods
-  has Hash $.objects = {};
+  has Hash $.objects is rw = {};
   has XML::Document $!xml-document;
+
+  # The F-table is devised elsewhere as well. This table is read from the config
+  has Hash $.F-table is rw = {};
 
   # Keep current state of affairs. Hopefully some info when parsing fails
   has Int $.from;
@@ -34,9 +38,8 @@ class Actions {
   has Array $!tag-list = [];
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( :$sxml-obj ) {
-    $!sxml-obj = $sxml-obj;
-  }
+#TODO can we remove the BUILD?
+  submethod BUILD ( :$!sxml-obj ) { }
 
   #-----------------------------------------------------------------------------
   method init-doc ( $match ) {
@@ -68,18 +71,18 @@ class Actions {
 
       my $children = $node.nodes;
 
-      # Eat from the end of the list and add just after the container element.
-      # Somehow they get lost from the array when done otherwise.
+      # eat from the end of the list and add just after the container element.
+      # somehow they get lost from the array when done otherwise.
       #
       for @$children.reverse {
         $node.parent.after( $node, $^a);
       }
 
-      # Remove the now empty element
+      # remove the now empty element
       $node.remove;
     }
 
-    # Process top level method container
+    # process top level method container
     if $parent.name eq '__PARENT_CONTAINER__' {
       if +$parent.nodes == 0 {
         # No nodes generated
@@ -100,16 +103,17 @@ class Actions {
       }
     }
 
-    # Conversion to xml escapes is done as late as possible
+    # conversion to xml escapes is done as late as possible
     my Sub $after-math = sub ( XML::Element $x ) {
 
-      # Process attributes to escape special chars
+      # process attributes to escape special chars, Stringify attr value because
+      # of its type: StringList
       my %a = $x.attribs;
       for %a.kv -> $k, $v {
-        $x.set( $k, self!process-esc( $v, :is-attr));
+        $x.set( $k, self!process-esc( ~$v, :is-attr));
       }
 
-      # Process body text to escape special chars
+      # process body text to escape special chars
       for $x.nodes -> $node {
         if $node ~~ any( SemiXML::Text, XML::Text) {
           my Str $s = self!process-esc(~$node);
@@ -117,14 +121,39 @@ class Actions {
         }
 
         elsif $node ~~ XML::Element {
-          $after-math($node);
+          my Array $self-closing = $!F-table<self-closing> // [];
+
+#note "Ftab: ", $self-closing;
+          # Check for self closing tag, and if so remove content if any
+          if $node.name ~~ any(@$self-closing) {
+#note "Found self closing tag: $node.name()";
+            # elements not able to contain any content; remove any content
+            for $node.nodes.reverse -> $child {
+              $node.removeChild($child);
+            }
+          }
+
+          else {
+            # recurively process through all elements
+            $after-math($node);
+
+            # If this is not a self closing element and there is no content, insert
+            # an empty string to get <a></a> instead of <a/>
+            if ! $node.nodes {
+              $node.append(SemiXML::Text.new(:text('')));
+            }
+          }
         }
+
+#        elsif $node ~~ any(XML::Text|SemiXML::Text) {
+#
+#        }
       }
     }
 
     &$after-math($parent);
 
-    # Return the completed report
+    # return the completed document
     $!xml-document .= new($parent);
   }
 
@@ -138,6 +167,8 @@ class Actions {
 
   #-----------------------------------------------------------------------------
   method document ( $match ) {
+
+    self!current-state( $match, 'document');
 
     # Try to find indent level to match up open '[' with close ']'.
     #
@@ -156,23 +187,18 @@ class Actions {
     #    ]
     #
     my Str $orig = $match.orig;
-#      my Int $from = $match.from;
-#      my Int $to = $match.to;
 
     my Array $tag-bodies = $match<tag-body>;
     loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
       my Int $b-from = $match.from;
       my Int $b-to = $match.to;
-#note "ORBody $b-from, $b-to";
 
-#note $tag-bodies[$mi].from, '--', $tag-bodies[$mi].to, ': ',
-  $orig.substr( $tag-bodies[$mi].to - 3, 3);
-
+#TODO test for ] in special bodies and for !] in non-special ones
       # test for special body
       my Bool $special-body = ?$orig.substr(
         $b-from, $b-to - $b-from
-      ).index('[!');
+      ) ~~ m/^ '[!' /;
 
       $orig.substr( $tag-bodies[$mi].to - 3, 3);
 
@@ -184,9 +210,16 @@ class Actions {
       # find end of body, search from the end
       my Int $bend;
       if $special-body {
-        $bend = $orig.substr(
-          $bstart, $b-to - $bstart
-        ).rindex('!]') + $bstart;
+        $bend = $orig.substr( $bstart, $b-to - $bstart).rindex('!]');
+
+        if ?$bend {
+           $bend += $bstart;
+        }
+
+        else {
+          note "special body $special-body, $bstart, $b-to - $bstart";
+          note "$orig.substr( $bstart, $b-to - $bstart)";
+        }
       }
 
       else {
@@ -205,14 +238,14 @@ class Actions {
       if $has-nl {
 
         my Int $tag-loc = $match<tag-spec>.from;
-        my Int $indent-start = $tag-loc
-                      - ($orig.substr( 0, $tag-loc).rindex("\n") // -1) - 1;
+        my Int $indent-start =
+            $tag-loc - ($orig.substr( 0, $tag-loc).rindex("\n") // -1) - 1;
 
-        my Int $indent-end = $bend
-                      - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
+        my Int $indent-end =
+            $bend - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
 #note "NLDoc  $tag-loc, $indent-start, $indent-end, $bstart, $bend";
 
-        # make a note when indents are not the same, it might point to a
+        # make a note when indents are not the same, it might reveal a
         # missing bracket.
         if $indent-start != $indent-end {
 
@@ -238,15 +271,15 @@ class Actions {
       }
     }
 
-    self!current-state( $match, 'document');
-
     my XML::Element $x;
 
     ( my $tt,                 # tag type
       my $ns, my $tn,         # namespace and tag name
       my $mod, my $meth,      # module and method
-      my $att                 # attributes
+      my $attrs               # attributes
     ) = @($match<tag-spec>.made);
+#note "doc attrs: ", $attrs.WHAT;
+#for $attrs.keys -> $k { note "Key $k: ", $attrs{$k}.WHAT; };
 
     # Check the node type
     given $tt {
@@ -256,13 +289,14 @@ class Actions {
 
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
 
-        $x .= new( :name($tag), :attribs(%$att));
+        # A bit of hassle to get the StringList values converted into Str explicitly
+        $x .= new( :name($tag), :attribs(%($attrs.keys Z=> $attrs.values>>.Str)));
 
         # Check for xmlns uri definitions and set them on the current node
-        for $att.keys {
+        for $attrs.keys {
           when m/^ 'xmlns:' ( <before '='>* ) $/ {
             my $ns-prefix = $0;
-            $x.setNamespace( $att{$_}, $0);
+            $x.setNamespace( ~$attrs{$_}, $0);
           }
         }
 
@@ -283,11 +317,12 @@ class Actions {
 
         # Otherwise it is the module on which method can be called
         else {
+#note "Method call attribs: ", $attrs;
 
           # call user method and expect result in $x
           $x = $module."$meth"(
             XML::Element.new(:name('__PARENT_CONTAINER__')),
-            $att,
+            $attrs,
             :content-body(
               self!build-content-body(
                 $match,
@@ -326,11 +361,11 @@ class Actions {
 
         # Any piece of found text in bodies. Filter out any comments.
         when Str {
-
           my Str $txt = $_;
-          if ? $$txt {
+          if ? $txt {
+#TODO maybe all lines prefixed with a space and one at the end.
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
-            $parent.append(SemiXML::Text.new(:text($$txt)));
+            $parent.append(SemiXML::Text.new(:text($txt)));
           }
         }
 
@@ -340,15 +375,17 @@ class Actions {
 #note "Ast tag: ", $_<tag-ast>;
 #note "Ast body: ", $_<body-ast>;
 #note "Ast doc: ", $_<doc-ast>;
-          # tag ast: [ tag type, namespace, tag name, module, method, attributes
+          # tag ast: [ tag type, namespace, tag name, module, method, attributes ]
           my Array $tag-ast = $_<tag-ast>;
 
+#TODO see above
           # Test if spaces are needed before the document
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $*| >);
 
           $parent.append($_<doc-ast>);
 
+#TODO see above
           # Test if spaces are needed after the document
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $|* >);
@@ -366,20 +403,39 @@ class Actions {
 
     # Name of element or method to be saved in array $!tag-list on $!level
     my Str $tag-name;
-
     my Array $ast = [];
-
     my Str $symbol = $match<tag><sym>.Str;
     $ast.push: $symbol;
 #note "Tag: ", $match<tag>.kv;
 
-    # find level of indent
-
+    # define the attributes for the element. attr value is of type StringList
+    # where ~$strlst gives string, @$strlst returns list and $strlist.value
+    # either string or list depending on :use-as-list which in turn depends
+    # on the way an attribute is defined att='val1 val2' or att=<val1 val2>.
     my Hash $attrs = {};
     for $match<attributes>.caps -> $as {
       next unless $as<attribute>:exists;
       my $a = $as<attribute>;
-      my $av = $a<attr-value-spec><attr-value>.Str;
+      my SemiXML::StringList $av;
+
+      # when =attr is same as attr=1
+      if ? $a<bool-true-attr> {
+        $av .= new( :string<1>, :!use-as-list);
+      }
+
+      # when =!attr is same as attr=0
+      elsif ? $a<bool-false-attr> {
+        $av .= new( :string<0>, :!use-as-list);
+      }
+
+      else {
+        # when attr=<a b c> attr-list-value is set
+        $av .= new(
+          :string($a<attr-value-spec><attr-value>.Str),
+          :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
+        );
+      }
+#note "AV $a<attr-key>: ", $av;
       $attrs{$a<attr-key>.Str} = $av;
     }
 
@@ -399,7 +455,9 @@ class Actions {
       # Check if there is a method initialize in the module. If so call it
       # with the found attributes.
       my $module = self!can-method( $tn<mod-name>.Str, 'initialize');
-      $module.initialize( $!sxml-obj, $attrs) if $module;
+      $module.initialize(
+        $!sxml-obj, $attrs, :method($tn<meth-name>.Str)
+      ) if $module;
     }
 
     # Add to the list
@@ -493,10 +551,18 @@ class Actions {
     $match.make($ast);
   }
 
+#`{{
   #-----------------------------------------------------------------------------
-#    method comment ( Match $match ) {
-#      dump $match;
-#    }
+  method attr-value-spec ( Match $match ) {
+    note $match.Str;
+  }
+}}
+#`{{
+  #-----------------------------------------------------------------------------
+  method comment ( Match $match ) {
+    dump $match;
+  }
+}}
 
   #-----------------------------------------------------------------------------
   # Return object if module and method is found. Otherwise return Any
@@ -581,7 +647,8 @@ class Actions {
     # Entity must be known in the xml result!
     $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/ unless $is-attr;
     $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
-    $esc ~~ s:g/\</\&lt;/ unless $is-attr;
+    $esc ~~ s:g/ '<' /\&lt;/ unless $is-attr;
+    $esc ~~ s:g/ '>' /\&gt;/ unless $is-attr;
 
     $esc ~~ s:g/\"/\&quot;/ if $is-attr;
     $esc ~~ s:g/'\\'//;
@@ -613,7 +680,13 @@ class Actions {
   }
 
   #-----------------------------------------------------------------------------
-  method process-modules ( Hash :$lib = {}, Hash :$mod = {} ) {
+  method Xset-objects( Hash:D $objects ) {
+
+    $!objects = $objects;
+  }
+
+  #-----------------------------------------------------------------------------
+  method Xprocess-modules ( Hash :$lib = {}, Hash :$mod = {} ) {
 
     # cleanup old objects
     for $!objects.keys -> $k {
@@ -642,19 +715,5 @@ class Actions {
   method get-document ( --> XML::Document ) {
 
     return $!xml-document;
-  }
-
-  #-----------------------------------------------------------------------------
-  method get-sxml-object ( Str $class-name ) {
-
-    my $object;
-    for $!objects.keys -> $ok {
-      if $!objects{$ok}.^name eq $class-name {
-        $object = $!objects{$ok};
-        last;
-      }
-    }
-
-    $object;
   }
 }

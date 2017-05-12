@@ -27,12 +27,16 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-  module => {
-    list => 'SxmlLib::Html::List'
+  ML => {
+    in-fmt => {
+      list => 'SxmlLib::Html::List'
+    }
   },
 
-  output => {
-    fileext => 'html'
+  S => {
+    test-file => {
+      fileext => 'html'
+    }
   }
 };
 
@@ -46,7 +50,7 @@ spurt( $g2, q:to/EOSXML/);
   <html/>
   EOSXML
 
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config);
 my Str $xml-text = ~$x;
 #note $xml-text;

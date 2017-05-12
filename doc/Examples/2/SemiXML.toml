@@ -1,14 +1,24 @@
-[option.doctype]
-  show          = 0
+#------------------------------------------------------------------------------
+[C]
+  tracing       = true
 
-[output]
-  fileext       = 'html'
-
-[output.program]
-  pdf           = 'wkhtmltopdf - %op/%of.pdf'
-  xml           = 'cat > %op/%of.xml'
-
-[module]
+#------------------------------------------------------------------------------
+[ML.html]
   lorem         = 'SxmlLib::LoremIpsum'
   file          = 'SxmlLib::File'
 
+#------------------------------------------------------------------------------
+[R.html]
+  pdf           = 'wkhtmltopdf - %op/%of.%oe'
+  html          = 'xmllint --format - > %op/%of.%oe'
+  xml           = 'xmllint --format - > %op/%of.%oe'
+
+#------------------------------------------------------------------------------
+[ T ]
+#  config-search = false
+  config        = false
+  tables        = true
+  modules       = true
+  parse         = false
+  parse-result  = false
+  file-handling = true

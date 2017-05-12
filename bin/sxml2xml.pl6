@@ -22,52 +22,12 @@ for grep( /^ '--'/, @*ARGS) -> $a {
 #  note "A: $^a";
 #}
 
-
 #-------------------------------------------------------------------------------
-#= sxml2xml -run=<run-code> filename.sxml
 sub MAIN (
-  Str $filename, Str :$run, Str :$in = 'xml', Str :$out = 'xml',
-  Bool :$trace = False, Bool :$merge = False
+  Str $filename, Str :$in = 'xml', Str :$out = 'xml',
+  Bool :$merge = False
 ) {
 
-  my $dep = process-sxml(
-    $filename, :$run, :refine([ $in, $out]), :$trace, :$merge
-  );
-
-  if $dep.defined {
-    my Array $dep-list = [$dep.split(/\s* ',' \s*/)];
-    for $dep-list.list -> $dependency is copy {
-
-      $dependency ~~ s/^\s+//;
-      $dependency ~~ s/\s+$//;
-
-      say "Processing dependency $dependency";
-      my $dep = process-sxml(
-        $dependency, :$run, :refine([ $in, $out]), :$trace, :$merge
-      ) if ? $dependency;
-
-      $dep-list.push: |$dep.split(/\s* ',' \s*/) if ? $dep;
-    }
-  }
-}
-
-#-------------------------------------------------------------------------------
-sub process-sxml (
-  Str:D $filename is copy, Str :$run, Array :$refine,
-  Bool :$trace = False, Bool :$merge = False, 
-) {
-
-  my SemiXML::Sxml $x .= new( :$trace, :$merge, :$refine);
-
-  if $filename.IO ~~ :r {
-    $x.parse(:$filename);
-    $filename ~~ s/ '.' $filename.IO.extention //;
-    $x.save( :run-code($run), :$filename);
-    my $deps = $x.get-option( :section('dependencies'), :option('files')) // '';
-    return $deps;
-  }
-
-  else {
-    die "File $filename not readable";
-  }
+  my SemiXML::Sxml $x .= new( :$merge, :refine([ $in, $out]));
+  $x.save if $x.parse(:$filename) ~~ Match;
 }

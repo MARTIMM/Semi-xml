@@ -37,15 +37,12 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {};
-$config<output><fileext> = 'html';
-$config<module><SxmlCore> = 'SxmlLib::SxmlCore';
+$config<S><test-file><fileext> = 'html';
 
 #-------------------------------------------------------------------------------
 # Parse
-#
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new( :!trace, :merge);
 $x.parse( :filename($f1), :$config);
-
 my Str $xml-text = ~$x;
 #note $xml-text;
 

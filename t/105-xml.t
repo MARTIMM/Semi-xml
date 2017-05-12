@@ -35,18 +35,22 @@ spurt( $f2, q:to/EOSXML/);
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-  module => {
-    file => 'SxmlLib::File'
+  ML => {
+    in-fmt => {
+      file => 'SxmlLib::File'
+    }
   },
 
-  output => {
-    fileext => 'html'
+  S => {
+    $f2 => {
+      fileext => 'html'
+    }
   }
 };
 
 #-------------------------------------------------------------------------------
 # Parse
-my SemiXML::Sxml $x .= new;
+my SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config);
 my Str $xml-text = ~$x;
 #note $xml-text;

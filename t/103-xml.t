@@ -49,28 +49,33 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-  option => {
-    doctype => {
-      show => 1,                        # Default 0
+  C => {
+    out-fmt => {
+      doctype-show => True,
+      xml-show => True,
     },
+  },
 
-    xml-prelude => {
-      show => 1,                        # Default 0
-      version => 1.1,                   # Default 1.0
-      encoding => 'UTF-8',              # Default UTF-8
+  X => {
+    out-fmt => {
+      xml-version => 1.1,
+      xml-encoding => 'UTF-8',
     }
   },
 
-  output => {
-    filename => 'f1',                   # Default current file
-    filepath => 't/D103',               # Default path '.'
-    fileext => 'html',                  # Default xml
+  S => {
+    out-fmt => {
+      filename => 'f1',
+      rootpath => 't/D103',
+      fileext => 'html',
+    }
   }
 }
 
 # Parse
-my SemiXML::Sxml $x .= new;     #(:trace);
+my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config);
+
 my Str $xml-text = ~$x;
 #note $xml-text;
 
@@ -91,9 +96,8 @@ ok $xml-text ~~ ms/var a_tags '=' "\$('a');" var b '=' a_tags/,
 
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, "'Th' after 'tr' found";
 
-ok $xml-text ~~ ms/'data at <a href="http://example.com/"/><p>'/,
-   "Testing \$* tag"
-   ;
+ok $xml-text ~~ ms/'data at <a href="http://example.com/"></a><p>'/,
+   "Testing \$* tag";
 
 like $xml-text, / :s "bla<b>bla</b>bla <u>bla<b>bla</b></u>."/,
      'Check part of result spacing tag $*|';

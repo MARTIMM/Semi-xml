@@ -1,10 +1,11 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
 
 use XML;
 use SemiXML::Text;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Docbook5::FixedLayout {
@@ -16,39 +17,39 @@ class Docbook5::FixedLayout {
   # enclosed in lines of #`{{Example-Start}} and #`{{Example-Stop}}
   #
   # path=<file>
-  # start=<stop-mark>   Start is an optional marker to start selecting text.
+  # start=<start-mark>  Start is an optional marker to start selecting text.
   #                     Start and stop overides the defaults mentioned above.
   # stop=<stop-mark>    Stop is an optional marker to stop selecting text
   # keep-literal=<0/1>  Substitute < > characters with &lt; and &gr;
   # fix-indent=<n>      Remove some space in front of every line.
   #
-  method load-test-example ( XML::Element $parent, Hash $attrs is copy ) {
-    my Str $path = $attrs<path>:delete // '';
-    my Str $ltype = $attrs<ltype>:delete // '';
-    my Str $start = $attrs<start>:delete // '#`{{Example-Start}}';
-    my Str $stop = $attrs<stop>:delete // '#`{{Example-Stop}}';
-    my Bool $keep-literal = $attrs<keep-literal>:delete ?? True !! False;
-    my $fix-indent = $attrs<fix-indent>:delete // '0';
-    my $callout-prefix = $attrs<callout-prefix>:delete // 'c.';
-    my $callout-rows = $attrs<callout-rows>:delete // '';
-    my $callout-col = $attrs<callout-col>:delete // '80';
+  method load-test-example ( XML::Element $parent, Hash $attrs ) {
+    my Str $path = ~($attrs<path> // '');
+    my Str $ltype = ~($attrs<ltype> // '');
+    my Str $start = ~($attrs<start> // '#`{{Example-Start}}');
+    my Str $stop = ~($attrs<stop> // '#`{{Example-Stop}}');
+    my Bool $keep-literal =
+       ($attrs<keep-literal>:exists and ?$attrs<keep-literal>) ?? True !! False;
+    my $fix-indent = ~($attrs<fix-indent> // '0');
+    my $callout-prefix = ~($attrs<callout-prefix> // 'c.');
+    my $callout-rows = ~($attrs<callout-rows> // '');
+    my $callout-col = ~($attrs<callout-col> // '80');
 
     my $text;
     if $path.IO ~~ :r {
       $text = slurp($path);
 
-      # Find all sections between code markers
-      #
-      $text ~~ m:g:i/$start(.*?)<?before $stop>/;
       my $c;
+
+      # Find all sections between code markers
+      $text ~~ m:g:i/$start(.*?)<?before $stop>/;
       if $/.elems {
         for @$/ -> $m is copy {
+
           # I am not shure why it is included but we remove it here
-          #
           $m ~~ s:i/\n? $start \n?//;
 
           # Put all code sections together and separate them with '...'
-          #
           $c ~= ?$c ?? "...\n$m\n" !! "$m";
         }
 
@@ -67,13 +68,11 @@ class Docbook5::FixedLayout {
     }
 
     # Create the container
-    #
     my $pl = XML::Element.new(:name('programlisting'));
     $parent.append($pl);
 
     # When callouts must be placed in the text, the text must be added in
     # pieces with the callout tags in between on the proper places.
-    #
     if ?$callout-rows {
       $callout-col = Int($callout-col);
 #say "CR 0: $callout-rows, $callout-col";
@@ -88,7 +87,6 @@ class Docbook5::FixedLayout {
 #say "CR 1: $row";
 
           # If row is within limits of the text then add a callout
-          #
           if 0 <= $row < @lines.elems {
 #say "CR 2: ", @lines[$row].chars;
             # If line is too short add spaces
@@ -98,7 +96,6 @@ class Docbook5::FixedLayout {
             }
 
             # If line is too long truncate the line
-            #.
             elsif @lines[$row].chars > $callout-col {
               @lines[$row] = @lines[$row].substr( 0, $callout-col);
             }
@@ -126,7 +123,6 @@ class Docbook5::FixedLayout {
         }
 
         # Append remaining text to the container
-        #
         if $text-start-line < @lines.elems {
           $text = @lines[$text-start-line ..^ @lines.elems].join("\n");
           if $keep-literal {
@@ -140,11 +136,9 @@ class Docbook5::FixedLayout {
 
     else {
       # Place the selected code in the container
-      #
       $pl.append(SemiXML::Text.new(:$text));
     }
 
     $parent;
   }
 }
-

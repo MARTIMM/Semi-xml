@@ -1,8 +1,9 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 use XML;
-use SemiXML::Sxml;
+#use SemiXML::Sxml;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
@@ -10,6 +11,11 @@ unit package SxmlLib:auth<https://github.com/MARTIMM>;
 #-------------------------------------------------------------------------------
 # Core module with common used methods
 class SxmlCore {
+
+  #-----------------------------------------------------------------------------
+  method is-method-inline ( Str $method-name --> Bool ) {
+    $method-name ~~ any(<date date-time>);
+  }
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
@@ -40,8 +46,8 @@ class SxmlCore {
                      --> XML::Node
                    ) {
 
-    my Bool $iso = $attrs<iso>:exists ?? ?$attrs<iso>.Int !! True;
-    my Bool $utc = $attrs<utc>:exists ?? ?$attrs<utc>.Int !! False;
+    my Bool $iso = $attrs<iso>:exists ?? ? $attrs<iso>.Int !! True;
+    my Bool $utc = $attrs<utc>:exists ?? ? $attrs<utc>.Int !! False;
     my Int $tz = $attrs<timezone>:exists ?? $attrs<timezone>.Int !! 0;
 
     my DateTime $date-time;
@@ -114,7 +120,7 @@ class SxmlCore {
     $parent.append(
       XML::PI.new(
         :data((
-          (( $attrs<target> // 'no-target'), $content-body.nodes).join(' ')
+          (( ~$attrs<target> // 'no-target'), $content-body.nodes).join(' ')
         ))
       )
     );
