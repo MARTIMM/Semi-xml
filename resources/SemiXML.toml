@@ -25,14 +25,15 @@
 #------------------------------------------------------------------------------
 [ F.html ]
   inline            = [
-  'a', 'b', 'big', 'i', 'strong', 'small', 'tt', 'abbr', 'acronym', 'cite',
-  'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'time', 'var', 'bdo', 'br',
-  'img', 'map', 'object', 'q', 'script', 'span', 'sub', 'sup', 'button',
-  'input', 'label', 'select', 'textarea'
+    'a', 'b', 'big', 'i', 'strong', 'small', 'tt', 'abbr', 'acronym', 'cite',
+    'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'time', 'var', 'bdo', 'br',
+    'img', 'map', 'object', 'q', 'script', 'span', 'sub', 'sup', 'button',
+    'input', 'label', 'select', 'textarea'
   ]
 
   non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
   space-preserve    = [ 'pre' ]
+  self-closing      = [ 'br', 'meta', 'link' ]
 
 #------------------------------------------------------------------------------
 # Header table

@@ -407,30 +407,26 @@ class Sxml {
     $c<S><filepath> //= '';
 
     # Fill the special purpose tables with the refined searches in the config
-    for @$!refine-tables {
+    for @$!refine-tables -> $table {
       # document control
-      when any(<D E F ML R>) {
-        my $table = $_;
+      if $table ~~ any(<D E F ML R>) {
         $!refined-config{$table} =
           $!configuration.refine( $table, $!refine[IN], $basename);
       }
 
       # output control
-      when any(<C H S X>) {
-        my $table = $_;
+      elsif $table ~~ any(<C H S X>) {
         $!refined-config{$table} =
           $!configuration.refine( $table, $!refine[OUT], $basename);
       }
 
-      when 'T' {
-        my $table = $_;
+      elsif $table eq 'T' {
         $!refined-config{$table} =
           $!configuration.refine( $table, $basename);
       }
 
 #`{{
-      when 'S' {
-        my $table = $_;
+      elsif $table eq 'S' {
         $!refined-config{$table} =
           $!configuration.refine( $table, $basename);
       }
@@ -482,6 +478,9 @@ class Sxml {
 
     # instantiate modules specified in the configuration
     self!process-modules if $continue;
+
+    # Place the F-table in the actions environment
+    $!actions.F-table = $!refined-config<F>{$!refine[OUT]} // {};
 
     $continue;
   }

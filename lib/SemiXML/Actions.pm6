@@ -17,6 +17,9 @@ class Actions {
   has Hash $.objects is rw = {};
   has XML::Document $!xml-document;
 
+  # The F-table is devised elsewhere as well. This table is read from the config
+  has Hash $.F-table is rw = {};
+
   # Keep current state of affairs. Hopefully some info when parsing fails
   has Int $.from;
   has Int $.to;
@@ -250,6 +253,8 @@ class Actions {
       my $mod, my $meth,      # module and method
       my $attrs               # attributes
     ) = @($match<tag-spec>.made);
+#note "doc attrs: ", $attrs.WHAT;
+#for $attrs.keys -> $k { note "Key $k: ", $attrs{$k}.WHAT; };
 
     # Check the node type
     given $tt {
@@ -259,7 +264,8 @@ class Actions {
 
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
 
-        $x .= new( :name($tag), :attribs(%$attrs));
+        # A bit of hassle to get the StringList values converted into Str explicitly
+        $x .= new( :name($tag), :attribs(%($attrs.keys Z=> $attrs.values>>.Str)));
 
         # Check for xmlns uri definitions and set them on the current node
         for $attrs.keys {
@@ -520,10 +526,18 @@ class Actions {
     $match.make($ast);
   }
 
+#`{{
   #-----------------------------------------------------------------------------
-#    method comment ( Match $match ) {
-#      dump $match;
-#    }
+  method attr-value-spec ( Match $match ) {
+    note $match.Str;
+  }
+}}
+#`{{
+  #-----------------------------------------------------------------------------
+  method comment ( Match $match ) {
+    dump $match;
+  }
+}}
 
   #-----------------------------------------------------------------------------
   # Return object if module and method is found. Otherwise return Any
