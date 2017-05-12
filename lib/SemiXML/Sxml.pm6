@@ -477,10 +477,12 @@ class Sxml {
 #    $continue = True;
 
     # instantiate modules specified in the configuration
-    self!process-modules if $continue;
+    if $continue {
+      self!process-modules;
 
-    # Place the F-table in the actions environment
-    $!actions.F-table = $!refined-config<F>{$!refine[OUT]} // {};
+      # Place the F-table in the actions environment
+      $!actions.F-table = $!refined-config<F>;
+    }
 
     $continue;
   }
