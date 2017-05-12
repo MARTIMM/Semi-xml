@@ -38,12 +38,18 @@ EOSX
 $x.parse(
   content => $sx-text,
   config => {
-      C => {
-        out-fmt => {
+    C => {
+      out-fmt => {
         xml-show => True,
         doctype-show => True
-      },
-    }
+      }
+    },
+
+    F => {
+      in-fmt => {
+        self-closing => ['br'],
+      }
+    },
   }
 );
 

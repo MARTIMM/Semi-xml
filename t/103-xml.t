@@ -96,9 +96,8 @@ ok $xml-text ~~ ms/var a_tags '=' "\$('a');" var b '=' a_tags/,
 
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, "'Th' after 'tr' found";
 
-ok $xml-text ~~ ms/'data at <a href="http://example.com/"/><p>'/,
-   "Testing \$* tag"
-   ;
+ok $xml-text ~~ ms/'data at <a href="http://example.com/"></a><p>'/,
+   "Testing \$* tag";
 
 like $xml-text, / :s "bla<b>bla</b>bla <u>bla<b>bla</b></u>."/,
      'Check part of result spacing tag $*|';

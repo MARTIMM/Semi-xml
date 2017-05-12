@@ -113,7 +113,7 @@ ok $r ~~ Match, "match $content";
 $xml = $x.get-xml-text;
 #note "XML: \n$xml";
 like $xml, /'<?xml version="1.0" encoding="UTF-8"?>'/, 'found prelude';
-like $xml, /'<x><p/><p>Added 0 xml nodes</p></x>'/, "generated content from mth2";
+like $xml, /'<x><p></p><p>Added 0 xml nodes</p></x>'/, "generated content from mth2";
 
 
 $content = '$x =a =!b [ $!mod1.mth2 [ $h [abc] $h[def]]]';
@@ -121,7 +121,7 @@ $r = $x.parse( :$config, :$content);
 ok $r ~~ Match, "match $content";
 
 $xml = $x.get-xml-text;
-like $xml, /'<x a="1" b="0"><p/><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>'/,
+like $xml, /'<x a="1" b="0"><p></p><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>'/,
            "generated: $xml";
 
 

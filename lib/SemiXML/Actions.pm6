@@ -71,18 +71,18 @@ class Actions {
 
       my $children = $node.nodes;
 
-      # Eat from the end of the list and add just after the container element.
-      # Somehow they get lost from the array when done otherwise.
+      # eat from the end of the list and add just after the container element.
+      # somehow they get lost from the array when done otherwise.
       #
       for @$children.reverse {
         $node.parent.after( $node, $^a);
       }
 
-      # Remove the now empty element
+      # remove the now empty element
       $node.remove;
     }
 
-    # Process top level method container
+    # process top level method container
     if $parent.name eq '__PARENT_CONTAINER__' {
       if +$parent.nodes == 0 {
         # No nodes generated
@@ -103,17 +103,17 @@ class Actions {
       }
     }
 
-    # Conversion to xml escapes is done as late as possible
+    # conversion to xml escapes is done as late as possible
     my Sub $after-math = sub ( XML::Element $x ) {
 
-      # Process attributes to escape special chars, Stringify attr value because
+      # process attributes to escape special chars, Stringify attr value because
       # of its type: StringList
       my %a = $x.attribs;
       for %a.kv -> $k, $v {
         $x.set( $k, self!process-esc( ~$v, :is-attr));
       }
 
-      # Process body text to escape special chars
+      # process body text to escape special chars
       for $x.nodes -> $node {
         if $node ~~ any( SemiXML::Text, XML::Text) {
           my Str $s = self!process-esc(~$node);
@@ -121,14 +121,39 @@ class Actions {
         }
 
         elsif $node ~~ XML::Element {
-          $after-math($node);
+          my Array $self-closing = $!F-table<self-closing> // [];
+
+#note "Ftab: ", $self-closing;
+          # Check for self closing tag, and if so remove content if any
+          if $node.name ~~ any(@$self-closing) {
+#note "Found self closing tag: $node.name()";
+            # elements not able to contain any content; remove any content
+            for $node.nodes.reverse -> $child {
+              $node.removeChild($child);
+            }
+          }
+
+          else {
+            # recurively process through all elements
+            $after-math($node);
+
+            # If this is not a self closing element and there is no content, insert
+            # an empty string to get <a></a> instead of <a/>
+            if ! $node.nodes {
+              $node.append(SemiXML::Text.new(:text('')));
+            }
+          }
         }
+
+#        elsif $node ~~ any(XML::Text|SemiXML::Text) {
+#
+#        }
       }
     }
 
     &$after-math($parent);
 
-    # Return the completed document
+    # return the completed document
     $!xml-document .= new($parent);
   }
 

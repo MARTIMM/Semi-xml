@@ -29,16 +29,16 @@ subtest 'test oneliners', {
   }
 
   $xml = parse('$t1 [ $t2 [] $t3[]]');
-  is $xml, '<t1><t2/><t3/></t1>', "nested tags: $xml";
+  is $xml, '<t1><t2></t2><t3></t3></t1>', "nested tags: $xml";
 
   $xml = parse('$t1 [ $**t2 [] $t3[]]');
-  is $xml, '<t1> <t2/> <t3/></t1>', "nested tags with \$**: $xml";
+  is $xml, '<t1> <t2></t2> <t3></t3></t1>', "nested tags with \$**: $xml";
 
   $xml = parse('$t1 [ $|*t2 [] $t3[]]');
-  is $xml, '<t1><t2/> <t3/></t1>', "nested tags with \$|*: $xml";
+  is $xml, '<t1><t2></t2> <t3></t3></t1>', "nested tags with \$|*: $xml";
 
   $xml = parse('$t1 [ $*|t2 [] $t3[]]');
-  is $xml, '<t1> <t2/><t3/></t1>', "nested tags with \$*|: $xml";
+  is $xml, '<t1> <t2></t2><t3></t3></t1>', "nested tags with \$*|: $xml";
 }
 
 #-------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ subtest 'test multi liners', {
     ]
     EOXML
 
-  is $xml, '<aa><bb/></aa>', "2 tags: $xml";
+  is $xml, '<aa><bb></bb></aa>', "2 tags: $xml";
 
   try {
     $xml = parse(Q:q:to/EOXML/);
@@ -81,7 +81,7 @@ subtest 'test multi liners', {
     ]
     EOXML
 
-  is $xml, '<aa><bb><cc/></bb></aa>', "3 tags: $xml";
+  is $xml, '<aa><bb><cc></cc></bb></aa>', "3 tags: $xml";
 
   $xml = parse(Q:q:to/EOXML/);
     $aa [
