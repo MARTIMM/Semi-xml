@@ -70,7 +70,7 @@ class Html::List {
 
         my $ul = self!make-dir-entry( $parent, $dir);
 
-        my @new-files = dir( $dir, :Str);
+        my @new-files = dir($dir)>>.Str;
         self!create-list( $ul, @(sort @new-files));
 
         $!level--;
@@ -95,9 +95,10 @@ class Html::List {
   }
 
   #-----------------------------------------------------------------------------
-  method !make-dir-entry ( XML::Element $parent, Str $dir-label is copy
-                           --> XML::Element
-                         ) {
+  method !make-dir-entry (
+    XML::Element $parent, Str $dir-label is copy
+    --> XML::Element
+  ) {
 
     # place left attributes only on the first directory shown
     my XML::Element $ul = append-element( $parent, 'ul', $!top-level-attrs);
