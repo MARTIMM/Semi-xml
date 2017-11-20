@@ -1,7 +1,7 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
+unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML::Grammar;
 use SemiXML::Actions;
@@ -10,8 +10,6 @@ use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
 use XML;
-
-subset ParseResult is export where $_ ~~ any(Match|Nil);
 
 #-------------------------------------------------------------------------------
 class Sxml {
@@ -54,9 +52,9 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  multi method parse ( Str:D :$!filename!, Hash :$config --> ParseResult ) {
+  multi method parse ( Str:D :$!filename!, Hash :$config --> Bool ) {
 
-    my ParseResult $pr;
+    my Bool $pr;
 
     if $!filename.IO ~~ :r {
       my $text = slurp($!filename);
@@ -75,7 +73,7 @@ class Sxml {
   #-----------------------------------------------------------------------------
   multi method parse (
     Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True
-    --> ParseResult
+    --> Bool
   ) {
 
     $!user-config = $config;
@@ -84,7 +82,7 @@ class Sxml {
     # Prepare config and process dependencies. If result is newer than source
     # prepare returns False to note that further work is not needed.
     # Generate a proper Match object to return.
-    return Nil unless self!prepare-config;
+    return False unless self!prepare-config;
 
     # Parse the content. Parse can be recursively called
     $SemiXML::Grammar::trace = ($!trace and $!refined-config<T><parse>);
@@ -129,7 +127,7 @@ class Sxml {
       }
     }
 
-    $m;
+    True;
   }
 
   #-----------------------------------------------------------------------------
@@ -142,7 +140,7 @@ class Sxml {
     # If a run code is defined, use that code as a key to find the program
     # to send the result to. If R-table entry is an Array, take the first
     # element. The second element is a result filename to check for modification
-    # date. Check is done before parsing to see if paqrsing is needed.
+    # date. Check is done before parsing to see if parsing is needed.
     my $cmd;
     if $!refined-config<R>{$!refine[OUT]} ~~ Array {
       $cmd = $!refined-config<R>{$!refine[OUT]}[0];
@@ -157,7 +155,7 @@ class Sxml {
 
       $cmd = self!process-cmd-str($cmd);
 
-      say "Send file to program: $cmd"
+      note "Send file to program: $cmd"
         if $!trace and $!refined-config<T><file-handling>;
 
       my Proc $p = shell "$cmd", :in;
@@ -447,7 +445,7 @@ class Sxml {
     }
 
     # before continuing, process dependencies first
-    self!run-dependencies;
+    my Bool $found-dependency = self!run-dependencies;
 
     #TODO Check exitence and modification time of result to see
     # if wee need to continue parsing
@@ -456,8 +454,8 @@ class Sxml {
     # Use the R-table if the entry is an Array. If R-table entry is an Array,
     # take the second element. It is a result filename to check for modification
     # date. Check is done before parsing to see if paqrsing is needed.
+    my $fn = 'unknown.unknown';
     if ?$!filename {
-      my $fn;
       if $!refined-config<R>{$!refine[OUT]} ~~ Array {
         $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
         $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
@@ -467,36 +465,41 @@ class Sxml {
         $fn = self!process-cmd-str("%op/%of.%oe");
         $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
       }
-
-      if ! $continue {
-        note "No need to parse and save data, $fn is newer than $!filename"
-           if $!trace and $!refined-config<T><parse>;
-      }
     }
 
 #    $continue = True;
 
     # instantiate modules specified in the configuration
-    if $continue {
+    if $found-dependency or $continue {
       self!process-modules;
 
       # Place the F-table in the actions environment
       $!actions.F-table = $!refined-config<F>;
     }
 
-    $continue;
+    else {
+      note "No need to parse and save data, $fn is in its latest version"
+           if $!trace and $!refined-config<T><parse>;
+    }
+
+    $found-dependency or $continue
   }
 
   #-----------------------------------------------------------------------------
-  method !run-dependencies ( ) {
+  method !run-dependencies ( --> Bool ) {
 
 #TODO compare modification times of result
+    my Bool $dependency-found = False;
 
-    # get D-table
+    # get D-table. selection is already made on in-key
     my Hash $D = $!refined-config<D> // {};
-    my Array $dependencies = $D{$!refine[OUT]} // [];
+    # select the entry pointed by the out-key. this must be an array of
+    # dependency specs
+    my $d = $D{$!refine[OUT]} // [];
+    my Array $dependencies = $d ~~ Array ?? $d !! [$d];
     for @$dependencies -> $d-spec {
-      my @d = $d-spec.split(';');
+      # a spec is like [in-key;out-key;dep-file]
+      my @d = $d-spec.split(/\s* ';' \s*/);
       if @d.elems == 3 {
 
         # check if file is seen before. Set before parsing starts on dependency
@@ -504,12 +507,12 @@ class Sxml {
         next if $processed-dependencies{$filename}:exists;
         $processed-dependencies{$filename} = True;
 
-        # Bind to S table
+        # get S table
         my Hash $S := $!refined-config<S>;
 
         # prefix filename with path when filename is relative
         if ?$S<filepath> {
-          $filename = $S<rootpath> ~ '/' ~ $S<filepath> ~ '/' ~ $filename;
+          $filename = [~] $S<rootpath>, '/', $S<filepath>, '/', $filename;
         }
 
         else {
@@ -519,12 +522,17 @@ class Sxml {
         my Array $refine = [@d[ IN, OUT]];
         my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
 
-        note "Process dependency @d[*]"
+        note "Process dependency: --in=@d[0] --out=@d[1] @d[2]"
           if $!trace and $!refined-config<T><file-handling>;
 
-        $x.save if $x.parse(:$filename) ~~ Match;
+        if $x.parse(:$filename) {
+          $x.save;
+          $dependency-found = True;
+        }
       }
     }
+
+    $dependency-found
   }
 
   #-----------------------------------------------------------------------------

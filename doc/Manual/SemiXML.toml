@@ -6,7 +6,7 @@
 
 #------------------------------------------------------------------------------
 [ D.Db5 ]
-  pdf           = [ 'xml;xsl;ss-fo.sxml']
+  pdf           = 'xml; xsl; ss-fo.sxml'
   chunk         = [ 'xml;xsl;ss-chunk.sxml']
   xhtml         = [ 'xml;xsl;ss-xhtml.sxml']
 
@@ -71,6 +71,6 @@
   config        = false
   tables        = false
   modules       = true
-  parse         = true
+  parse         = false
   parse-result  = false
   file-handling = true

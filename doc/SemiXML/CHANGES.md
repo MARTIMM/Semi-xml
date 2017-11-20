@@ -2,6 +2,12 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.33.2
+  * In SxmlLib::Html::List the use of `dir\( \$d, :str)` has changed in newer versions of perl6. Can now be done like `dir\(\$d)>>.Str`.
+  * The type `ParseResult` is removed. parse() now returns a Bool to show that a file is parsed correctly (`True`) or skipped (`False`) because of its result being newer. It throws an exception when parsing fails.
+* 0.33.1
+  * Improved processing of dependencies
+  * A dependency entry may also be a string instead of an array of strings when only one file is involved
 * 0.33.0
   * Implemented self-closing key of table F in configuration.
 * 0.32.0

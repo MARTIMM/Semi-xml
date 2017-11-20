@@ -47,6 +47,8 @@ subtest 'self-closing on html defaults', {
       $head [
         $title
         $meta  charset=UTF-8
+        $script src=prut.js
+        $link href='prut.css'
       ]
 
       $body [
@@ -64,12 +66,13 @@ subtest 'self-closing on html defaults', {
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;
-  #note $xml-text;
+  note $xml-text;
   like $xml-text, /'<title></title>'/, 'empty title found';
   like $xml-text, /'<meta charset="UTF-8"/>'/, 'meta found';
   like $xml-text, /'<p></p>'/, 'empty p found';
   like $xml-text, /'<br/>'/, 'br ok';
   like $xml-text, /'<hr/>'/, 'hr ok';
+  like $xml-text, /'<script src="prut.js"></script>'/, 'script ok';
 }
 
 #-------------------------------------------------------------------------------

@@ -86,8 +86,8 @@ my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsense [
 
 # instantiate parser and parse with contents and config
 my SemiXML::Sxml $x .= new( :!trace, :merge);
-my ParseResult $r = $x.parse( :$config, :$content);
-ok $r ~~ Match, "match $content";
+my Bool $r = $x.parse( :$config, :$content);
+ok $r, "match $content";
 
 my $xml = $x.get-xml-text;
 #note "Xml: $xml";
@@ -97,7 +97,7 @@ like $xml, /'class="top-method"'/, "found class attribute in '$xml'";
 
 $content = '$!mod1.mth2 [ ]';
 $r = $x.parse( :$config, :$content);
-ok $r ~~ Match, "match $content";
+ok $r, "match $content";
 
 $xml = $x.get-xml-text;
 like $xml, /'<method-generated-too-many-nodes'/, "generated $xml";
@@ -108,7 +108,7 @@ like $xml, /'method="mth2"'/, "culprit method mth2";
 
 $content = '$x [ $!mod1.mth2 [ ] ]';
 $r = $x.parse( :$config, :$content);
-ok $r ~~ Match, "match $content";
+ok $r, "match $content";
 
 $xml = $x.get-xml-text;
 #note "XML: \n$xml";
@@ -118,7 +118,7 @@ like $xml, /'<x><p></p><p>Added 0 xml nodes</p></x>'/, "generated content from m
 
 $content = '$x =a =!b [ $!mod1.mth2 [ $h [abc] $h[def]]]';
 $r = $x.parse( :$config, :$content);
-ok $r ~~ Match, "match $content";
+ok $r, "match $content";
 
 $xml = $x.get-xml-text;
 like $xml, /'<x a="1" b="0"><p></p><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>'/,
@@ -127,7 +127,7 @@ like $xml, /'<x a="1" b="0"><p></p><p><h>abc</h><h>def</h>Added 2 xml nodes</p><
 
 $content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
 $r = $x.parse( :$config, :$content);
-ok $r ~~ Match, "match $content";
+ok $r, "match $content";
 $xml = $x.get-xml-text;
 #note $xml;
 like $xml, /'<ul class="v1 v2"><li>head1</li><li>head2</li></ul>'/,

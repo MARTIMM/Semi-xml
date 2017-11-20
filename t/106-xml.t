@@ -16,7 +16,6 @@ mkdir $gdir unless $gdir.IO ~~ :e;
 my $g1 = "$gdir/Debugging grammar rules.html";
 my $g2 = "$gdir/Error messages.html";
 
-
 spurt( $f1, q:to/EOSX/);
 $html [
   $body [
