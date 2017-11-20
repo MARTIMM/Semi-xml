@@ -3,6 +3,9 @@
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
 * 0.33.0
+  * Improved processing of dependencies
+  * A dependency entry may also be a string instead of an array of strings when only one file is involved
+* 0.33.0
   * Implemented self-closing key of table F in configuration.
 * 0.32.0
   * --trace is removed. All tracing is controlled by config table T and by config entry tracing (true/false) in the C table.
