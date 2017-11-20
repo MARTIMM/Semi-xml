@@ -1,7 +1,7 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
+unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML::Grammar;
 use SemiXML::Actions;
@@ -10,8 +10,6 @@ use Config::DataLang::Refine;
 use Terminal::ANSIColor;
 
 use XML;
-
-#subset ParseResult is export where $_ ~~ any(Match|Nil);
 
 #-------------------------------------------------------------------------------
 class Sxml {
