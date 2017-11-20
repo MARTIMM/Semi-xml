@@ -11,7 +11,7 @@ Attribute values which are empty like '' or "" are translated wrong
 * Error messages when parser fails can still be improved.
 
 ### Syntax
-* XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
+* XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '\_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
 
 ```
       Current syntax          Becomes             Note    Done
@@ -153,8 +153,58 @@ Attribute values which are empty like '' or "" are translated wrong
 * Support css
 * Support perl6 module testing
 
+### Module ideas
+#### css a la scss/sass
+```
+$!css.style [
+  $!css.color-palet clrs='' []
+  $!css.b s='.infobox >' [
+    $!css.b s=.message [
+      border: 1px solid $!css.c =!step4 [];
+      $!css.b s='> .title' [
+        color: $!css.c =!step8 [];
+      ]
+    ]
+    $!css.b s=.user [
+      border: 1px solid black;
+      $!css.b s='> .title' [
+        color: black;
+      ]
+    ]
+  ]
+]
+```
+
+Which produces (This will be more like a one liner, but is pretty printed here)
+
+```
+<style>
+.infobox > .message {
+  border: 1px solid #440000;
+ }
+
+.infobox > .message > .title
+  color: #880000;
+ }
+
+.infobox > .user {
+  border: 1px solid black;
+}
+
+.infobox > .user > .title {
+  color: black;
+}
+</style>
+```
+
+
 ### And ...
   * Documentation.
   * Module and program documentation
   * Documentation is started as a docbook 5 document. There are references to local iconfiles and fonts for which I don't know yet if they may be included (license issues).
   * Tutorials.
+
+<!-- References -->
+[colors1]: http://paletton.com
+[colorspace]: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+[colors2]: http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
