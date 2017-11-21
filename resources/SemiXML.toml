@@ -17,8 +17,6 @@
 #[ D.html ]
 #  pdf = [ 'xml; html; table1.xml', 'xml; html; table2.xml']
 
-
-
 #------------------------------------------------------------------------------
 # Doctype entity tables
 #[ E.xml ]
