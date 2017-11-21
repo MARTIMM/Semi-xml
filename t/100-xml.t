@@ -5,9 +5,7 @@ use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing;
-#   Role add to parser class
 #   Translation of SemiXML text
-#   Control of output via role
 #   Result to text
 #   test attributes
 #-------------------------------------------------------------------------------
@@ -76,7 +74,7 @@ like $xml-text,
 
 like $xml-text, / :s eq1 empty\-single\=\"\" /, "single quotes";
 like $xml-text, / :s eq2 empty\-double\=\"\" /, "double quotes";
+
 #-------------------------------------------------------------------------------
 # Cleanup
-done-testing();
-exit(0);
+done-testing;
