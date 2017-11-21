@@ -27,6 +27,7 @@ class Sxml {
   has Hash $!objects = {};
 
   has Str $!filename;
+  has Str $!target-fn;
 
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
@@ -444,28 +445,34 @@ class Sxml {
       }
     }
 
-    # before continuing, process dependencies first
-    my Bool $found-dependency = self!run-dependencies;
-
     #TODO Check exitence and modification time of result to see
-    # if wee need to continue parsing
+    # if we need to continue parsing
     my Bool $continue = True;
 
     # Use the R-table if the entry is an Array. If R-table entry is an Array,
     # take the second element. It is a result filename to check for modification
-    # date. Check is done before parsing to see if paqrsing is needed.
-    my $fn = 'unknown.unknown';
+    # date. Check is done before parsing to see if parsing is needed.
+    $!target-fn = 'unknown.unknown';
     if ?$!filename {
       if $!refined-config<R>{$!refine[OUT]} ~~ Array {
-        $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
-        $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
+        $!target-fn = self!process-cmd-str(
+          $!refined-config<R>{$!refine[OUT]}[1]
+        );
       }
 
       else {
-        $fn = self!process-cmd-str("%op/%of.%oe");
-        $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
+        $!target-fn = self!process-cmd-str("%op/%of.%oe");
       }
+
+      $continue = (
+        ! $!target-fn.IO.e or (
+          $!filename.IO.modified.Int > $!target-fn.IO.modified.Int
+        )
+      );
     }
+
+    # before continuing, process dependencies first. $!target-fn is used there
+    my Bool $found-dependency = self!run-dependencies;
 
 #    $continue = True;
 
@@ -478,7 +485,7 @@ class Sxml {
     }
 
     else {
-      note "No need to parse and save data, $fn is in its latest version"
+      note "No need to parse and save data, $!target-fn is in its latest version"
            if $!trace and $!refined-config<T><parse>;
     }
 
@@ -519,15 +526,30 @@ class Sxml {
           $filename = $S<rootpath> ~ '/' ~ $filename;
         }
 
-        my Array $refine = [@d[ IN, OUT]];
-        my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
+        # if one of the IN or OUT keys is a '-' then it is supposed not to
+        # do any work but compare the modification time of the file with that
+        # of the target
+        if @d[IN] eq '-' or @d[OUT] eq '-' {
 
-        note "Process dependency: --in=@d[0] --out=@d[1] @d[2]"
-          if $!trace and $!refined-config<T><file-handling>;
+          $dependency-found = (
+            ! $!target-fn.IO.e or (
+              $!filename.IO.modified.Int > $!target-fn.IO.modified.Int
+            )
+          );
+        }
 
-        if $x.parse(:$filename) {
-          $x.save;
-          $dependency-found = True;
+        else {
+
+          my Array $refine = [@d[ IN, OUT]];
+          my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
+
+          note "Process dependency: --in=@d[IN] --out=@d[OUT] $filename"
+            if $!trace and $!refined-config<T><file-handling>;
+
+          if $x.parse(:$filename) {
+            $x.save;
+            $dependency-found = True;
+          }
         }
       }
     }

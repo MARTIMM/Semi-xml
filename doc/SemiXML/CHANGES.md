@@ -2,6 +2,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.34.0
+  * Dependency table can have entries of files where the IN- and OUT-keys are a '-'. If defined like that, there is no extra processing but only the test if the target file is older than the depending file. This can be used if a module is changed or an image is updated.
 * 0.33.2
   * In SxmlLib::Html::List the use of `dir\( \$d, :str)` has changed in newer versions of perl6. Can now be done like `dir\(\$d)>>.Str`.
   * The type `ParseResult` is removed. parse() now returns a Bool to show that a file is parsed correctly (`True`) or skipped (`False`) because of its result being newer. It throws an exception when parsing fails.
