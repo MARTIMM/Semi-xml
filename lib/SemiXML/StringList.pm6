@@ -6,7 +6,7 @@ unit package SemiXML:auth<https://github.com/MARTIMM>;
 #-------------------------------------------------------------------------------
 # StringList is used to have attributes with a split brain like IntStr and the
 # like. Normally they are used as a string value but with methods they can
-# have a value as a list.
+# have a list as its value.
 #
 class StringList does Callable {
 
