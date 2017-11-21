@@ -58,7 +58,8 @@
   fmt             = 'xmllint --format - > "%op/%of.%oe"'
 #  fmt             = 'xmllint --format --noent - > %op/%of.%oe'
 #  pdf             = 'wkhtmltopdf - %op/%of.pdf'
-#  chk             = 'tidy -'
+#  chk             = [ 'tidy -xml > tidy.html', 'tidy.html']
+#  other           = ['cat > backup.xml', 'backup.xml']
 
 #------------------------------------------------------------------------------
 # Storage tables
