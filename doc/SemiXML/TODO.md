@@ -154,6 +154,16 @@ Attribute values which are empty like '' or "" are translated wrong
 * Support perl6 module testing
 
 ## Module ideas
+
+### Variables
+This might be defined in the main libs. An example;
+```
+$!SxmlCore.var name=aCommonText [Lorem ipsum dolor simet ...]
+```
+That piece could set a variable and any use of **\$aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into **\<aCommonText />**. A module should also be able to set a variable.
+
+Scope?
+
 ### css a la scss/sass
 ```
 $!css.style [
@@ -197,16 +207,6 @@ The code above could produce (This will be more like a one liner, but is pretty 
 }
 </style>
 ```
-
-### Variables
-This might be defined in the main libs. An example;
-```
-$!SxmlCore.var name=aCommonText [Lorem ipsum dolor simet ...]
-```
-That piece could set a variable and any use of **\$aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into **\<aCommonText />**. A module should also be able to set a variable.
-
-Scope?
-
 
 ## And ...
   * Documentation.
