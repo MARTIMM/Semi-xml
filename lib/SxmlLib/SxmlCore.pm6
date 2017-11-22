@@ -2,7 +2,6 @@ use v6;
 
 #-------------------------------------------------------------------------------
 use XML;
-#use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
@@ -19,11 +18,10 @@ class SxmlCore {
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
-  method date ( XML::Element $parent,
-                Hash $attrs,
-                XML::Node :$content-body   # Ignored
-                --> XML::Node
-              ) {
+  method date (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
 
     $parent.append(XML::Text.new(:text(' ')));
 
@@ -40,11 +38,10 @@ class SxmlCore {
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date-time timezone=tz iso=n []
-  method date-time ( XML::Element $parent,
-                     Hash $attrs,
-                     XML::Node :$content-body   # Ignored
-                     --> XML::Node
-                   ) {
+  method date-time (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
 
     my Bool $iso = $attrs<iso>:exists ?? ? $attrs<iso>.Int !! True;
     my Bool $utc = $attrs<utc>:exists ?? ? $attrs<utc>.Int !! False;
@@ -124,6 +121,22 @@ class SxmlCore {
         ))
       )
     );
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  # $!SxmlCore.var name=xyz [<data>] generates
+  # <sxml:variable name=xyz name="aCommonText">...</sxml:variable>
+  # namespace xmlns:sxml="github:MARTIMM" is placed on top level element
+  # and removed later when document is ready.
+  method var (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
+
+    my $e = append-element( $parent, 'sxml:variable', %$attrs);
+    $e.append($content-body);
+
     $parent;
   }
 }
