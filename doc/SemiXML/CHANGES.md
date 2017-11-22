@@ -2,6 +2,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.35.0
+  * Added a way to insert and substitute variables.
 * 0.34.0
   * Dependency table can have entries of files where the IN- and OUT-keys are a '-'. If defined like that, there is no extra processing but only the test if the target file is older than the depending file. This can be used if a module is changed or an image is updated.
 * 0.33.2
