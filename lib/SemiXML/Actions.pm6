@@ -193,6 +193,12 @@ class Actions {
       $vd.remove;
     }
 
+    # show some leftover sxml namespace elements
+    for $x.find( '//*', :to-list) -> $v {
+      note "Leftovers in sxml namespace: '$v.name()', parent is '$v.parent.name()'"
+        if $v.name() ~~ /^ 'sxml:'/;
+    }
+
     # remove the namespace
     $parent.attribs{"xmlns:sxml"}:delete;
 
