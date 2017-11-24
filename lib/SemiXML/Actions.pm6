@@ -107,13 +107,6 @@ class Actions {
     # conversion to xml escapes is done as late as possible
     my Sub $after-math = sub ( XML::Element $x ) {
 
-      # process attributes to escape special chars, Stringify attr value because
-      # of its type: StringList
-      my %a = $x.attribs;
-      for %a.kv -> $k, $v {
-        $x.set( $k, self!process-esc( ~$v, :is-attr));
-      }
-
       # process body text to escape special chars
       for $x.nodes -> $node {
         if $node ~~ any( SemiXML::Text, XML::Text) {
@@ -727,15 +720,14 @@ class Actions {
   # Substitute some escape characters in entities and remove the remaining
   # backslashes.
   #
-  method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
+  method !process-esc ( Str $esc is copy --> Str ) {
 
     # Entity must be known in the xml result!
-    $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/ unless $is-attr;
-    $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
-    $esc ~~ s:g/ '<' /\&lt;/ unless $is-attr;
-    $esc ~~ s:g/ '>' /\&gt;/ unless $is-attr;
+    $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;
+    $esc ~~ s:g/\\\s/\&nbsp;/;
+    $esc ~~ s:g/ '<' /\&lt;/;
+    $esc ~~ s:g/ '>' /\&gt;/;
 
-    $esc ~~ s:g/\"/\&quot;/ if $is-attr;
     $esc ~~ s:g/'\\'//;
 
 #`{{
