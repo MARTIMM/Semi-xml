@@ -65,4 +65,37 @@ subtest 'undeclared variable', {
 }
 
 #------------------------------------------------------------------------------
+subtest 'generated variables', {
+
+  my $text = q:to/EOTXT/;
+    $html [
+      $!SxmlCore.colors base-color='#1200ff'
+      $head [
+        $style [
+          strong {
+            color: $sxml:base-color;
+          }
+        ]
+      ]
+      $body [
+        $h1 id=h1001 [ Introduction ]
+        $p [ $strong [some text] ]
+      ]
+    ]
+    EOTXT
+
+  my SemiXML::Sxml $x .= new;
+  $x.parse(content => $text);
+
+  # See the result
+  my Str $xml-text = ~$x;
+  diag $xml-text;
+
+  my XML::XPath $p .= new(:xml($xml-text));
+
+  like $p.find( '//style/text()', :to-list)[0].text,
+       / 'color:#1200ff;' /, 'Found undeclared variable';
+}
+
+#------------------------------------------------------------------------------
 done-testing;
