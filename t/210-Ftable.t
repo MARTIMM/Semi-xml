@@ -66,7 +66,7 @@ subtest 'self-closing on html defaults', {
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;
-  note $xml-text;
+  #diag $xml-text;
   like $xml-text, /'<title></title>'/, 'empty title found';
   like $xml-text, /'<meta charset="UTF-8"/>'/, 'meta found';
   like $xml-text, /'<p></p>'/, 'empty p found';

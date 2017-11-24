@@ -6,7 +6,7 @@ use SemiXML::Sxml;
 # Testing;
 #   Check of SemiLib::Html::List
 #-------------------------------------------------------------------------------
-# Setup
+# setup files
 my $dir = 't/D106';
 mkdir $dir unless $dir.IO ~~ :e;
 my $f1 = "$dir/test-file.sxml";
@@ -24,7 +24,7 @@ $html [
 ]
 EOSX
 
-#-------------------------------------------------------------------------------
+# setup config
 my Hash $config = {
   ML => {
     in-fmt => {
@@ -39,8 +39,7 @@ my Hash $config = {
   }
 };
 
-#-------------------------------------------------------------------------------
-# Parse
+# some html files
 spurt( $g1, q:to/EOSXML/);
   <html/>
   EOSXML
@@ -49,10 +48,12 @@ spurt( $g2, q:to/EOSXML/);
   <html/>
   EOSXML
 
+#-------------------------------------------------------------------------------
+# Parse
 my SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config);
 my Str $xml-text = ~$x;
-#note $xml-text;
+#diag $xml-text;
 
 # To check html by viewing, dumpit
 spurt( "$dir/r.html", $xml-text);
