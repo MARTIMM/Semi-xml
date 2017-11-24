@@ -40,8 +40,9 @@ class Html::List {
     @!header.push: |@list;
     @!header.push: |(@list[@list.end] xx (C-MAX-LEVEL - +@list));
 
-    $!top-level-attrs = $attrs;
-    self!create-list( $parent, @($!directory));
+    # convert other attributes from StringList to string
+    $!top-level-attrs = (map { $^k => $^v.Str }, $attrs.kv).Hash;
+    self!create-list( $parent, @($!directory))
   }
 
   #-----------------------------------------------------------------------------
@@ -67,9 +68,7 @@ class Html::List {
         else {
           $!first_level = False;
         }
-
         my $ul = self!make-dir-entry( $parent, $dir);
-
         my @new-files = dir($dir)>>.Str;
         self!create-list( $ul, @(sort @new-files));
 
@@ -107,7 +106,6 @@ class Html::List {
     my XML::Element $li = append-element( $ul, 'li');
     my XML::Element $hdr = append-element( $li, 'h' ~ @!header[$!level]);
 
-#    $dir-label ~~ s:g/<-[\/]>+\///;
     $dir-label = $dir-label.IO.basename;
     $hdr.append(XML::Text.new(:text($dir-label)));
 
