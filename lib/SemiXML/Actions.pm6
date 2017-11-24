@@ -159,7 +159,7 @@ class Actions {
 
       my $vd = $vdecl.clone;
 
-      my Str $var-name = $vd.attribs<name>;
+      my Str $var-name = ~$vd.attribs<name>;
       my @var-value = $vd.nodes;
       my Bool $var-global = $vd.attribs<global>:exists;
 
