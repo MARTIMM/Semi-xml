@@ -51,7 +51,7 @@ Attribute values which are empty like '' or "" are translated wrong
 * Library paths to find modules are provided
 * A module should be accessible from within another perl6 sxml module. Problem of registration.
 * Use a plugin system for the modules.
-* Store SxmlLib modules in the resources directory.
+* Now XML::Text is improved, SemiXML::Text should be abandoned to use XML::Text again.
 
 ## Attribute grammar addition
 * Boolean attributes can be expressed as **=x** and  **=!x** meaning **x=true** or **x=false**.
