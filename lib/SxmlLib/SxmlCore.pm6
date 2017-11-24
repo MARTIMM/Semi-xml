@@ -72,11 +72,10 @@ class SxmlCore {
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.comment []
-  method comment ( XML::Element $parent,
-                   Hash $attrs,
-                   XML::Node :$content-body
-                   --> XML::Node
-                 ) {
+  method comment (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
 
     # Textify all body content
     my Str $comment-content = [~] $content-body.nodes;
@@ -90,11 +89,10 @@ class SxmlCore {
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.cdata []
-  method cdata ( XML::Element $parent,
-                 Hash $attrs,
-                 XML::Node :$content-body
-                 --> XML::Node
-               ) {
+  method cdata (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
 
     # Textify all body content
     my Str $cdata-content = [~] $content-body.nodes;
@@ -108,11 +106,10 @@ class SxmlCore {
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.pi []
-  method pi ( XML::Element $parent,
-              Hash $attrs,
-              XML::Node :$content-body
-              --> XML::Node
-            ) {
+  method pi (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
 
     $parent.append(
       XML::PI.new(
@@ -136,6 +133,25 @@ class SxmlCore {
 
     my $e = append-element( $parent, 'sxml:variable', %$attrs);
     $e.append($content-body);
+
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  # $!SxmlCore.colors base-color=<color> generates
+  # <sxml:variable name=xyz name="aCommonText">...</sxml:variable>
+  # namespace xmlns:sxml="github:MARTIMM" is placed on top level element
+  # and removed later when document is ready.
+  # See also http://scholarship.claremont.edu/cgi/viewcontent.cgi?article=1881&context=cmc_theses
+  method colors (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
+
+    my Str $base-color = ~$attrs<base-color>;
+
+    my $e = append-element( $parent, 'sxml:variable', %(:name<base-color>));
+    append-element( $e, :text($base-color));
 
     $parent;
   }
