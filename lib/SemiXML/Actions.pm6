@@ -188,8 +188,10 @@ class Actions {
 
     # show some leftover sxml namespace elements
     for $x.find( '//*', :to-list) -> $v {
-      note "Leftovers in sxml namespace: '$v.name()', parent is '$v.parent.name()'"
-        if $v.name() ~~ /^ 'sxml:'/;
+      if $v.name() ~~ /^ 'sxml:'/ {
+        note "Leftovers in sxml namespace: '$v.name()', parent is '$v.parent.name()'";
+        $v.remove;
+      }
     }
 
     # remove the namespace
