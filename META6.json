@@ -5,7 +5,8 @@
   "depends": [
     "XML", "XML::XPath",
     "Config::DataLang::Refine",
-    "Terminal::ANSIColor"
+    "Terminal::ANSIColor",
+    "Color"
   ],
   "license": "Artistic-2.0",
   "description": "Semi xml parser",
