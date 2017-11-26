@@ -53,13 +53,13 @@ subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
     $html [
-      $!SxmlCore.palette base-rgb='#1200ff' type=blended
+      $!Colors.palette base-rgb='#1200ff' type=blended mode=hard
       $head [
         $style [
           strong {
             color: $sxml:base-color;
             border-color: $sxml:color-two;
-            background-color: $sxml:color-five[]_map;
+            background-color: $sxml:color-five;
           }
         ]
       ]

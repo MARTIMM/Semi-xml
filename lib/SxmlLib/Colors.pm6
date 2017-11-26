@@ -76,7 +76,7 @@ note "X: $attrs.perl()";
       }
 
       when 'blended' {
-        $color-set = self!blended-colors($base-color);
+        $color-set = self!blended-colors( $base-color, ~$attrs<mode>);
       }
 
       default {
@@ -148,7 +148,9 @@ note "X: $attrs.perl()";
         ?? self!multiply-blend( $cb, Color.new(:rgbd((2,2,2) Z* $cs.rgbd)))
         !! self!screen-blend(
              $cb,
-             Color.new(:rgbd( ((2,2,2) Z* $cs.rgbd ) Z- (1, 1, 1)));
+             Color.new(:rgbd( ((2,2,2) Z* $cs.rgbd ) Z- (1, 1, 1)))
+           )
+    ;
   }
 
   #-----------------------------------------------------------------------------
@@ -166,6 +168,7 @@ note "X: $attrs.perl()";
 
       when 'overlay' {
         self!hard-light-blend( $cb, $cs)
+      }
 
       default {
       }
@@ -174,7 +177,7 @@ note "X: $attrs.perl()";
 
   #-----------------------------------------------------------------------------
   # blended color
-  method !blended-color ( Color $base, Str $mode --> Hash ) {
+  method !blended-color ( Color $base, Str $mode --> Color ) {
 
     my Array $base-rgb = [$base.rgba];
 
@@ -192,10 +195,11 @@ note "X: $attrs.perl()";
   #-----------------------------------------------------------------------------
   # blended colors
   method !blended-colors ( Color $base, Str $mode --> Hash ) {
+note "C&B: $base.to-string('hex'), $mode";
 
     my Hash $d = {};
 
-    $d<color-one> = self!blended-colors( $base, $mode);
+    $d<color-one> = self!blended-color( $base, $mode);
     $d<color-two> = self!blended-color( $base, $mode);
     $d<color-three> = self!blended-color( $base, $mode);
     $d<color-four> = self!blended-color( $base, $mode);
