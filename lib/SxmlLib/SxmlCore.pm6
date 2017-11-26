@@ -1,11 +1,11 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-use XML;
-use SxmlLib::SxmlHelper;
-
-#-------------------------------------------------------------------------------
 unit package SxmlLib:auth<https://github.com/MARTIMM>;
+
+use SemiXML::StringList;
+use SxmlLib::SxmlHelper;
+use XML;
 
 #-------------------------------------------------------------------------------
 # Core module with common used methods
@@ -133,25 +133,6 @@ class SxmlCore {
 
     my $e = append-element( $parent, 'sxml:variable', %$attrs);
     $e.append($content-body);
-
-    $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  # $!SxmlCore.colors base-color=<color> generates
-  # <sxml:variable name=xyz name="aCommonText">...</sxml:variable>
-  # namespace xmlns:sxml="github:MARTIMM" is placed on top level element
-  # and removed later when document is ready.
-  # See also http://scholarship.claremont.edu/cgi/viewcontent.cgi?article=1881&context=cmc_theses
-  method colors (
-    XML::Element $parent, Hash $attrs, XML::Node :$content-body
-    --> XML::Node
-  ) {
-
-    my Str $base-color = ~$attrs<base-color>;
-
-    my $e = append-element( $parent, 'sxml:variable', %(:name<base-color>));
-    append-element( $e, :text($base-color));
 
     $parent;
   }

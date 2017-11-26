@@ -22,6 +22,7 @@
 
 
     "SxmlLib::SxmlHelper":              "lib/SxmlLib/SxmlHelper.pm6",
+    "SxmlLib::Colors":                  "lib/SxmlLib/Colors.pm6",
 
     "SxmlLib::SxmlCore":                "lib/SxmlLib/SxmlCore.pm6",
     "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
