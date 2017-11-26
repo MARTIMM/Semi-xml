@@ -2,13 +2,13 @@
 
 # Bugs
 Attribute values which are empty like '' or "" are translated wrong
-* '' -> "''"              Now fixed
-* "" -> '&quot;&quot;"    Now fixed
+* [x] '' -> "''" -> "&#39;&#39;" (Translated by module XML)
+* [x] "" -> '&quot;&quot;"
 
 # Todo
 
 ## Parser and actions.
-* Error messages when parser fails can still be improved.
+* [ ] Error messages when parser fails can still be improved.
 
 ## Syntax
 * XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '\_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
@@ -48,31 +48,30 @@ Attribute values which are empty like '' or "" are translated wrong
   * [ ] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere.
 
 ## External modules located in SxmlLib tree
-* Library paths to find modules are provided
-* A module should be accessible from within another perl6 sxml module. Problem of registration.
-* Use a plugin system for the modules.
-* Now XML::Text is improved, SemiXML::Text should be abandoned to use XML::Text again.
+* [x] Library paths to find modules are provided using the ML table in default configuration from the resources directory.
+* [ ] A module should be accessible from within another perl6 sxml module. Problem of registration.
+* [ ] Now XML::Text is improved, SemiXML::Text should be abandoned to use XML::Text again.
 
 ## Attribute grammar addition
-* Boolean attributes can be expressed as **=x** and  **=!x** meaning **x=true** or **x=false**.
-* Attributes are also given as argument to module methods. In this case it might be possible to have hashes, array and more. Values are string or perhaps boolean.
+* [ ] Boolean attributes can be expressed as **=x** and  **=!x** meaning **x=true** or **x=false**.
+* [x] Attributes are also given as argument to module methods. In this case it might be possible to have hashes, arrays and more. Values are string or perhaps boolean. The attribute values are StringList types which can be stringyfied or used as an array.
 
 ## Items needed in program sxml2xml or SemiXML/Sxml.pm6
-  * Dependencies on other files
-  * Store internal representation back into sxml.
-  * Load any xml based source to convert back to sxml. Can be used as a start for templating things using pages from a nice website.
-  * Add conveneance method to Sxml.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $e, %attrs ) { }`
+  * [x] Dependencies on other files. This is controlled by the D table in the config.
+  * [ ] Store internal representation back into sxml (forgot what I meant by that).
+  * [ ] Load any xml based source to convert back to sxml. Can be used as a start for templating things using pages from a nice website.
+  * [x] Add a conveneance method to SxmlHelper.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $node, Hash $attributes ) { }`
 
 ## Tests
-  * tags without body but with attributes
-  * comments in sxml
-  * lineup of brackets of body to find errors
+  * [ ] tags without body but with attributes
+  * [ ] comments in sxml
+  * [ ] lineup of brackets of body to find errors
 
 ## Configuration
-  * Search for config files (assume parsed file is fpath/file.sxml)
-    * Merge <resource-location>/<resource named SemiXML.toml>,  <fpath>/SemiXML.toml, ~/.SemiXML.toml, ./.SemiXML.toml, ./SemiXML.toml, <fpath>/file.toml, ~/.file.toml, ./.file.toml and ./file.toml
+  * [x] Search for config files (assume parsed file is fpath/file.sxml)
+    Merge sequence is <resource-location>/<resource named SemiXML.toml>,  <fpath>/SemiXML.toml, ~/.SemiXML.toml, ./.SemiXML.toml, ./SemiXML.toml, <fpath>/file.toml, ~/.file.toml, ./.file.toml and ./file.toml
 
-  * When choosing the proper command line options one must keep the following in mind. First the document written is always **sxml**. What it represents should be the first option (by default **xml**) and what it should become the next option (by default **xml**). These options are provided by the sxml2xml program. The following **--in** and  **--out** with e.g. **--in=docbook5** and  **--out=pdf**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result. To also use the refine method from Config::DataLang::Refine, the options are used as keys to that method. A third key can be added, the basename of the file being parsed. So the next configuration tables are possible ();
+  * [x] When choosing the proper command line, one must keep the following in mind. First the document written is always **sxml**. What it represents should be the first option (by default **xml**) and what it should become the next option (by default **xml**). These options are provided by the sxml2xml program. The following **--in** and  **--out** with e.g. **--in=docbook5** and  **--out=pdf**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result. To also use the refine method from Config::DataLang::Refine, the options are used as keys to that method. A third key can be added, the basename of the file being parsed. So the next configuration tables are possible ();
 
     ```
     # [C] Content additions table. only used with out-key and file. Looked
@@ -123,6 +122,7 @@ Attribute values which are empty like '' or "" are translated wrong
     [ R.in-key ]
     [ R.in-key.file ]
       run-key = 'command line'
+      [ run-key = 'command line', target-file]
 
     # [S] Storage table, only with file. Looked up after parsing.
     [ S ]
@@ -143,36 +143,58 @@ Attribute values which are empty like '' or "" are translated wrong
   This is now implemented.
 
 ## Plugin modules
-* Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
-* Use the resources field from META.info to save the core Sxml plug-able modules.
+* [ ] Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
+* [ ] Use the resources field from META.info to save the core Sxml plug-able modules.
 
 ## Modules
-* Handle and generate ebooks
-* Support docbook 5
-* Support html
-* Support css
-* Support perl6 module testing
+Many parts of any language can be coded so this will never be finished, but lets say that when a few things are implemented, then there are examples to build the next methods.
+* [x] Handle and generate ebooks
+* [x] Support docbook 5
+* [x] Support html
+* [ ] Support css
+* [x] Support perl6 module testing
 
 ## Module ideas
 
 ### Variables
-This might be defined in the main libs. An example;
+* [x] This is defined in the main lib SxmlCore. An example;
 ```
 $!SxmlCore.var name=aCommonText [Lorem ipsum dolor simet ...]
 ```
-That piece could set a variable and any use of **\$aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into **\<aCommonText />**. A module should also be able to set a variable.
+That method sets a variable in a `sxml` namespace which is removed afterwards. Any use of **\$sxml:aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into **\<sxml:aCommonText />**. What it generates is simple and can be written more directly as **\$sxml:variable name=aCommonText [ \$strong [Lorem ipsum dolor simet ...] ]** without calling the `var` method.
 
-Scope?
+Scope is local except when global attribute is set. The local scope is however a bit strange because the use of a variable might come before the declaration of it. This is because the declaration is searched first and then, with that information, searched for the variable uses in the set of child elements found in the parent element of the declaration.
+
+* [x] User methods can also declare variables. The only thing it needs to do is generating an element such as from the example above **\<sxml:variable name="aCommonText">\<strong>Lorem ipsum dolor simet ...\</strong>\</sxml:variable>**.
+
+* [x] Substitution of variables can be done by writing the brackets with empty content like so **pre\$sxml:abc[]_map**. If **\$sxml:abc** was set to `pqr` this would become `prepqr_map`.
+* [ ] A variable declaration which behaves like a function. E.g. a declaration like **\$!SxmlCore.var name=hello _name='World' [Hello \$name]** has a variable in it. This is used like **\$sxml:hello name=Piet** which translates to `Hello Piet` and **$sxml:hello** translates to `Hello World` where the default is used. In this example the declaration attribute `_name` is used to define a default value for **\$name**.
+
+### Calculation of color palettes
+* [ ] Generating a set of colors is useful in defining several of the properties in css. Instead of coding the colors individually, the colors can be calculated using some algorithm and stored in variable declarations. When one is not satisfied, the calculations can be repeated with different values without changing the used variables.
+
+See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#html4)
+* [ ] Attributes for the color calculations
+  * [ ] Input color.
+    * [ ] base-rgb; '#xxx[,op]', '#xxxxxx[,op]' or 'd,d,d[,op]' where x=0..ff and d=0..255 or percententage. op (opacity) is a Num 0..1 or percentage and is optional
+    * [ ] base-hsl; 'hue,saturation,lightness[,op]' as an angle,percentage,percentage and op or opacity is optional.
+  * [ ] Type of calculation
+  * [ ] Output variables
+
 
 ### css a la scss/sass
+Css can be generated using methods. Nesting can take place like in sass/scss is done. Variable generation explained above can help here for example to generate color palettes.
+* [ ] **\$!css.style** to use at the top and generates the \<style> elements with the css content.
+
+An example css definition
 ```
 $!css.style [
-  $!css.color-palette base='red' type=single-color []
+  $!SxmlCore.colors base='red' type=single-color []
   $!css.b s='.infobox >' [
     $!css.b s=.message [
-      border: 1px solid $step4;
+      border: 1px solid $sxml:color-four;
       $!css.b s='> .title' [
-        color: $step8;
+        color: $sxml:color-eight;
       ]
     ]
     $!css.b s=.user [
@@ -184,8 +206,6 @@ $!css.style [
   ]
 ]
 ```
-Normally **\$step8** will produce **\<step8 />** but **\$!css.style** can find them in its content and use them as variables generated by $!css.color-palette and substitute them with their values like `#880000`.
-
 The code above could produce (This will be more like a one liner, but is pretty printed here)
 
 ```
@@ -209,10 +229,10 @@ The code above could produce (This will be more like a one liner, but is pretty 
 ```
 
 ## And ...
-  * Documentation.
-  * Module and program documentation
-  * Documentation is started as a docbook 5 document. There are references to local iconfiles and fonts for which I don't know yet if they may be included (license issues).
-  * Tutorials.
+  * [ ] Documentation.
+  * [ ] Module and program documentation
+  * [ ] Documentation is started as a docbook 5 document. There are references to local iconfiles and fonts for which I don't know yet if they may be included (license issues).
+  * [ ] Tutorials.
 
 <!-- References -->
 [colors1]: http://paletton.com
