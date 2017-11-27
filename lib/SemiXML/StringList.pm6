@@ -1,7 +1,7 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
+unit package SemiXML:auth<github:MARTIMM>;
 
 #-------------------------------------------------------------------------------
 # StringList is used to have attributes with a split brain like IntStr and the

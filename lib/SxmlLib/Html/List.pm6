@@ -4,7 +4,7 @@ use v6;
 # Package cannot be placed in SemiXML/Lib and named File.pm6. Evaluation seems
 # to fail not finding the methods when doing so (perl6 2015-04).
 #
-unit package SxmlLib:auth<https://github.com/MARTIMM>;
+unit package SxmlLib:auth<github:MARTIMM>;
 
 use XML;
 #use SemiXML::Sxml;

@@ -3,7 +3,7 @@ use v6;
 # Check sigil, pandoc, perl5 EBook::EPUB,
 
 #-------------------------------------------------------------------------------
-unit package SxmlLib:auth<https://github.com/MARTIMM>;
+unit package SxmlLib:auth<github:MARTIMM>;
 
 use XML;
 #use SemiXML::Sxml;
