@@ -58,13 +58,15 @@ class Actions {
 
     my $parent = $match<document>.made;
 
+    self!drop-parent-container($parent);
+#`{{
     # Cleanup residue tags left from processing methods. The childnodes in
-    # '__PARENT_CONTAINER__' tags must be moved to the parent of it. There
+    # 'sxml:parent_container' tags must be moved to the parent of it. There
     # is one exception, that is when the tag is at the top. Then there may
     # only be one tag. If there are more, an error tag is generated.
     #
     my $containers = $parent.elements(
-      :TAG<__PARENT_CONTAINER__>,
+      :TAG<sxml:parent_container>,
       :RECURSE, :NEST,
     );
 
@@ -82,9 +84,10 @@ class Actions {
       # remove the now empty element
       $node.remove;
     }
+}}
 
     # process top level method container
-    if $parent.name eq '__PARENT_CONTAINER__' {
+    if $parent.name eq 'sxml:parent_container' {
       if +$parent.nodes == 0 {
         # No nodes generated
         $parent = XML::Element.new;
@@ -125,6 +128,10 @@ class Actions {
             for $node.nodes.reverse -> $child {
               $node.removeChild($child);
             }
+          }
+
+          elsif $node.name ~~ m/^ 'sxml:' / {
+            # no processing for these kinds of nodes
           }
 
           else {
@@ -401,12 +408,12 @@ class Actions {
 
           # call user method and expect result in $x
           $x = $module."$meth"(
-            XML::Element.new(:name('__PARENT_CONTAINER__')),
+            XML::Element.new(:name('sxml:parent_container')),
             $attrs,
             :content-body(
               self!build-content-body(
                 $match,
-                XML::Element.new(:name('__PARENT_CONTAINER__'))
+                XML::Element.new(:name('sxml:parent_container'))
               )
             ),
             :$!tag-list
@@ -463,7 +470,10 @@ class Actions {
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $*| >);
 
-          $parent.append($_<doc-ast>);
+#TODO not sure if this is the only place to remove sxml:parent_container
+          my $d = $_<doc-ast>;
+          #self!drop-parent-container($d);
+          $parent.append($d);
 
 #TODO see above
           # Test if spaces are needed after the document
@@ -474,6 +484,32 @@ class Actions {
     }
 
     $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  # Cleanup residue tags left from processing methods. The childnodes in
+  # 'sxml:parent_container' tags must be moved to the parent of it. There
+  # is one exception, that is when the tag is at the top. Then there may
+  # only be one tag. If there are more, an error tag is generated.
+  method !drop-parent-container ( XML::Element $parent ) {
+
+    my $containers = $parent.elements(
+      :TAG<sxml:parent_container>,
+      :RECURSE, :NEST,
+    );
+
+    for @$containers -> $node {
+      my $children = $node.nodes;
+
+      # eat from the end of the list and add just after the container element.
+      # somehow they get lost from the array when done otherwise.
+      for @$children.reverse {
+        $node.parent.after( $node, $^a);
+      }
+
+      # remove the now empty element
+      $node.remove;
+    }
   }
 
   #-----------------------------------------------------------------------------

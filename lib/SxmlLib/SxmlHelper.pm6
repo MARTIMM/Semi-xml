@@ -189,4 +189,30 @@ class SxmlHelper {
       }
     }
   }
+
+  #-----------------------------------------------------------------------------
+  # Cleanup residue tags left from processing methods. The childnodes in
+  # 'sxml:parent_container' tags must be moved to the parent of it. There
+  # is one exception, that is when the tag is at the top. Then there may
+  # only be one tag. If there are more, an error tag is generated.
+  sub drop-parent-container ( XML::Element $parent ) is export {
+
+    my $containers = $parent.elements(
+      :TAG<sxml:parent_container>,
+      :RECURSE, :NEST,
+    );
+
+    for @$containers -> $node {
+      my $children = $node.nodes;
+
+      # eat from the end of the list and add just after the container element.
+      # somehow they get lost from the array when done otherwise.
+      for @$children.reverse {
+        $node.parent.after( $node, $^a);
+      }
+
+      # remove the now empty element
+      $node.remove;
+    }
+  }
 }
