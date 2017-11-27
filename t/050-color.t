@@ -6,7 +6,7 @@ use SemiXML::Sxml;
 use XML::XPath;
 
 #------------------------------------------------------------------------------
-subtest 'generated averaged color variables', {
+subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
     $x [
@@ -33,7 +33,7 @@ subtest 'generated averaged color variables', {
   $text = q:to/EOTXT/;
     $x [
       $!Colors.palette
-        base-rgb='#1200ff' type=blended mode=averaged opacity=0.8
+        base-rgb='#1200ff' type=blended mode=hard opacity=0.8
         ncolors=10
       $set0 [$sxml:base-color]
       $set1 [$sxml:color1 $sxml:color2 $sxml:color3 $sxml:color4 $sxml:color5]
@@ -68,21 +68,7 @@ subtest 'generated blended color variables', {
     ]
     EOTXT
 
-  my SemiXML::Sxml $x .= new;
-  $x.parse(
-    config => {
-      ML => {:Colors<SxmlLib::Colors>,},
-    },
-    content => $text
-  );
-
-
-
-  # See the result
-  my Str $xml-text = ~$x;
-  diag $xml-text;
-
-  my XML::XPath $p .= new(:xml($xml-text));
+  my XML::XPath $p = get-xpath($text);
 
   my Str $style-text = $p.find( '//style/text()', :to-list)[0].text;
   like $style-text, /:i 'color:#1200ff;' /, 'Found base color';
