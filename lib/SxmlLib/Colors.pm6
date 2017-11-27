@@ -141,14 +141,11 @@ note "X: $attrs.perl()";
 
   #-----------------------------------------------------------------------------
   method !hard-light-blend ( Color $cb, Color $cs --> Color ) {
-    #my Array $rgbad-b = [$cb.rgbad];
-    #my Array $rgbad-s = [$cs.rgbad];
-
-    my Color $cr = ([+] $cs.rgbd)/3.0 <= 0.5
-        ?? self!multiply-blend( $cb, Color.new(:rgbd((2,2,2) Z* $cs.rgbd)))
+    ([+] $cs.rgbad)/4.0 <= 0.5
+        ?? self!multiply-blend( $cb, Color.new(:rgbad([ (2,2,2,2) Z* $cs.rgbad ])))
         !! self!screen-blend(
              $cb,
-             Color.new(:rgbd( ((2,2,2) Z* $cs.rgbd ) Z- (1, 1, 1)))
+             Color.new(:rgbd([ ((2,2,2,2) Z* $cs.rgbd ) Z- (1,1,1,1) ]))
            )
     ;
   }
@@ -157,22 +154,33 @@ note "X: $attrs.perl()";
   # blend
   method !blend ( Color $cb, Color $cs, Str $mode --> Color ) {
 
+    my Color $c;
+#note "Mode: $mode. $cb.perl(), $cs.perl()";
+
     given $mode {
       when 'multiply' {
-        self!multiply-blend( $cb, $cs)
+        $c = self!multiply-blend( $cb, $cs);
       }
 
       when 'screen' {
-        self!screen-blend( $cb, $cs)
+        $c = self!screen-blend( $cb, $cs);
       }
 
       when 'overlay' {
-        self!hard-light-blend( $cb, $cs)
+        my Color $hc = self!hard-light-blend( $cb, $cs);
+        $c = Color.new(:rgbad([ (1,1,1,1) Z- $hc.rgbad ]));
+      }
+
+      when 'hard' {
+        $c = self!hard-light-blend( $cb, $cs);
       }
 
       default {
+        $c .= new(:rgba([ 0, 0, 0, 0]));
       }
     }
+
+    $c
   }
 
   #-----------------------------------------------------------------------------
@@ -182,14 +190,10 @@ note "X: $attrs.perl()";
     my Array $base-rgb = [$base.rgba];
 
     # calculate random backdrop color
-    my Int $red = 256.rand.Int;
-    my Int $green = 256.rand.Int;
-    my Int $blue = 256.rand.Int;
+    my Color $rc .= new(:rgbad([rand xx 4]));
 
     # backdrop color has opacity of 0.1
-    0.9 * $base + 0.1 * self!blend(
-      Color.new( $red, $green, $blue), $base, $mode
-    );
+    0.9 * $base + 0.1 * self!blend( $rc, $base, $mode);
   }
 
   #-----------------------------------------------------------------------------
