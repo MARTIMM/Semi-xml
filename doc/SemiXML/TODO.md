@@ -168,7 +168,10 @@ Scope is local except when global attribute is set. The local scope is however a
 * [x] User methods can also declare variables. The only thing it needs to do is generating an element such as from the example above **\<sxml:variable name="aCommonText">\<strong>Lorem ipsum dolor simet ...\</strong>\</sxml:variable>**.
 
 * [x] Substitution of variables can be done by writing the brackets with empty content like so **pre\$sxml:abc[]_map**. If **\$sxml:abc** was set to `pqr` this would become `prepqr_map`.
+
 * [ ] A variable declaration which behaves like a function. E.g. a declaration like **\$!SxmlCore.var name=hello _name='World' [Hello \$name]** has a variable in it. This is used like **\$sxml:hello name=Piet** which translates to `Hello Piet` and **$sxml:hello** translates to `Hello World` where the default is used. In this example the declaration attribute `_name` is used to define a default value for **\$name**.
+
+* [ ] Substitution in attribute values.
 
 ### Calculation of color palettes
 * [ ] Generating a set of colors is useful in defining several of the properties in css. Instead of coding the colors individually, the colors can be calculated using some algorithm and stored in variable declarations. When one is not satisfied, the calculations can be repeated with different values without changing the used variables.
