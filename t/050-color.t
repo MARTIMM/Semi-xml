@@ -15,8 +15,8 @@ subtest 'generated averaged color variables', {
         $style [
           strong {
             color: $sxml:base-color;
-            border-color: $sxml:color-two;
-            background-color: $sxml:color-five;
+            border-color: $sxml:color2;
+            background-color: $sxml:color5;
           }
         ]
       ]
@@ -58,8 +58,8 @@ subtest 'generated blended color variables', {
         $style [
           strong {
             color: $sxml:base-color;
-            border-color: $sxml:color-two;
-            background-color: $sxml:color-five;
+            border-color: $sxml:color2;
+            background-color: $sxml:color5;
           }
         ]
       ]
