@@ -70,17 +70,24 @@ note "X: $attrs.perl()";
 #    my Color $base-color .= new(~$attrs<base-rgb>);
 
     my Hash $color-set;
-    given ~$attrs<type> {
+    given ($attrs<type>//'averaged').Str {
       when 'averaged' {
-        $color-set = self!averaged-colors($base-color);
+        $color-set = self!averaged-colors(
+          $base-color, ($attrs<ncolors>//5).Str.UInt
+        );
       }
 
       when 'blended' {
-        $color-set = self!blended-colors( $base-color, ~$attrs<mode>);
+        $color-set = self!blended-colors(
+          $base-color, ($attrs<mode>//'multiply').Str,
+          ($attrs<opacity>//0.9).Str.Num, ($attrs<ncolors>//5).Str.UInt
+        );
       }
 
       default {
-        $color-set = self!averaged-colors($base-color);
+        $color-set = self!averaged-colors(
+          $base-color, ($<ncolors>//5).Str.UInt
+        );
       }
     }
 
@@ -111,15 +118,15 @@ note "X: $attrs.perl()";
 
   #-----------------------------------------------------------------------------
   # averaged colors
-  method !averaged-colors ( Color $base --> Hash ) {
+  method !averaged-colors ( Color $base, UInt $ncolors = 5 --> Hash ) {
 
+    my Array $ca = [ self!random-color($base) xx $ncolors];
+
+    my Int $count = 1;
     my Hash $d = {};
-
-    $d<color-one> = self!random-color($base);
-    $d<color-two> = self!random-color($base);
-    $d<color-three> = self!random-color($base);
-    $d<color-four> = self!random-color($base);
-    $d<color-five> = self!random-color($base);
+    for @$ca.sort({ ([+] $^a.rgbad) <=> ([+] $^b.rgbad) }) -> $c {
+      $d{"color" ~ $count++} = $c;
+    }
 
     $d
   }
@@ -137,6 +144,16 @@ note "X: $attrs.perl()";
         ]
       )
     )
+  }
+
+  #-----------------------------------------------------------------------------
+  method !darken-blend ( Color $cb, Color $cs --> Color ) {
+    Color.new(:rgbad([ ($cb.rgbad Zmin $cs.rgbad) ]))
+  }
+
+  #-----------------------------------------------------------------------------
+  method !lighten-blend ( Color $cb, Color $cs --> Color ) {
+    Color.new(:rgbad([ ($cb.rgbad Zmax $cs.rgbad) ]))
   }
 
   #-----------------------------------------------------------------------------
@@ -171,6 +188,18 @@ note "X: $attrs.perl()";
         $c = Color.new(:rgbad([ (1,1,1,1) Z- $hc.rgbad ]));
       }
 
+      when 'darken' {
+        $c = self!darken-blend( $cb, $cs);
+      }
+
+      when 'lighten' {
+        $c = self!lighten-blend( $cb, $cs);
+      }
+
+      when 'hard' {
+        $c = self!hard-light-blend( $cb, $cs);
+      }
+
       when 'hard' {
         $c = self!hard-light-blend( $cb, $cs);
       }
@@ -185,29 +214,33 @@ note "X: $attrs.perl()";
 
   #-----------------------------------------------------------------------------
   # blended color
-  method !blended-color ( Color $base, Str $mode --> Color ) {
+  method !blended-color ( Color $base, Str $mode, Num $opacity --> Color ) {
 
     my Array $base-rgb = [$base.rgba];
 
     # calculate random backdrop color
-    my Color $rc .= new(:rgbad([rand xx 4]));
+    my Color $rc .= new(:rgbad([|(rand xx 3), 1]));
 
-    # backdrop color has opacity of 0.1
-    0.9 * $base + 0.1 * self!blend( $rc, $base, $mode);
+    # backdrop color has inversion of opacity
+    $opacity * $base + (1.0 - $opacity) * self!blend( $rc, $base, $mode);
   }
 
   #-----------------------------------------------------------------------------
   # blended colors
-  method !blended-colors ( Color $base, Str $mode --> Hash ) {
-note "C&B: $base.to-string('hex'), $mode";
+  method !blended-colors (
+    Color $base, Str $mode, Num $opacity where 0.0 <= $_ <= 1.0,
+    UInt $ncolors = 5
+    --> Hash
+  ) {
+note "C&B: $base.to-string('hex'), $mode, $opacity";
 
+    my Array $ca = [ self!blended-color( $base, $mode, $opacity) xx $ncolors];
+
+    my Int $count = 1;
     my Hash $d = {};
-
-    $d<color-one> = self!blended-color( $base, $mode);
-    $d<color-two> = self!blended-color( $base, $mode);
-    $d<color-three> = self!blended-color( $base, $mode);
-    $d<color-four> = self!blended-color( $base, $mode);
-    $d<color-five> = self!blended-color( $base, $mode);
+    for @$ca.sort({ ([+] $^a.rgbad) <=> ([+] $^b.rgbad) }) -> $c {
+      $d{"color" ~ $count++} = $c;
+    }
 
     $d
   }
