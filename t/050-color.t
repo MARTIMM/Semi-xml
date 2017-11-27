@@ -10,7 +10,7 @@ subtest 'generated averaged color variables', {
 
   my $text = q:to/EOTXT/;
     $html [
-      $!Colors.palette base-rgb='#1200ff' type=averaged
+      $!Colors.palette base-rgb='#1200ff' type=blended mode=averaged
       $head [
         $style [
           strong {

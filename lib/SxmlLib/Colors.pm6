@@ -71,12 +71,6 @@ note "X: $attrs.perl()";
 
     my Hash $color-set;
     given ($attrs<type>//'averaged').Str {
-      when 'averaged' {
-        $color-set = self!averaged-colors(
-          $base-color, ($attrs<ncolors>//5).Str.UInt
-        );
-      }
-
       when 'blended' {
         $color-set = self!blended-colors(
           $base-color, ($attrs<mode>//'multiply').Str,
@@ -102,6 +96,7 @@ note "X: $attrs.perl()";
     $parent;
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   # private color handling methods
   # random colors
@@ -130,6 +125,7 @@ note "X: $attrs.perl()";
 
     $d
   }
+}}
 
   #-----------------------------------------------------------------------------
   method !multiply-blend ( Color $cb, Color $cs --> Color ) {
@@ -175,6 +171,10 @@ note "X: $attrs.perl()";
 #note "Mode: $mode. $cb.perl(), $cs.perl()";
 
     given $mode {
+      when 'averaged' {
+        $c = Color.new(:rgbad([ ($cb.rgbad Z+ $cs.rgbad) Z/ (2,2,2,2) ]));
+      }
+
       when 'multiply' {
         $c = self!multiply-blend( $cb, $cs);
       }
@@ -221,7 +221,7 @@ note "X: $attrs.perl()";
     # calculate random backdrop color
     my Color $rc .= new(:rgbad([|(rand xx 3), 1]));
 
-    # backdrop color has inversion of opacity
+    # backdrop color is the inverted opacity
     $opacity * $base + (1.0 - $opacity) * self!blend( $rc, $base, $mode);
   }
 
