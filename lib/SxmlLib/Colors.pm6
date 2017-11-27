@@ -70,17 +70,11 @@ note "X: $attrs.perl()";
 #    my Color $base-color .= new(~$attrs<base-rgb>);
 
     my Hash $color-set;
-    given ($attrs<type>//'averaged').Str {
+    given ($attrs<type>//'blended').Str {
       when 'blended' {
         $color-set = self!blended-colors(
           $base-color, ($attrs<mode>//'multiply').Str,
           ($attrs<opacity>//0.9).Str.Num, ($attrs<ncolors>//5).Str.UInt
-        );
-      }
-
-      default {
-        $color-set = self!averaged-colors(
-          $base-color, ($<ncolors>//5).Str.UInt
         );
       }
     }
@@ -153,6 +147,27 @@ note "X: $attrs.perl()";
   }
 
   #-----------------------------------------------------------------------------
+  method !dodge-blend ( Color $cb, Color $cs --> Color ) {
+
+    my Color $c;
+    if [+] $cb.rgbad == 0 {
+      $c = $cb;
+    }
+
+    elsif [+] $cs.rgbad == 1 {
+      $c = $cs;
+    }
+
+    else {
+      $c .= new(
+        :rgbad([ (1,1,1,1) Zmin ($cb.rgbad Z/ ((1,1,1,1) Z- $cs.rgbad)) ])
+      )
+    }
+
+    $c
+  }
+
+  #-----------------------------------------------------------------------------
   method !hard-light-blend ( Color $cb, Color $cs --> Color ) {
     ([+] $cs.rgbad)/4.0 <= 0.5
         ?? self!multiply-blend( $cb, Color.new(:rgbad([ (2,2,2,2) Z* $cs.rgbad ])))
@@ -194,6 +209,10 @@ note "X: $attrs.perl()";
 
       when 'lighten' {
         $c = self!lighten-blend( $cb, $cs);
+      }
+
+      when 'dodge' {
+        $c = self!dodge-blend( $cb, $cs);
       }
 
       when 'hard' {
