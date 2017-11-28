@@ -79,11 +79,12 @@ note "X: $attrs.perl()";
     }
 
     my $bce = append-element( $parent, 'sxml:variable', %(:name<base-color>));
-    append-element( $bce, :text($base-color.to-string('hex')));
+    append-element( $bce, :text($base-color.to-string('hex8')));
 
     for $color-set.kv -> $name, $color {
       my $e = append-element( $parent, 'sxml:variable', %(:$name));
-      append-element( $e, :text($color.to-string('hex')));
+      append-element( $e, :text($color.to-string('hex8')));
+note "Color: $name => $color.to-string('hex8'), $e";
     }
 
     $parent;
@@ -218,9 +219,9 @@ note "X: $attrs.perl()";
         $c = self!hard-light-blend( $cb, $cs);
       }
 
-      when 'hard' {
-        $c = self!hard-light-blend( $cb, $cs);
-      }
+#      when 'hard' {
+#        $c = self!hard-light-blend( $cb, $cs);
+#      }
 
       default {
         $c .= new(:rgba([ 0, 0, 0, 0]));
@@ -260,6 +261,7 @@ note "C&B: $base.to-string('hex'), $mode, $opacity";
       $d{"color" ~ $count++} = $c;
     }
 
+#note "D: ", $d.perl;
     $d
   }
 }

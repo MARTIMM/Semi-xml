@@ -23,7 +23,7 @@ subtest 'generated blended color variables', {
   like $c, /:i '#1200ff' /, 'Found base color';
 
   $c = $p.find( '/x/set1/text()', :to-list)[0].text;
-  ok $c ~~ / [ '#' <xdigit>**6 ]**5 /, 'Found 5 other colors in set 1';
+  ok $c ~~ / [ '#' <xdigit>**8 ]**5 /, 'Found 5 other colors in set 1';
 
   $c = $p.find( '/x/set2/text()', :to-list)[0].text;
   ok !$c, 'There is no 6th color';
@@ -41,9 +41,9 @@ subtest 'generated blended color variables', {
     ]
     EOTXT
 
-  my XML::XPath $p = get-xpath($text);
+  $p = get-xpath($text);
   $c = $p.find( '/x/set2/text()', :to-list)[0].text;
-  ok $c ~~ / [ '#' <xdigit>**6 ]**2 /, 'Found 6th and 9th color2 in set 2';
+  ok $c ~~ / [ '#' <xdigit>**8 ]**2 /, 'Found 6th and 9th color2 in set 2';
 }
 
 #------------------------------------------------------------------------------
@@ -71,9 +71,9 @@ subtest 'generated blended color variables', {
   my XML::XPath $p = get-xpath($text);
 
   my Str $style-text = $p.find( '//style/text()', :to-list)[0].text;
-  like $style-text, /:i 'color:#1200ff;' /, 'Found base color';
-  like $style-text, /:i 'border-color:#' <xdigit>**6 ';' /, 'Found border color';
-  like $style-text, /:i 'background-color:#' <xdigit>**6 ';' /,
+  like $style-text, /:i 'color:#1200ffff;' /, 'Found base color';
+  like $style-text, /:i 'border-color:#' <xdigit>**8 ';' /, 'Found border color';
+  like $style-text, /:i 'background-color:#' <xdigit>**8 ';' /,
        'Found background color';
 }
 
