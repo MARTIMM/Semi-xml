@@ -87,6 +87,7 @@ class Actions {
 
       # process body text to escape special chars
       for $x.nodes -> $node {
+#TODO use no-escaping from table F
         if $node ~~ any( SemiXML::Text, XML::Text) {
           my Str $s = self!process-esc(~$node);
           $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
@@ -129,20 +130,20 @@ class Actions {
 
     &$after-math($parent);
 
+    # search for variables and substitute them
     subst-variables($parent);
 
     # create completed document
     $parent.setNamespace( 'github.MARTIMM', 'sxml');
     $!xml-document .= new($parent);
 
-    # search for variables and substitute them
     my $x = XML::XPath.new(:document($!xml-document));
     $x.set-namespace: 'sxml' => 'github.MARTIMM';
 
     # show some leftover sxml namespace elements
     for $x.find( '//*', :to-list) -> $v {
       if $v.name() ~~ /^ 'sxml:'/ {
-        note "Leftovers in sxml namespace: '$v.name()', parent is '$v.parent.name()'";
+#        note "Leftovers in sxml namespace: '$v.name()', parent is '$v.parent.name()'";
         $v.remove;
       }
     }
