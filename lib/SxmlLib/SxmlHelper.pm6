@@ -5,6 +5,7 @@ unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::Text;
 use XML;
+use XML::XPath;
 
 #------------------------------------------------------------------------------
 class SxmlHelper {
@@ -214,5 +215,85 @@ class SxmlHelper {
       # remove the now empty element
       $node.remove;
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  sub subst-variables ( XML::Element $parent ) is export {
+
+    my XML::Document $xml-document .= new($parent);
+    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+    # search for variables and substitute them
+    my $x = XML::XPath.new(:document($xml-document));
+    $x.set-namespace: 'sxml' => 'github.MARTIMM';
+    for $x.find( '//sxml:variable', :to-list) -> $vdecl {
+
+      my $vd = $vdecl.clone;
+
+      my Str $var-name = ~$vd.attribs<name>;
+      my @var-value = $vd.nodes;
+      my Bool $var-global = $vd.attribs<global>:exists;
+
+      my @var-use;
+      if $var-global {
+        @var-use = $x.find( '//sxml:' ~ $var-name, :to-list);
+      }
+
+      else {
+        @var-use = $x.find(
+          './/sxml:' ~ $var-name, :start($vd.parent), :to-list
+        );
+      }
+
+      for @var-use -> $vuse {
+        for $vd.nodes -> $vdn {
+          my XML::Node $x = clone-node($vdn);
+          $vuse.parent.before( $vuse, $x);
+        }
+
+        $vuse.remove;
+      }
+
+      $vd.remove;
+    }
+
+    # remove the namespace
+    $parent.attribs{"xmlns:sxml"}:delete;
+  }
+
+  #---------------------------------------------------------------------------
+  sub clone-node ( XML::Node $node --> XML::Node ) is export {
+
+    my XML::Node $clone;
+
+    if $node ~~ XML::Element {
+
+#note "Node is element, name: $node.name()";
+      $clone = XML::Element.new( :name($node.name), :attribs($node.attribs));
+      $clone.idattr = $node.idattr;
+
+      $clone.nodes = [];
+      for $node.nodes -> $n {
+        $clone.nodes.push: clone-node($n);
+      }
+    }
+
+    elsif $node ~~ XML::Text {
+#note "Node is text";
+      $clone = XML::Text.new(:text($node.text));
+    }
+
+    elsif $node ~~ SemiXML::Text {
+#note "Node is text";
+      $clone = SemiXML::Text.new(:text($node.txt));
+    }
+
+    else {
+#note "Node is ", $node.WHAT;
+      $clone = $node.cloneNode;
+    }
+
+#note "Clone: ", $clone.perl;
+    $clone
   }
 }

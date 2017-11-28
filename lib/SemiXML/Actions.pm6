@@ -7,6 +7,7 @@ use XML;
 use XML::XPath;
 use SemiXML::Text;
 use SemiXML::StringList;
+use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Actions {
@@ -58,33 +59,7 @@ class Actions {
 
     my $parent = $match<document>.made;
 
-    self!drop-parent-container($parent);
-#`{{
-    # Cleanup residue tags left from processing methods. The childnodes in
-    # 'sxml:parent_container' tags must be moved to the parent of it. There
-    # is one exception, that is when the tag is at the top. Then there may
-    # only be one tag. If there are more, an error tag is generated.
-    #
-    my $containers = $parent.elements(
-      :TAG<sxml:parent_container>,
-      :RECURSE, :NEST,
-    );
-
-    for @$containers -> $node {
-
-      my $children = $node.nodes;
-
-      # eat from the end of the list and add just after the container element.
-      # somehow they get lost from the array when done otherwise.
-      #
-      for @$children.reverse {
-        $node.parent.after( $node, $^a);
-      }
-
-      # remove the now empty element
-      $node.remove;
-    }
-}}
+    drop-parent-container($parent);
 
     # process top level method container
     if $parent.name eq 'sxml:parent_container' {
@@ -154,44 +129,15 @@ class Actions {
 
     &$after-math($parent);
 
+    subst-variables($parent);
 
     # create completed document
-    $!xml-document .= new($parent);
     $parent.setNamespace( 'github.MARTIMM', 'sxml');
+    $!xml-document .= new($parent);
 
     # search for variables and substitute them
     my $x = XML::XPath.new(:document($!xml-document));
     $x.set-namespace: 'sxml' => 'github.MARTIMM';
-    for $x.find( '//sxml:variable', :to-list) -> $vdecl {
-
-      my $vd = $vdecl.clone;
-
-      my Str $var-name = ~$vd.attribs<name>;
-      my @var-value = $vd.nodes;
-      my Bool $var-global = $vd.attribs<global>:exists;
-
-      my @var-use;
-      if $var-global {
-        @var-use = $x.find( '//sxml:' ~ $var-name, :to-list);
-      }
-
-      else {
-        @var-use = $x.find(
-          './/sxml:' ~ $var-name, :start($vd.parent), :to-list
-        );
-      }
-
-      for @var-use -> $vuse {
-        for $vd.nodes -> $vdn {
-          my XML::Node $x = self.clone-node($vdn);
-          $vuse.parent.before( $vuse, $x);
-        }
-
-        $vuse.remove;
-      }
-
-      $vd.remove;
-    }
 
     # show some leftover sxml namespace elements
     for $x.find( '//*', :to-list) -> $v {
@@ -206,42 +152,6 @@ class Actions {
 
     # return the completed document
     $!xml-document
-  }
-
-  #---------------------------------------------------------------------------
-  method clone-node ( XML::Node $node --> XML::Node ) {
-
-    my $clone;
-
-    if $node ~~ XML::Element {
-
-#note "Node is element, name: $node.name()";
-      $clone = XML::Element.new( :name($node.name), :attribs($node.attribs));
-      $clone.idattr = $node.idattr;
-
-      $clone.nodes = [];
-      for $node.nodes -> $n {
-        $clone.nodes.push: self.clone-node($n);
-      }
-    }
-
-    elsif $node ~~ XML::Text {
-#note "Node is text";
-      $clone = XML::Text.new(:text($node.text));
-    }
-
-    elsif $node ~~ SemiXML::Text {
-#note "Node is text";
-      $clone = SemiXML::Text.new(:text($node.txt));
-    }
-
-    else {
-#note "Node is ", $node.WHAT;
-      $clone = $node.cloneNode;
-    }
-
-#note "Clone: ", $clone.perl;
-    $clone
   }
 
   #---------------------------------------------------------------------------
@@ -484,32 +394,6 @@ class Actions {
     }
 
     $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  # Cleanup residue tags left from processing methods. The childnodes in
-  # 'sxml:parent_container' tags must be moved to the parent of it. There
-  # is one exception, that is when the tag is at the top. Then there may
-  # only be one tag. If there are more, an error tag is generated.
-  method !drop-parent-container ( XML::Element $parent ) {
-
-    my $containers = $parent.elements(
-      :TAG<sxml:parent_container>,
-      :RECURSE, :NEST,
-    );
-
-    for @$containers -> $node {
-      my $children = $node.nodes;
-
-      # eat from the end of the list and add just after the container element.
-      # somehow they get lost from the array when done otherwise.
-      for @$children.reverse {
-        $node.parent.after( $node, $^a);
-      }
-
-      # remove the now empty element
-      $node.remove;
-    }
   }
 
   #-----------------------------------------------------------------------------
