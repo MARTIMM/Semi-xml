@@ -4,6 +4,7 @@ use v6;
 unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
+use SemiXML::Text;
 use SxmlLib::SxmlHelper;
 use XML;
 
@@ -11,34 +12,83 @@ use XML;
 # Core module with common used methods
 class Css {
 
-  has Array $!css-selectors;
-  has Int $!selector-idx;
-
   #-----------------------------------------------------------------------------
   method style (
     XML::Element $parent, Hash $attrs, XML::Node :$content-body
     --> XML::Node
   ) {
-    # initialize
-    $!css-selectors = [];
-    $!selector-idx = -1;
 
-    my XML::Element $e = append-element( $parent, 'style', :text("\n"));
-    if ($attrs<compress>//0).Int {
-      my Str $content-text = [~] @($content-body.nodes);
-      $content-text ~~ s:g/ [ \s\s+ || \n ] / /;
-note "\nXML:\n$content-text\n";
-      $e.append(from-xml($content-text).root);
+    # put everything into a style variable to prevent any escape substitutions
+    my XML::Element $var = append-element(
+      $parent, 'sxml:variable', {name => 'style'}
+    );
+    my XML::Element $style = append-element( $var, 'style', :text("\n"));
+    append-element( $parent, 'sxml:style');
+
+    drop-parent-container($content-body);
+    subst-variables($content-body);
+
+    self!css-blocks( $style, $content-body, '', ? ($attrs<compress>//0).Int);
+
+note "Result css\n", '-' x 80, "\n$style\n", '-' x 80;
+
+    $parent
+  }
+
+  #-----------------------------------------------------------------------------
+  method !css-blocks (
+    XML::Element $style, XML::Element $css-block, Str $parent-select,
+    Bool $compress
+  ) {
+
+    my Bool $is-block = False;
+    $is-block = ($css-block ~~ XML::Element) and $css-block.attribs<s>:exists;
+    my Str $css-body = '';
+
+    # build current selector
+    my Str $select = '';
+
+    if $is-block {
+      $select = [~] $parent-select,
+                    (?$parent-select ?? ' ' !! ''),
+                    $css-block.attribs<s>;
+    }
+note "Current selector: $select";
+
+    # do the textual parts first, then process rest
+    for $css-block.nodes -> $node {
+      if $node ~~ any(XML::Text, SemiXML::Text) {
+        $css-body ~= $node.Str;
+      }
     }
 
-    else {
-      $e.append($content-body);
+    # if the css body is not a string of only spaces, add it to the style
+    if $is-block and $css-body !~~ m/^ \s* $/ {
+#note "Body: $css-body";
+
+      $css-body ~~ s:g/ \s\s+ / /;
+      $css-body ~~ s:g/ \n / /;
+      if $compress {
+        $css-body = "$select \{$css-body}\n";
+      }
+
+      else {
+        $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
+        $css-body ~~ s:g/ \s+ $//;
+        $css-body = "$select \{\n  $css-body\n}\n\n";
+      }
+
+      $style.append(SemiXML::Text.new(:text($css-body)));
     }
 
-    drop-parent-container($e);
-note "\nStyle:\n$e";
 
-    $e
+
+    # process the rest of the blocks
+    for $css-block.nodes -> $node {
+      if $node ~~ XML::Element and $node.name eq 'sxml:css-block' {
+        self!css-blocks( $style, $node, $select, $compress);
+      }
+    }
   }
 
   #-----------------------------------------------------------------------------
@@ -407,9 +457,6 @@ note "\nStyle:\n$e";
     XML::Element $parent, Hash $attrs, XML::Node :$content-body
     --> XML::Node
   ) {
-#  has Array $!css-selectors;
-#  has Int $!selector-idx;
-
 
     my Str $selector = ~($attrs<s>//'*');
     my XML::Element $css-block = append-element(

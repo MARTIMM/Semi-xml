@@ -10,15 +10,17 @@ subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
     $html [
-      $!colors.palette base-rgb='#1200ff' type=blended mode=averaged
       $head [
         $!css.style compress=0 [
           $!css.reset type=minimalistic
+          $!colors.palette base-rgb='#1200ff' type=blended mode=averaged
 
 
           $!css.b s='.infobox >' [
             $!css.b s=.message [
               border: 1px solid $*|sxml:color1;
+              padding: 10px;
+
               $!css.b s='> .title' [
                 color: $sxml:color5;
               ]
