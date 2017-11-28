@@ -77,11 +77,11 @@ class SxmlCore {
     --> XML::Node
   ) {
 
+    # cleanup parent-containers
+    drop-parent-container($content-body);
+
     # Textify all body content
     my Str $comment-content = [~] $content-body.nodes;
-
-    # Remove textitified container tags from the text
-    $comment-content ~~ s:g/ '<' '/'? '__PARENT_CONTAINER__>' //;
 
     $parent.append(XML::Comment.new(:data($comment-content)));
     $parent;
@@ -94,11 +94,11 @@ class SxmlCore {
     --> XML::Node
   ) {
 
+    # cleanup parent-containers
+    drop-parent-container($content-body);
+
     # Textify all body content
     my Str $cdata-content = [~] $content-body.nodes;
-
-    # Remove container tags from the text
-    $cdata-content ~~ s:g/ '<' '/'? '__PARENT_CONTAINER__>' //;
 
     $parent.append(XML::CDATA.new(:data($cdata-content)));
     $parent;
