@@ -30,7 +30,7 @@ class Colors {
 
     if ? ~$attrs<base-rgb> {
       $xc = ($attrs<base-rgb>:delete).List;
-note "RGB: $xc.perl()";
+#note "RGB: $xc.perl()";
       if $xc[0] ~~ /'#' [<xdigit>**3 || <xdigit>**6]/ {
         $base-color .= new($xc[0]);
         if ? $xc[1] {
@@ -54,7 +54,7 @@ note "RGB: $xc.perl()";
 
     elsif ? ~$attrs<base-hsl> {
       $xc = ($attrs<base-hsl>:delete).List;
-note "HSL: $xc.perl()";
+#note "HSL: $xc.perl()";
       $base-color .= new(:hsl([|$xc[0..2]]));
       if ? $xc[3] {
         $base-color .= new(:rgba([ |$base-color.rgb, $xc[3]]));
@@ -84,7 +84,7 @@ note "X: $attrs.perl()";
     for $color-set.kv -> $name, $color {
       my $e = append-element( $parent, 'sxml:variable', %(:$name));
       append-element( $e, :text($color.to-string('hex8')));
-note "Color: $name => $color.to-string('hex8'), $e";
+#note "Color: $name => $color.to-string('hex8'), $e";
     }
 
     $parent;
