@@ -228,11 +228,9 @@ class SxmlHelper {
     $x.set-namespace: 'sxml' => 'github.MARTIMM';
     for $x.find( '//sxml:variable', :to-list) -> $vdecl {
 
-      my $vd = $vdecl.clone;
-
-      my Str $var-name = ~$vd.attribs<name>;
-      my @var-value = $vd.nodes;
-      my Bool $var-global = $vd.attribs<global>:exists;
+      my Str $var-name = ~$vdecl.attribs<name>;
+      my @var-value = $vdecl.nodes;
+      my Bool $var-global = $vdecl.attribs<global>:exists;
 
       my @var-use;
       if $var-global {
@@ -241,12 +239,12 @@ class SxmlHelper {
 
       else {
         @var-use = $x.find(
-          './/sxml:' ~ $var-name, :start($vd.parent), :to-list
+          './/sxml:' ~ $var-name, :start($vdecl.parent), :to-list
         );
       }
 
       for @var-use -> $vuse {
-        for $vd.nodes -> $vdn {
+        for $vdecl.nodes -> $vdn {
           my XML::Node $x = clone-node($vdn);
           $vuse.parent.before( $vuse, $x);
         }
@@ -254,7 +252,7 @@ class SxmlHelper {
         $vuse.remove;
       }
 
-      $vd.remove;
+      $vdecl.remove;
     }
 
     # remove the namespace
