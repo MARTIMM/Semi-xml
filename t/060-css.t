@@ -12,7 +12,7 @@ subtest 'generated blended color variables', {
     $html [
       $head [
         $!css.style compress=0 [
-          $!css.reset type=minimalistic
+          $!css.reset type=condensed-universal
           $!colors.palette base-rgb='#1200ff' type=blended mode=averaged
 
 
