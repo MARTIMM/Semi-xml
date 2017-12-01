@@ -218,20 +218,29 @@ class SxmlHelper {
   }
 
   #-----------------------------------------------------------------------------
+  # search for variables and substitute them
   sub subst-variables ( XML::Element $parent ) is export {
 
     my XML::Document $xml-document .= new($parent);
     $parent.setNamespace( 'github.MARTIMM', 'sxml');
 
-    # search for variables and substitute them
+    # set namespace first
     my $x = XML::XPath.new(:document($xml-document));
     $x.set-namespace: 'sxml' => 'github.MARTIMM';
+
+    # look for variable declarations
     for $x.find( '//sxml:variable', :to-list) -> $vdecl {
 
+      # get the name of the variable
       my Str $var-name = ~$vdecl.attribs<name>;
+
+      # and the content of this declaration
       my @var-value = $vdecl.nodes;
+
+      # see if it is a global declaration
       my Bool $var-global = $vdecl.attribs<global>:exists;
 
+      # now look for the variable to substitute
       my @var-use;
       if $var-global {
         @var-use = $x.find( '//sxml:' ~ $var-name, :to-list);
@@ -249,10 +258,13 @@ class SxmlHelper {
           $vuse.parent.before( $vuse, $x);
         }
 
+        # the variable is substituted, remove the element
         $vuse.remove;
       }
 
-      $vdecl.remove;
+      # all variable are substituted, remove declaration too, unless it is
+      # defined global. Other parts may have been untouched.
+      $vdecl.remove unless $var-global;
     }
 
     # remove the namespace
