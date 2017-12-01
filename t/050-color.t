@@ -5,7 +5,7 @@ use Test;
 use SemiXML::Sxml;
 use XML::XPath;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
@@ -46,7 +46,7 @@ subtest 'generated blended color variables', {
   ok $c ~~ / [ '#' <xdigit>**8 ]**2 /, 'Found 6th and 9th color2 in set 2';
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
@@ -78,7 +78,7 @@ subtest 'generated blended color variables', {
 }
 
 #`{{
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
@@ -101,7 +101,7 @@ subtest 'generated blended color variables', {
 }
 }}
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
 
   my SemiXML::Sxml $x .= new;
@@ -119,5 +119,5 @@ sub get-xpath ( Str $content --> XML::XPath ) {
   XML::XPath.new(:xml($xml-text))
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 done-testing;

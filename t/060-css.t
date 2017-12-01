@@ -5,7 +5,7 @@ use Test;
 use SemiXML::Sxml;
 use XML::XPath;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
@@ -43,7 +43,7 @@ subtest 'generated blended color variables', {
   like $style-text, /'.infobox > .message > .title'/, 'found a selector line';
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
 
   my SemiXML::Sxml $x .= new;
@@ -64,5 +64,5 @@ sub get-xpath ( Str $content --> XML::XPath ) {
   XML::XPath.new(:xml($xml-text))
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 done-testing;
