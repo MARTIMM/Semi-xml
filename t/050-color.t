@@ -77,6 +77,30 @@ subtest 'generated blended color variables', {
        'Found background color';
 }
 
+#`{{
+#------------------------------------------------------------------------------
+subtest 'generated blended color variables', {
+
+  my $text = q:to/EOTXT/;
+    $x [
+      $!Colors.palette base-rgb='#1200ff' type=blended mode=hard
+      $y [
+        $!Colors.darken name=cd c='#1200ff' p=20 []
+        $!Colors.lighten name=cl p=20 [$sxml:color2]
+      ]
+    ]
+    EOTXT
+
+  my XML::XPath $p = get-xpath($text);
+
+  my Str $style-text = $p.find( '//style/text()', :to-list)[0].text;
+  like $style-text, /:i 'color:#1200ffff;' /, 'Found base color';
+  like $style-text, /:i 'border-color:#' <xdigit>**8 ';' /, 'Found border color';
+  like $style-text, /:i 'background-color:#' <xdigit>**8 ';' /,
+       'Found background color';
+}
+}}
+
 #------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
 
