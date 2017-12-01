@@ -38,8 +38,9 @@ subtest 'generated blended color variables', {
     EOTXT
 
   my XML::XPath $p = get-xpath($text);
-  #like $style-text, /:i 'background-color:#' <xdigit>**6 ';' /,
-  #     'Found background color';
+  my Str $style-text = $p.find('//style/text()').text;
+  like $style-text, /'font-weight: inherit;'/, 'Found some of the reset';
+  like $style-text, /'.infobox > .message > .title'/, 'found a selector line';
 }
 
 #------------------------------------------------------------------------------
