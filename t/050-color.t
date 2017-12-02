@@ -79,15 +79,12 @@ subtest 'generated blended color variables', {
 
 #`{{
 #-------------------------------------------------------------------------------
-subtest 'generated blended color variables', {
+subtest 'generate monochromatic color variables', {
 
   my $text = q:to/EOTXT/;
     $x [
-      $!Colors.palette base-rgb='#1200ff' type=blended mode=hard
-      $y [
-        $!Colors.darken name=cd c='#1200ff' p=20 []
-        $!Colors.lighten name=cl p=20 [$sxml:color2]
-      ]
+      $!Colors.palette base-hsl='#122388' type=monochromatic spread=20 ncolors=6
+      $set1 []
     ]
     EOTXT
 

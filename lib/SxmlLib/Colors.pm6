@@ -1,6 +1,10 @@
 use v6;
 
 #-------------------------------------------------------------------------------
+# http://www.paletton.com/wiki/index.php?title=Welcome_to_the_Colorpedia
+# http://scholarship.claremont.edu/cgi/viewcontent.cgi?article=1881&context=cmc_theses
+# http://www.malanenewman.com/color_theory_color_wheel.html
+
 unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
@@ -18,7 +22,7 @@ class Colors {
   # one of base-color, ....
   # The namespace xmlns:sxml="github:MARTIMM" is placed on top level element
   # and removed later when document is ready.
-  # See also http://scholarship.claremont.edu/cgi/viewcontent.cgi?article=1881&context=cmc_theses
+
   method palette (
     XML::Element $parent, Hash $attrs, XML::Node :$content-body
     --> XML::Node
@@ -28,21 +32,33 @@ class Colors {
     my Color $base-color;
     my Bool $use-alpha = False;
 
+    # find out what color scheme is used
+    # base color given in rgb
     if ? ~$attrs<base-rgb> {
+
+      # if base-rgb it can be defined in 4 different ways
       $xc = ($attrs<base-rgb>:delete).List;
 #note "RGB: $xc.perl()";
-      if $xc[0] ~~ /'#' [<xdigit>**3 || <xdigit>**6]/ {
+      # as #xxx, #xxxxxx, (#xxx,d), (#xxxxxx,d)
+      if $xc[0] ~~ /'#' [<xdigit>**3 || <xdigit>**6 || <xdigit>**8]/ {
         $base-color .= new($xc[0]);
         if ? $xc[1] {
-          $base-color .= new(:rgba([ |$base-color.rgb, $xc[1]]));
+          $base-color .= new(:rgba([ |$base-color.rgb, $xc[1].UInt]));
           $use-alpha = True;
         }
       }
 
+      # as #xxxxxxxx
+      if $xc[0] ~~ /'#' <xdigit>**8/ {
+        $base-color .= new($xc[0]);
+        $use-alpha = True;
+      }
+
+      # as (d,d,d), (d,d,d,d)
       elsif $xc.elems >= 3 {
         $base-color .= new(:rgb([|$xc[0..2]]));
         if ? $xc[3] {
-          $base-color .= new(:rgba([ |$base-color.rgb, $xc[3]]));
+          $base-color .= new(:rgba([ |$base-color.rgb, $xc[3].UInt]));
           $use-alpha = True;
         }
       }
@@ -52,9 +68,13 @@ class Colors {
       }
     }
 
+    # base color given in hsl
     elsif ? ~$attrs<base-hsl> {
+
+      # if base-hsl it can be defined in 2 different ways
       $xc = ($attrs<base-hsl>:delete).List;
-#note "HSL: $xc.perl()";
+note "HSL: $xc.perl()";
+      # as (d,d,d) or (d,d,d,d)
       $base-color .= new(:hsl([|$xc[0..2]]));
       if ? $xc[3] {
         $base-color .= new(:rgba([ |$base-color.rgb, $xc[3]]));
@@ -64,28 +84,47 @@ class Colors {
 
     else {
 note "X: $attrs.perl()";
+      die "Not a defined color type, attributes found are: $attrs.keys().join(', ')";
     }
 
-#    my Color $base-color .= new(~$attrs<base-rgb>);
-
+    # hash to set the colors in
+    # The blended type operations set color1, color2, ...
+    # The monochromatic type set primary-color1, primary-color2, ...
     my Hash $color-set;
-    given ($attrs<type>//'blended').Str {
+
+
+    # save some more attribs
+    my Str $mode = ($attrs<mode>//'').Str;
+    my Str $opacity = ($attrs<opacity>//0.9).Str.Num;
+    my Str $ncolors = ($attrs<ncolors>//5).Str.UInt;
+
+    # do the operations according to its type.
+    # the default type is monochromatic.
+    given ($attrs<type>//'monochromatic').Str {
+
       when 'blended' {
         $color-set = self!blended-colors(
-          $base-color, ($attrs<mode>//'multiply').Str,
-          ($attrs<opacity>//0.9).Str.Num, ($attrs<ncolors>//5).Str.UInt
+          $base-color, $mode//'multiply', $opacity, $ncolors
         );
       }
+
+      when 'monochromatic' {
+        $color-set = self!monochromatic();
+
     }
 
+
+    # create a variable for the base color
     my $bce = append-element( $parent, 'sxml:variable', %(:name<base-color>));
     append-element( $bce, :text($base-color.to-string('hex8')));
 
+    # create a variable for each color
     for $color-set.kv -> $name, $color {
       my $e = append-element( $parent, 'sxml:variable', %(:$name));
       append-element( $e, :text($color.to-string('hex8')));
 #note "Color: $name => $color.to-string('hex8'), $e";
     }
+
 
     $parent;
   }
