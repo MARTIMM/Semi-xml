@@ -247,6 +247,8 @@ class SxmlHelper {
       }
 
       else {
+#note "Parent: $vdecl.parent()";
+#note "search for './/sxml:$var-name'";
         @var-use = $x.find(
           './/sxml:' ~ $var-name, :start($vdecl.parent), :to-list
         );
