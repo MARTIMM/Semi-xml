@@ -2,7 +2,8 @@ use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
-#parser fails when: use Grammar::Tracer;
+#parser fails when:
+#use Grammar::Tracer;
 
 #-------------------------------------------------------------------------------
 grammar Grammar {
