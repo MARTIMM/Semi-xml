@@ -17,8 +17,23 @@ class File {
                    XML::Element :$content-body
                  ) {
 
-    my $type = ~$attrs<type> // 'reference';
+    my $type = ($attrs<type> // 'reference').Str;
     my $reference = ~$attrs<reference> // '';
+
+    # make reference in reference to the parsed sxml file
+    if $reference !~~ m/^ '/'/ {
+      $reference =
+        $SemiXML::Sxml::filename.IO.absolute.IO.dirname ~
+        "/$reference";
+    }
+
+    # check if readable
+    if $reference.IO !~~ :r {
+
+      die "Reference '$reference' not found";
+    }
+
+
     my $document;
     given $type {
 
@@ -30,26 +45,30 @@ class File {
       # include sub document from file
       when 'include' {
 
+        # read the content
+        my $sxml-text = slurp($reference);
+
+        # new parser object
+        my SemiXML::Sxml $x .= new;
+
+        # the top level node xx-xx-xx is used to be sure there is only one
+        # element at the top when parsing starts.
+        my $e = $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
+
+        # move nodes to the parent node
+        $parent.insert($_) for $x.root-element.nodes.reverse;
+      }
+
+      # include sub document from file
+      when 'include-xml' {
+
         # check if readable
         if $reference.IO ~~ :r {
-
-          # read the content
-          my $sxml-text = slurp($reference);
-
-          # new parser object
-          my SemiXML::Sxml $x .= new;
-
-          # the top level node xx-xx-xx is used to be sure there is only one
-          # element at the top when parsing starts.
-          #
-          my $e = $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
+          # new xml object
+          my XML::Document $xml = from-xml-file($reference);
 
           # move nodes to the parent node
-          $parent.insert($_) for $x.root-element.nodes.reverse;
-        }
-
-        else {
-          die "Reference '$reference' not found";
+          $parent.insert($xml.root);
         }
       }
 
