@@ -1,14 +1,27 @@
+[TOC]
 # Bugs and Todo list for the SemiXML:: * modules and sxml2xml program
+
 
 # Bugs
 Attribute values which are empty like '' or "" are translated wrong
 * [x] '' -> "''" -> "&#39;&#39;" (Translated by module XML)
 * [x] "" -> '&quot;&quot;"
+* [ ] Hangups are possible but why and where?
+* [ ] Parse should die on obvious errors;
+  * [ ] `$!abc.def.ghi`
+  * [ ] `$a.b`
+  * [ ] `$a b=c d f=a`. This becomes `$a b=c [] d f=a`
+  * [ ] spacing around brackets seems to matter
+  * [x] one `$br` generates two of them! Caused by improper input key selection where the proper table for html could not be found.
+  * [ ] sometimes there is an error in SxmlLib::LoremIpsum
+
 
 # Todo
 
+
 ## Parser and actions.
 * [ ] Error messages when parser fails can still be improved.
+
 
 ## Syntax
 * XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '\_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
@@ -47,14 +60,17 @@ Attribute values which are empty like '' or "" are translated wrong
   * [ ] Javascript and css like comments **// \<text> EOL** and **/\* \<text> \*/**. Can be used only within **\$x [! !]** and special checks must be done for these character strings within string variable values.
   * [ ] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere.
 
+
 ## External modules located in SxmlLib tree
 * [x] Library paths to find modules are provided using the ML table in default configuration from the resources directory.
 * [ ] A module should be accessible from within another perl6 sxml module. Problem of registration.
 * [ ] Now XML::Text is improved, SemiXML::Text should be abandoned to use XML::Text again.
 
+
 ## Attribute grammar addition
 * [ ] Boolean attributes can be expressed as **=x** and  **=!x** meaning **x=true** or **x=false**.
 * [x] Attributes are also given as argument to module methods. In this case it might be possible to have hashes, arrays and more. Values are string or perhaps boolean. The attribute values are StringList types which can be stringyfied or used as an array.
+
 
 ## Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * [x] Dependencies on other files. This is controlled by the D table in the config.
@@ -62,10 +78,12 @@ Attribute values which are empty like '' or "" are translated wrong
   * [ ] Load any xml based source to convert back to sxml. Can be used as a start for templating things using pages from a nice website.
   * [x] Add a conveneance method to SxmlHelper.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $node, Hash $attributes ) { }`
 
+
 ## Tests
   * [ ] tags without body but with attributes
   * [ ] comments in sxml
   * [ ] lineup of brackets of body to find errors
+
 
 ## Configuration
   * [x] Search for config files (assume parsed file is fpath/file.sxml)
@@ -142,21 +160,106 @@ Attribute values which are empty like '' or "" are translated wrong
   All these ideas could also replace the one option --run from the program which only had a selective influence on the [output.program] table. Also less files might be searched through as opposed to the list shown above.
   This is now implemented.
 
-## Plugin modules
+
+## Modules and ideas
+Many parts of any xml like language can be coded so this will never be finished, but lets say that when a few things are implemented, then there are examples to build the next methods.
+
+
+### Plugin modules
 * [ ] Use role Pluggable to handle plugin modules. Delivered modules in the Sxml namespace can be handled this way.
 * [ ] Use the resources field from META.info to save the core Sxml plug-able modules.
 
-## Modules
-Many parts of any language can be coded so this will never be finished, but lets say that when a few things are implemented, then there are examples to build the next methods.
-* [x] Handle and generate ebooks
-* [x] Support docbook 5
-* [x] Support html
-* [ ] Support css
-* [x] Support perl6 module testing
 
-## Module ideas
+### What a module must be able to do
+
+* [x] Get hold of the primary sxml file name which is parsed. It is now stored at $SemiXML::Sxml::filename and for every module readable.
+* [ ] Call another sxml module.
+
+
+### Plain XML
+* [x] Plain XML
+  * [x] config.toml in resources
+
+
+### Html
+* [x] Support html
+  * [x] config.toml in resources
+
+
+### css a la scss/sass
+* [ ] **SxmlLib::Css**. Support css
+
+Css can be generated using methods. Nesting can take place like in sass/scss is done. Variable generation explained above can help here for example to generate color palettes.
+
+* [x] **\$!css.style** to use at the top and generates the \<style> elements with the css content.
+An example css definition
+  ```
+  $!css.style [
+    $!SxmlCore.colors base='red' type=single-color []
+    $!css.b s='.infobox >' [
+      $!css.b s=.message [
+        border: 1px solid $sxml:color-four;
+        $!css.b s='> .title' [
+          color: $sxml:color-eight;
+        ]
+      ]
+      $!css.b s=.user [
+        border: 1px solid black;
+        $!css.b s='> .title' [
+          color: black;
+        ]
+      ]
+    ]
+  ]
+  ```
+
+  The code above could produce (This will be more like a one liner, but is pretty printed here)
+
+  ```
+  <style>
+  .infobox > .message {
+    border: 1px solid #440000;
+   }
+
+  .infobox > .message > .title
+    color: #880000;
+   }
+
+  .infobox > .user {
+    border: 1px solid black;
+  }
+
+  .infobox > .user > .title {
+    color: black;
+  }
+  </style>
+  ```
+  * [x] block with selector spec
+  * [x] nesting blocks like in sass
+  * [x] reset css definitions
+  * [ ] looping structures, sass like
+
+
+### Docbook
+* [ ] Support of docbook 5
+  * [ ] config.toml in resources
+
+
+### Independent of XML language
+* [x] **SxmlLib::File**. Load or refence to external file
+  * [ ] Link to page or image checking and generating.
+  * [x] Load sxml file
+  * [x] Load xml file
+
+* [x] **SxmlLib::LoremIpsum**.
+  * [ ] Better and longer texts and store them in resources. So the text can be loaded when needed instead of having all texts in the module.
+
+* [ ] **SxmlLib::Html::FixedLayout** - Content from files to be used in e.g. pre elements.
+  * [ ] load-test-example
+
 
 ### Variables
+
 * [x] This is defined in the main lib SxmlCore. An example;
 ```
 $!SxmlCore.var name=aCommonText [Lorem ipsum dolor simet ...]
@@ -167,11 +270,13 @@ Scope is local except when global attribute is set. The local scope is however a
 
 * [x] User methods can also declare variables. The only thing it needs to do is generating an element such as from the example above **\<sxml:variable name="aCommonText">\<strong>Lorem ipsum dolor simet ...\</strong>\</sxml:variable>**.
 
-* [x] Substitution of variables can be done by writing the brackets with empty content like so **pre\$sxml:abc[]_map**. If **\$sxml:abc** was set to `pqr` this would become `prepqr_map`.
+* [x] Mistakes in names of variables can be prevented by writing the brackets with empty content like so **pre\$sxml:abc[]_map**. If **\$sxml:abc** was set to `pqr` this would become `prepqr_map`.
 
 * [ ] A variable declaration which behaves like a function. E.g. a declaration like **\$!SxmlCore.var name=hello _name='World' [Hello \$name]** has a variable in it. This is used like **\$sxml:hello name=Piet** which translates to `Hello Piet` and **$sxml:hello** translates to `Hello World` where the default is used. In this example the declaration attribute `_name` is used to define a default value for **\$name**.
 
 * [ ] Substitution in attribute values.
+* [ ] Map one variable to another
+
 
 ### Calculation of color palettes
 * [ ] Generating a set of colors is useful in defining several of the properties in css. Instead of coding the colors individually, the colors can be calculated using some algorithm and stored in variable declarations. When one is not satisfied, the calculations can be repeated with different values without changing the used variables.
@@ -185,51 +290,24 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
   * [ ] Output variables
 
 
-### css a la scss/sass
-Css can be generated using methods. Nesting can take place like in sass/scss is done. Variable generation explained above can help here for example to generate color palettes.
-* [ ] **\$!css.style** to use at the top and generates the \<style> elements with the css content.
+### Other
+* [ ] Handle and generate ebooks
 
-An example css definition
-```
-$!css.style [
-  $!SxmlCore.colors base='red' type=single-color []
-  $!css.b s='.infobox >' [
-    $!css.b s=.message [
-      border: 1px solid $sxml:color-four;
-      $!css.b s='> .title' [
-        color: $sxml:color-eight;
-      ]
-    ]
-    $!css.b s=.user [
-      border: 1px solid black;
-      $!css.b s='> .title' [
-        color: black;
-      ]
-    ]
-  ]
-]
-```
-The code above could produce (This will be more like a one liner, but is pretty printed here)
+* [ ] Supporting perl6 module testing to generate reports
+  * [ ] **SxmlLib::Testing::Bug**
+  * [ ] **SxmlLib::Testing::Code**
+  * [ ] **SxmlLib::Testing::Report**
+  * [ ] **SxmlLib::Testing::Skip**
+  * [ ] **SxmlLib::Testing::Test**
+  * [ ] **SxmlLib::Testing::Testing**
+  * [ ] **SxmlLib::Testing::Todo**
+  * [ ] Make benchmark reports using `Bench`
+  * [ ] Make code coverage reports with `Rakudo::Perl6::Tracer`.
 
-```
-<style>
-.infobox > .message {
-  border: 1px solid #440000;
- }
-
-.infobox > .message > .title
-  color: #880000;
- }
-
-.infobox > .user {
-  border: 1px solid black;
-}
-
-.infobox > .user > .title {
-  color: black;
-}
-</style>
-```
+* [ ] avatar linking
+* [ ] Generating tables
+* [ ] Generating graphics, statistics, svg etc
+* [ ] Scalable Vector Graphics or SVG
 
 ## And ...
   * [ ] Documentation.
