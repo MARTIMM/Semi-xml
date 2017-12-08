@@ -10,10 +10,13 @@ subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
     $x [
-      $!Colors.palette base-rgb='#1200ff' type=blended mode=averaged
+      $!Colors.palette outspec=rgbhex base-rgb='#1200ff' type=blended mode=averaged
       $set0 [$sxml:base-color]
-      $set1 [$sxml:color1 $sxml:color2 $sxml:color3 $sxml:color4 $sxml:color5]
-      $set2 [$sxml:color6]
+      $set1 [
+        $sxml:blend-color1 $sxml:blend-color2 $sxml:blend-color3
+        $sxml:blend-color4 $sxml:blend-color5
+      ]
+      $set2 [$sxml:blend-color6]
     ]
     EOTXT
 
@@ -23,7 +26,7 @@ subtest 'generated blended color variables', {
   like $c, /:i '#1200ff' /, 'Found base color';
 
   $c = $p.find( '/x/set1/text()', :to-list)[0].text;
-  ok $c ~~ / [ '#' <xdigit>**8 ]**5 /, 'Found 5 other colors in set 1';
+  ok $c ~~ / [ '#' <xdigit>**6 ]**5 /, 'Found 5 other colors in set 1';
 
   $c = $p.find( '/x/set2/text()', :to-list)[0].text;
   ok !$c, 'There is no 6th color';
@@ -36,14 +39,17 @@ subtest 'generated blended color variables', {
         base-rgb='#1200ff' type=blended mode=hard opacity=0.8
         ncolors=10
       $set0 [$sxml:base-color]
-      $set1 [$sxml:color1 $sxml:color2 $sxml:color3 $sxml:color4 $sxml:color5]
-      $set2 [$sxml:color6 $sxml:color9]
+      $set1 [
+        $sxml:blend-color1 $sxml:blend-color2 $sxml:blend-color3
+        $sxml:blend-color4 $sxml:blend-color5
+      ]
+      $set2 [$sxml:blend-color6 $sxml:blend-color9]
     ]
     EOTXT
 
   $p = get-xpath($text);
   $c = $p.find( '/x/set2/text()', :to-list)[0].text;
-  ok $c ~~ / [ '#' <xdigit>**8 ]**2 /, 'Found 6th and 9th color2 in set 2';
+  ok $c ~~ / [ '#' <xdigit>**6 ]**2 /, 'Found 6th and 9th color2 in set 2';
 }
 
 #-------------------------------------------------------------------------------
@@ -51,13 +57,13 @@ subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
     $html [
-      $!Colors.palette base-rgb='#1200ff' type=blended mode=hard
+      $!Colors.palette outspec=rgbhex base-rgb='#1200ffff' type=blended mode=hard
       $head [
         $style [
           strong {
             color: $sxml:base-color;
-            border-color: $sxml:color2;
-            background-color: $sxml:color5;
+            border-color: $sxml:blend-color2;
+            background-color: $sxml:blend-color5;
           }
         ]
       ]
@@ -77,26 +83,30 @@ subtest 'generated blended color variables', {
        'Found background color';
 }
 
-#`{{
 #-------------------------------------------------------------------------------
 subtest 'generate monochromatic color variables', {
 
   my $text = q:to/EOTXT/;
     $x [
-      $!Colors.palette base-hsl='#122388' type=monochromatic spread=20 ncolors=6
-      $set1 []
+      $!Colors.palette base-hsl='0 100 50' type=color-scheme mode=monochromatic
+                       lighten=20 ncolors=6 outspec=hsl set-name=mono
+      $set1 [
+        $sxml:mono-scheme-color1
+        $sxml:mono-scheme-color2
+        $sxml:mono-scheme-color3
+        $sxml:mono-scheme-color4
+        $sxml:mono-scheme-color5
+        $sxml:mono-scheme-color6
+      ]
     ]
     EOTXT
 
   my XML::XPath $p = get-xpath($text);
 
-  my Str $style-text = $p.find( '//style/text()', :to-list)[0].text;
-  like $style-text, /:i 'color:#1200ffff;' /, 'Found base color';
-  like $style-text, /:i 'border-color:#' <xdigit>**8 ';' /, 'Found border color';
-  like $style-text, /:i 'background-color:#' <xdigit>**8 ';' /,
-       'Found background color';
+  my Str $style-text = $p.find( '//set1/text()', :to-list)[0].text;
+  like $style-text, / 'hsla(0.0,100.0%,20.0%)' /, 'Found color 2';
+  like $style-text, / 'hsla(0.0,100.0%,80.0%)' /, 'Found 5th color';
 }
-}}
 
 #-------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
@@ -104,7 +114,9 @@ sub get-xpath ( Str $content --> XML::XPath ) {
   my SemiXML::Sxml $x .= new;
   $x.parse(
     config => {
-      ML => {:Colors<SxmlLib::Colors>,}
+      F => { xml => { space-preserve => [<set0 set1 set2>], }, },
+      ML => { :Colors<SxmlLib::Colors>, },
+      T => { :config, :tables, :modules, :parse, },
     },
     :$content
   );

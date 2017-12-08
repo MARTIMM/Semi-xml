@@ -16,6 +16,8 @@ use Color::Operators;
 #-------------------------------------------------------------------------------
 class Colors {
 
+  has Bool $!use-alpha = False;
+
   #-----------------------------------------------------------------------------
   # $!Colors.colors base-rgb=<color> generates
   # <sxml:variable name=xyz>color</sxml:variable> variables where xyz becomes
@@ -30,55 +32,56 @@ class Colors {
 
     my List $xc;
     my Color $base-color;
-    my Bool $use-alpha = False;
+    $!use-alpha = False;
 
     # find out what color scheme is used
     # base color given in rgb
-    if ? ~$attrs<base-rgb> {
+    if $attrs<base-rgb>:exists {
 
       # if base-rgb it can be defined in 4 different ways
       $xc = ($attrs<base-rgb>:delete).List;
 #note "RGB: $xc.perl()";
-      # as #xxx, #xxxxxx, (#xxx,d), (#xxxxxx,d)
-      if $xc[0] ~~ /'#' [<xdigit>**3 || <xdigit>**6 || <xdigit>**8]/ {
+      # as '#xxx', '#xxxxxx', '('#xxx d', '#xxxxxx d'
+      if $xc[0] ~~ /^ '#' [<xdigit>**3 || <xdigit>**6] $/ {
         $base-color .= new($xc[0]);
         if ? $xc[1] {
           $base-color .= new(:rgba([ |$base-color.rgb, $xc[1].UInt]));
-          $use-alpha = True;
+          $!use-alpha = True;
         }
       }
 
-      # as #xxxxxxxx
-      if $xc[0] ~~ /'#' <xdigit>**8/ {
+      # as '#xxxxxxxx'
+      elsif $xc[0] ~~ /^ '#' <xdigit>**8 $/ {
+#note "8 digits rgb";
         $base-color .= new($xc[0]);
-        $use-alpha = True;
+        $!use-alpha = True;
       }
 
-      # as (d,d,d), (d,d,d,d)
+      # as 'd d d', 'd d d d'
       elsif $xc.elems >= 3 {
-        $base-color .= new(:rgb([|$xc[0..2]]));
+        $base-color .= new(:rgb([|$xc[0..2]>>.Real]));
         if ? $xc[3] {
           $base-color .= new(:rgba([ |$base-color.rgb, $xc[3].UInt]));
-          $use-alpha = True;
+          $!use-alpha = True;
         }
       }
 
       else {
-        die "Note the proper number of color elements. Use '#xxx[,op]', '#xxxxxx[,op]' or 'r,g,b[,op]'";
+        die "Not a proper rgb spec";
       }
     }
 
     # base color given in hsl
-    elsif ? ~$attrs<base-hsl> {
+    elsif $attrs<base-hsl>:exists {
 
       # if base-hsl it can be defined in 2 different ways
       $xc = ($attrs<base-hsl>:delete).List;
-note "HSL: $xc.perl()";
-      # as (d,d,d) or (d,d,d,d)
-      $base-color .= new(:hsl([|$xc[0..2]]));
+#note "HSL: $xc.perl()";
+      # as 'd d d' or 'd d d d'
+      $base-color .= new(:hsl([|$xc[0..2]>>.Real]));
       if ? $xc[3] {
         $base-color .= new(:rgba([ |$base-color.rgb, $xc[3]]));
-        $use-alpha = True;
+        $!use-alpha = True;
       }
     }
 
@@ -90,45 +93,108 @@ note "X: $attrs.perl()";
     # hash to set the colors in
     # The blended type operations set color1, color2, ...
     # The monochromatic type set primary-color1, primary-color2, ...
-    my Hash $color-set;
+    my Seq $color-set;
 
+    # get number of colors to generate
+    my UInt $ncolors = ($attrs<ncolors>//5).Str.UInt;
 
-    # save some more attribs
-    my Str $mode = ($attrs<mode>//'').Str;
-    my Str $opacity = ($attrs<opacity>//0.9).Str.Num;
-    my Str $ncolors = ($attrs<ncolors>//5).Str.UInt;
+    # the default type is color-scheme.
+    my Str $type = ($attrs<type>//'color-scheme').Str;
+
+    my Str $oper-name = '';
 
     # do the operations according to its type.
-    # the default type is monochromatic.
-    given ($attrs<type>//'monochromatic').Str {
+    given $type {
 
       when 'blended' {
-        $color-set = self!blended-colors(
-          $base-color, $mode//'multiply', $opacity, $ncolors
-        );
+        $oper-name = 'blend';
+        $color-set = self!blended-colors( $base-color, $ncolors, $attrs);
       }
 
-      when 'monochromatic' {
-        $color-set = self!monochromatic();
-
+      when 'color-scheme' {
+        $oper-name = 'scheme';
+        $color-set = self!color-scheme( $base-color, $ncolors, $attrs);
+      }
     }
 
+    # get the set name and color name for the variables
+    my Str $set-name = ($attrs<set-name>//'').Str;
+    my Str $color-name = ($attrs<color-name>//'color').Str;
+
+    my Str $output-spec = ($attrs<outspec>//'rgbhex').Str;
 
     # create a variable for the base color
     my $bce = append-element( $parent, 'sxml:variable', %(:name<base-color>));
-    append-element( $bce, :text($base-color.to-string('hex8')));
+    append-element( $bce, :text(self!output-spec( $base-color, $output-spec)));
 
     # create a variable for each color
-    for $color-set.kv -> $name, $color {
-      my $e = append-element( $parent, 'sxml:variable', %(:$name));
-      append-element( $e, :text($color.to-string('hex8')));
-#note "Color: $name => $color.to-string('hex8'), $e";
+    my Int $color-count = 1;
+    for @$color-set -> $color {
+      my Str $name = [~] (?$set-name ?? "$set-name-" !! ''),
+                     $oper-name, '-', $color-name, $color-count++;
+      my XML::Element $e = append-element( $parent, 'sxml:variable', %(:$name));
+      append-element( $e, :text(self!output-spec( $color, $output-spec)));
     }
-
 
     $parent;
   }
 
+  #-----------------------------------------------------------------------------
+  method !output-spec ( Color $color, Str $output-spec --> Str ) {
+
+    my Str $color-spec;
+    if $output-spec eq 'rgb' {
+      my @c = $color.rgbad;
+      if $!use-alpha {
+        $color-spec =
+          [~] 'rgba(',
+          (map {($_ * 100).fmt('%.1f') ~ '%'}, @c).join(','),
+          ')';
+      }
+
+      else {
+        $color-spec =
+          [~] 'rgb(',
+          (map {($_ * 100).fmt('%.1f') ~ '%'}, @c[0..2]).join(','),
+          ')';
+      }
+    }
+
+    elsif $output-spec eq 'rgbhex' {
+      if $!use-alpha {
+        $color-spec = $color.to-string('hex8');
+      }
+
+      else {
+        $color-spec = $color.to-string('hex');
+      }
+    }
+
+    elsif $output-spec eq 'hsl' {
+      if $!use-alpha {
+        my $alpha = $color.rgbad[3];
+        $color-spec =
+          [~] 'hsla(',
+          (map {$_.fmt('%.1f') ~ '%'}, (|$color.hsl,$alpha)).join(','),
+          ')';
+        # remove the first and last percent again
+        $color-spec ~~ s/ '%' //;
+        $color-spec ~~ s/ '%)' /)/;
+      }
+
+      else {
+        $color-spec =
+          [~] 'hsla(',
+          (map {$_.fmt('%.1f') ~ '%'}, $color.hsl).join(','),
+          ')';
+        # remove the first percent again
+        $color-spec ~~ s/ '%' //;
+      }
+
+#note "Color: $color-spec";
+      $color-spec
+    }
+  }
 #`{{
   #-----------------------------------------------------------------------------
   # private color handling methods
@@ -274,8 +340,6 @@ note "X: $attrs.perl()";
   # blended color
   method !blended-color ( Color $base, Str $mode, Num $opacity --> Color ) {
 
-    my Array $base-rgb = [$base.rgba];
-
     # calculate random backdrop color
     my Color $rc .= new(:rgbad([|(rand xx 3), 1]));
 
@@ -285,22 +349,64 @@ note "X: $attrs.perl()";
 
   #-----------------------------------------------------------------------------
   # blended colors
-  method !blended-colors (
-    Color $base, Str $mode, Num $opacity where 0.0 <= $_ <= 1.0,
-    UInt $ncolors = 5
-    --> Hash
-  ) {
-note "C&B: $base.to-string('hex'), $mode, $opacity";
+  method !blended-colors ( Color $base, UInt $ncolors, Hash $attrs --> Seq ) {
+
+    my Str $mode = ($attrs<mode>//'multiply').Str;
+    my Num $opacity = ($attrs<opacity>//0.9).Str.Num;
+
+    $opacity = 0e0 if $opacity < 0e0;
+    $opacity = 1e0 if $opacity > 1e0;
+#note "BC: $base.to-string('hex8'), $mode, $opacity";
 
     my Array $ca = [ self!blended-color( $base, $mode, $opacity) xx $ncolors];
 
-    my Int $count = 1;
-    my Hash $d = {};
-    for @$ca.sort({ ([+] $^a.rgbad) <=> ([+] $^b.rgbad) }) -> $c {
-      $d{"color" ~ $count++} = $c;
+#note "CA: $ca.elems()";
+    $ca.sort({ ([+] $^a.rgbad) <=> ([+] $^b.rgbad) })
+  }
+
+  #-----------------------------------------------------------------------------
+  # color schemas
+  method !color-scheme ( Color $base, UInt $ncolors, Hash $attrs --> Seq ) {
+
+    my Str $mode = ($attrs<mode>//'monochromatic').Str;
+    my Real $lighten = ($attrs<lighten>//0.0).Str.Real;
+    my Real $saturate = ($attrs<saturate>//0.0).Str.Real;
+#note "M0: $base.to-string('hex8'), $mode, $lighten, $saturate";
+
+    # get color in hsl form where this color is the center color
+    my @c = $base.hsl;
+
+    my Array $ca = [];
+    given $mode {
+      when 'monochromatic' {
+        my Real $step = ($ncolors - 1) / 2.0;
+        my Real $start-s = @c[1] - $step * $saturate;
+        my Real $start-l = @c[2] - $step * $lighten;
+#note "M1: $step, $start-s, $start-l";
+        for ^$ncolors -> $n {
+          # set default of original color in case of only one is needed
+          my $s = @c[1];
+          my $l = @c[2];
+          if ?$lighten and ?$saturate {
+            $s = $start-s + $n * $saturate;
+            $l = $start-l + $n * $lighten;
+          }
+
+          elsif ?$lighten {
+            $l = $start-l + $n * $lighten;
+          }
+
+          elsif ?$saturate {
+            $s = $start-s + $n * $saturate;
+          }
+
+#note "M2: $n, @c[0], $s, $l";
+          my Color $c .= new(:hsl( @c[0], $s, $l));
+          $ca.push($c);
+        }
+      }
     }
 
-#note "D: ", $d.perl;
-    $d
+    $ca.Seq;
   }
 }
