@@ -99,11 +99,8 @@ class Actions {
 #note "Ftab: ", $self-closing;
           # Check for self closing tag, and if so remove content if any
           if $node.name ~~ any(@$self-closing) {
-#note "Found self closing tag: $node.name()";
-            # elements not able to contain any content; remove any content
-            for $node.nodes.reverse -> $child {
-              $node.removeChild($child);
-            }
+            before-element( $node, $node.name, $node.attribs);
+            $node.remove;
           }
 
           elsif $node.name ~~ m/^ 'sxml:' / {
