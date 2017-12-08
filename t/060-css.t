@@ -15,14 +15,13 @@ subtest 'generated blended color variables', {
           $!css.reset type=condensed-universal
           $!colors.palette base-rgb='#1200ff' type=blended mode=averaged
 
-
           $!css.b s='.infobox >' [
             $!css.b s=.message [
-              border: 1px solid $*|sxml:color1;
+              border: 1px solid $*|sxml:blend-color1;
               padding: 10px;
 
               $!css.b s='> .title' [
-                color: $sxml:color5;
+                color: $sxml:blend-color5;
               ]
             ]
             $!css.b s=.user [
