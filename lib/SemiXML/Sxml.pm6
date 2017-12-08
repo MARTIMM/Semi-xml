@@ -58,6 +58,9 @@ class Sxml {
     my Bool $pr;
 
     if $!filename.IO ~~ :r {
+      # save the filename globally but only once
+      our $SemiXML::Sxml::filename //= $!filename;
+
       my $text = slurp($!filename);
       $pr = self.parse( :content($text), :$config, :!drop-cfg-filename);
       die "Parse failure" if $pr ~~ Nil;
