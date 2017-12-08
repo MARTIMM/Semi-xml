@@ -54,7 +54,6 @@ class LoremIpsum {
     }
   }
 
-
   #-----------------------------------------------------------------------------
   method standard1500 ( XML::Element $parent, Hash $attrs --> XML::Element ) {
 
@@ -211,10 +210,19 @@ class LoremIpsum {
   method words (XML::Element $parent, Hash $attrs --> XML::Element ) {
 
     # get the number of words
-    my Int $nbr-words = (~$attrs<n> // 1).Int;
+    my Int $nbr-words = ($attrs<n> // 1).Str.Int;
 
     my Str $ipsum;
     $ipsum ~= self!make-word ~ ' ' for ^$nbr-words;
+
+    $ipsum ~~ s:g/ <punct>+ //;
+    $ipsum ~~ s:g/ ^\s+ //;
+    $ipsum ~~ s:g/ \s+ $//;
+    $ipsum ~~ s:g/ \s+\s / /;
+
+    $ipsum .= lc;
+    $ipsum .= tc if ? $attrs{'tc'};
+    $ipsum .= uc if ? $attrs{'uc'};
 
     $parent.append(XML::Text.new(:text($ipsum)));
     $parent;
@@ -224,7 +232,9 @@ class LoremIpsum {
   # Generate a sentence using words from the text
   method sentence ( XML::Element $parent, Hash $attrs --> XML::Element ) {
 
-    $parent.append(XML::Text.new(:text(self!make-sentence)));
+    my Str $ipsum = self!make-sentence;
+    #$ipsum ~~ s:g/ <punct> //;
+    $parent.append(XML::Text.new(:text($ipsum)));
     $parent;
   }
 
@@ -233,11 +243,13 @@ class LoremIpsum {
   method sentences ( XML::Element $parent, Hash $attrs --> XML::Element ) {
 
     # get the number of sentences
-    my Int $nbr-sentences = (~$attrs<n> // 1).Int;
+    my Int $nbr-sentences = ($attrs<n> // 1).Str.Int;
 
     # use that point to get some words from the text
     my Str $ipsum = '';
-    $ipsum ~= self!make-sentence ~ '. ' for ^$nbr-sentences;
+    for ^$nbr-sentences {
+      $ipsum ~= self!make-sentence;
+    }
 
     $parent.append(XML::Text.new(:text($ipsum)));
     $parent;
@@ -277,7 +289,7 @@ class LoremIpsum {
       /\w+/, 4 + 6.rand.Int
     ).join(' ').tc;
 
-    $ipsum;
+    "$ipsum. ";
   }
 
   #-----------------------------------------------------------------------------
