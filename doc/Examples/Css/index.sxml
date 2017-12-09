@@ -110,13 +110,8 @@ $html [
         	float: left;
         	margin: 0; padding: 0;
         	width: 20%;
-        	background: $sxml:mono-scheme-color2;
-        	color: $sxml:mono-scheme-color6;
-
-          $!css.b s=.sel [
-          	background: $sxml:mono-scheme-color1;
-          	color: black;
-        	]
+#        	background: $sxml:mono-scheme-color2;
+#        	color: $sxml:mono-scheme-color6;
       	]
 
         $!css.b s=a [
@@ -129,8 +124,8 @@ $html [
         	text-decoration: none;
         	text-transform: uppercase;
         	text-align: center;
-#        	background: $sxml:mono-scheme-color2;
-#        	color: $sxml:mono-scheme-color6;
+        	background: $sxml:mono-scheme-color2;
+        	color: $sxml:mono-scheme-color6;
 
           $!css.b s=span [
           	display: block;
@@ -141,7 +136,12 @@ $html [
       	]
 
         $!css.b s='a:hover' [
-        	background: $sxml:mono-scheme-color4;
+        	background: $sxml:mono-scheme-color6;
+        	color: $sxml:mono-scheme-color2;
+      	]
+
+        $!css.b s=a.sel [
+        	background: $sxml:mono-scheme-color3;
         	color: $sxml:mono-scheme-color2;
       	]
     	]
@@ -164,7 +164,7 @@ $html [
         $!css.b s=p [
         	margin: 0.25em 0;
       	]
-
+/*
         $!css.b s=h3 [
         	margin: 0.5em 0 0.3em;
         	font-size: 18px;
@@ -173,6 +173,29 @@ $html [
 
         $!css.b s=h4 [
         	margin: 0 0 0 6em;
+        	font-size: 100%;
+        	font-weight: bold;
+      	]
+*/
+
+        $!css.b s=h3 [
+        	clear: left;
+        	margin: 0.5em 0 0.3em 0;
+        	font-size: 16px;
+          font-weight: bold;
+
+          $!css.b s=span [
+          	display: inline-block;
+          	width: 9px; height: 9px;
+          	margin-right: 1em;
+          	border: 1px solid black;
+          	vertical-align: middle;
+            background: $sxml:mono-scheme-color3
+        	]
+      	]
+
+        $!css.b s=h4 [
+        	margin: 0;
         	font-size: 100%;
         	font-weight: bold;
       	]
@@ -262,28 +285,6 @@ $html [
       	margin: 0 20px 0 0;
       	padding: 10px 0;
 
-        $!css.b s=h3 [
-        	clear: left;
-        	margin: 0.5em 0 0.3em 0;
-        	font-size: 16px;
-          font-weight: bold;
-
-          $!css.b s=span [
-          	display: inline-block;
-          	width: 9px; height: 9px;
-          	margin-right: 1em;
-          	border: 1px solid black;
-          	vertical-align: middle;
-            background: $sxml:mono-scheme-color3
-        	]
-      	]
-
-        $!css.b s=h4 [
-        	margin: 0;
-        	font-size: 100%;
-        	font-weight: bold;
-      	]
-
         $!css.b s=.photo [
         	float: left;
         	margin: 0 15px 15px 0;
@@ -369,13 +370,13 @@ $html [
     		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
     		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
     		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
-    		$li class=sel [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
+    		$li [ $a href="#" class=sel [ $span $!lorem.words n=1 uc=1 ] ]
     		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
     	]
 
     	$div id=content [
     		$div id=left [
-    			$h3 class=ttl    [ $!lorem.words n=2 tc=1 ]
+    			$h3 class=ttl    [ $span $!lorem.words n=1 tc=1 ]
     			$p               [ $!lorem.standard1500 ]
     			$dl [
     				$dt class=ttl  [ $!lorem.words n=1 tc=1 ]
@@ -387,7 +388,7 @@ $html [
           $div id=server [
             $!file.include type=include-xml reference=image/server.svg
           ]
-    			$h4 [ $!lorem.words n=5 tc=1 ]
+    			$h4              [ $!lorem.words n=5 tc=1 ]
     			$ul [
     				$li            [ $a href='#' [ $!lorem.words n=2 tc=1 ] ]
     				$li            [ $a href='#' [ $!lorem.words n=3 tc=1 ] ]
