@@ -39,6 +39,7 @@
 
     "SxmlLib::Html::FixedLayout":       "lib/SxmlLib/Html/FixedLayout.pm6",
     "SxmlLib::Html::List":              "lib/SxmlLib/Html/List.pm6",
+    "SxmlLib::Html::Menu":              "lib/SxmlLib/Html/Menu.pm6",
 
     "SxmlLib::Testing::Bug":            "lib/SxmlLib/Testing/Bug.pm6",
     "SxmlLib::Testing::Code":           "lib/SxmlLib/Testing/Code.pm6",
@@ -62,5 +63,5 @@
     "google-code-prettify/run_prettify.js"
   ],
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.35.1"
+  "version": "v0.37.0"
 }
