@@ -1,0 +1,28 @@
+# sxml2xml.pl6 --in=html --out=index doc/Examples/Menu/index.sxml
+
+$html [
+  #=============================================================================
+  $head [
+    $meta charset=UTF-8
+
+    $!css.style compress=0 [
+      $!css.reset type=condensed-universal
+
+    ]
+  ]
+
+  #=============================================================================
+  $body [
+
+    #---------------------------------------------------------------------------
+    $!menu.container location=top [
+      $!menu.entry name=Home [
+        $!lorem.cheese-ipsum
+      ]
+
+      $!menu.entry name=About [
+        $!lorem.veggie-ipsum
+      ]
+    ]
+  ]
+]
