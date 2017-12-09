@@ -33,7 +33,7 @@ $html [
       $!css.b s='#topbg' [
       	position: absolute; top: 0; left: 0; z-index: -1;
       	width: 100%; height: 143px;
-      	background: silver;
+      	background: $sxml:mono-scheme-color6;
     	]
 
       /* @group Header */
