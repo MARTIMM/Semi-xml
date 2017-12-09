@@ -1,4 +1,6 @@
-## Changes in SemiXML:: * and sxml2xml
+[toc]
+
+# Changes in SemiXML:: * and sxml2xml
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
