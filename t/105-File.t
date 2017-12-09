@@ -19,7 +19,10 @@ spurt( $f1, q:to/EOSX/);
       $h1 [First chapter]
       some text
 
-      $!file.include type=include reference=t/D105/d1.sxml [ ignored content ]
+      # this file is placed in t/D105. So to refer to d1.sxml in the same
+      # directory, only its name must be mentioned and not the directory
+      # path to it
+      $!file.include type=include reference=d1.sxml [ ignored content ]
     ]
   ]
   EOSX
