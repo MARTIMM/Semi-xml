@@ -176,13 +176,9 @@ Many parts of any xml like language can be coded so this will never be finished,
 * [ ] Call another sxml module.
 
 
-### Plain XML
-* [x] Plain XML
-  * [x] config.toml in resources
-
-
 ### Html
 * [x] Support html
+  * [x] `IN` refinement assumed to be `html`
   * [x] config.toml in resources
 
 
@@ -242,10 +238,17 @@ An example css definition
 
 ### Docbook
 * [ ] Support of docbook 5
+  * [x] `IN` refinement assumed to be `db5`
   * [ ] config.toml in resources
 
 
-### Independent of XML language
+### Plain XML or independent of any XML language
+* [x] Plain XML
+  * [x] `IN` refinement assumed to be `xml`
+  * [x] config.toml in resources
+
+
+### Independent of any XML language
 * [x] **SxmlLib::File**. Load or refence to external file
   * [ ] Link to page or image checking and generating.
   * [x] Load sxml file
@@ -258,7 +261,7 @@ An example css definition
   * [ ] load-test-example
 
 
-### Variables
+#### Variables
 
 * [x] This is defined in the main lib SxmlCore. An example;
 ```
@@ -278,7 +281,7 @@ Scope is local except when global attribute is set. The local scope is however a
 * [ ] Map one variable to another
 
 
-### Calculation of color palettes
+#### Calculation of color palettes
 * [ ] Generating a set of colors is useful in defining several of the properties in css. Instead of coding the colors individually, the colors can be calculated using some algorithm and stored in variable declarations. When one is not satisfied, the calculations can be repeated with different values without changing the used variables.
 
 See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#html4)
@@ -289,8 +292,11 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
   * [ ] Type of calculation
   * [ ] Output variables
 
+#### Remapping of generated structures
+Methods can only generate something in a given parent container. This parent container does not yet take part of the document. It can happen that, at some point, a method generates elements which really belong in some other part of a document. E.g. A menu can have a need of a set of style controls and these must be placed in the `/html/head/style` (xpath notation). There it is necessary to have a remapping opereration so as to move the generated part to its proper place.
+* [x] **\<sxml:remap map-to="/html/head" as="style"> ... content ... \</sxml:remap>**. There is no need to create a method resembling this tag. Only a need to search for this remap element.
 
-### Other
+### Other ideas
 * [ ] Handle and generate ebooks
 
 * [ ] Supporting perl6 module testing to generate reports
@@ -309,9 +315,9 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
 * [ ] Generating graphics, statistics, svg etc
 * [ ] Scalable Vector Graphics or SVG
 
-## And ...
-  * [ ] Documentation.
-  * [ ] Module and program documentation
+## And …
+  * [ ] Documentation in a manual.
+  * [ ] Module and program pod documentation
   * [ ] Documentation is started as a docbook 5 document. There are references to local iconfiles and fonts for which I don't know yet if they may be included (license issues).
   * [ ] Tutorials.
 
