@@ -3,6 +3,7 @@
 $html [
   $head [
     $meta charset=UTF-8
+    $meta http-equiv=Content-Style-Type content=text/css
 
     $!css.style compress=0 [
       $!css.reset type=condensed-universal
