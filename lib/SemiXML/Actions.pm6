@@ -130,6 +130,13 @@ class Actions {
     # search for variables and substitute them
     subst-variables($parent);
 
+    # move around some elements
+    remap-content($parent);
+
+    # remove leftovers from sxml namespace
+    remove-sxml($parent);
+
+#`{{
     # create completed document
     $parent.setNamespace( 'github.MARTIMM', 'sxml');
     $!xml-document .= new($parent);
@@ -147,8 +154,11 @@ class Actions {
 
     # remove the namespace
     $parent.attribs{"xmlns:sxml"}:delete;
+}}
+
 
     # return the completed document
+    $!xml-document .= new($parent);
     $!xml-document
   }
 

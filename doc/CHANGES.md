@@ -4,6 +4,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.38.0
+  * Added a remapping option to move inserted content to some other location at the end of the parsing process.
 * 0.37.0
   * Added a new module to generate a menu
 * 0.36.0

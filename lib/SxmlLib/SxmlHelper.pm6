@@ -308,4 +308,69 @@ class SxmlHelper {
 #note "Clone: ", $clone.perl;
     $clone
   }
+
+  #-----------------------------------------------------------------------------
+  # remove leftovers from sxml namespace
+  sub remap-content ( XML::Element $parent ) is export {
+
+    # get xpath object
+    my XML::Document $xml-document .= new($parent);
+    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+    # set namespace first
+    my $x = XML::XPath.new(:document($xml-document));
+    $x.set-namespace: 'sxml' => 'github.MARTIMM';
+
+    #look for remapping elements
+    for $x.find( '//sxml:remap', :to-list) -> $remap {
+
+      my Str $map-to = $remap.attribs<map-to> // '';
+      die "empty map-to value" unless ? $map-to;
+
+      my Str $as = $remap.attribs<as> // '';
+
+      # if more nodes are found take only the first one
+      my $n = $x.find( $map-to, :to-list)[0];
+      die "node '$map-to' to map to, not found" unless ? $n;
+      if ?$as {
+        my $top-node;
+        $top-node = XML::Element.new(:name($as));
+        $top-node.append(clone-node($_)) for $remap.nodes;
+        $n.append($top-node);
+      }
+
+      else {
+        $n.append(clone-node($_)) for $remap.nodes;
+      }
+
+      $remap.remove;
+    }
+
+    # remove the namespace
+    $parent.attribs{"xmlns:sxml"}:delete;
+  }
+
+  #-----------------------------------------------------------------------------
+  # remove leftovers from sxml namespace
+  sub remove-sxml ( XML::Element $parent ) is export {
+
+    # get xpath object
+    my XML::Document $xml-document .= new($parent);
+    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+    # set namespace first
+    my $x = XML::XPath.new(:document($xml-document));
+    $x.set-namespace: 'sxml' => 'github.MARTIMM';
+
+    # drop some leftover sxml namespace elements
+    for $x.find( '//*', :to-list) -> $v {
+      if $v.name() ~~ /^ 'sxml:'/ {
+        note "Leftover in sxml namespace removed: '$v.name()', parent is '$v.parent.name()'";
+        $v.remove;
+      }
+    }
+
+    # remove the namespace
+    $parent.attribs{"xmlns:sxml"}:delete;
+  }
 }
