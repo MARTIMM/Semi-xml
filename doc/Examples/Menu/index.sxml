@@ -4,10 +4,19 @@ $html [
   #=============================================================================
   $head [
     $meta charset=UTF-8
+    $meta http-equiv=Content-Style-Type content=text/css
 
     $!css.style compress=0 [
       $!css.reset type=condensed-universal
 
+      $!css.b s='*' [
+        font-family:    'sans';
+      ]
+
+      $!css.b s=h1 [
+        font-size:      larger;
+        font-weight:    bold;
+      ]
     ]
   ]
 
@@ -15,14 +24,22 @@ $html [
   $body [
 
     #---------------------------------------------------------------------------
-    $!menu.container location=top [
-      $!menu.entry name=Home [
-        $!lorem.cheese-ipsum
+    $!menu.container location=left main-page=main [
+      $!menu.entry title=Home id=sub-page1 [
+        $h1 [ $!lorem.words n=3 tc=1 ]
+        $p [ $!lorem.cheese-ipsum ]
       ]
 
-      $!menu.entry name=About [
-        $!lorem.veggie-ipsum
+      $!menu.entry title=About id=sub-page2 [
+        $h1 [ $!lorem.words n=4 tc=1 ]
+        $p [ $!lorem.veggie-ipsum ] 
       ]
+    ]
+
+    #---------------------------------------------------------------------------
+    $div id=main [
+      $h1 [ $!lorem.words n=6 tc=1 ]
+      $!lorem.cicero45bc
     ]
   ]
 ]
