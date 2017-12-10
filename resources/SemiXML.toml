@@ -43,9 +43,10 @@
 #------------------------------------------------------------------------------
 # Header table
 [ H.html ]
-  Content-Type    = 'text/html; charset="utf-8"'
-#  From            = 'my-addr@gmail.com'
-#  User-Agent      = 'SemiXML'
+  Content-Type          = 'text/html; charset="utf-8"'
+#  From                  = 'my-addr@gmail.com'
+#  User-Agent            = 'SemiXML'
+#  Content-Style-Type    = 'text/css'
 
 #------------------------------------------------------------------------------
 # Module and library path tables
