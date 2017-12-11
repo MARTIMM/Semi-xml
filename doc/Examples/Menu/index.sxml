@@ -6,9 +6,11 @@ $html [
     $meta charset=UTF-8
     $meta http-equiv=Content-Style-Type content=text/css
 
-    $!css.style compress=0 [
+    $!css.style compress=0 id=reset [
       $!css.reset type=condensed-universal
+    ]
 
+    $!css.style compress=0 id=page-style [
       $!css.b s='*' [
         font-family:    'sans';
       ]
@@ -18,28 +20,54 @@ $html [
         font-weight:    bold;
       ]
     ]
+
+    $!css.style compress=0 id=menu-changes [
+      $!css.b s=.sidenav [
+        background:     rgb( 0, 110, 110);
+#        color:          rgb( 0, 200, 200);
+
+        $!css.b s=a [
+          margin:         1px;
+          padding:        1px;
+          background:     rgb( 0, 100, 100);
+          color:          rgb( 0, 200, 200);
+        ]
+
+        $!css.b s=a:hover [
+          color:          rgb( 0, 240, 240);
+        ]
+      ]
+    ]
   ]
 
   #=============================================================================
   $body [
 
     #---------------------------------------------------------------------------
-    $!menu.container location=left main-page=main [
-      $!menu.entry title=Home id=sub-page1 [
+    $!menu.container location=left [
+
+      #-------------------------------------------------------------------------
+      # first page is the main page and is shown first
+      $!menu.entry title=Home id=main-page =!home-button [
+        $h1 [ $!lorem.words n=6 tc=1 ]
+        $p [ $!lorem.cicero45bc ]
+      ]
+
+      #-------------------------------------------------------------------------
+      $!menu.entry title=Contact id=sub-page1 =!open-button =!home-button [
         $h1 [ $!lorem.words n=3 tc=1 ]
         $p [ $!lorem.cheese-ipsum ]
+        $a href="javascript:void(0)" class="menu-open-button"
+           onclick="menu.openNavigation()" [ &#9776; ]
+        $a href="javascript:void(0)" class="menu-home-button"
+           onclick="menu.showPage('main-page')" [ &#x1F3DB; ]
       ]
 
+      #-------------------------------------------------------------------------
       $!menu.entry title=About id=sub-page2 [
         $h1 [ $!lorem.words n=4 tc=1 ]
-        $p [ $!lorem.veggie-ipsum ] 
+        $p [ $!lorem.veggie-ipsum ]
       ]
-    ]
-
-    #---------------------------------------------------------------------------
-    $div id=main [
-      $h1 [ $!lorem.words n=6 tc=1 ]
-      $!lorem.cicero45bc
     ]
   ]
 ]

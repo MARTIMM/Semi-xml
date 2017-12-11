@@ -12,6 +12,7 @@ use SxmlLib::SxmlHelper;
 class Html::Menu {
 
   my Bool $menu-js-stored = False;
+  my Str $main-page-id;
 
   #-----------------------------------------------------------------------------
   method container (
@@ -23,36 +24,50 @@ class Html::Menu {
     my Str $class = ($attrs<class>//'sidenav').Str;
     my Str $location = ($attrs<id>//'left').Str;
 
+    # style element and their setting for the menu and pages
     self!create-style( $parent, $id, $class);
 
-
-    my XML::Element $span = append-element(
-      $parent, 'span', {
-        class => 'menu-open-button',
-        onclick => 'menu.openNavigation()'
-      }
-    );
-
-    append-element( $span, :text('&#9776;'));
-
-    my XML::Element $div = append-element(
+    my XML::Element $menu-div = append-element(
       $parent, 'div', {
         id => $id, class => $class,
       }
     );
 
+    self!create-script( $parent, $id);
+
+    my XML::Element $pages-hook = append-element( $parent, 'sxml:hook');
+    drop-parent-container($content-body);
+
+    for $content-body.nodes.reverse -> $node {
+      if $node ~~ XML::Element and $node.name eq 'a' {
+        $menu-div.insert($node);
+      }
+
+      elsif $node ~~ XML::Element and $node.name eq 'div' {
+        $pages-hook.after($node);
+      }
+    }
+
     my XML::Element $a = append-element(
-      $div, 'a', {
-        href => 'javascript:void(0)', class => 'menu-close-button',
+      $menu-div, 'a', {
+        href => 'javascript:void(0)',
+        class => 'menu-close-button',
         onclick => 'menu.closeNavigation()',
       }
     );
 
     append-element( $a, :text('&#x2716;'));
 
-    self!create-script( $parent, $id);
+    for $parent.nodes -> $node {
+      if $node ~~ XML::Element and $node.name eq 'div' {
+        if $node.attribs<class>:exists and $node.attribs<class> eq 'menu-page' {
+          $node.set( 'style', 'display: block;');
+          last;
+        }
+      }
+    }
 
-    $div.append($content-body);
+    $pages-hook.remove;
     $parent;
   }
 
@@ -64,15 +79,58 @@ class Html::Menu {
   ) {
     my Str $title = ($attrs<title>//'...title...').Str;
     my Str $id = ($attrs<id>//'...id...').Str;
+    my Bool $open-button = ($attrs<open-button>//1).Int.Bool;
+    my Bool $home-button = ($attrs<home-button>//1).Int.Bool;
+
+    # $main-page-id is set to the id of the current entry and it is
+    # global to the class.
+    $main-page-id //= $id;
 
     drop-parent-container($content-body);
 
-    my XML::Element $a = append-element( $parent, 'a', {href => '#'});
+    # make a link with an empty reference and an onclick function which must
+    # show the selected page.
+    my XML::Element $a = append-element(
+      $parent, 'a', {
+        href => 'javascript:void(0)',
+        onclick => Q:s "menu.showPage('$id')",
+      }
+    );
     append-element( $a, :text($title));
 
-    my XML::Element $page-div = append-element( $parent, 'div', { id => $id});
-note "CB: $content-body";
-    $page-div.append(clone-node($_)) for $content-body.nodes;
+    my XML::Element $page-div = append-element(
+      $parent, 'div', {
+        id => $id,
+        style => 'display: none',
+        class => 'menu-page'
+      }
+    );
+
+    $page-div.insert($_) for $content-body.nodes.reverse;
+
+    if $open-button {
+      my XML::Element $open-a = insert-element(
+        $page-div, 'a', {
+          href => 'javascript:void(0)',
+          class => 'menu-open-button',
+          onclick => 'menu.openNavigation()'
+        }
+      );
+
+      append-element( $open-a, :text('&#9776;'));
+    }
+
+    if $home-button {
+      my XML::Element $home-a = insert-element(
+        $page-div, 'a', {
+          href => 'javascript:void(0)',
+          class => 'menu-home-button',
+          onclick => Q:s "menu.showPage('$main-page-id')"
+        }
+      );
+
+      append-element( $home-a, :text('&#x1F3E0;'));
+    }
 
     $parent;
   }
@@ -82,7 +140,7 @@ note "CB: $content-body";
   method !create-style( XML::Element $parent, Str $id, Str $class ) {
 
     my XML::Element $remap-style = append-element(
-      $parent, 'sxml:remap', { map-to => "/html/head",}
+      $parent, 'sxml:remap', { map-after => "/html/head/style[1]",}
     );
 
     my XML::Element $style = append-element( $remap-style, 'style');
@@ -131,6 +189,11 @@ note "CB: $content-body";
         cursor: pointer;
       }
 
+      .menu-home-button {
+        font-size: 30px;
+        cursor: pointer;
+      }
+
       /* Style page content - use this if you want to push the page content to the right when you open the side navigation */
       #main {
           transition: margin-left .5s;
@@ -157,12 +220,31 @@ note "CB: $content-body";
       my XML::Element $script = append-element( $remap-js, 'script');
       append-element( $script, :text(Q:s:to/EOJS/));
         var menu = {
-          openNavigation: function() {
+          openNavigation: function ( ) {
             document.getElementById('$id').style.width = "250px";
           },
 
-          closeNavigation: function() {
+          closeNavigation: function ( ) {
             document.getElementById('$id').style.width = "0";
+          },
+
+          showPage: function ( id ) {
+            this.closeNavigation();
+            setTimeout(
+              function ( ) {
+
+                var node = document.getElementById(id);
+                var divNodes = node.parentNode.getElementsByTagName('div');
+                for ( var i=0; i < divNodes.length; i++) {
+                  if ( divNodes[i].className == 'menu-page' ) {
+                    divNodes[i].style.display = "none";
+                  }
+                }
+
+                document.getElementById(id).style.display = "block";
+              },
+              750
+            );
           }
         }
         EOJS
