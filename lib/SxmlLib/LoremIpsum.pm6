@@ -296,10 +296,14 @@ class LoremIpsum {
   method !make-word ( --> Str ) {
 
     # get some point in the first half of the text and find the next space
-    my Int $start1 = $lorem-texts<perl5-lorem><text>.index(
-      ' ', (($lorem-texts<perl5-lorem><length>) - 20).rand.Int
-    );
-    my Int $start2 = $lorem-texts<perl5-lorem><text>.index( ' ', $start1 + 1);
+    my Int $start1 = 0;
+    my Int $start2 = 0;
+    repeat until ( ? $start1 and ?$start2 and ($start2 - $start1 > 1) ) {
+      $start1 = $lorem-texts<perl5-lorem><text>.index(
+        ' ', (($lorem-texts<perl5-lorem><length>) - 20).rand.Int
+      );
+      $start2 = $lorem-texts<perl5-lorem><text>.index( ' ', $start1 + 1);
+    }
 
     # use the points to get a words from the text
     $lorem-texts<perl5-lorem><text>.substr( $start1, $start2 - $start1);

@@ -13,7 +13,7 @@ Attribute values which are empty like '' or "" are translated wrong
   * [ ] `$a b=c d f=a`. This becomes `$a b=c [] d f=a`
   * [ ] spacing around brackets seems to matter
   * [x] one `$br` generates two of them! Caused by improper input key selection where the proper table for html could not be found.
-  * [ ] sometimes there is an error in SxmlLib::LoremIpsum
+  * [x] sometimes there is an error in SxmlLib::LoremIpsum
 
 
 # Todo
