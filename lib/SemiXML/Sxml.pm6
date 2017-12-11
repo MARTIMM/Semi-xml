@@ -142,7 +142,7 @@ class Sxml {
   method save ( ) {
 
     # Get the document text
-    my $document = self.get-xml-text;
+    my $document = self.Str;
 
     # If a run code is defined, use that code as a key to find the program
     # to send the result to. If R-table entry is an Array, take the first
@@ -182,7 +182,13 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   method Str ( --> Str ) {
-    return self.get-xml-text;
+    my Str $text = self.get-xml-text;
+
+    # substitute back all single quotes. it is never a problem to
+    # have them escaped
+    $text ~~ s:g/'&#39;'/'/;
+
+    $text
   }
 
   #-----------------------------------------------------------------------------
