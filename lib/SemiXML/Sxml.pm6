@@ -33,12 +33,15 @@ class Sxml {
   has Hash $!user-config;
   has Bool $!trace = False;
   has Bool $!merge;
+  has Bool $!force;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( Array :$!refine = [], :$!merge = False ) {
+  submethod BUILD (
+    Array :$!refine = [], Bool :$!merge = False, Bool :$!force
+  ) {
 
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
@@ -452,32 +455,33 @@ class Sxml {
     # if we need to continue parsing
     my Bool $continue = True;
 
-    # Use the R-table if the entry is an Array. If R-table entry is an Array,
-    # take the second element. It is a result filename to check for modification
-    # date. Check is done before parsing to see if parsing is needed.
-    $!target-fn = 'unknown.unknown';
-    if ?$!filename {
-      if $!refined-config<R>{$!refine[OUT]} ~~ Array {
-        $!target-fn = self!process-cmd-str(
-          $!refined-config<R>{$!refine[OUT]}[1]
+    if ! $!force {
+
+      # Use the R-table if the entry is an Array. If R-table entry is an Array,
+      # take the second element. It is a result filename to check for modification
+      # date. Check is done before parsing to see if parsing is needed.
+      $!target-fn = 'unknown.unknown';
+      if ?$!filename {
+        if $!refined-config<R>{$!refine[OUT]} ~~ Array {
+          $!target-fn = self!process-cmd-str(
+            $!refined-config<R>{$!refine[OUT]}[1]
+          );
+        }
+
+        else {
+          $!target-fn = self!process-cmd-str("%op/%of.%oe");
+        }
+
+        $continue = (
+          ! $!target-fn.IO.e or (
+            $!filename.IO.modified.Int > $!target-fn.IO.modified.Int
+          )
         );
       }
-
-      else {
-        $!target-fn = self!process-cmd-str("%op/%of.%oe");
-      }
-
-      $continue = (
-        ! $!target-fn.IO.e or (
-          $!filename.IO.modified.Int > $!target-fn.IO.modified.Int
-        )
-      );
     }
 
     # before continuing, process dependencies first. $!target-fn is used there
     my Bool $found-dependency = self!run-dependencies;
-
-#    $continue = True;
 
     # instantiate modules specified in the configuration
     if $found-dependency or $continue {

@@ -25,9 +25,9 @@ for grep( /^ '--'/, @*ARGS) -> $a {
 #-------------------------------------------------------------------------------
 sub MAIN (
   Str $filename, Str :$in = 'xml', Str :$out = 'xml',
-  Bool :$merge = False
+  Bool :$merge = False, Bool :$force = False
 ) {
 
-  my SemiXML::Sxml $x .= new( :$merge, :refine([ $in, $out]));
+  my SemiXML::Sxml $x .= new( :$merge, :refine([ $in, $out]), :$force);
   $x.save if $x.parse(:$filename);
 }

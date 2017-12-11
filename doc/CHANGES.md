@@ -4,6 +4,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.39.0
+  * Added --force to sxml2xml and :force to Sxml.pm6 BUILD() to force processing even when result is newer than its source. This is for example needed when developing modules. The sxml source might not change while coding the module.
 * 0.38.0
   * Added a remapping option to move inserted content to some other location at the end of the parsing process.
 * 0.37.0
