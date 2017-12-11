@@ -19,11 +19,14 @@ class Css {
   ) {
 
     # put everything into a style variable to prevent any escape substitutions
+#`{{
     my XML::Element $var = append-element(
       $parent, 'sxml:variable', {name => 'style'}
     );
     my XML::Element $style = append-element( $var, 'style', :text("\n"));
     append-element( $parent, 'sxml:style');
+}}
+    my XML::Element $style = append-element( $parent, 'style', :text("\n"));
 
     drop-parent-container($content-body);
 #note "\nContent0 $content-body";
@@ -65,7 +68,7 @@ class Css {
 
     # if the css body is not a string of only spaces, add it to the style
     if $is-block and $css-body !~~ m/^ \s* $/ {
-#note "Body: $css-body";
+note "Body: $css-body";
 
       $css-body ~~ s:g/ \s\s+ / /;
       $css-body ~~ s:g/ \n / /;
