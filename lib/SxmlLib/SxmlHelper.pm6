@@ -325,22 +325,44 @@ class SxmlHelper {
     for $x.find( '//sxml:remap', :to-list) -> $remap {
 
       my Str $map-to = $remap.attribs<map-to> // '';
-      die "empty map-to value" unless ? $map-to;
+      my Str $map-after = $remap.attribs<map-after> // '';
 
       my Str $as = $remap.attribs<as> // '';
 
-      # if more nodes are found take only the first one
-      my $n = $x.find( $map-to, :to-list)[0];
-      die "node '$map-to' to map to, not found" unless ? $n;
-      if ?$as {
-        my $top-node;
-        $top-node = XML::Element.new(:name($as));
-        $top-node.append(clone-node($_)) for $remap.nodes;
-        $n.append($top-node);
+      if ? $map-to {
+        # if more nodes are found take only the first one
+        my $n = $x.find( $map-to, :to-list)[0];
+        die "node '$map-to' to map to, not found" unless ? $n;
+        if ?$as {
+          my $top-node = XML::Element.new(:name($as));
+          $top-node.append(clone-node($_)) for $remap.nodes;
+          $n.append($top-node);
+        }
+
+        else {
+          $n.append(clone-node($_)) for $remap.nodes;
+        }
+      }
+
+      elsif ? $map-after {
+        # if more nodes are found take only the first one
+        my $n = $x.find( $map-after, :to-list)[0];
+        die "node '$map-after' to map after, not found" unless ? $n;
+        if ?$as {
+          my $top-node = XML::Element.new(:name($as));
+          $top-node.append(clone-node($_)) for $remap.nodes;
+          $n.after($top-node);
+        }
+
+        else {
+          my XML::Element $hook = after-element( $n, 'sxml:hook');
+          $hook.before(clone-node($_)) for $remap.nodes;
+          $hook.remove;
+        }
       }
 
       else {
-        $n.append(clone-node($_)) for $remap.nodes;
+        die "empty map-to or map-after value";
       }
 
       $remap.remove;
