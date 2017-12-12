@@ -44,7 +44,7 @@ $html [
   $body [
 
     #---------------------------------------------------------------------------
-    $!menu.container location=left [
+    $!menu.container side=right [
 
       #-------------------------------------------------------------------------
       # first page is the main page and is shown first

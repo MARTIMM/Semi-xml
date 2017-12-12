@@ -4,6 +4,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
 
+* 0.39.2
+  * Side menu can open from left and right.
 * 0.39.1
   * Side menu opening from left is functioning.
 * 0.39.0

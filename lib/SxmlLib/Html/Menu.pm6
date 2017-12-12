@@ -22,10 +22,11 @@ class Html::Menu {
   ) {
     my Str $id = ($attrs<id>//'SideNav').Str;
     my Str $class = ($attrs<class>//'sidenav').Str;
-    my Str $location = ($attrs<id>//'left').Str;
+    my Str $side = ($attrs<side>//'').Str;
+    $side = 'left' unless $side ~~ any( 'left', 'right');
 
     # style element and their setting for the menu and pages
-    self!create-style( $parent, $id, $class);
+    self!create-style( $parent, $id, $class, $side);
 
     my XML::Element $menu-div = append-element(
       $parent, 'div', {
@@ -137,7 +138,7 @@ class Html::Menu {
 
   #-----------------------------------------------------------------------------
   # create a style element with the properties for a menu
-  method !create-style( XML::Element $parent, Str $id, Str $class ) {
+  method !create-style( XML::Element $parent, Str $id, Str $class, Str $side ) {
 
     my XML::Element $remap-style = append-element(
       $parent, 'sxml:remap', { map-after => "/html/head/style[1]",}
@@ -152,7 +153,7 @@ class Html::Menu {
           position:   fixed;              /* Stay in place */
           z-index:    1;                  /* Stay on top */
           top:        0;                  /* Stay at the top */
-          left:       0;
+          $side:      0;
           background-color:   #111;       /* Black*/
           overflow-x:         hidden;     /* Disable horizontal scroll */
           padding-top:        60px;       /* Place content 60px from the top */
