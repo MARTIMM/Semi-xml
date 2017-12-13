@@ -4,6 +4,9 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers.
 
+* 0.39.4
+  * refactored code from `Action` to `SxmlHelper`.
+  * bug fixed in several non self closing elements.
 * 0.39.3
   * No escaping of contents for certain elements. E.g.
     ```
