@@ -28,7 +28,6 @@ subtest 'self-closing', {
 
   my SemiXML::Sxml $x;
   $x .= new( :trace, :merge, :refine([ <t210 xml>]));
-  isa-ok $x, 'SemiXML::Sxml';
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;
@@ -62,7 +61,6 @@ subtest 'self-closing on html defaults', {
 
   my SemiXML::Sxml $x;
   $x .= new( :trace, :merge, :refine([ <html html>]));
-  isa-ok $x, 'SemiXML::Sxml';
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;
