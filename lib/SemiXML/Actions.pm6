@@ -87,7 +87,7 @@ class Actions {
 
       # process body text to escape special chars
       for $x.nodes -> $node {
-#TODO use no-escaping from table F
+
         if $node ~~ any( SemiXML::Text, XML::Text) {
           my Str $s = self!process-esc(~$node);
           $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
@@ -95,16 +95,24 @@ class Actions {
 
         elsif $node ~~ XML::Element {
           my Array $self-closing = $!F-table<self-closing> // [];
+          my Array $no-escaping = $!F-table<no-escaping> // [];
 
-#note "Ftab: ", $self-closing;
+#note "Ftab: $node.name()", $no-escaping;
           # Check for self closing tag, and if so remove content if any
           if $node.name ~~ any(@$self-closing) {
             before-element( $node, $node.name, $node.attribs);
             $node.remove;
           }
 
+          elsif $node.name ~~ any(@$no-escaping) {
+            # no escaping must be performed on its contents
+            # for these kinds of nodes
+            next;
+          }
+
           elsif $node.name ~~ m/^ 'sxml:' / {
             # no processing for these kinds of nodes
+            next;
           }
 
           else {
