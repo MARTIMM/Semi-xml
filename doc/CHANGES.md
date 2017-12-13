@@ -2,8 +2,23 @@
 
 # Changes in SemiXML:: * and sxml2xml
 
-Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers
+Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers.
 
+* 0.39.3
+  * No escaping of contents for certain elements. E.g.
+    ```
+    $style [
+      p > strong {
+        color: black;
+      }
+    ]
+    ```
+    Here `>` must not be converted to &gt;
+  * Conversion of single quotes into &#39; by XML is wrong in some cases. E,g,
+    ```
+    $a href="javascript:void(0)" onclick="openPage('main')" [Open Menu]
+    ```
+    This is converted back when result is asked using `.Str()`.
 * 0.39.2
   * Side menu can open from left and right.
 * 0.39.1
