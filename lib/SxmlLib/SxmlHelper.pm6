@@ -92,11 +92,11 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   sub append-element (
-    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text = ''
+    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
     --> XML::Node
   ) is export {
 
-    my XML::Node $text-element = SemiXML::Text.new(:$text) if ? $text;
+    my XML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
     my XML::Node $element =
        XML::Element.new( :$name, :attribs(%$attributes)) if ? $name;
 
@@ -310,7 +310,7 @@ class SxmlHelper {
   }
 
   #-----------------------------------------------------------------------------
-  # remove leftovers from sxml namespace
+  # move content to some other place in the document
   sub remap-content ( XML::Element $parent ) is export {
 
     # get xpath object
@@ -321,9 +321,12 @@ class SxmlHelper {
     my $x = XML::XPath.new(:document($xml-document));
     $x.set-namespace: 'sxml' => 'github.MARTIMM';
 
-    #look for remapping elements
+    # look for remapping elements
     for $x.find( '//sxml:remap', :to-list) -> $remap {
 
+      # there are 2 types;
+      # map-to is used to append the content into the target xpath
+      # map-after is used to insert after the target path
       my Str $map-to = $remap.attribs<map-to> // '';
       my Str $map-after = $remap.attribs<map-after> // '';
 
@@ -370,6 +373,99 @@ class SxmlHelper {
 
     # remove the namespace
     $parent.attribs{"xmlns:sxml"}:delete;
+  }
+
+  #-----------------------------------------------------------------------------
+  my $local-action;
+  sub escape-attr-and-elements (
+    XML::Element $x,
+    $action is copy where .^name eq 'SemiXML::Actions' = $local-action
+  ) is export {
+
+    $local-action = $action if ?$action;
+
+    # process body text to escape special chars
+    for $x.nodes -> $node {
+
+      if $node ~~ any( SemiXML::Text, XML::Text) {
+        my Str $s = process-esc(~$node);
+        $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
+      }
+
+      elsif $node ~~ XML::Element {
+        my Array $self-closing = $action.F-table<self-closing> // [];
+        my Array $no-escaping = $action.F-table<no-escaping> // [];
+
+note "Ftab: $node.name()", $self-closing, $no-escaping;
+        # Check for self closing tag, and if so remove content if any
+        if $node.name ~~ any(@$self-closing) {
+          before-element( $node, $node.name, $node.attribs);
+          $node.remove;
+          next;
+        }
+
+        else {
+          # ensure that there is at least a space as its content otherwise
+          # XML will make it self-closing
+          unless $node.nodes.elems {
+            append-element( $node, :text(''));
+          }
+        }
+
+        if $node.name ~~ any(@$no-escaping) {
+          # no escaping must be performed on its contents
+          # for these kinds of nodes
+          next;
+        }
+
+        if $node.name ~~ m/^ 'sxml:' / {
+          # no processing for these kinds of nodes
+          next;
+        }
+
+        # recurively process through all elements
+        escape-attr-and-elements($node);
+
+        # If this is not a self closing element and there is no content, insert
+        # an empty string to get <a></a> instead of <a/>
+        if ! $node.nodes {
+          $node.append(SemiXML::Text.new(:text('')));
+        }
+      }
+
+#        elsif $node ~~ any(XML::Text|SemiXML::Text) {
+#
+#        }
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # Substitute some escape characters in entities and remove the remaining
+  # backslashes.
+  sub process-esc ( Str $esc is copy --> Str ) {
+
+    # Entity must be known in the xml result!
+    $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;
+    $esc ~~ s:g/\\\s/\&nbsp;/;
+    $esc ~~ s:g/ '<' /\&lt;/;
+    $esc ~~ s:g/ '>' /\&gt;/;
+
+    $esc ~~ s:g/'\\'//;
+
+#`{{
+    # Remove rest of the backslashes unless followed by hex numbers prefixed
+    # by an 'x'
+    #
+    if $esc ~~ m/ '\\x' <xdigit>+ / {
+      my $set-utf8 = sub ( $m1, $m2) {
+        return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
+      };
+
+      $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
+    }
+}}
+
+    return $esc;
   }
 
   #-----------------------------------------------------------------------------

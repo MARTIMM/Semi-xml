@@ -83,57 +83,7 @@ class Actions {
     }
 
     # conversion to xml escapes is done as late as possible
-    my Sub $after-math = sub ( XML::Element $x ) {
-
-      # process body text to escape special chars
-      for $x.nodes -> $node {
-
-        if $node ~~ any( SemiXML::Text, XML::Text) {
-          my Str $s = self!process-esc(~$node);
-          $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
-        }
-
-        elsif $node ~~ XML::Element {
-          my Array $self-closing = $!F-table<self-closing> // [];
-          my Array $no-escaping = $!F-table<no-escaping> // [];
-
-#note "Ftab: $node.name()", $no-escaping;
-          # Check for self closing tag, and if so remove content if any
-          if $node.name ~~ any(@$self-closing) {
-            before-element( $node, $node.name, $node.attribs);
-            $node.remove;
-          }
-
-          elsif $node.name ~~ any(@$no-escaping) {
-            # no escaping must be performed on its contents
-            # for these kinds of nodes
-            next;
-          }
-
-          elsif $node.name ~~ m/^ 'sxml:' / {
-            # no processing for these kinds of nodes
-            next;
-          }
-
-          else {
-            # recurively process through all elements
-            $after-math($node);
-
-            # If this is not a self closing element and there is no content, insert
-            # an empty string to get <a></a> instead of <a/>
-            if ! $node.nodes {
-              $node.append(SemiXML::Text.new(:text('')));
-            }
-          }
-        }
-
-#        elsif $node ~~ any(XML::Text|SemiXML::Text) {
-#
-#        }
-      }
-    }
-
-    &$after-math($parent);
+    escape-attr-and-elements( $parent, self);
 
     # search for variables and substitute them
     subst-variables($parent);
@@ -143,27 +93,6 @@ class Actions {
 
     # remove leftovers from sxml namespace
     remove-sxml($parent);
-
-#`{{
-    # create completed document
-    $parent.setNamespace( 'github.MARTIMM', 'sxml');
-    $!xml-document .= new($parent);
-
-    my $x = XML::XPath.new(:document($!xml-document));
-    $x.set-namespace: 'sxml' => 'github.MARTIMM';
-
-    # show some leftover sxml namespace elements
-    for $x.find( '//*', :to-list) -> $v {
-      if $v.name() ~~ /^ 'sxml:'/ {
-#        note "Leftovers in sxml namespace: '$v.name()', parent is '$v.parent.name()'";
-        $v.remove;
-      }
-    }
-
-    # remove the namespace
-    $parent.attribs{"xmlns:sxml"}:delete;
-}}
-
 
     # return the completed document
     $!xml-document .= new($parent);
@@ -652,36 +581,6 @@ class Actions {
     }
 
     $t;
-  }
-
-  #-----------------------------------------------------------------------------
-  # Substitute some escape characters in entities and remove the remaining
-  # backslashes.
-  #
-  method !process-esc ( Str $esc is copy --> Str ) {
-
-    # Entity must be known in the xml result!
-    $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;
-    $esc ~~ s:g/\\\s/\&nbsp;/;
-    $esc ~~ s:g/ '<' /\&lt;/;
-    $esc ~~ s:g/ '>' /\&gt;/;
-
-    $esc ~~ s:g/'\\'//;
-
-#`{{
-    # Remove rest of the backslashes unless followed by hex numbers prefixed
-    # by an 'x'
-    #
-    if $esc ~~ m/ '\\x' <xdigit>+ / {
-      my $set-utf8 = sub ( $m1, $m2) {
-        return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
-      };
-
-      $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
-    }
-}}
-
-    return $esc;
   }
 
   #-----------------------------------------------------------------------------
