@@ -31,7 +31,7 @@
     'input', 'label', 'select', 'textarea'
   ]
 
-  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
+#  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
   no-escaping       = [ 'style', 'script']
   space-preserve    = [ 'pre' ]
   self-closing      = [
