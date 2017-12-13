@@ -69,7 +69,7 @@ like $xml-text,
      /'<y data_1="quoted&quot;test&quot;">'/,
      'Class test 3';
 like $xml-text,
-     / :s '<z data_2="double &#39;quoted&#39; attrs">'/,
+     / :s '<z data_2="double \'quoted\' attrs">'/,
      'Class test 4';
 
 like $xml-text, / :s eq1 empty\-single\=\"\" /, "single quotes";
