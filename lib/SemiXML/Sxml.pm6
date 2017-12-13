@@ -40,7 +40,7 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   submethod BUILD (
-    Array :$!refine = [], Bool :$!merge = False, Bool :$!force
+    Array :$!refine = [], Bool :$!merge = False, Bool :$!force, Bool :$!trace
   ) {
 
     $!grammar .= new;
@@ -79,7 +79,8 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   multi method parse (
-    Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True
+    Str:D :$content! is copy, Hash :$config,
+    Bool :$!drop-cfg-filename = True
     --> Bool
   ) {
 
