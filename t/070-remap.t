@@ -97,7 +97,7 @@ subtest 'empty map-to path', {
       my XML::XPath $x = get-xpath($text);
     }, Exception,
     'No map-to found',
-    :message("empty map-to value");
+    :message("empty map-to or map-after value");
 }
 
 #-------------------------------------------------------------------------------
