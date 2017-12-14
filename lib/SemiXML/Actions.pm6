@@ -259,7 +259,7 @@ class Actions {
 
         # Otherwise it is the module on which method can be called
         else {
-#note "Method call attribs: ", $attrs;
+#note "Method call $module.\"$meth\", attribs: ", $attrs;
 
           # call user method and expect result in $x
           $x = $module."$meth"(

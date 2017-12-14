@@ -96,19 +96,25 @@ class SxmlHelper {
     --> XML::Node
   ) is export {
 
+    # create a text element, even when it is an empty string.
     my XML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
+
+    # create an element only when the name is defined and not empty
     my XML::Node $element =
        XML::Element.new( :$name, :attribs(%$attributes)) if ? $name;
 
+    # if both are created than add text to the element
     if ? $element and ? $text-element {
       $element.append($text-element);
     }
 
+    # if only text, then the element becomes the text element
     elsif ? $text-element {
       $element = $text-element;
     }
 
     # else $name -> no change to $element. No name and no text is an error.
+#    die "No element nor text defined" unless ? $element;
 
     $parent.append($element);
     $element;
@@ -116,18 +122,20 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   sub insert-element (
-    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text = ''
+    XML::Element $parent, Str $name = '', Hash $attributes = {}, Str :$text
     --> XML::Node
   ) is export {
 
-    my XML::Node $element;
+    my XML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
+    my XML::Node $element =
+       XML::Element.new( :$name, :attribs(%$attributes)) if ? $name;
 
-    if ? $text {
+    if ? $element and ? $text-element {
       $element = SemiXML::Text.new(:$text);
     }
 
-    else {
-      $element = XML::Element.new( :$name, :attribs(%$attributes));
+    elsif ? $text-element {
+      $element = $text-element;
     }
 
     $parent.insert($element);
@@ -382,6 +390,8 @@ class SxmlHelper {
     $action is copy where .^name eq 'SemiXML::Actions' = $local-action
   ) is export {
 
+    # when called from Action $action is set, otherwise it was from the
+    # recursive call. this saves some stack space.
     $local-action = $action if ?$action;
 
     # process body text to escape special chars
@@ -396,7 +406,7 @@ class SxmlHelper {
         my Array $self-closing = $action.F-table<self-closing> // [];
         my Array $no-escaping = $action.F-table<no-escaping> // [];
 
-note "Ftab: $node.name()", $self-closing, $no-escaping;
+#note "Ftab: $node.name()", $self-closing, $no-escaping;
         # Check for self closing tag, and if so remove content if any
         if $node.name ~~ any(@$self-closing) {
           before-element( $node, $node.name, $node.attribs);
@@ -405,32 +415,33 @@ note "Ftab: $node.name()", $self-closing, $no-escaping;
         }
 
         else {
-          # ensure that there is at least a space as its content otherwise
-          # XML will make it self-closing
+          # ensure that there is at least a text element as its content
+          # otherwise XML will make it self-closing
           unless $node.nodes.elems {
             append-element( $node, :text(''));
           }
         }
 
+        # some elements mast not be processed to escape characters
         if $node.name ~~ any(@$no-escaping) {
           # no escaping must be performed on its contents
           # for these kinds of nodes
           next;
         }
 
+        # no processing for these kinds of nodes
         if $node.name ~~ m/^ 'sxml:' / {
-          # no processing for these kinds of nodes
           next;
         }
 
-        # recurively process through all elements
+        # recurively process through other type of elements
         escape-attr-and-elements($node);
 
-        # If this is not a self closing element and there is no content, insert
-        # an empty string to get <a></a> instead of <a/>
-        if ! $node.nodes {
-          $node.append(SemiXML::Text.new(:text('')));
-        }
+#        # If this is not a self closing element and there is no content, insert
+#        # an empty string to get <a></a> instead of <a/>
+#        if ! $node.nodes {
+#          $node.append(SemiXML::Text.new(:text('')));
+#        }
       }
 
 #        elsif $node ~~ any(XML::Text|SemiXML::Text) {

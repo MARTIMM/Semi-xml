@@ -13,7 +13,6 @@ mkdir($dir) unless $dir.IO ~~ :e;
 spurt( $mod, q:to/EOMOD/);
   use v6;
   use Test;
-  #use SemiXML::Sxml;
   use SxmlLib::SxmlHelper;
   use SemiXML::Text;
   use XML;
