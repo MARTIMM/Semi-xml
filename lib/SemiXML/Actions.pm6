@@ -36,7 +36,6 @@ class Actions {
   # body is processed later than tag-spec. The names are the element name,
   # method name or symbol name. The xml namesspace and module name are not
   # added because these can be any name defined by the user.
-  #
   has Array $!tag-list = [];
 
   #-----------------------------------------------------------------------------
