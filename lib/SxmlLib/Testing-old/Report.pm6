@@ -62,11 +62,11 @@ class Report:ver<0.2.2> {
     $!bug-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Bug');
     $!skip-obj = $!sxml.get-sxml-object('SxmlLib::Testing::Skip');
 
-    $!highlight-code = ? ~$attrs<highlight-lang> // False;
-    $!highlight-language = ~$attrs<highlight-lang> // '';
+    $!highlight-code = ($attrs<highlight-lang> // '').Str.Bool;
+    $!highlight-language = ($attrs<highlight-lang> // '').Str;
     $!highlight-skin = lc(($attrs<highlight-skin> // 'prettify').Str);
     $!highlight-skin = 'prettify' if $!highlight-skin eq 'default';
-    $!linenumbers = ? ~$attrs<linenumbers> // False;
+    $!linenumbers = ($attrs<linenumbers> // '').Str.Bool;
 
     self!setup-report-doc($attrs);
   }
@@ -297,7 +297,7 @@ class Report:ver<0.2.2> {
         # <hook> used to insert test, todo, bug and skip content after the code.
         # $hook is removed later
         #
-        $hook = append-element( $!body, 'hook');
+        $hook = append-element( $!body, 'sxml:hook');
 
 
         # get code entry number
@@ -330,7 +330,7 @@ class Report:ver<0.2.2> {
               # and to the test program
               $!test-program ~= $code-text;
 
-              # add test text after the <pre> and before the <hook>
+              # add test text after the <pre> and before the <sxml:hook>
               $!body.before( $hook, $!test-obj.make-table($tentry));
             }
 
@@ -345,7 +345,7 @@ class Report:ver<0.2.2> {
               # and to the test program
               $!test-program ~= $code-text;
 
-              # add todo text after the <pre> and before the <hook>
+              # add todo text after the <pre> and before the <sxml:hook>
               $!body.before( $hook, $!todo-obj.make-table($tentry));
             }
 
@@ -360,7 +360,7 @@ class Report:ver<0.2.2> {
               # and to the test program
               $!test-program ~= $code-text;
 
-              # add bug text after the <pre> and before the <hook>
+              # add bug text after the <pre> and before the <sxml:hook>
               $!body.before( $hook, $!bug-obj.make-table($tentry));
             }
 
@@ -375,7 +375,7 @@ class Report:ver<0.2.2> {
               # and to the test program
               $!test-program ~= $code-text;
 
-              # add skip text after the <pre> and before the <hook>
+              # add skip text after the <pre> and before the <sxml:hook>
               $!body.before( $hook, $!skip-obj.make-table($tentry));
             }
           }
@@ -399,7 +399,7 @@ class Report:ver<0.2.2> {
     # Cannot use $!body.removeChild($hook) because in the mean time there
     # are many hooks left behind, so search by name
     for $!body.nodes.reverse -> $node {
-      $node.remove if $node.name eq 'hook';
+      $node.remove if $node ~~ XML::Element and $node.name eq 'sxml:hook';
     }
   }
 
