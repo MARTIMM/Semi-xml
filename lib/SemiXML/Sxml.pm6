@@ -32,7 +32,6 @@ class Sxml {
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
   has Bool $!trace = False;
-  has Bool $!merge;
   has Bool $!force;
 
   # structure to check for dependencies
@@ -40,7 +39,7 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   submethod BUILD (
-    Array :$!refine = [], Bool :$!merge = False, Bool :$!force, Bool :$!trace
+    Array :$!refine = [], Bool :$!force, Bool :$!trace
   ) {
 
     $!grammar .= new;
@@ -272,20 +271,6 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-#TODO check if still needed
-  method get-current-filename ( --> Str ) {
-
-    my Hash $S = $!refined-config<S>;
-    if ?$S<filepath> {
-      "$S<rootpath>/$S<filepath>/$S<filename>.$S<fileext>";
-    }
-
-    else {
-     "$S<rootpath>/$S<filename>.$S<fileext>";
-    }
-  }
-
-  #-----------------------------------------------------------------------------
   method !process-cmd-str( Str $cmd-string --> Str ) {
 
     my $cmd = $cmd-string;
@@ -322,20 +307,7 @@ class Sxml {
     $!configuration = Config::DataLang::Refine;
 
     # 2) load the SemiXML.toml from resources directory
-
-# There is a bug locally to this package. Resources get wrong path when using
-# local distribution. However, strange as it is, not on Travis! This is Caused
-# by wrong? use of PERL6LIB env variable.
-#note "\nR: ", %?RESOURCES.perl;
-#note "\nC: ", %?RESOURCES<SemiXML.toml>;
-
-#my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
-#if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
-#  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
-#}
-# pick only one config file. Will always be there.
-#self!load-config( :config-name($rp.IO.absolute), :!merge);
-
+    # first is resource and there is no merge from other configs
     self!load-config( :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge);
 
     # 3) if filename is given, use its path also
@@ -355,7 +327,7 @@ class Sxml {
 #      $fext = $*PROGRAM.extension;
 
       # 3a) to load SemiXML.TOML from the files location, current dir
-      #     (also hidden), and in $HOME. merge is controlled by user.
+      #     (also hidden), and in $HOME.
       self!load-config( :config-name<SemiXML.toml>, :$locations, :merge);
 
       # 3b) same as in 3a but use the filename now.
@@ -555,7 +527,7 @@ class Sxml {
         else {
 
           my Array $refine = [@d[ IN, OUT]];
-          my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
+          my SemiXML::Sxml $x .= new( :$!trace, :$refine);
 
           note "Process dependency: --in=@d[IN] --out=@d[OUT] $filename"
             if $!trace and $!refined-config<T><file-handling>;
@@ -643,10 +615,8 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   method !load-config (
-    Str :$config-name, Array :$locations = [], Bool :$merge is copy
+    Str :$config-name, Array :$locations = [], Bool :$merge
   ) {
-
-    $merge = $!merge ?& $merge;
 
     try {
 
@@ -654,17 +624,12 @@ class Sxml {
       if ?$!configuration {
         $!configuration .= new(
           :$config-name, :$locations, :other-config($!configuration.config),
-          :$merge, :!trace
-#          :trace($!trace and ($!refined-config<T><config-search> // False))
+          :$merge, :$!trace
         );
       }
 
       else {
-        $!configuration .= new(
-          :$config-name, :$locations, :$merge,
-          :!trace
-#          :trace($!trace and ($!refined-config<T><config-search> // False))
-        );
+        $!configuration .= new( :$config-name, :$locations, :$merge, :$!trace);
       }
 
       CATCH {
