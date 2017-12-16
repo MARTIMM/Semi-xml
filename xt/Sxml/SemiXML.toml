@@ -1,0 +1,16 @@
+#[ dependencies ]
+#  file          = [ ]
+
+[ ML ]
+  test        = 'SxmlLib::Testing::Test'
+#  code          = 'SxmlLib::Testing::Code'
+#  test          = 'SxmlLib::Testing::Test'
+#  todo          = 'SxmlLib::Testing::Todo'
+#  bug           = 'SxmlLib::Testing::Bug'
+#  skip          = 'SxmlLib::Testing::Skip'
+  lorem         = 'SxmlLib::LoremIpsum'
+
+[ R.html ]
+  pdf           = 'wkhtmltopdf - %op/%of.pdf'
+#  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
+#  chk           = 'tidy -'
