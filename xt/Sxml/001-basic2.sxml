@@ -1,0 +1,52 @@
+# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/001-basic.sxml
+
+$!test.run title='Basic SemiXML tests' [
+
+  $h1 [ Testing the basic use of SemiXML ]
+  $h2 [ Introduction ]
+
+  $p [
+    SemiXML is a library of modules which translate an sxml into a XML based
+    language. For example Html, Soap, Docbook or your own XML language.
+    There are several syntactic constructs which look very much the same as the
+    XML language.
+  ]
+
+  $p [
+    The code below will test a simple top level structure.
+  ]
+
+  $pre [!=
+    A one liner
+
+    $st [ ]
+
+    This should translate into
+
+    <st/>
+  !]
+
+  $p [
+    We need to write a convenience routine to call the parser several times from
+    the tests. This way we keep the tests simple.
+  ]
+
+  $!test.code [!=
+    use SemiXML::Sxml;
+
+    sub parse ( Str $content --> Str ) {
+
+      state SemiXML::Sxml $x .= new;
+      $x.parse(:$content);
+      ~$x;
+    }
+  !]
+
+  $!test.code [!
+    my $xml = parse('$st []');
+  !]
+
+  $!test.code =test [!=
+    is $xml, '<st/>'", 'The element generated is $*|code [ <st/> ].';
+  !]
+]

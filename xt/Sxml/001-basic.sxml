@@ -1,13 +1,19 @@
+# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/001-basic.sxml
+
 $!report.run title='Basic SemiXML tests' [
 
   $h1 [ Testing the basic use of SemiXML ]
   $h2 [ Introduction ]
 
   $p [
-    SemiXML is a library which translates an equally named language into XML.
+    SemiXML is a library of modules which translate an sxml into a XML based
+    language. For example Html, Soap, Docbook or your own XML language.
     There are several syntactic constructs which look very much the same as the
-    XML language. What we are going to test here is the simple
-    structure at the top level,
+    XML language.
+  ]
+
+  $p [
+    The code below will test a simple top level structure.
   ]
 
   $pre [!=
@@ -42,20 +48,20 @@ $!report.run title='Basic SemiXML tests' [
   $!code.add [!
     my $xml = parse('$st []');
   !][
-    $!test.add t="is $xml, '<st/>'" [ The element generated is $*|code[<st/>]. ]
+    $!test.add t="is $xml, '<st/>'" [ The element generated is $*|code [ <st/> ]. ]
   ][!
     $xml = parse('$st [ abc ]');
   !][
     $!test.add t="is $xml, '<st>abc</st>'" [
-      The element generated is $*|code[<st>abc</st>].
+      The element generated is $*|code [ <st>abc</st> ].
     ]
   ][!
     $xml = parse(Q:q@$st a1=w a2='g g' a3="h h" [ ]@);
   !][
-    $!test.add t=^like $xml, /'a1="w"'/^ [a1="w" attribute]
-    $!test.add t=^like $xml, /'a2="g g"'/^ [a2="g g" attribute]
-    $!test.add t=^like $xml, /'a3="h h"'/^ [a3="h h" attribute]
-  
+    $!test.add t=^like $xml, /'a1="w"'/^ [ a1="w" attribute ]
+    $!test.add t=^like $xml, /'a2="g g"'/^ [ a2="g g" attribute ]
+    $!test.add t=^like $xml, /'a3="h h"'/^ [ a3="h h" attribute ]
+
     $!test.add t="dies-ok { $xml = parse('$st [ $f w [] hj ]'); }" [
       Elementary parse failures are trapped. Here the first attribute $**b[w] to
       element $**b[f] is unfinished. Unfortunately the location where the error
