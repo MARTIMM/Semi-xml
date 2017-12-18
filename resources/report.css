@@ -10,9 +10,24 @@ pre {
 }
 
 pre.test-block-code {
-  background-color:     #eaefea;
+#  background-color:     #eaefea;
   font-family:          FreeMono;
   font-size:            11pt;
+  display:              inline;
+}
+
+pre.prettyprint {
+  position:             normal;
+  float:                left;
+  background-color:     #366;
+  width:                89%;
+}
+
+pre.aside-check {
+  position:             normal;
+  float:                right;
+  width:                7%;
+  background-color:     #dff;
 }
 
 pre.example {
