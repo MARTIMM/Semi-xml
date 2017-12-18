@@ -1,6 +1,7 @@
 # run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/001-basic.sxml
 
-$!test.run title='Basic SemiXML tests' [
+$!test.run title='Basic SemiXML tests'
+       highlight-skin=desert highlight-lang=perl6 =linenumbers [
 
   $h1 [ Testing the basic use of SemiXML ]
   $h2 [ Introduction ]
@@ -12,41 +13,36 @@ $!test.run title='Basic SemiXML tests' [
     XML language.
   ]
 
+  $h2 [ Test SemiXML::Sxml object and simple input ]
   $p [
-    The code below will test a simple top level structure.
-  ]
-
-  $pre [!=
-    A one liner
-
-    $st [ ]
-
-    This should translate into
-
-    <st/>
-  !]
-
-  $p [
-    We need to write a convenience routine to call the parser several times from
-    the tests. This way we keep the tests simple.
+    The code below will test a simple top level structure. A one liner
+    $**strong [! $st [ ] !] should translate into $*|strong [! <st/> !].
+    Because there is no added configuration, it defaults to XML so it will
+    have a prefix.
   ]
 
   $!test.code [!=
     use SemiXML::Sxml;
+    my SemiXML::Sxml $sxml .= new;
+    isa-ok $sxml, SemiXML::Sxml;
 
-    sub parse ( Str $content --> Str ) {
+    $sxml.parse(:content('$st []'));
+    my $xml = ~$sxml;
 
-      state SemiXML::Sxml $x .= new;
-      $x.parse(:$content);
-      ~$x;
-    }
+    is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<st/>@,
+       "The generated xml is conforming the standard";
   !]
 
-  $!test.code [!
-    my $xml = parse('$st []');
-  !]
+  $h2 [ jklzflkjhflkja fd ]
+  $p [
+    ajskdhf ljkh dflkjhdf
+  ]
+  $!test.code title='jhg djhgasd asjh' [!=
+    is 1,1,'yes one is one';
+    is 2,2,'and two is two';
+    is 2,3,'and two is not three';
 
-  $!test.code =test [!=
-    is $xml, '<st/>'", 'The element generated is $*|code [ <st/> ].';
+    throws-like { Failure.new('awkward'); },
+      Exception, 'return a failure', :message('not so awkward');
   !]
 ]
