@@ -1,8 +1,9 @@
-#[ dependencies ]
-#  file          = [ ]
+[ C ]
+  tracing       = false
 
+#------------------------------------------------------------------------------
 [ ML ]
-  test        = 'SxmlLib::Testing::Test'
+  test          = 'SxmlLib::Testing::Test'
 #  code          = 'SxmlLib::Testing::Code'
 #  test          = 'SxmlLib::Testing::Test'
 #  todo          = 'SxmlLib::Testing::Todo'
@@ -10,7 +11,18 @@
 #  skip          = 'SxmlLib::Testing::Skip'
   lorem         = 'SxmlLib::LoremIpsum'
 
+#------------------------------------------------------------------------------
 [ R.html ]
   pdf           = 'wkhtmltopdf - %op/%of.pdf'
 #  fmt           = 'xmllint --format --noent - > %op/%of.%oe'
 #  chk           = 'tidy -'
+
+#------------------------------------------------------------------------------
+# Tracing tables
+[ T ]
+#  config        = true
+#  tables        = true
+#  modules       = true
+#  parse         = true
+#  parse-result  = true
+  file-handling = true
