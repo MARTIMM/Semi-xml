@@ -621,7 +621,7 @@ class Sxml {
     try {
 
       # $!configuration is always undefined the first time.
-      if ?$!configuration {
+      if $!configuration.defined {
         $!configuration .= new(
           :$config-name, :$locations, :other-config($!configuration.config),
           :$merge, :$!trace
