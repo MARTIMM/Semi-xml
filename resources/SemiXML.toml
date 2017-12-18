@@ -86,7 +86,6 @@
 #------------------------------------------------------------------------------
 # Tracing tables
 [ T ]
-#  config-search = false
   config        = false
   tables        = false
   modules       = false
