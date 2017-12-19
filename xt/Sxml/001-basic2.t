@@ -6,10 +6,10 @@ use SemiXML::Sxml;
 my SemiXML::Sxml $sxml .= new;
 isa-ok $sxml, SemiXML::Sxml;
 
-$sxml.parse(:content('$st []'));
+$sxml.parse(:content('$some-element []'));
 my $xml = ~$sxml;
 
-is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<st/>@,
+is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
    "The generated xml is conforming the standard";
 subtest 'jhg djhgasd asjh', {
   is 1,1,'yes one is one';
@@ -18,6 +18,11 @@ subtest 'jhg djhgasd asjh', {
   
   throws-like { Failure.new('awkward'); },
     Exception, 'return a failure', :message('not so awkward');
+}
+
+todo 'working on it', 1 unless 0;
+subtest 'jhgj jh jh jhg', {
+  is 15,14,'not yet, maybe later'; 
 }
 
 

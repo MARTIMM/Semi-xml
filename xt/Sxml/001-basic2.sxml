@@ -16,7 +16,8 @@ $!test.run title='Basic SemiXML tests'
   $h2 [ Test SemiXML::Sxml object and simple input ]
   $p [
     The code below will test a simple top level structure. A one liner
-    $**strong [! $st [ ] !] should translate into $*|strong [! <st/> !].
+    $**strong [! $some-element [ ] !] should translate into $*|strong
+    [! <some-element/> !].
     Because there is no added configuration, it defaults to XML so it will
     have a prefix.
   ]
@@ -26,10 +27,10 @@ $!test.run title='Basic SemiXML tests'
     my SemiXML::Sxml $sxml .= new;
     isa-ok $sxml, SemiXML::Sxml;
 
-    $sxml.parse(:content('$st []'));
+    $sxml.parse(:content('$some-element []'));
     my $xml = ~$sxml;
 
-    is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<st/>@,
+    is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
        "The generated xml is conforming the standard";
   !]
 
@@ -45,4 +46,14 @@ $!test.run title='Basic SemiXML tests'
     throws-like { Failure.new('awkward'); },
       Exception, 'return a failure', :message('not so awkward');
   !]
+
+  $p [
+    ljkdsf lkjha sdfl ljkdfkjh adf;jkasdfl jhsdaf
+    asdkfjladhjs fk adsfl lasd flkj diu cyviuzcivx yv
+  ]
+
+  $!test.todo title='jhgj jh jh jhg' reason='working on it' test=0 [!
+    is 15,14,'not yet, maybe later';
+  !]
+
 ]

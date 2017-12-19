@@ -4,6 +4,7 @@ use v6;
 unit package SxmlLib::Testing:auth<github:MARTIMM>;
 
 use XML;
+use XML::XPath;
 use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
 use SxmlLib::Testing::Testing;
@@ -169,22 +170,7 @@ class Test {
     XML::Element $parent, XML::Element $code, Hash $attrs, :$type
   ) {
 
-    drop-parent-container($code);
-
-    # remove starting new-line if there
-    my Str $code-text = '';
-    for $code.nodes -> $node {
-      my Str $snode = ~$node;
-      $snode ~~ s/^ \n//;
-      $code-text ~= $snode;
-    }
-
-    # setup class
-    my Str $class = 'test-block-code';
-    if $!highlight-code {
-      $class = "prettyprint $!highlight-language";
-      $class ~= " linenums:$!line-number" if $!linenumbers;
-    }
+    my Str $code-text = self!get-code-text($code);
 
 #`{{
     # Experiment to wrap all in EVALs
@@ -258,21 +244,48 @@ note $code-text;
 
       $lc++;
     }
+note "TL: ", (map {"[$_]"}, @$!test-lines).join(',');
 
-    # update the line number count for the next code block
-    my Int $nlines = $code-text.lines.elems;
-    $!line-number += $nlines;
+    # setup class
+    my Str $class = 'test-block-code';
+    if $!highlight-code {
+      $class = "prettyprint $!highlight-language";
+      $class ~= " linenums:$!line-number" if $!linenumbers;
+    }
 
     # add the code text to the report document
     append-element( $parent, 'pre', {:$class}, :text($code-text));
 
     # also add a check part to the right side of the code block
+    my Int $nlines = $code-text.lines.elems;
     my $aside-check = " \n" x $nlines;
-    $class ~~ s/ 'linenums:' \d+ //;
-    $class ~= " aside-check";
-    append-element( $parent, 'pre', {:$class}, :text($aside-check));
+    append-element(
+      $parent, 'pre',
+      { :class("aside-check"), :id("aside{$!line-number}nl{$nlines}")},
+      :text($aside-check)
+    );
+
+    # insert a cleaner div below to prevent any disturbences of the two <pre>
+    append-element( $parent, 'div', {:class('cleaner')});
+
+    # update the line number count for the next code block
+    $!line-number += $nlines;
 
     $!program-text ~= $code-text;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !get-code-text ( XML::Element $code --> Str ) {
+
+    drop-parent-container($code);
+
+    # remove starting new-line if there is one
+    my Str $code-text = '';
+    for $code.nodes -> $node {
+      my Str $snode = ~$node;
+      $snode ~~ s/^ \n//;
+      $code-text ~= $snode;
+    }
   }
 
   #-----------------------------------------------------------------------------
@@ -286,15 +299,17 @@ note $code-text;
 
     # run the tests using perl and get the result contents through a pipe
     note "\n---[ Prove output ]", '-' x 61;
+    note " ";
 
     #'--timer', '--merge', "--archive $!test-filename.tgz",
     my Proc $p = run 'prove', '--exec', 'perl6', '--verbose',
                      '--ignore-exit', '--failures', "--rules='seq=**'",
                      '--nocolor', '--norc',
-                     $!test-filename, :out;
+                     $!test-filename, :out, :err;
 
     # read lines from pipe from testing command
     my @lines = $p.out.lines;
+    my @diag-lines = $p.err.lines;
 
 #    $p.out.close;
 
@@ -302,29 +317,127 @@ note $code-text;
     my Int $indent = 0;
     my Int $prev-indent = 0;
     my Int $test-lines-idx = 0;
+    #my Int $subtest-index;
+    #my Int $throws-like-index;
     my Bool $throws-like-test = False;
-    for @lines -> $line {
-      $line ~~ /:s ^ (\s+) ([not]? ok) /;
-      if ? ~$/[0] {
-        $indent = (~$/).chars;
-        if $indent > $prev-indent {
+    my Array $idx-stack = [];
 
+    for @lines -> $line {
+      $line ~~ /^ (\s*) (['not' \s+]? 'ok') /;
+
+      if $/.defined {
+#        note $line;
+
+        # stick to the last one if w've gone too far
+        $test-lines-idx -= 1 unless $!test-lines[$test-lines-idx].defined;
+
+note "Line : $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+
+        # if indent increases, it could have been a subtest or a throws-like
+        $indent = (~$/[0]).chars;
+        if $indent > $prev-indent {
+note "Indented... $test-lines-idx, $!test-lines[$test-lines-idx][1] (push)";
+          if $!test-lines[$test-lines-idx][1] eq 's' {
+            $idx-stack.push($test-lines-idx);
+
+            # a subtest does show when decreasing indent. this line is the first
+            # test in the subtest
+note "Lin s: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
+            $test-lines-idx++;
+            $!test-lines[$test-lines-idx].push(~$/[1]);
+note "Lin x: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+          }
+
+          elsif $!test-lines[$test-lines-idx][1] eq 't' {
+note "Lin t: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
+
+            $idx-stack.push($test-lines-idx);
+            $throws-like-test = True;
+#            $test-lines-idx++;
+          }
+
+
+
+          $test-lines-idx++;
+          $prev-indent = $indent;
         }
 
+        # if indent decreases, it could have been the
+        # end of a subtest or a throws-like
         elsif $indent < $prev-indent {
+note "Compare $indent < $prev-indent (pop)";
 
+          my $stack-idx = $idx-stack.pop;
+          if $!test-lines[$test-lines-idx][1] eq 's' {
+            $!test-lines[$stack-idx].push(~$/[1]);
+          }
+
+          elsif $!test-lines[$test-lines-idx][1] eq 't' {
+            $!test-lines[$stack-idx].push(~$/[1]);
+            $throws-like-test = False;
+          }
+note "End... $test-lines-idx, $stack-idx, \[$!test-lines[$stack-idx][*].join(',')]";
+
+          #$test-lines-idx++;
+          $prev-indent = $indent;
         }
 
         else {
+          next if $throws-like-test;
           $!test-lines[$test-lines-idx].push(~$/[1]);
+note "Lin n: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+          $test-lines-idx++;
         }
       }
-
-      note $line;
     }
 
-note "Test lines: $!test-lines[*]";
-    note "---[ End prove output ]", '-' x 57;
+    note "\n---[ End prove output ]", '-' x 57;
     note " ";
+    .note for @diag-lines;
+    note "\n---[ End prove diagnostics ]", '-' x 52;
+    note " ";
+
+note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
+
+    self!modify-aside-check-panels;
+
+  }
+
+  #-----------------------------------------------------------------------------
+  method !modify-aside-check-panels ( ) {
+
+    my Int $test-lines-idx = 0;
+
+    # search for the aside check panels
+    my XML::Document $document .= new($!html);
+    my $x = XML::XPath.new(:$document);
+    for $x.find( '//pre', :to-list) -> $acheck {
+      next unless $acheck.attribs<class> ~~ m/ 'aside-check' /;
+      my $start-line = $acheck<id>;
+      $start-line ~~ s/^ 'aside' //;
+      my $nlines = $start-line;
+      $start-line ~~ s/ 'nl' \d+ $//;
+      $start-line .= Int;
+      $nlines ~~ s/^ \d+ 'nl' //;
+      $nlines .= Int;
+
+      my @lines = [ ' ' xx $nlines ];
+note "Init l: ", (map { "'$_'" }, @lines).join(', ');
+      for $acheck.nodes -> $n {
+        $n.remove;
+      }
+
+      loop ( my $i = 0; $i < $nlines; $i++) {
+        next unless $!test-lines[$test-lines-idx].defined;
+note "Loop: $start-line + $i, $test-lines-idx, $!test-lines[$test-lines-idx][0]";
+        next unless ($start-line + $i) == $!test-lines[$test-lines-idx][0];
+
+        @lines[$i] = $!test-lines[$test-lines-idx][2];
+        $test-lines-idx++;
+      }
+
+note "\nLines aside: $start-line, $nlines, ", (map { "'$_'" }, @lines).join(', ');
+      append-element( $acheck, :text(@lines.join("\n") ~ " \n"));
+    }
   }
 }
