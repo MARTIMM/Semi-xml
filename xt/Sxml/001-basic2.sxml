@@ -1,7 +1,7 @@
 # run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/001-basic.sxml
 
-$!test.run title='Basic SemiXML tests'
-       highlight-skin=desert highlight-lang=perl6 =linenumbers [
+$!test.run title='Basic SemiXML tests' lang=perl6
+       highlight-skin=desert =linenumbers [
 
   $h1 [ Testing the basic use of SemiXML ]
   $h2 [ Introduction ]
@@ -13,47 +13,48 @@ $!test.run title='Basic SemiXML tests'
     XML language.
   ]
 
-  $h2 [ Test SemiXML::Sxml object and simple input ]
-  $p [
-    The code below will test a simple top level structure. A one liner
-    $**strong [! $some-element [ ] !] should translate into $*|strong
-    [! <some-element/> !].
-    Because there is no added configuration, it defaults to XML so it will
-    have a prefix.
+  $!test.chapter title='Test SemiXML::Sxml object and simple input' [
+    $p [
+      The code below will test a simple top level structure. A one liner
+      $**strong [! $some-element [ ] !] should translate into $*|strong
+      [! <some-element/> !].
+      Because there is no added configuration, it defaults to XML so it will
+      have a prefix.
+    ]
+
+    $!test.code [!=
+      use SemiXML::Sxml;
+      my SemiXML::Sxml $sxml .= new;
+      isa-ok $sxml, SemiXML::Sxml;
+
+      $sxml.parse(:content('$some-element []'));
+      my $xml = ~$sxml;
+
+      is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
+         "The generated xml is conforming the standard";
+    !]
   ]
 
-  $!test.code [!=
-    use SemiXML::Sxml;
-    my SemiXML::Sxml $sxml .= new;
-    isa-ok $sxml, SemiXML::Sxml;
+  $!test.chapter title='jklzflkjhflkja fd' [
+    $p [
+      ajskdhf ljkh dflkjhdf
+    ]
+    $!test.code title='jhg djhgasd asjh' [!=
+      is 1,1,'yes one is one';
+      is 2,2,'and two is two';
+      is 2,3,'and two is not three';
 
-    $sxml.parse(:content('$some-element []'));
-    my $xml = ~$sxml;
+      throws-like { Failure.new('awkward'); },
+        Exception, 'return a failure', :message('not so awkward');
+    !]
 
-    is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
-       "The generated xml is conforming the standard";
-  !]
+    $p [
+      ljkdsf lkjha sdfl ljkdfkjh adf;jkasdfl jhsdaf
+      asdkfjladhjs fk adsfl lasd flkj diu cyviuzcivx yv
+    ]
 
-  $h2 [ jklzflkjhflkja fd ]
-  $p [
-    ajskdhf ljkh dflkjhdf
+    $!test.todo title='jhgj jh jh jhg' reason='working on it' test=0 [!
+      is 15,14,'not yet, maybe later';
+    !]
   ]
-  $!test.code title='jhg djhgasd asjh' [!=
-    is 1,1,'yes one is one';
-    is 2,2,'and two is two';
-    is 2,3,'and two is not three';
-
-    throws-like { Failure.new('awkward'); },
-      Exception, 'return a failure', :message('not so awkward');
-  !]
-
-  $p [
-    ljkdsf lkjha sdfl ljkdfkjh adf;jkasdfl jhsdaf
-    asdkfjladhjs fk adsfl lasd flkj diu cyviuzcivx yv
-  ]
-
-  $!test.todo title='jhgj jh jh jhg' reason='working on it' test=0 [!
-    is 15,14,'not yet, maybe later';
-  !]
-
 ]

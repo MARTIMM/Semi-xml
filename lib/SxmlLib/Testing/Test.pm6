@@ -21,6 +21,8 @@ class Test {
   has Str $!program-text;
   has Str $!test-filename;
 
+  has Str $!language = 'perl6';
+
   has Bool $!highlight-code = False;
   has Str $!highlight-language = '';
   has Str $!highlight-skin = '';
@@ -29,7 +31,10 @@ class Test {
 
   has Bool $!initialized = False;
 
+  enum Test-lines-entry <LINENUMBER TESTTYPE TESTRESULT CHAPTER DIAGNOSTIC>;
   has Array $!test-lines = [];
+
+  has Str $!chapter-test-title = 'No test title';
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
@@ -37,8 +42,8 @@ class Test {
     return if $!initialized;
 
     # things to highlight code using google prettify
-    $!highlight-code = ($attrs<highlight-lang> // '').Str.Bool;
-    $!highlight-language = ($attrs<highlight-lang> // '').Str;
+    $!highlight-code = ($attrs<lang> // '').Str.Bool;
+    $!language = $!highlight-language = ($attrs<lang> // 'perl6').Str;
     $!highlight-skin = lc(($attrs<highlight-skin> // 'prettify').Str);
     $!highlight-skin = 'prettify' if $!highlight-skin eq 'default';
     $!linenumbers = ($attrs<linenumbers> // '').Str.Bool;
@@ -108,6 +113,35 @@ class Test {
     $parent
   }
 
+  #-----------------------------------------------------------------------------
+  method chapter (
+    XML::Element $parent, Hash $attrs,
+    XML::Element :$content-body, Array :$tag-list
+
+    --> XML::Node
+  ) {
+
+    $!chapter-test-title = ($attrs<title>//'No test title').Str;
+
+    drop-parent-container($content-body);
+
+    # search for the aside check panels
+    my XML::Document $document .= new($content-body);
+    my $x = XML::XPath.new(:$document);
+    for $x.find( '//pre', :to-list) -> $acheck {
+note "Pre A: ", ~$acheck.attribs<class>;
+      # skip if <pre> is not an aside check
+      next unless $acheck.attribs<class> ~~ m/ 'aside-check' /;
+
+      $acheck.set( 'title', $!chapter-test-title);
+    }
+
+    append-element( $parent, 'h2', :text($!chapter-test-title));
+    $parent.append($content-body);
+
+    $parent
+  }
+
   #===[ private methods ]=======================================================
   method !initialize-report ( Hash $attrs ) {
 
@@ -165,12 +199,7 @@ class Test {
     ) if ? $attrs<title>;
   }
 
-  #-----------------------------------------------------------------------------
-  method !wrap-code (
-    XML::Element $parent, XML::Element $code, Hash $attrs, :$type
-  ) {
 
-    my Str $code-text = self!get-code-text($code);
 
 #`{{
     # Experiment to wrap all in EVALs
@@ -180,97 +209,30 @@ class Test {
 note $code-text;
 }}
 
-    # if title is given wrap code in a subtest
-    if ? $attrs<title> {
-      my Str $ct = "subtest '$attrs<title>', \{\n";
-      for $code-text.lines -> $l {
-        $ct ~= "  $l\n";
-      }
-      $code-text = "$ct}\n";
-    }
+  #-----------------------------------------------------------------------------
+  method !wrap-code (
+    XML::Element $parent, XML::Element $code, Hash $attrs, :$type
+  ) {
+
+    # get code text from code element
+    my Str $code-text = self!get-code-text($code);
+
+    # wrap in a subtest if a title attribute is found
+    $code-text = self!wrap-subtest( $code-text, $attrs);
 
     # add some code depending on code type
-    given $type {
-      when 'skip' {
-        my Int $n = ($attrs<n>//1).Str.Int;
-        my Str $reason = ($attrs<reason>//'some reason').Str;
-        my Str $test = ($attrs<test>//'1').Str;
-
-        my Str $ct = "\nif $test \{\n";
-        for $code-text.lines -> $l {
-          $ct ~= "  $l\n";
-        }
-        $code-text = "$ct}\nelse \{\n  skip '$reason', $n;\n}\n";
-      }
-
-      when 'todo' {
-        my Int $n = ($attrs<n>//1).Str.Int;
-        my Str $reason = ($attrs<reason>//'some reason').Str;
-        my Str $test = ($attrs<test>//'1').Str;
-
-        $code-text = "\ntodo '$reason', $n unless $test;\n$code-text";
-      }
-
-      # when 'code' { continue; }
-      # default { }
-    }
+    $code-text = self!wrap-type( $type, $code-text, $attrs);
 
     # gather the line numbers where the tests are written
-    my $lc = $!line-number;
-    for $code-text.lines -> $l {
+    self!save-testlines($code-text);
 
-      if $l ~~ m:s/ ^ \s*
-                    [ todo | skip | skip\-rest | pass | flunk | ok |
-                      nok | cmp\-ok | is | isnt | is\-deeply |
-                      is\-approx | like | unlike | use\-ok | isa\-ok |
-                      does\-ok | can\-ok | dies\-ok | lives\-ok |
-                      eval\-dies\-ok | eval\-lives\-ok | throws\-like |
-                      subtest
-                    ]
+    # insert place to display the code
+    self!create-code-element( $parent, $code-text);
 
-                  / {
-        if $l ~~ m:s/ ^ \s* subtest / {
-          $!test-lines.push([ $lc, 's']);
-        }
+    # insert place to display the test results
+    self!create-test-result( $parent, $code-text);
 
-        elsif $l ~~ m:s/ ^ \s* throws\-like / {
-          $!test-lines.push([ $lc, 't']);
-        }
-
-        else {
-          $!test-lines.push([ $lc, 'n']);
-        }
-      }
-
-      $lc++;
-    }
-note "TL: ", (map {"[$_]"}, @$!test-lines).join(',');
-
-    # setup class
-    my Str $class = 'test-block-code';
-    if $!highlight-code {
-      $class = "prettyprint $!highlight-language";
-      $class ~= " linenums:$!line-number" if $!linenumbers;
-    }
-
-    # add the code text to the report document
-    append-element( $parent, 'pre', {:$class}, :text($code-text));
-
-    # also add a check part to the right side of the code block
-    my Int $nlines = $code-text.lines.elems;
-    my $aside-check = " \n" x $nlines;
-    append-element(
-      $parent, 'pre',
-      { :class("aside-check"), :id("aside{$!line-number}nl{$nlines}")},
-      :text($aside-check)
-    );
-
-    # insert a cleaner div below to prevent any disturbences of the two <pre>
-    append-element( $parent, 'div', {:class('cleaner')});
-
-    # update the line number count for the next code block
-    $!line-number += $nlines;
-
+    # add to total code text to be run later
     $!program-text ~= $code-text;
   }
 
@@ -286,32 +248,142 @@ note "TL: ", (map {"[$_]"}, @$!test-lines).join(',');
       $snode ~~ s/^ \n//;
       $code-text ~= $snode;
     }
+
+    $code-text
+  }
+
+  #-----------------------------------------------------------------------------
+  method !wrap-subtest ( Str $code-text is copy, Hash $attrs --> Str ) {
+
+    # if title is given wrap code in a subtest
+    if ? $attrs<title> {
+      my Str $ct = "subtest '$attrs<title>', \{\n";
+      for $code-text.lines -> $l {
+        $ct ~= "  $l\n";
+      }
+      $code-text = "$ct}\n";
+    }
+
+    $code-text
+  }
+
+  #-----------------------------------------------------------------------------
+  method !wrap-type ( Str $type, Str $code-text is copy, Hash $attrs --> Str ) {
+
+    given $type {
+      when 'skip' {
+        my Int $n = ($attrs<n>//1).Str.Int;
+        my Str $reason = ($attrs<reason>//'some reason').Str;
+        my Str $test = ($attrs<test>//'1').Str;
+
+        my Str $ct = "if $test \{\n";
+        for $code-text.lines -> $l {
+          $ct ~= "  $l\n";
+        }
+        $code-text = "$ct}\nelse \{\n  skip '$reason', $n;\n}\n";
+      }
+
+      when 'todo' {
+        my Int $n = ($attrs<n>//1).Str.Int;
+        my Str $reason = ($attrs<reason>//'some reason').Str;
+        my Str $test = ($attrs<test>//'1').Str;
+
+        $code-text = "todo '$reason', $n unless $test;\n$code-text";
+      }
+
+      # when 'code' { continue; }
+      # default { }
+    }
+
+    $code-text
+  }
+
+  #-----------------------------------------------------------------------------
+  # find the test code lines and store the line numbers in $!test-lines
+  method !save-testlines ( Str $code-text ) {
+
+    my $lc = $!line-number;
+    for $code-text.lines -> $l {
+
+      # check if it is one of the test lines
+      if $l ~~ m:s/ ^ \s*
+                    [ pass | flunk | ok |
+                      nok | cmp\-ok | is | isnt | is\-deeply |
+                      is\-approx | like | unlike | use\-ok | isa\-ok |
+                      does\-ok | can\-ok | dies\-ok | lives\-ok |
+                      eval\-dies\-ok | eval\-lives\-ok | throws\-like |
+                      subtest
+                    ]
+
+                  / {
+
+        # then see if it is one of subtest or throws-like. these test results
+        # have indented output
+        if $l ~~ m:s/^ \s* subtest / {
+          $!test-lines.push([ $lc, 's']);
+        }
+
+        elsif $l ~~ m:s/^ \s* throws\-like / {
+          $!test-lines.push([ $lc, 't']);
+        }
+
+        # the rest is normal
+        else {
+          $!test-lines.push([ $lc, 'n']);
+        }
+      }
+
+      $lc++;
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # create a <pre> element where code is displayed
+  method !create-code-element( XML::Element $parent, $code-text) {
+
+    # setup class
+    my Str $class = 'test-block-code';
+    if $!highlight-code {
+      $class = "prettyprint $!highlight-language";
+      $class ~= " linenums:$!line-number" if $!linenumbers;
+    }
+
+    # add the code text to the report document
+    append-element( $parent, 'pre', {:$class}, :text($code-text));
+  }
+
+  #-----------------------------------------------------------------------------
+  method !create-test-result( XML::Element $parent, $code-text ) {
+
+    my Int $nlines = $code-text.lines.elems;
+    my $aside-check = " \n" x $nlines;
+    append-element(
+      $parent, 'pre', {
+        :class("aside-check"),
+        :name("aside{$!line-number}nl{$nlines}"),
+        :title('No test title')
+      },
+      :text($aside-check)
+    );
+#note "LN: $!line-number, $nlines";
+
+    # update the line number count for the next code block
+    $!line-number += $nlines;
+
+    # insert a cleaner div below to prevent any disturbences of the two <pre>
+    append-element( $parent, 'div', {:class('cleaner')});
   }
 
   #-----------------------------------------------------------------------------
   method !run-tests ( ) {
 
-    # finish program and write to test file
-    $!program-text ~= "\n\ndone-testing;\n";
-
-    note "\nWrite test code to $!test-filename";
-    $!test-filename.IO.spurt($!program-text);
-
-    # run the tests using perl and get the result contents through a pipe
     note "\n---[ Prove output ]", '-' x 61;
     note " ";
 
-    #'--timer', '--merge', "--archive $!test-filename.tgz",
-    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose',
-                     '--ignore-exit', '--failures', "--rules='seq=**'",
-                     '--nocolor', '--norc',
-                     $!test-filename, :out, :err;
-
-    # read lines from pipe from testing command
-    my @lines = $p.out.lines;
-    my @diag-lines = $p.err.lines;
-
-#    $p.out.close;
+    # run the tests
+    my Array $result-lines = self!get-test-result;
+    my @lines = |$result-lines[0];
+    my @diag-lines = |$result-lines[1];
 
     # interprete test results
     my Int $indent = 0;
@@ -331,32 +403,30 @@ note "TL: ", (map {"[$_]"}, @$!test-lines).join(',');
         # stick to the last one if w've gone too far
         $test-lines-idx -= 1 unless $!test-lines[$test-lines-idx].defined;
 
-note "Line : $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+#note "Line : $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
 
         # if indent increases, it could have been a subtest or a throws-like
         $indent = (~$/[0]).chars;
         if $indent > $prev-indent {
-note "Indented... $test-lines-idx, $!test-lines[$test-lines-idx][1] (push)";
-          if $!test-lines[$test-lines-idx][1] eq 's' {
+#note "Indented... $test-lines-idx, $!test-lines[$test-lines-idx][1] (push)";
+          if $!test-lines[$test-lines-idx][TESTTYPE] eq 's' {
             $idx-stack.push($test-lines-idx);
 
             # a subtest does show when decreasing indent. this line is the first
             # test in the subtest
-note "Lin s: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
+#note ">>> s: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
             $test-lines-idx++;
             $!test-lines[$test-lines-idx].push(~$/[1]);
-note "Lin x: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+#note ">>> x: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
           }
 
-          elsif $!test-lines[$test-lines-idx][1] eq 't' {
-note "Lin t: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
+          elsif $!test-lines[$test-lines-idx][TESTTYPE] eq 't' {
+#note ">>> t: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
 
             $idx-stack.push($test-lines-idx);
             $throws-like-test = True;
 #            $test-lines-idx++;
           }
-
-
 
           $test-lines-idx++;
           $prev-indent = $indent;
@@ -365,18 +435,19 @@ note "Lin t: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
         # if indent decreases, it could have been the
         # end of a subtest or a throws-like
         elsif $indent < $prev-indent {
-note "Compare $indent < $prev-indent (pop)";
+#note "Compare $indent < $prev-indent (pop)";
 
           my $stack-idx = $idx-stack.pop;
-          if $!test-lines[$test-lines-idx][1] eq 's' {
+          if $!test-lines[$stack-idx][TESTTYPE] eq 's' {
             $!test-lines[$stack-idx].push(~$/[1]);
+#note "<<< s: $test-lines-idx, \[$!test-lines[$stack-idx][*].join(',')]";
           }
 
-          elsif $!test-lines[$test-lines-idx][1] eq 't' {
+          elsif $!test-lines[$stack-idx][TESTTYPE] eq 't' {
             $!test-lines[$stack-idx].push(~$/[1]);
             $throws-like-test = False;
+#note "<<< t: $test-lines-idx, \[$!test-lines[$stack-idx][*].join(',')]";
           }
-note "End... $test-lines-idx, $stack-idx, \[$!test-lines[$stack-idx][*].join(',')]";
 
           #$test-lines-idx++;
           $prev-indent = $indent;
@@ -385,7 +456,7 @@ note "End... $test-lines-idx, $stack-idx, \[$!test-lines[$stack-idx][*].join(','
         else {
           next if $throws-like-test;
           $!test-lines[$test-lines-idx].push(~$/[1]);
-note "Lin n: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+#note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
           $test-lines-idx++;
         }
       }
@@ -400,7 +471,35 @@ note "Lin n: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $li
 note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
 
     self!modify-aside-check-panels;
+  }
 
+  #-----------------------------------------------------------------------------
+  # run the tests using perl5 prove and get the result lines
+  method !get-test-result ( --> Array ) {
+
+    # finish program and write to test file
+    $!program-text ~= "\n\ndone-testing;\n";
+
+    note "\nWrite test code to $!test-filename";
+    $!test-filename.IO.spurt($!program-text);
+
+    #'--timer', '--merge', "--archive $!test-filename.tgz",
+    my Proc $p = run 'prove', '--exec', 'perl6', '--verbose',
+                     '--ignore-exit', '--failures', "--rules='seq=**'",
+                     '--nocolor', '--norc',
+                     $!test-filename, :out, :err;
+
+    # read lines from pipe from testing command
+    my @lines = $p.out.lines;
+    my @diag-lines = $p.err.lines;
+
+    try {
+      $p.out.close;
+      $p.err.close;
+      CATCH { default {}}
+    }
+
+    [ @lines, @diag-lines]
   }
 
   #-----------------------------------------------------------------------------
@@ -412,8 +511,12 @@ note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
     my XML::Document $document .= new($!html);
     my $x = XML::XPath.new(:$document);
     for $x.find( '//pre', :to-list) -> $acheck {
+
+      # skip if <pre> is not an aside check
       next unless $acheck.attribs<class> ~~ m/ 'aside-check' /;
-      my $start-line = $acheck<id>;
+
+      # get start line number and the number of line in the aside
+      my $start-line = $acheck<name>;
       $start-line ~~ s/^ 'aside' //;
       my $nlines = $start-line;
       $start-line ~~ s/ 'nl' \d+ $//;
@@ -421,23 +524,59 @@ note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
       $nlines ~~ s/^ \d+ 'nl' //;
       $nlines .= Int;
 
-      my @lines = [ ' ' xx $nlines ];
-note "Init l: ", (map { "'$_'" }, @lines).join(', ');
+      my $chapter = $acheck<title>;
+note "Chapter $chapter";
+
+      # initialize and empty the aside <pre> element
+#      my @lines = [ ' ' xx $nlines ];
       for $acheck.nodes -> $n {
         $n.remove;
       }
 
+      # loop over the test lines and set the results from the tests
       loop ( my $i = 0; $i < $nlines; $i++) {
-        next unless $!test-lines[$test-lines-idx].defined;
-note "Loop: $start-line + $i, $test-lines-idx, $!test-lines[$test-lines-idx][0]";
-        next unless ($start-line + $i) == $!test-lines[$test-lines-idx][0];
 
-        @lines[$i] = $!test-lines[$test-lines-idx][2];
-        $test-lines-idx++;
+        # check if there are still test lines left
+        if $!test-lines[$test-lines-idx].defined {
+
+note "Loop: $start-line + $i, $test-lines-idx, $!test-lines[$test-lines-idx][0]";
+          # check if line count matches the test-lines number
+          if ($start-line + $i) == $!test-lines[$test-lines-idx][LINENUMBER] {
+
+            my Str $class;
+            if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
+              $class = 'red';
+            }
+
+            else {
+              $class = 'green';
+            }
+
+            append-element(
+              $acheck, 'strong', {:$class},
+              :text($!test-lines[$test-lines-idx][TESTRESULT] ~ "\n")
+            );
+
+            # add chapter to the test lines
+            $!test-lines[$test-lines-idx][CHAPTER] = $chapter;
+
+            # on to the next test
+            $test-lines-idx++;
+          }
+
+          else {
+            append-element( $acheck, 'strong', :text("\n"));
+          }
+        }
+
+        # fill last lines up
+        else {
+          append-element( $acheck, 'strong', :text("\n"));
+        }
       }
 
-note "\nLines aside: $start-line, $nlines, ", (map { "'$_'" }, @lines).join(', ');
-      append-element( $acheck, :text(@lines.join("\n") ~ " \n"));
+#note "\nLines aside: $start-line, $nlines, ", (map { "'$_'" }, @lines).join(', ');
+#      append-element( $acheck, :text(@lines.join("\n") ~ " \n"));
     }
   }
 }
