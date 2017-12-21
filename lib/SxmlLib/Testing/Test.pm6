@@ -31,10 +31,14 @@ class Test {
 
   has Bool $!initialized = False;
 
-  enum Test-lines-entry <LINENUMBER TESTTYPE TESTRESULT CHAPTER DIAGNOSTIC>;
+  enum Test-lines-entry < LINENUMBER TESTTYPE TESTRESULT CHAPTER
+                          DIAGNOSTIC TODO SKIP
+                        >;
   has Array $!test-lines = [];
 
   has Str $!chapter-test-title = 'No test title';
+
+  has Hash $!run-data = {};
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
@@ -60,6 +64,13 @@ class Test {
     $!test-filename = $SemiXML::Sxml::filename;
     $!test-filename ~~ s/ '.sxml' $/.t/;
 
+    $!run-data<title> = ($attrs<title>//'-').Str;
+    $!run-data<package> = ($attrs<package>//'-').Str;
+    $!run-data<class> = ($attrs<class>//'-').Str;
+    $!run-data<module> = ($attrs<module>//'-').Str;
+    $!run-data<distribution> = ($attrs<distribution>//'-').Str;
+    $!run-data<label> = ($attrs<label>//'-').Str;
+
     self!initialize-report($attrs);
     $!initialized = True;
   }
@@ -76,6 +87,8 @@ class Test {
     $parent.append($!html);
 
     self!run-tests;
+
+    self!footer;
 
     $parent
   }
@@ -129,11 +142,18 @@ class Test {
     my XML::Document $document .= new($content-body);
     my $x = XML::XPath.new(:$document);
     for $x.find( '//pre', :to-list) -> $acheck {
-note "Pre A: ", ~$acheck.attribs<class>;
-      # skip if <pre> is not an aside check
-      next unless $acheck.attribs<class> ~~ m/ 'aside-check' /;
 
-      $acheck.set( 'title', $!chapter-test-title);
+      # skip if <pre> is not an aside check
+      if $acheck.attribs<class>:exists
+         and $acheck.attribs<class> ~~ m/ 'aside-check' / {
+        $acheck.set( 'title', $!chapter-test-title);
+      }
+
+      # or a diagnostic panel
+      elsif $acheck.attribs<name>:exists
+        and $acheck.attribs<name> eq 'diagnostic' {
+        $acheck.set( 'title', $!chapter-test-title);
+      }
     }
 
     append-element( $parent, 'h2', :text($!chapter-test-title));
@@ -208,6 +228,19 @@ note "Pre A: ", ~$acheck.attribs<class>;
                      /$/[0]EVAL\('try {$/[1]}'\)$/[2]; note \$! if ? \$!/;
 note $code-text;
 }}
+
+  #-----------------------------------------------------------------------------
+  # Add footer to the end of the report
+  method !footer ( ) {
+
+    my XML::Element $div = append-element( $!body, 'div', {class => 'footer'});
+    append-element(
+      $div,
+      :text( "Generated using SemiXML, SxmlLib::Testing::*," ~
+             " XML, XML::XPath, &copy;Google prettify"
+      )
+    );
+  }
 
   #-----------------------------------------------------------------------------
   method !wrap-code (
@@ -353,6 +386,7 @@ note $code-text;
   }
 
   #-----------------------------------------------------------------------------
+  # create <pre> element to show diagnostic info
   method !create-test-result( XML::Element $parent, $code-text ) {
 
     my Int $nlines = $code-text.lines.elems;
@@ -371,11 +405,13 @@ note $code-text;
     $!line-number += $nlines;
 
     # insert a cleaner div below to prevent any disturbences of the two <pre>
-    append-element( $parent, 'div', {:class('cleaner')});
+    append-element( $parent, 'pre', { :class<cleaner>, :name<diagnostic>});
   }
 
   #-----------------------------------------------------------------------------
   method !run-tests ( ) {
+
+note "TL: ", (map { "[$_]" }, @$!test-lines).join(', ');
 
     note "\n---[ Prove output ]", '-' x 61;
     note " ";
@@ -384,50 +420,59 @@ note $code-text;
     my Array $result-lines = self!get-test-result;
     my @lines = |$result-lines[0];
     my @diag-lines = |$result-lines[1];
+    my @diag = @diag-lines;
 
     # interprete test results
     my Int $indent = 0;
     my Int $prev-indent = 0;
     my Int $test-lines-idx = 0;
-    #my Int $subtest-index;
-    #my Int $throws-like-index;
     my Bool $throws-like-test = False;
     my Array $idx-stack = [];
 
     for @lines -> $line {
+      my $message = $line;
+      $message ~~ s/^ \s* //;
       $line ~~ /^ (\s*) (['not' \s+]? 'ok') /;
 
       if $/.defined {
-#        note $line;
+        note $line;
 
         # stick to the last one if w've gone too far
         $test-lines-idx -= 1 unless $!test-lines[$test-lines-idx].defined;
 
-#note "Line : $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+note "Line : $test-lines-idx, \[$!test-lines[$test-lines-idx][0,1].join(',')], $message";
 
         # if indent increases, it could have been a subtest or a throws-like
         $indent = (~$/[0]).chars;
         if $indent > $prev-indent {
-#note "Indented... $test-lines-idx, $!test-lines[$test-lines-idx][1] (push)";
+note "Indented...";
           if $!test-lines[$test-lines-idx][TESTTYPE] eq 's' {
             $idx-stack.push($test-lines-idx);
 
             # a subtest does show when decreasing indent. this line is the first
             # test in the subtest
-#note ">>> s: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
+note ">>> s: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..1].join(',')]";
             $test-lines-idx++;
-            $!test-lines[$test-lines-idx].push(~$/[1]);
-#note ">>> x: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+            self!store-state( $!test-lines[$test-lines-idx], ~$/[1], $message, @diag);
+            #$!test-lines[$test-lines-idx][TESTRESULT] = ~$/[1];
+            #$!test-lines[$test-lines-idx][DIAGNOSTIC] = "$message\n";
+            #if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
+            #  self!gather-diagnostic( @diag, $!test-lines[$test-lines-idx]);
+            #}
+note ">>> x: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], $message";
           }
 
           elsif $!test-lines[$test-lines-idx][TESTTYPE] eq 't' {
-#note ">>> t: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')]";
+note ">>> t: $test-lines-idx, \[$!test-lines[$test-lines-idx][0,1].join(',')]";
 
             $idx-stack.push($test-lines-idx);
             $throws-like-test = True;
 #            $test-lines-idx++;
           }
 
+          # set todo or skip state
+          $!test-lines[$test-lines-idx][TODO] = ?($message ~~ /:s TODO /);
+          $!test-lines[$test-lines-idx][SKIP] = ?($message ~~ /:s SKIP /);
           $test-lines-idx++;
           $prev-indent = $indent;
         }
@@ -435,28 +480,49 @@ note $code-text;
         # if indent decreases, it could have been the
         # end of a subtest or a throws-like
         elsif $indent < $prev-indent {
-#note "Compare $indent < $prev-indent (pop)";
+note "Outdented...";
 
           my $stack-idx = $idx-stack.pop;
           if $!test-lines[$stack-idx][TESTTYPE] eq 's' {
-            $!test-lines[$stack-idx].push(~$/[1]);
-#note "<<< s: $test-lines-idx, \[$!test-lines[$stack-idx][*].join(',')]";
+            self!store-state( $!test-lines[$stack-idx], ~$/[1], $message, @diag);
+            #$!test-lines[$stack-idx][TESTRESULT] = ~$/[1];
+            #$!test-lines[$stack-idx][DIAGNOSTIC] = "$message\n";
+            #if $!test-lines[$stack-idx][TESTRESULT] ~~ /:s not ok/ {
+            #  self!gather-diagnostic( @diag, $!test-lines[$stack-idx]);
+            #}
+note "<<< s: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
           }
 
           elsif $!test-lines[$stack-idx][TESTTYPE] eq 't' {
-            $!test-lines[$stack-idx].push(~$/[1]);
+            self!store-state( $!test-lines[$stack-idx], ~$/[1], $message, @diag);
+            #$!test-lines[$stack-idx][TESTRESULT] = ~$/[1];
+            #$!test-lines[$stack-idx][DIAGNOSTIC] = "$message\n";
+            #if $!test-lines[$stack-idx][TESTRESULT] ~~ /:s not ok/ {
+            #  self!gather-diagnostic( @diag, $!test-lines[$stack-idx]);
+            #}
             $throws-like-test = False;
-#note "<<< t: $test-lines-idx, \[$!test-lines[$stack-idx][*].join(',')]";
+note "<<< t: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
           }
 
-          #$test-lines-idx++;
+          # set todo or skip state
+          $!test-lines[$test-lines-idx][TODO] = ?($message ~~ /:s TODO /);
+          $!test-lines[$test-lines-idx][SKIP] = ?($message ~~ /:s SKIP /);
           $prev-indent = $indent;
         }
 
         else {
           next if $throws-like-test;
-          $!test-lines[$test-lines-idx].push(~$/[1]);
-#note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][*].join(',')], $line";
+          self!store-state( $!test-lines[$test-lines-idx], ~$/[1], $message, @diag);
+          #$!test-lines[$test-lines-idx][TESTRESULT] = ~$/[1];
+          #$!test-lines[$test-lines-idx][DIAGNOSTIC] = "$message\n";
+          #if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
+          #  self!gather-diagnostic( @diag, $!test-lines[$test-lines-idx]);
+          #}
+note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], $message";
+
+          # set todo or skip state
+          $!test-lines[$test-lines-idx][TODO] = ?($message ~~ /:s TODO /);
+          $!test-lines[$test-lines-idx][SKIP] = ?($message ~~ /:s SKIP /);
           $test-lines-idx++;
         }
       }
@@ -468,9 +534,83 @@ note $code-text;
     note "\n---[ End prove diagnostics ]", '-' x 52;
     note " ";
 
-note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
-
     self!modify-aside-check-panels;
+    self!modify-diagnostic-panel(@diag-lines);
+    self!save-metric-data;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !store-state (
+    Array $test-line, Str $status, Str $message, @diag
+  ) {
+
+    $test-line[TESTRESULT] = $status;
+    $test-line[DIAGNOSTIC] = "$message\n";
+
+    if $test-line[TESTRESULT] ~~ /:s not ok/ {
+      self!gather-diagnostic( @diag, $test-line);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !gather-diagnostic ( @diag, Array $test-line ) {
+
+    $test-line[DIAGNOSTIC] //= '';
+
+    repeat {
+
+      # check if there are still diagnostic messages
+      last unless @diag.elems;
+
+      # get a diagnostic line and calculate indent
+      my $dline = @diag.shift;
+
+      # remove indent and '#'
+      $dline ~~ s/^ \s* '#' \s+ //;
+
+      # save and add a newline
+      $test-line[DIAGNOSTIC] ~= $dline ~ "\n";
+#print $dline;
+    } until @diag.elems == 0 or @diag[0] ~~ /:s Failed test || Looks like /;
+
+    # if type is throws-like read another line
+    if @diag.elems and $test-line[TESTTYPE] eq 't' {
+      my $dline = @diag.shift;
+      if $dline ~~ /:s Looks like you failed/ {
+        $dline ~~ s/^ \s* '#' \s+ //;
+        $test-line[DIAGNOSTIC] ~= $dline ~ "\n";
+      }
+
+      # look for further messages from a level higher
+      repeat {
+        last unless @diag.elems;
+        my $dline = @diag.shift;
+        $dline ~~ s/^ \s* '#' \s+ //;
+        $test-line[DIAGNOSTIC] ~= $dline ~ "\n";
+      } until @diag.elems == 0 or @diag[0] ~~ /:s Failed test || Looks like /;
+    }
+
+    # if type is throws-like read another line
+    if @diag.elems and $test-line[TESTTYPE] eq 's' {
+      my $dline = @diag.shift;
+      $dline ~~ s/^ \s* '#' \s+ //;
+      $test-line[DIAGNOSTIC] ~= $dline ~ "\n";
+
+      # if this was a plan failure then read another line
+      if @diag.elems and $dline ~~ /:s Looks like you planned/ {
+        $dline = @diag.shift;
+        $dline ~~ s/^ \s* '#' \s+ //;
+        $test-line[DIAGNOSTIC] ~= $dline ~ "\n";
+      }
+
+      # look for further messages from a level higher
+      repeat {
+        last unless @diag.elems;
+        my $dline = @diag.shift;
+        $dline ~~ s/^ \s* '#' \s+ //;
+        $test-line[DIAGNOSTIC] ~= $dline ~ "\n";
+      } until @diag.elems == 0 or @diag[0] ~~ /:s Failed test || Looks like /;
+    }
   }
 
   #-----------------------------------------------------------------------------
@@ -480,7 +620,7 @@ note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
     # finish program and write to test file
     $!program-text ~= "\n\ndone-testing;\n";
 
-    note "\nWrite test code to $!test-filename";
+#note "\nWrite test code to $!test-filename";
     $!test-filename.IO.spurt($!program-text);
 
     #'--timer', '--merge', "--archive $!test-filename.tgz",
@@ -505,15 +645,13 @@ note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
   #-----------------------------------------------------------------------------
   method !modify-aside-check-panels ( ) {
 
+    state Int $counter = 1;
     my Int $test-lines-idx = 0;
 
     # search for the aside check panels
     my XML::Document $document .= new($!html);
     my $x = XML::XPath.new(:$document);
-    for $x.find( '//pre', :to-list) -> $acheck {
-
-      # skip if <pre> is not an aside check
-      next unless $acheck.attribs<class> ~~ m/ 'aside-check' /;
+    for $x.find( '//pre[@class="aside-check"]', :to-list) -> $acheck {
 
       # get start line number and the number of line in the aside
       my $start-line = $acheck<name>;
@@ -524,11 +662,10 @@ note "Test Lines: ", (map {"[$_]"}, @$!test-lines).join(',');
       $nlines ~~ s/^ \d+ 'nl' //;
       $nlines .= Int;
 
+      # get chapter title
       my $chapter = $acheck<title>;
-note "Chapter $chapter";
 
-      # initialize and empty the aside <pre> element
-#      my @lines = [ ' ' xx $nlines ];
+      # empty the aside <pre> element
       for $acheck.nodes -> $n {
         $n.remove;
       }
@@ -539,22 +676,36 @@ note "Chapter $chapter";
         # check if there are still test lines left
         if $!test-lines[$test-lines-idx].defined {
 
-note "Loop: $start-line + $i, $test-lines-idx, $!test-lines[$test-lines-idx][0]";
           # check if line count matches the test-lines number
           if ($start-line + $i) == $!test-lines[$test-lines-idx][LINENUMBER] {
 
+            my Str $mark-symbol;
             my Str $class;
             if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
-              $class = 'red';
+              $class = $!test-lines[$test-lines-idx][TODO] ?? 'orange' !! 'red';
+              $class = $!test-lines[$test-lines-idx][SKIP] ?? 'purple' !! 'red';
+              if $!test-lines[$test-lines-idx][TESTTYPE] eq 's' {
+                $mark-symbol = "\x[1F5D0]($counter)";
+              }
+
+              else {
+                $mark-symbol = "\x[2718]($counter)";
+#TODO check max of ㊾ after that write (50), (51), etc
+              }
+
+              $counter++;
             }
 
             else {
-              $class = 'green';
+              $class = $!test-lines[$test-lines-idx][TODO] ?? 'orange' !! 'green';
+              $class = $!test-lines[$test-lines-idx][SKIP] ?? 'purple' !! 'green';
+              #$class = 'green';
+              $mark-symbol = "\x[2713]";
             }
 
             append-element(
-              $acheck, 'strong', {:$class},
-              :text($!test-lines[$test-lines-idx][TESTRESULT] ~ "\n")
+              $acheck, 'span', {:$class},
+              :text($mark-symbol ~ "\n")
             );
 
             # add chapter to the test lines
@@ -565,18 +716,195 @@ note "Loop: $start-line + $i, $test-lines-idx, $!test-lines[$test-lines-idx][0]"
           }
 
           else {
-            append-element( $acheck, 'strong', :text("\n"));
+            append-element( $acheck, 'span', :text("\n"));
           }
         }
 
         # fill last lines up
         else {
-          append-element( $acheck, 'strong', :text("\n"));
+          append-element( $acheck, 'span', :text("\n"));
+        }
+      }
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !modify-diagnostic-panel ( @diag-lines ) {
+
+    my @diag = @diag-lines;
+    state Int $counter = 1;
+
+    my Int $test-lines-idx = 0;
+    my Str $diag-title = $!test-lines[$test-lines-idx][CHAPTER];
+
+    # search for the aside check panels
+    my XML::Document $document .= new($!html);
+    my $x = XML::XPath.new(:$document);
+
+    my @diag-panels = $x.find( '//pre[@name="diagnostic"]', :to-list);
+    loop ( my $i = 0; $i < @diag-panels.elems; $i++) {
+      my XML::Element $diag-panel = @diag-panels[$i];
+
+      # skip if <pre> is not a diagnostic
+      if $diag-panel.attribs<name>:exists
+         and $diag-panel.attribs<name> eq 'diagnostic' {
+
+        # move to the next panel if the next still has the same title
+        next if @diag-panels[$i+1].defined
+                and $diag-title eq @diag-panels[$i+1].attribs<title>;
+
+        # test the title of the panel against that of the test-lines
+        while $diag-title eq $diag-panel.attribs<title> {
+
+          if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
+
+            my Str $mark = "$counter  ";
+
+#note "\n$diag-title";
+#note "TL: ", $!test-lines[$test-lines-idx][*];
+            if $!test-lines[$test-lines-idx].defined
+               and $!test-lines[$test-lines-idx][TESTTYPE] eq 't' {
+
+              $mark = "{$counter} ";
+              self!add-to-diag-panel( $diag-panel, @diag, $mark, $test-lines-idx);
+
+#              $mark = "{$counter}b ";
+#              self!add-to-diag-panel( $diag-panel, @diag, $mark, $test-lines-idx);
+            }
+
+            else {
+              self!add-to-diag-panel( $diag-panel, @diag, $mark, $test-lines-idx);
+            }
+
+            $diag-panel.set( 'style', 'border-width:2px;');
+            $counter++;
+          }
+
+          $test-lines-idx++;
+          last unless @diag.lines
+               and $!test-lines[$test-lines-idx].defined;
+          $diag-title = $!test-lines[$test-lines-idx][CHAPTER];
         }
       }
 
-#note "\nLines aside: $start-line, $nlines, ", (map { "'$_'" }, @lines).join(', ');
-#      append-element( $acheck, :text(@lines.join("\n") ~ " \n"));
+      else {
+        note 'Pre: ', ~$diag-panel;
+      }
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !add-to-diag-panel (
+    $diag-panel, @diag, Str $mark is copy, Int $test-lines-idx
+  ) {
+
+    my Str $s = $mark ~ $!test-lines[$test-lines-idx][DIAGNOSTIC];
+    my @lines = $s.lines;
+    $s = @lines.shift ~ "\n";
+    $s ~~ s:g/\s\s+/ /;
+    append-element( $diag-panel, 'strong', :text($s));
+    append-element( $diag-panel, :text(.indent(2) ~ "\n")) for @lines;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !save-metric-data ( ) {
+
+    # metric filename
+    my $metric-file = $SemiXML::Sxml::filename;
+    my $c = $*PERL.compiler();
+    $metric-file ~~ s/\.sxml $/-metric/;
+    $metric-file ~= [~] "-$*DISTRO.name()", "-$*DISTRO.version()",
+                        "-$c.name()", "-$*VM.name()", ".toml";
+
+    # general metric content
+    my Str $metric-text = "[ general ]\n";
+
+    # gather data from attributes
+    $metric-text ~= "  title        = '$!run-data<title>'\n";
+    $metric-text ~= "  package      = '$!run-data<package>'\n";
+    $metric-text ~= "  module       = '$!run-data<module>'\n";
+    $metric-text ~= "  class        = '$!run-data<class>'\n";
+    $metric-text ~= "  distribution = '$!run-data<distribution>'\n";
+    $metric-text ~= "  label        = '$!run-data<label>'\n";
+
+    $metric-text ~= "  date         = '" ~ now.DateTime.utc.Str ~ "'\n";
+
+    # gather data from compiler and system
+    $metric-text ~= "  oskernel     = '$*KERNEL.name():$*KERNEL.version()'\n";
+    $metric-text ~= "  osdistro     = '$*DISTRO.name():$*DISTRO.version():$*DISTRO.release():$*DISTRO.is-win()'\n";
+    $metric-text ~= "  perl         = '$*PERL.name():$*PERL.version()'\n";
+    $metric-text ~= "  compiler     = '$c.name():$c.version()'\n";
+    $metric-text ~= "  vm           = '$*VM.name():$*VM.version()'\n";
+
+    # chapters
+    my Str $chapter = '';
+    my Int $chapter-count = 1;
+
+    my Int $success = 0;
+    my Int $fail = 0;
+    my Int $todo = 0;
+    my Int $skip = 0;
+
+    # go through the tests
+    for @$!test-lines -> $test-line {
+      if $test-line[CHAPTER] ne $chapter {
+
+        # write totals of previous chapter
+        if ? $chapter {
+          $metric-text ~= "  success      = $success\n";
+          $metric-text ~= "  fail         = $fail\n";
+          $metric-text ~= "  todo         = $todo\n";
+          $metric-text ~= "  skipped      = $skip\n";
+
+          # reset
+          $success = 0;
+          $fail = 0;
+          $todo = 0;
+          $skip = 0;
+        }
+
+        # next chapter
+        $metric-text ~= "\n[ chapter.c$chapter-count ]\n";
+        $metric-text ~= "  name         = '$test-line[CHAPTER]'\n";
+        $chapter = $test-line[CHAPTER];
+        $chapter-count++;
+      }
+
+      # count results.
+      # skip subtest count because that's a result from inner tests
+      if $test-line[TESTTYPE] ne 's' {
+        if $test-line[SKIP] {
+          $skip++;
+        }
+
+        elsif $test-line[TODO] {
+          $todo++;
+        }
+
+        elsif $test-line[TESTRESULT] ~~ /:s not ok / {
+          $fail++;
+        }
+
+        else {
+          $success++;
+        }
+      }
+    }
+
+    # last chapters data
+    $metric-text ~= "  success      = $success\n";
+    $metric-text ~= "  fail         = $fail\n";
+    $metric-text ~= "  todo         = $todo\n";
+    $metric-text ~= "  skipped      = $skip\n";
+
+    # summary of all failure messages
+    for @$!test-lines -> $test-line {
+#      next unless $test-line[TESTRESULT] ~~ /:s not ok /;
+      $metric-text ~= "\n[ summary.line-$test-line[LINENUMBER] ]\n";
+      $metric-text ~= "  chapter      = '$test-line[CHAPTER]'\n";
+      $metric-text ~= "  diagnostic   = \"\"\"\n$test-line[DIAGNOSTIC].indent(4)\"\"\"\n";
+    }
+
+    $metric-file.IO.spurt($metric-text);
   }
 }
