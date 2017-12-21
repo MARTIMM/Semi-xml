@@ -3,46 +3,58 @@ pre {
   border-style:         solid;
   border-color:         #006000;
   padding:              0 0 0 5px;
+  margin:               4px 0 8px 0;
   color:                #00501e;
   box-shadow:           6px 6px 4px #aaafaa;
   border-radius:        4px;
   page-break-inside:    avoid;
   font-family:          FreeMono;
-  font-size:            11pt;
+  font-size:            12pt;
+  line-height:          14pt; /* keep lines in all sections at same height */
 }
 
+/*
 pre.test-block-code {
-#  background-color:     #eaefea;
+  background-color:     #eaefea;
   display:              inline;
 }
+*/
 
 pre.prettyprint {
+  box-sizing:           border-box; /* need to use width in percentages */
   position:             normal;
   float:                left;
-  background-color:     #366;
-  width:                89%;
+  width:                92%;
+  background-color:     #244;
 }
 
 pre.aside-check {
+  box-sizing:           border-box;
   position:             normal;
   float:                right;
-  width:                7%;
+  width:                7%; /* keep 1% in between */
   background-color:     #dff;
 }
 
+/*
 pre.example {
   color:                #00401e;
   background-color:     #ffeeee;
   font-family:          FreeMono;
   font-size:            11pt;
 }
+*/
 
-.cleaner {
+pre.cleaner {
 	clear: both;
-	height: 1px;
+/*	height: 1px;*/
   margin: 0;
+  border-width:         0px;
+  background-color:     #dff;
+/*  color:                #cff; */
 }
 
+/*
 table {
   width:                95%;
 }
@@ -85,6 +97,7 @@ td.test-comment {
   margin:               0;
   padding:              0;
 }
+*/
 
 .green {
   color:                #00aa00;
@@ -157,6 +170,7 @@ code {
   right:                0;
   left:                 0;
   padding-right:        3px;
+  margin:               10px 0 10px 0;
   background-color:     #c0e472;
   font-size:            7pt;
   text-align:           right;
