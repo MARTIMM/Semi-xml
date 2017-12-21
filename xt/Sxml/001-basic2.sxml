@@ -1,7 +1,7 @@
 # run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/001-basic.sxml
 
-$!test.run title='Basic SemiXML tests' lang=perl6
-       highlight-skin=desert =linenumbers [
+$!test.run title='Basic SemiXML tests'
+       lang=perl6 highlight-skin=desert =linenumbers [
 
   $h1 [ Testing the basic use of SemiXML ]
   $h2 [ Introduction ]
@@ -32,6 +32,8 @@ $!test.run title='Basic SemiXML tests' lang=perl6
 
       is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
          "The generated xml is conforming the standard";
+
+      is 2, 3, 'uhmm...';
     !]
   ]
 
@@ -40,12 +42,14 @@ $!test.run title='Basic SemiXML tests' lang=perl6
       ajskdhf ljkh dflkjhdf
     ]
     $!test.code title='jhg djhgasd asjh' [!=
+      plan 7;
+      
       is 1,1,'yes one is one';
       is 2,2,'and two is two';
       is 2,3,'and two is not three';
 
       throws-like { Failure.new('awkward'); },
-        Exception, 'return a failure', :message('not so awkward');
+        Str, 'return a failure', :message('not so awkward');
     !]
 
     $p [
