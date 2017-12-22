@@ -1,0 +1,7 @@
+# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/summary.sxml
+
+$!summary.report title='Summary test report for the Semi XML project' [
+
+  $!summary.load tests=module
+  $!summary.load tests=basic
+]
