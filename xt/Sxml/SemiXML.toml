@@ -4,6 +4,7 @@
 #------------------------------------------------------------------------------
 [ ML ]
   test          = 'SxmlLib::Testing::Test'
+  summary       = 'SxmlLib::Testing::Summary'
 #  code          = 'SxmlLib::Testing::Code'
 #  test          = 'SxmlLib::Testing::Test'
 #  todo          = 'SxmlLib::Testing::Todo'
