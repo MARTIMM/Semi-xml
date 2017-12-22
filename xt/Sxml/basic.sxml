@@ -3,38 +3,32 @@
 $!test.run title='Basic SemiXML tests'
        lang=perl6 highlight-skin=desert =linenumbers [
 
-  $h1 [ Testing the basic use of SemiXML ]
-  $h2 [ Introduction ]
-
-  $p [
-    SemiXML is a library of modules which translate an sxml into a XML based
-    language. For example Html, Soap, Docbook or your own XML language.
-    There are several syntactic constructs which look very much the same as the
-    XML language.
+  $!test.purpose title='Testing the basic use of SemiXML' [
+    Purpose of this report is that it tests the parsing and translating process.
   ]
 
-  $!test.chapter title='Test SemiXML::Sxml object and simple input' [
+  $!test.chapter title='Generate a simple element' [
     $p [
       The code below will test a simple top level structure. A one liner
       $**strong [! $some-element [ ] !] should translate into $*|strong
       [! <some-element/> !].
       Because there is no added configuration, it defaults to XML so it will
       have a prefix.
+
+      $!test.code [!=
+        use SemiXML::Sxml;
+        my SemiXML::Sxml $sxml .= new;
+        isa-ok $sxml, SemiXML::Sxml;
+
+        $sxml.parse(:content('$some-element []'));
+        my $xml = ~$sxml;
+
+        is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
+           "The generated xml is conforming the standard";
+
+        is 2, 3, 'uhmm...';
+      !]
     ]
-
-    $!test.code [!=
-      use SemiXML::Sxml;
-      my SemiXML::Sxml $sxml .= new;
-      isa-ok $sxml, SemiXML::Sxml;
-
-      $sxml.parse(:content('$some-element []'));
-      my $xml = ~$sxml;
-
-      is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
-         "The generated xml is conforming the standard";
-
-      is 2, 3, 'uhmm...';
-    !]
   ]
 
   $!test.chapter title='jklzflkjhflkja fd' [
@@ -43,7 +37,7 @@ $!test.run title='Basic SemiXML tests'
     ]
     $!test.code title='jhg djhgasd asjh' [!=
       plan 7;
-      
+
       is 1,1,'yes one is one';
       is 2,2,'and two is two';
       is 2,3,'and two is not three';
@@ -61,4 +55,10 @@ $!test.run title='Basic SemiXML tests'
       is 15,14,'not yet, maybe later';
     !]
   ]
+
+  # remaining untested chapters
+  $!test.chapter title='Add an attribute. Then add more and play with quotes and type.'
+  $!test.chapter title='Nested elements.'
+  $!test.chapter title='Elements with more than one block.'
+  $!test.chapter title='Elements with different types of blocks.'
 ]

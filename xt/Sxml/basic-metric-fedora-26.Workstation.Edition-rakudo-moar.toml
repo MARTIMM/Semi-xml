@@ -5,15 +5,24 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2017-12-21T19:02:09.421154Z'
+  date         = '2017-12-22T18:31:56.220779Z'
   oskernel     = 'linux:4.14.4.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
-  compiler     = 'rakudo:2017.11.121.gfb.8.ea.2248'
-  vm           = 'moar:2017.11.43.g.93.a.77.dc.1'
+  compiler     = 'rakudo:2017.12.14.gf.137.c.2510'
+  vm           = 'moar:2017.12.1.g.912.f.9678'
+
+[ purpose ]
+  purposetitle = 'Testing the basic use of SemiXML'
+  purpose      = '''
+Purpose of this report is that it tests the parsing and translating process. 
+'''
+
+[ chapters ]
+  list         = [ 'Generate a simple element', 'jklzflkjhflkja fd', 'Add an attribute. Then add more and play with quotes and type.', 'Nested elements.', 'Elements with more than one block.', 'Elements with different types of blocks.' ]
 
 [ chapter.c1 ]
-  name         = 'Test SemiXML::Sxml object and simple input'
+  name         = 'Generate a simple element'
   success      = 2
   fail         = 1
   todo         = 0
@@ -27,23 +36,23 @@
   skipped      = 0
 
 [ summary.line-7 ]
-  chapter      = 'Test SemiXML::Sxml object and simple input'
+  chapter      = 'Generate a simple element'
   diagnostic   = """
     ok 1 - The object is-a 'SemiXML::Sxml'
 """
 
 [ summary.line-12 ]
-  chapter      = 'Test SemiXML::Sxml object and simple input'
+  chapter      = 'Generate a simple element'
   diagnostic   = """
     ok 2 - The generated xml is conforming the standard
 """
 
 [ summary.line-15 ]
-  chapter      = 'Test SemiXML::Sxml object and simple input'
+  chapter      = 'Generate a simple element'
   diagnostic   = """
     not ok 3 - uhmm...
     Failed test 'uhmm...'
-    at xt/Sxml/001-basic2.t line 15
+    at xt/Sxml/basic.t line 15
     expected: '3'
     got: '2'
 """
@@ -55,7 +64,7 @@
     Looks like you planned 7 tests, but ran 4
     Looks like you failed 2 tests of 4
     Failed test 'jhg djhgasd asjh'
-    at xt/Sxml/001-basic2.t line 16
+    at xt/Sxml/basic.t line 16
 """
 
 [ summary.line-19 ]
@@ -75,7 +84,7 @@
   diagnostic   = """
     not ok 3 - and two is not three
     Failed test 'and two is not three'
-    at xt/Sxml/001-basic2.t line 21
+    at xt/Sxml/basic.t line 21
     expected: '3'
     got: '2'
 """
@@ -85,13 +94,13 @@
   diagnostic   = """
     not ok 4 - return a failure
     Failed test 'right exception type (Str)'
-    at /home/marcel/Software/perl6/rakudo/install/share/perl6/precomp/DC5BE813D5C4C72C72FC6AF6489772C18342AD3B.1513266865.70398/C7/C712FE6969F786C9380D643DF17E85D06868219E line 1
+    at /home/marcel/Software/perl6/rakudo/install/share/perl6/precomp/F361351ED957B4147A315862EE8FA5E0886319B7.1513967070.02457/C7/C712FE6969F786C9380D643DF17E85D06868219E line 1
     Expected: Str
     Got:      X::AdHoc
     Exception message: awkward
     Looks like you failed 1 test of 3
     Failed test 'return a failure'
-    at xt/Sxml/001-basic2.t line 23
+    at xt/Sxml/basic.t line 23
 """
 
 [ summary.line-27 ]
