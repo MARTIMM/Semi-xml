@@ -1,4 +1,4 @@
-# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/001-basic.sxml
+# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/basic.sxml
 
 $!test.run title='Basic SemiXML tests'
        lang=perl6 highlight-skin=desert =linenumbers [
