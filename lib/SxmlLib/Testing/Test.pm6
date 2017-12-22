@@ -36,9 +36,17 @@ class Test {
                         >;
   has Array $!test-lines = [];
 
-  has Str $!chapter-test-title = 'No test title';
+  has Str $!chapter-test-title = 'No chapter test title';
+  has Array $!chapters = [];
+  has Str $!purpose-title = 'No purpose title';
+  has Str $!purpose = "No purpose\n";
 
   has Hash $!run-data = {};
+
+#TODO
+#  paragraphs ?
+#  summary report
+#  bench marking
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
@@ -83,12 +91,69 @@ class Test {
     --> XML::Node
   ) {
 
+    # throw the whole shebang into the body
     $!body.append($content-body);
+
+    # add the html to the parent
     $parent.append($!html);
 
     self!run-tests;
-
+    self!modify-purpose;
     self!footer;
+
+    $parent
+  }
+
+  #-----------------------------------------------------------------------------
+  method purpose (
+    XML::Element $parent, Hash $attrs,
+    XML::Element :$content-body, Array :$tag-list
+
+    --> XML::Node
+  ) {
+
+    $!purpose-title = ($attrs<title>//$!purpose-title).Str;
+    append-element( $parent, 'h2', :text($!purpose-title));
+    $!purpose = [~] $content-body.nodes;
+    my XML::Element $p = append-element( $parent, 'p', {:title<purpose>});
+    $p.append($content-body);
+
+    $parent;
+  }
+
+  #-----------------------------------------------------------------------------
+  method chapter (
+    XML::Element $parent, Hash $attrs,
+    XML::Element :$content-body, Array :$tag-list
+
+    --> XML::Node
+  ) {
+
+    $!chapter-test-title = ($attrs<title>//'No test title').Str;
+    $!chapters.push($!chapter-test-title);
+
+    drop-parent-container($content-body);
+
+    # search for the aside check panels
+    my XML::Document $document .= new($content-body);
+    my $x = XML::XPath.new(:$document);
+    for $x.find( '//pre', :to-list) -> $acheck {
+
+      # skip if <pre> is not an aside check
+      if $acheck.attribs<class>:exists
+         and $acheck.attribs<class> ~~ m/ 'aside-check' / {
+        $acheck.set( 'title', $!chapter-test-title);
+      }
+
+      # or a diagnostic panel
+      elsif $acheck.attribs<name>:exists
+        and $acheck.attribs<name> eq 'diagnostic' {
+        $acheck.set( 'title', $!chapter-test-title);
+      }
+    }
+
+    append-element( $parent, 'h2', :text($!chapter-test-title));
+    $parent.append($content-body);
 
     $parent
   }
@@ -123,42 +188,6 @@ class Test {
     --> XML::Node
   ) {
     self!wrap-code( $parent, $content-body, $attrs, :type<todo>);
-    $parent
-  }
-
-  #-----------------------------------------------------------------------------
-  method chapter (
-    XML::Element $parent, Hash $attrs,
-    XML::Element :$content-body, Array :$tag-list
-
-    --> XML::Node
-  ) {
-
-    $!chapter-test-title = ($attrs<title>//'No test title').Str;
-
-    drop-parent-container($content-body);
-
-    # search for the aside check panels
-    my XML::Document $document .= new($content-body);
-    my $x = XML::XPath.new(:$document);
-    for $x.find( '//pre', :to-list) -> $acheck {
-
-      # skip if <pre> is not an aside check
-      if $acheck.attribs<class>:exists
-         and $acheck.attribs<class> ~~ m/ 'aside-check' / {
-        $acheck.set( 'title', $!chapter-test-title);
-      }
-
-      # or a diagnostic panel
-      elsif $acheck.attribs<name>:exists
-        and $acheck.attribs<name> eq 'diagnostic' {
-        $acheck.set( 'title', $!chapter-test-title);
-      }
-    }
-
-    append-element( $parent, 'h2', :text($!chapter-test-title));
-    $parent.append($content-body);
-
     $parent
   }
 
@@ -228,6 +257,28 @@ class Test {
                      /$/[0]EVAL\('try {$/[1]}'\)$/[2]; note \$! if ? \$!/;
 note $code-text;
 }}
+
+  #-----------------------------------------------------------------------------
+  # modify the purpose to show what is tested and what is not
+  method !modify-purpose ( ) {
+
+    # search for the aside check panels
+    my XML::Document $document .= new($!body);
+    my $x = XML::XPath.new(:$document);
+
+    # should only be one purpose
+    my XML::Element $purpose = $x.find( '//p[@title="purpose"]', :to-list)[0];
+    return unless $purpose.defined;
+
+    drop-parent-container($purpose);
+note "Purpose: $purpose";
+    append-element(
+      $purpose, 'p',
+      :text('The tests comprises the following chapters')
+    );
+    my XML::Element $ul = append-element( $purpose, 'ul');
+    append-element( $ul, 'li', :text($_)) for @$!chapters;
+  }
 
   #-----------------------------------------------------------------------------
   # Add footer to the end of the report
@@ -835,6 +886,13 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
     $metric-text ~= "  perl         = '$*PERL.name():$*PERL.version()'\n";
     $metric-text ~= "  compiler     = '$c.name():$c.version()'\n";
     $metric-text ~= "  vm           = '$*VM.name():$*VM.version()'\n";
+
+    $metric-text ~= "\n[ purpose ]\n";
+    $metric-text ~= "  purposetitle = '$!purpose-title'\n";
+    $metric-text ~= "  purpose      = '''\n$!purpose\n'''\n";
+
+    $metric-text ~= "\n[ chapters ]\n";
+    $metric-text ~= "  list         = [ { (map { "'$_'" }, @$!chapters).join(', ') } ]\n";
 
     # chapters
     my Str $chapter = '';
