@@ -7,7 +7,6 @@ use XML;
 use XML::XPath;
 use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
-use SxmlLib::Testing::Testing;
 
 #-------------------------------------------------------------------------------
 class Test {
