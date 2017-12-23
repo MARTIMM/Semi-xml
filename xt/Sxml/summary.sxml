@@ -2,6 +2,8 @@
 
 $!summary.report title='Summary test report for the Semi XML project' [
 
-  $!summary.load tests=module
-  $!summary.load tests=basic
+  $!summary.load metric=basic
+  $!summary.load metric=configuration
+  $!summary.load metric=core-module
+  $!summary.load metric=lorem-ipsum
 ]
