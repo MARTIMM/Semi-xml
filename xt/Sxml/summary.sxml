@@ -6,4 +6,15 @@ $!summary.report title='Summary test report for the Semi XML project' [
   $!summary.load metric=configuration
   $!summary.load metric=core-module
   $!summary.load metric=lorem-ipsum
+
+  $!summary.conclusion [
+
+    $p [
+      And here we are at the end of it all.
+    ]
+
+    $p [
+      Lots to do now but lets not give up hope and struggle on.
+    ]
+  ]
 ]

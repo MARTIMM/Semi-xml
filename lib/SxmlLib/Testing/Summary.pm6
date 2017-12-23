@@ -84,6 +84,20 @@ note "F: $metric-file";
     $parent
   }
 
+  #-----------------------------------------------------------------------------
+  method conclusion (
+    XML::Element $parent, Hash $attrs,
+    XML::Element :$content-body, Array :$tag-list
+
+    --> XML::Node
+  ) {
+    my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
+    append-element( $div, 'h2', {:class<repheader>}, :text<Conclusion>);
+    $div.append($content-body);
+
+    $parent;
+  }
+
   #===[ private methods ]=======================================================
   method !initialize-report ( Hash $attrs ) {
 
