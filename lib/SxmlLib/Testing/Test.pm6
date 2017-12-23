@@ -46,6 +46,8 @@ class Test {
 #  paragraphs ?
 #  summary report
 #  bench marking
+#  github issues
+#  package version from META6.json when package attribute is used
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
@@ -863,8 +865,7 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
     my $metric-file = $SemiXML::Sxml::filename;
     my $c = $*PERL.compiler();
     $metric-file ~~ s/\.sxml $/-metric/;
-    $metric-file ~= [~] "-$*DISTRO.name()", "-$*DISTRO.version()",
-                        "-$c.name()", "-$*VM.name()", ".toml";
+    $metric-file ~= [~] "-$*DISTRO.name()", "-$*DISTRO.version()", ".toml";
 
     # general metric content
     my Str $metric-text = "[ general ]\n";
@@ -921,8 +922,11 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
         }
 
         # next chapter
-        $metric-text ~= "\n[ chapter.c$chapter-count ]\n";
-        $metric-text ~= "  name         = '$test-line[CHAPTER]'\n";
+#        $metric-text ~= "\n[ chapter.c$chapter-count ]\n";
+        my $toml-text = $test-line[CHAPTER];
+        $toml-text ~~ s:g/\'//;
+        $metric-text ~= "\n[ chapter.'$toml-text' ]\n";
+#        $metric-text ~= "  name         = '$test-line[CHAPTER]'\n";
         $chapter = $test-line[CHAPTER];
         $chapter-count++;
       }
