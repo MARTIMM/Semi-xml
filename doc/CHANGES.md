@@ -4,6 +4,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers.
 
+* 0.41.0
+  * Added summary report
 * 0.40.0
   * Added module to generate a test report. This was done before and is totally rewritten. All old modules are now contained as several methods in one module.
   * Added chapters and a purpose section.
