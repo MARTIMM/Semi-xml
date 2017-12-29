@@ -4,6 +4,7 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 #parser fails when:
 #use Grammar::Tracer;
+#use Grammar::Debugger;
 
 #-------------------------------------------------------------------------------
 grammar Grammar {
@@ -24,13 +25,14 @@ grammar Grammar {
     <.comment>*         # Needed to make empty lines between comments possible.
                         # Only here is needed body*-contents is taking care for
                         # the rest.
-    [ <document> {
-        note "Parse: Top level >>{$/.Str.substr( $/.from, $/.from+30)} ... <<"
-             if $trace;
+    [ <?> {
+      note "\n", '-' x 80, "\nParse document\n",
+           $/.orig.Str.substr( 0, 80), "\n " if $trace;
       }
+      <document>
     ]
     <.comment>*
-    { note " " if $trace; }
+    { note '-' x 80 if $trace; }
   }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
@@ -39,9 +41,7 @@ grammar Grammar {
   #
   rule pop-tag-from-list { <?> }
   rule document {
-    <tag-spec> {
-      note "Parse: Tag $/<tag-spec>" if $trace;
-    }
+    <tag-spec> { note "Parse: Tag $/<tag-spec>" if $trace; }
     <tag-body>* <.pop-tag-from-list>
   }
 
@@ -96,51 +96,152 @@ grammar Grammar {
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]* }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
+
+#`{{
   # important to use token instead of rule to get spaces in the body*-contents
-  token tag-body { [
-      '[!=' ~ '!]'    <body1-contents> { note "Parse: body type [!= ... !]" if $trace; } ||
-      '[!' ~  '!]'    <body2-contents> { note "Parse: body type [! ... !]" if $trace; } ||
-      '[=' ~   ']'    <body3-contents> { note "Parse: body type [= ... ]" if $trace; } ||
-      '[' ~    ']'    <body4-contents> { note "Parse: body type [ ... ]" if $trace; }
+  token tag-body {
+    [ '[!=' ~ '!]'   <body1-contents>
+      { note "Parse: body type [!= ... !]" if $trace; }
+    ] |
+
+    [ '<<=' ~ '>>'   <body1a-contents>
+      { note "Parse: body type <<= ... >>" if $trace; }
+    ] |
+
+    [ '«='  ~ '»'    <body1b-contents>
+      { note "Parse: body type «= ... »" if $trace; }
+    ] |
+
+    [ '[!'  ~  '!]'  <body2-contents>
+      { note "Parse: body type [! ... !]" if $trace; }
+    ] |
+
+    [ '<<'  ~  '>>'  <body2a-contents>
+      { note "Parse: body type << ... >>" if $trace; }
+    ] |
+
+    [ '«'   ~  '»'   <body2b-contents>
+      { note "Parse: body type « ... »" if $trace; }
+    ] |
+
+    [ '[='  ~   ']'  <body3-contents>
+      { note "Parse: body type [= ... ]" if $trace; }
+    ] |
+
+    [ '['   ~    ']' <body4-contents>
+      { note "Parse: body type [ ... ]" if $trace; }
     ]
   }
 
   # The content can be anything mixed with document tags except following the
   # no-elements character. To use the brackets and other characters in the
-  # text, the characters must be escaped.
-  token body1-contents { <body2-text> }
-  token body2-contents { <body2-text> }
-  token body3-contents { [ <body1-text> || <document> || <.comment> ]* }
-  token body4-contents { [ <body1-text> || <document> || <.comment> ]* }
+  # text one can use one of the other enclosures like << ... >>
+  token body1-contents  { <body1-text> }
+  token body1a-contents { <body1a-text> }
+  token body1b-contents { <body1b-text> }
+  token body2-contents  { <body2-text> }
+  token body2a-contents { <body2a-text> }
+  token body2b-contents { <body2b-text> }
+  token body3-contents  { [ <body3-text> || <document> || <.comment> ]* }
+  token body4-contents  { [ <body4-text> || <document> || <.comment> ]* }
+}}
 
+  token tag-body {
+    # Content body can have child elements. Comments starting with '#'
+    # are removed. Content is kept as it is typed in when '=' is used
+    # right at the start.
+    [ '[' ~ ']' [ $<keep-as-typed>=<[=]>? [
+        <body-a> || <document> || <.comment> ]*
+      ]
+    ] ||
+
+    # Content body can not have child elements. All characters like '#'
+    # and '$' remain unprocessed
+    [ '{' ~ '}' [ $<keep-as-typed>=<[=]>? <body-b> ] ] ||
+
+    # Alternative for '{ ... }'
+    [ '«'  ~ '»' [ $<keep-as-typed>=<[=]>? <body-c> ] ]
+  }
+
+  token body-a { [ <.escaped-char> || <-[\\\$\#\]]> ]+ }
+  token body-b { [ <.escaped-char> || <-[\\\}]> ]* }
+  token body-c { [ <.escaped-char> || <-[\\»]> ]* }
+
+  token escaped-char { '\\' . }
+
+#`{{
+  # No comments recognized in [! ... !], << ... >> or « ... ». This works
+  # because nested documents are not included and thus no nesting is possible.
   token body1-text {
-    [ <.escaped-char> ||    # an escaped character
-      <entity> ||
-      <-[\$\]\#\\]>         # any character not being '\', '$', '#' or ']'
-                            # to stop at escaped char, a document
-                            # comment or end of current document.
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      '!' <!before ']'> ||  # single '!'
+      ']' <!after '!'>  ||  # single ']'
+      <-[\\]>               # any other character not being '\'
     ]+
   }
 
-  # No comments recognized in [! ... !]. This works because a nested documents
-  # are not recognized and thus no extra comments are checked and handled as such.
+  token body1a-text {
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      '>' <!before '>'> ||  # single '>'
+      <-[\\]>               # any other character not being '\'
+    ]+
+  }
+
+  token body1b-text {
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      <-[\\]>               # any other character not being '\'
+    ]+
+  }
+
   token body2-text {
-    [ <.escaped-char> ||    # an escaped character
-      <entity> ||
-#      '!' <!before ']'> ||
-      <-[\!\\]>             # any character not being '\' or '!'
-                            # to stop at escaped char or end of
-                            # current document
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      '!' <!before ']'> ||  # '!'
+      ']' <!after '!'>  ||  # single ']'
+      <-[\\\!]>             # any other character not being '\'
+    ]+
+  }
+
+  token body2a-text {
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      '>' <!before '>'> ||  # single '>'
+      <-[\\]>               # any other character not being '\'
+    ]+
+  }
+
+  token body2b-text {
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      <-[\\]>               # any other character not being '\'
+    ]+
+  }
+
+  token body3-text {
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      <-[\$\]\#\\]>         # any other character not being '\', '$', '#' or ']'
+    ]+
+  }
+
+  token body4-text {
+    [ <.escaped-char>   ||  # an escaped character
+      <entity>          ||  # &abc;
+      <-[\$\]\#\\]>         # any other character not being '\', '$', '#' or ']'
     ]+
   }
 
   token escaped-char {
-    '\\' .            ||
-    [ "'" ~ "'" [ . || '[!' || '!]' ] ]   ||
-    [ '"' ~ '"' [ . || '[!' || '!]' ] ]
+    '\\' .            #||
+#    [ "'" ~ "'" [ . || '[!' || '!]' ] ]   ||
+#    [ '"' ~ '"' [ . || '[!' || '!]' ] ]
   }
 
   token entity          { '&' <-[;]>+ ';' }
+}}
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.

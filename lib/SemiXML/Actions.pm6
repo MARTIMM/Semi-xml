@@ -12,6 +12,9 @@ use SxmlLib::SxmlHelper;
 #-------------------------------------------------------------------------------
 class Actions {
 
+  # Show what is found
+  our $trace = False;
+
   # Caller SemiXML::Sxml object
   has $!sxml-obj;
 
@@ -111,15 +114,16 @@ class Actions {
 
     self!current-state( $match, 'document');
 
+#`{{
     # Try to find indent level to match up open '[' with close ']'.
     #
     # 1) $x                     no body at all
     # 2) $x [ ]                 no newline in body
     # 3) $x [                   with newline, the ']' should line up with $x.
     #    ]
-    # 4) $x [ ] [ ]             multiple bodies no newline
+    # 4) $x [ ][ ]              multiple bodies no newline
     # 5) $x [                   idem with newline in first body. 1st ']'
-    #    ] [                    lines up with $x. When in 2nd, the 2nd ']'
+    #    ][                     lines up with $x. When in 2nd, the 2nd ']'
     #    ]                      should also line up with $x
     # 6) $x [ $y [ ] ]          nested bodies no newline
     # 7) $x [                   with newline, outer ']' should line up
@@ -139,9 +143,9 @@ class Actions {
       # test for special body
       my Bool $special-body = ?$orig.substr(
         $b-from, $b-to - $b-from
-      ) ~~ m/^ '[!' /;
+      ) ~~ m/^ '[!' | '<<' | '«' /;
 
-      $orig.substr( $tag-bodies[$mi].to - 3, 3);
+#note "Doc $mi:, $special-body, >>>", $orig.substr( $b-from, $b-to - $b-from), "<<<";
 
       # find start of body
       my Int $bstart = $orig.substr(
@@ -151,10 +155,13 @@ class Actions {
       # find end of body, search from the end
       my Int $bend;
       if $special-body {
-        $bend = $orig.substr( $bstart, $b-to - $bstart).rindex('!]');
+        #$bend = $orig.substr( $bstart, $b-to - $bstart).rindex('!]');
+        $orig.substr( $bstart, $b-to - $bstart) ~~ / '!]' || '>>' || '»' $/;
 
-        if ?$bend {
-           $bend += $bstart;
+#        if ?$bend {
+#           $bend += $bstart;
+        if ? $/ {
+          $bend = $/.from + $bstart;
         }
 
         else {
@@ -164,9 +171,16 @@ class Actions {
       }
 
       else {
-        $bend = $orig.substr(
-          $bstart, $b-to - $bstart
-        ).rindex(']') + $bstart;
+        $bend = $orig.substr( $bstart, $b-to - $bstart).rindex(']') + $bstart;
+        #$orig.substr( $bstart, $b-to - $bstart) ~~ / '!]' || '>>' || '»' $/;
+        #if ? $/ {
+        #  $bend = $/.from + $bstart;
+        #}
+
+#        else {
+#          note "special body $special-body, $bstart, $b-to - $bstart";
+#          note "$orig.substr( $bstart, $b-to - $bstart)";
+#        }
       }
 
       # check for newlines in this body
@@ -200,7 +214,7 @@ class Actions {
           # save data
           my $bracket-info := $!unleveled-brackets;
           $bracket-info := $.mismatched-brackets
-            if $orig.substr( $tag-bodies[$mi].to - 3, 3) ~~ m/ '!]' /;
+            if $orig.substr( $tag-bodies[$mi].to - 3, 3) ~~ m/ '!]' || '>>' || '»' /;
 
           $bracket-info.push: {
             tag-name => $match<tag-spec><tag>.Str,
@@ -211,6 +225,7 @@ class Actions {
         }
       }
     }
+}}
 
     my XML::Element $x;
 
@@ -229,6 +244,7 @@ class Actions {
       when any(< $** $*| $|* $ >) {
 
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
+        note "  Tag: $tt$tag" if $trace;
 
         # A bit of hassle to get the StringList values converted into Str explicitly
         $x .= new( :name($tag), :attribs(%($attrs.keys Z=> $attrs.values>>.Str)));
@@ -241,6 +257,7 @@ class Actions {
           }
         }
 
+        note "  Attr keys: $x.attribs().keys()" if $trace;
         self!build-content-body( $match, $x);
       }
 
@@ -297,6 +314,8 @@ class Actions {
     my Array $tag-bodies = $match<tag-body>;
     loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
+      note "  Body count: {$mi+1}" if $trace;
+
       my $match = $tag-bodies[$mi];
       for @($match.made) {
 
@@ -305,19 +324,21 @@ class Actions {
           my Str $txt = $_;
           if ? $txt {
 #TODO maybe all lines prefixed with a space and one at the end.
+            # only spaces between texts
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
             $parent.append(SemiXML::Text.new(:text($txt)));
+            note "  Text: '$txt'" if $trace;
           }
         }
 
         # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
         when Hash {
-#note "Ast hash: ", $_.keys;
 #note "Ast tag: ", $_<tag-ast>;
 #note "Ast body: ", $_<body-ast>;
 #note "Ast doc: ", $_<doc-ast>;
           # tag ast: [ tag type, namespace, tag name, module, method, attributes ]
           my Array $tag-ast = $_<tag-ast>;
+          note "  Tag hash keys: $_.keys()" if $trace;
 
 #TODO see above
           # Test if spaces are needed before the document
@@ -326,8 +347,10 @@ class Actions {
 
 #TODO not sure if this is the only place to remove sxml:parent_container
           my $d = $_<doc-ast>;
+          note "  doc_ast: $d" if $trace;
           #self!drop-parent-container($d);
           $parent.append($d);
+note "P: $parent";
 
 #TODO see above
           # Test if spaces are needed after the document
@@ -417,22 +440,60 @@ class Actions {
   #-----------------------------------------------------------------------------
   method tag-body ( $match ) {
 
+    my Bool $fixed = False;
+
     self!current-state( $match, 'tag body');
     my Array $ast = [];
-    for $match.caps {
+    for $match.caps -> $pair {
 
-      # keys can be body1-contents..body4-contents
-      my $p = $^a.key;
-      my $v = $^a.value;
+      my $k = $pair.key;
+      my $v = $pair.value;
 
+      note "  Body type: $k" if $trace;
+      given ~$k {
+        when 'keep-as-typed' {
+          $fixed = (~$v eq '=');
+          note "  Value: $fixed" if $trace;
+        }
+
+        # part from
+        when 'body-a' {
+          note "  body a: '$v'" if $trace;
+          $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+        }
+
+        #
+        when 'body-b' {
+          note "  body b: '$v'" if $trace;
+          $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+        }
+
+        when 'body-c' {
+          note "  body c: '$v'" if $trace;
+          $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+        }
+
+        when 'document' {
+          note "  Document: >>>", ~$v, '<<<' if $trace;
+
+          my $tag-ast = $v<tag-spec>.made;
+          my $body-ast = $v<tag-body>;
+note "Bast: '$body-ast'";
+          $ast.push: { :$tag-ast, :$body-ast, :doc-ast($v.made)};
+        }
+      }
+
+      note " " if $trace;
+
+#`{{
       # Text cannot have nested documents and text must be taken literally
-      if $p eq 'body1-contents' {
+      if $p ~~ / 'body1' <[ab]>? '-contents' / {
 
-        $ast.push: self!clean-text( $v<body2-text>.Str, :fixed, :!comment);
+        $ast.push: self!clean-text( $v<body1-text>.Str, :fixed, :!comment);
       }
 
       # Text cannot have nested documents and text may be re-formatted
-      elsif $p eq 'body2-contents' {
+      elsif $p ~~ / 'body2' <[ab]>? '-contents' / {
 
         $ast.push: self!clean-text( $v<body2-text>.Str, :!fixed, :!comment);
       }
@@ -442,12 +503,12 @@ class Actions {
 
         for $match<body3-contents>.caps {
 
-          # keys can be body1-text or document
+          # keys can be body3-text or document
           my $p3 = $^a.key;
           my $v3 = $^a.value;
 
-          # body1-text
-          if $p3 eq 'body1-text' {
+          # body2-text
+          if $p3 eq 'body3-text' {
 
             $ast.push: self!clean-text( $v3.Str, :fixed, :comment);
           }
@@ -469,12 +530,12 @@ class Actions {
         # walk through all body pieces
         for $match<body4-contents>.caps {
 
-          # keys can be body1-text or document
+          # keys can be body4-text or document
           my $p4 = $^a.key;
           my $v4 = $^a.value;
 
-          # body1-text
-          if $p4 eq 'body1-text' {
+          # body2-text
+          if $p4 eq 'body4-text' {
 
             $ast.push: self!clean-text( $v4.Str, :!fixed, :comment);
           }
@@ -489,7 +550,10 @@ class Actions {
           }
         }
       }
+}}
     }
+
+    note " " if $trace;
 
     # Set AST on node tag-body
     $match.make($ast);
@@ -497,10 +561,21 @@ class Actions {
 
 #`{{
   #-----------------------------------------------------------------------------
-  method attr-value-spec ( Match $match ) {
-    note $match.Str;
+  method body-a ( Match $match ) {
+    note "\nBa: $match";
+  }
+
+  #-----------------------------------------------------------------------------
+  method body-b ( Match $match ) {
+    note "\nBb: $match";
+  }
+
+  #-----------------------------------------------------------------------------
+  method body-c ( Match $match ) {
+    note "\nBc: $match";
   }
 }}
+
 #`{{
   #-----------------------------------------------------------------------------
   method comment ( Match $match ) {
@@ -540,6 +615,9 @@ class Actions {
     Str $t is copy, Bool :$fixed = False, Bool :$comment = True
     --> Str
   ) {
+
+    #$t ~~ s/^ '!' '='? //;
+    #$t ~~ s/ '!' $//;
 
     # filter comments
     $t ~~ s:g/ <.ws> '#' \N* \n // if $comment;
