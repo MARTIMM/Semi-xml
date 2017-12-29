@@ -114,9 +114,10 @@ class Test {
   ) {
 
     $!purpose-title = ($attrs<title>//$!purpose-title).Str;
-    append-element( $parent, 'h2', :text($!purpose-title));
+    my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
+    append-element( $div, 'h2', {:class<repheader>}, :text($!purpose-title));
     $!purpose = [~] $content-body.nodes;
-    my XML::Element $p = append-element( $parent, 'p', {:title<purpose>});
+    my XML::Element $p = append-element( $div, 'p', {:title<purpose>});
     $p.append($content-body);
 
     $parent;
@@ -153,8 +154,9 @@ class Test {
       }
     }
 
-    append-element( $parent, 'h2', :text($!chapter-test-title));
-    $parent.append($content-body);
+    my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
+    append-element( $div, 'h2', {:class<repheader>}, :text($!chapter-test-title));
+    $div.append($content-body);
 
     $parent
   }
@@ -272,7 +274,8 @@ note $code-text;
     return unless $purpose.defined;
 
     drop-parent-container($purpose);
-note "Purpose: $purpose";
+
+    # add a paragraph below the users text and add the chapters to a list
     append-element(
       $purpose, 'p',
       :text('The tests comprises the following chapters')
@@ -451,7 +454,6 @@ note "Purpose: $purpose";
       },
       :text($aside-check)
     );
-#note "LN: $!line-number, $nlines";
 
     # update the line number count for the next code block
     $!line-number += $nlines;
@@ -463,7 +465,7 @@ note "Purpose: $purpose";
   #-----------------------------------------------------------------------------
   method !run-tests ( ) {
 
-note "TL: ", (map { "[$_]" }, @$!test-lines).join(', ');
+#note "TL: ", (map { "[$_]" }, @$!test-lines).join(', ');
 
     note "\n---[ Prove output ]", '-' x 61;
     note " ";
@@ -492,34 +494,28 @@ note "TL: ", (map { "[$_]" }, @$!test-lines).join(', ');
         # stick to the last one if w've gone too far
         $test-lines-idx -= 1 unless $!test-lines[$test-lines-idx].defined;
 
-note "Line : $test-lines-idx, \[$!test-lines[$test-lines-idx][0,1].join(',')], $message";
+#note "Line : $test-lines-idx, \[$!test-lines[$test-lines-idx][0,1].join(',')], $message";
 
         # if indent increases, it could have been a subtest or a throws-like
         $indent = (~$/[0]).chars;
         if $indent > $prev-indent {
-note "Indented...";
+#note "Indented...";
           if $!test-lines[$test-lines-idx][TESTTYPE] eq 's' {
             $idx-stack.push($test-lines-idx);
 
             # a subtest does show when decreasing indent. this line is the first
             # test in the subtest
-note ">>> s: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..1].join(',')]";
+#note ">>> s: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..1].join(',')]";
             $test-lines-idx++;
             self!store-state( $!test-lines[$test-lines-idx], ~$/[1], $message, @diag);
-            #$!test-lines[$test-lines-idx][TESTRESULT] = ~$/[1];
-            #$!test-lines[$test-lines-idx][DIAGNOSTIC] = "$message\n";
-            #if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
-            #  self!gather-diagnostic( @diag, $!test-lines[$test-lines-idx]);
-            #}
-note ">>> x: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], $message";
+#note ">>> x: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], $message";
           }
 
           elsif $!test-lines[$test-lines-idx][TESTTYPE] eq 't' {
-note ">>> t: $test-lines-idx, \[$!test-lines[$test-lines-idx][0,1].join(',')]";
+#note ">>> t: $test-lines-idx, \[$!test-lines[$test-lines-idx][0,1].join(',')]";
 
             $idx-stack.push($test-lines-idx);
             $throws-like-test = True;
-#            $test-lines-idx++;
           }
 
           # set todo or skip state
@@ -532,7 +528,7 @@ note ">>> t: $test-lines-idx, \[$!test-lines[$test-lines-idx][0,1].join(',')]";
         # if indent decreases, it could have been the
         # end of a subtest or a throws-like
         elsif $indent < $prev-indent {
-note "Outdented...";
+#note "Outdented...";
 
           my $stack-idx = $idx-stack.pop;
           if $!test-lines[$stack-idx][TESTTYPE] eq 's' {
@@ -542,7 +538,7 @@ note "Outdented...";
             #if $!test-lines[$stack-idx][TESTRESULT] ~~ /:s not ok/ {
             #  self!gather-diagnostic( @diag, $!test-lines[$stack-idx]);
             #}
-note "<<< s: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
+#note "<<< s: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
           }
 
           elsif $!test-lines[$stack-idx][TESTTYPE] eq 't' {
@@ -553,7 +549,7 @@ note "<<< s: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
             #  self!gather-diagnostic( @diag, $!test-lines[$stack-idx]);
             #}
             $throws-like-test = False;
-note "<<< t: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
+#note "<<< t: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
           }
 
           # set todo or skip state
@@ -570,7 +566,7 @@ note "<<< t: $test-lines-idx, \[$!test-lines[$stack-idx][0..2].join(',')]";
           #if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
           #  self!gather-diagnostic( @diag, $!test-lines[$test-lines-idx]);
           #}
-note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], $message";
+#note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], $message";
 
           # set todo or skip state
           $!test-lines[$test-lines-idx][TODO] = ?($message ~~ /:s TODO /);
@@ -622,10 +618,9 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
 
       # save and add a newline
       $test-line[DIAGNOSTIC] ~= $dline ~ "\n";
-#print $dline;
     } until @diag.elems == 0 or @diag[0] ~~ /:s Failed test || Looks like /;
 
-    # if type is throws-like read another line
+    # if type is a throws-like then read another line
     if @diag.elems and $test-line[TESTTYPE] eq 't' {
       my $dline = @diag.shift;
       if $dline ~~ /:s Looks like you failed/ {
@@ -642,7 +637,7 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
       } until @diag.elems == 0 or @diag[0] ~~ /:s Failed test || Looks like /;
     }
 
-    # if type is throws-like read another line
+    # if type is a subtest then read another line
     if @diag.elems and $test-line[TESTTYPE] eq 's' {
       my $dline = @diag.shift;
       $dline ~~ s/^ \s* '#' \s+ //;
@@ -671,8 +666,6 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
 
     # finish program and write to test file
     $!program-text ~= "\n\ndone-testing;\n";
-
-#note "\nWrite test code to $!test-filename";
     $!test-filename.IO.spurt($!program-text);
 
     #'--timer', '--merge', "--archive $!test-filename.tgz",
@@ -742,7 +735,6 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
 
               else {
                 $mark-symbol = "\x[2718]($counter)";
-#TODO check max of ㊾ after that write (50), (51), etc
               }
 
               $counter++;
@@ -812,16 +804,11 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
 
             my Str $mark = "$counter  ";
 
-#note "\n$diag-title";
-#note "TL: ", $!test-lines[$test-lines-idx][*];
             if $!test-lines[$test-lines-idx].defined
                and $!test-lines[$test-lines-idx][TESTTYPE] eq 't' {
 
               $mark = "{$counter} ";
               self!add-to-diag-panel( $diag-panel, @diag, $mark, $test-lines-idx);
-
-#              $mark = "{$counter}b ";
-#              self!add-to-diag-panel( $diag-panel, @diag, $mark, $test-lines-idx);
             }
 
             else {
@@ -922,11 +909,9 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
         }
 
         # next chapter
-#        $metric-text ~= "\n[ chapter.c$chapter-count ]\n";
         my $toml-text = $test-line[CHAPTER];
         $toml-text ~~ s:g/\'//;
         $metric-text ~= "\n[ chapter.'$toml-text' ]\n";
-#        $metric-text ~= "  name         = '$test-line[CHAPTER]'\n";
         $chapter = $test-line[CHAPTER];
         $chapter-count++;
       }
@@ -960,7 +945,6 @@ note "    n: $test-lines-idx, \[$!test-lines[$test-lines-idx][0..2].join(',')], 
 
     # summary of all failure messages
     for @$!test-lines -> $test-line {
-#      next unless $test-line[TESTRESULT] ~~ /:s not ok /;
       $metric-text ~= "\n[ summary.line-$test-line[LINENUMBER] ]\n";
       $metric-text ~= "  chapter      = '$test-line[CHAPTER]'\n";
       $metric-text ~= "  diagnostic   = \"\"\"\n$test-line[DIAGNOSTIC].indent(4)\"\"\"\n";

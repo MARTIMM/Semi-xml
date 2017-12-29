@@ -1,11 +1,14 @@
 # run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/summary.sxml
 
-$!summary.report title='Summary test report for the Semi XML project' [
+$!summary.report title='Semi XML project summary report' [
 
   $!summary.load metric=basic
   $!summary.load metric=configuration
+  $!summary.load metric=sigils
   $!summary.load metric=core-module
   $!summary.load metric=lorem-ipsum
+
+  $!summary.load metric=documentation
 
   $!summary.conclusion [
 

@@ -64,7 +64,6 @@ class Summary {
     my @mfs = (dir($path).grep(/ $basename '-metric-'/)>>.Str);
     if ?@mfs {
       for @mfs -> $metric-file {
-note "F: $metric-file";
         self!process-metric( $div, $metric-file, :$first-metric-file);
         $first-metric-file = False;
       }
@@ -181,11 +180,6 @@ note "F: $metric-file";
         if ? $cc<fail> or ? $cc<todo> {
           $all-tests-are-successful = False;
         }
-
-        $percent-success += $cc<success>;
-        $percent-fail += $cc<fail>;
-        $percent-todo += $cc<todo>;
-        $percent-skipped += $cc<skipped>;
       }
 
       else {
@@ -200,15 +194,10 @@ note "F: $metric-file";
 
     else {
 
-      $total-tests = [+] $percent-success, $percent-fail, $percent-todo, $percent-skipped;
-      $percent-success = ($percent-success / $total-tests) * 100.0;
-      $percent-fail = ($percent-fail / $total-tests) * 100.0;
-      $percent-todo = ($percent-todo / $total-tests) * 100.0;
-      $percent-skipped = ($percent-skipped / $total-tests) * 100.0;
-note "$percent-success, $percent-fail, $percent-todo, $percent-skipped";
-
       # table items
-      my XML::Element $table = append-element( $div, 'table', {:class<summary-table>});
+      my XML::Element $table = append-element(
+        $div, 'table', {:class<summary-table>}
+      );
       my XML::Element $tr = append-element( $table, 'tr');
       append-element( $tr, 'th', {:class<summary-header>}, :text<Chapter>);
       append-element( $tr, 'th', {:class<summary-header>}, :text<Success>);
@@ -227,6 +216,11 @@ note "$percent-success, $percent-fail, $percent-todo, $percent-skipped";
           append-element( $tr, 'td', {:class<data>}, :text($cc<fail>.Str));
           append-element( $tr, 'td', {:class<data>}, :text($cc<todo>.Str));
           append-element( $tr, 'td', {:class<data>}, :text($cc<skipped>.Str));
+
+          $percent-success += $cc<success>;
+          $percent-fail += $cc<fail>;
+          $percent-todo += $cc<todo>;
+          $percent-skipped += $cc<skipped>;
         }
 
         else {
@@ -236,12 +230,31 @@ note "$percent-success, $percent-fail, $percent-todo, $percent-skipped";
         }
       }
 
+      $total-tests = [+] $percent-success, $percent-fail,
+                         $percent-todo, $percent-skipped;
+      $percent-success *= 100.0 / $total-tests;
+      $percent-fail *= 100.0 / $total-tests;
+      $percent-todo *= 100.0 / $total-tests;
+      $percent-skipped *= 100.0 / $total-tests;
+#note "$percent-success, $percent-fail, $percent-todo, $percent-skipped";
+
       $tr = append-element( $table, 'tr');
-      append-element( $tr, 'td', {:class<summary-header>}, :text('Total number of tests is ' ~ $total-tests.Str));
-      append-element( $tr, 'td', {:class<summary-header>}, :text($percent-success.Str ~ ' %'));
-      append-element( $tr, 'td', {:class<summary-header>}, :text($percent-fail.Str ~ ' %'));
-      append-element( $tr, 'td', {:class<summary-header>}, :text($percent-todo.Str ~ ' %'));
-      append-element( $tr, 'td', {:class<summary-header>}, :text($percent-skipped.Str ~ ' %'));
+      append-element(
+        $tr, 'td', {:class<summary-header>},
+        :text('Total number of tests: ' ~ $total-tests.Str)
+      );
+      append-element(
+        $tr, 'td', {:class<summary-header>}, :text($percent-success.fmt('%.2f') ~ ' %')
+      );
+      append-element(
+        $tr, 'td', {:class<summary-header>}, :text($percent-fail.fmt('%.2f') ~ ' %')
+      );
+      append-element(
+        $tr, 'td', {:class<summary-header>}, :text($percent-todo.fmt('%.2f') ~ ' %')
+      );
+      append-element(
+        $tr, 'td', {:class<summary-header>}, :text($percent-skipped.fmt('%.2f') ~ ' %')
+      );
     }
   }
 

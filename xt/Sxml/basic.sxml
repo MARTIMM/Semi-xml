@@ -4,7 +4,9 @@ $!test.run title='Basic SemiXML tests'
        lang=perl6 highlight-skin=desert =linenumbers [
 
   $!test.purpose title='Testing the basic use of SemiXML' [
-    Purpose of this report is that it tests the parsing and translating process.
+    Purpose of this report is that it tests the parsing and translating process
+    of the several parts of the language. Here only the simple structures are
+    tested and not the methods to generate new content.
   ]
 
   $!test.chapter title='Generate a simple element' [
@@ -12,53 +14,102 @@ $!test.run title='Basic SemiXML tests'
       The code below will test a simple top level structure. A one liner
       $**strong [! $some-element [ ] !] should translate into $*|strong
       [! <some-element/> !].
-      Because there is no added configuration, it defaults to XML so it will
-      have a prefix.
-
-      $!test.code [!=
-        use SemiXML::Sxml;
-        my SemiXML::Sxml $sxml .= new;
-        isa-ok $sxml, SemiXML::Sxml;
-
-        $sxml.parse(:content('$some-element []'));
-        my $xml = ~$sxml;
-
-        is $xml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
-           "The generated xml is conforming the standard";
-
-        is 2, 3, 'uhmm...';
-      !]
-    ]
-  ]
-
-  $!test.chapter title='jklzflkjhflkja fd' [
-    $p [
-      ajskdhf ljkh dflkjhdf
-    ]
-    $!test.code title='jhg djhgasd asjh' [!=
-      plan 7;
-
-      is 1,1,'yes one is one';
-      is 2,2,'and two is two';
-      is 2,3,'and two is not three';
-
-      throws-like { Failure.new('awkward'); },
-        Str, 'return a failure', :message('not so awkward');
-    !]
-
-    $p [
-      ljkdsf lkjha sdfl ljkdfkjh adf;jkasdfl jhsdaf
-      asdkfjladhjs fk adsfl lasd flkj diu cyviuzcivx yv
+      Because there is no added configuration, it defaults to XML as its input
+      as well as output so it will have an XML prelude.
     ]
 
-    $!test.todo title='jhgj jh jh jhg' reason='working on it' test=0 [!
-      is 15,14,'not yet, maybe later';
+    $!test.code [!=
+      use SemiXML::Sxml;
+      my SemiXML::Sxml $sxml .= new;
+      isa-ok $sxml, SemiXML::Sxml;
+
+      $sxml.parse(:content('$some-element []'));
+      is ~$sxml, qq@<?xml version="1.0" encoding="UTF-8"?>\n<some-element/>@,
+      "The generated xml is conforming the standard";
     !]
   ]
 
-  # remaining untested chapters
-  $!test.chapter title='Add an attribute. Then add more and play with quotes and type.'
-  $!test.chapter title='Nested elements.'
-  $!test.chapter title='Elements with more than one block.'
-  $!test.chapter title='Elements with different types of blocks.'
+  $!test.chapter title='Add attributes.' [
+    $p [
+      Elements can have attributes. The attributes are, in a way, the same as in
+      XML. The attributes, however, can be more simple when there are no spaces
+      in their values. Quoting can be left out in those cases no matter what
+      punctuation is used. We first test a single attribute, then we add some
+      more and play with quotes and type.
+    ]
+
+    $!test.code [!=
+      $sxml.parse(:content('$some-element attribute=value'));
+      like ~$sxml, / 'attribute="value"' /,
+                   'attribute without spaces in value';
+
+      $sxml.parse(:content('$some-element attribute="v a l u e"'));
+      like ~$sxml, / 'attribute="v a l u e"' /,
+                   'attribute with double quoted value';
+
+      $sxml.parse(:content("\$some-element attribute='v a l u e'"));
+      like ~$sxml, / 'attribute="v a l u e"' /,
+                   'attribute with single quoted value';
+
+      $sxml.parse(:content('$some-element attribute=<v a l u e>'));
+      like ~$sxml, / 'attribute="v a l u e"' /,
+                   'attribute with bracketed <> value';
+
+      $sxml.parse(:content('$some-element a1=v1 a2=v2'));
+      like ~$sxml, / 'a1="v1"' /, 'attribute a1 found';
+      like ~$sxml, / 'a2="v2"' /, 'attribute a2 found';
+
+      # Cannot test false attribute because the \! triggers a closing block
+      # somehow. This is a grammar problem.
+      $sxml.parse(:content('$some-element =a1'));
+      like ~$sxml, / 'a1="1"' /, 'true boolean attribute a1 found';
+      like ~$sxml, / 'a2="0"' /, 'false boolean attribute a2 found';
+    !]
+  ]
+
+  $!test.chapter title='Nested elements.' [
+    $p [
+      Elements can be nested to any level. As we see later, there are
+      some ways to control this behavior.
+    ]
+
+    $!test.code [!=
+      $sxml.parse(:content('$some-element [ $some-other-element ]'));
+      like ~$sxml, / '<some-element>'
+                     '<some-other-element></some-other-element>'
+                     '</some-element>'
+                   /, 'An element within another';
+    !]
+  ]
+
+  $!test.chapter title='Element blocks and their different types.' [
+    $p [
+      Elements can have different types of blocks. One can specify it
+      depending on the contents of the block. An element can also have
+      more than one block.
+    ]
+
+    $!test.code [!=
+      $sxml.parse(:content('$some-element [ block 1 ][ block 2 ]'));
+      like ~$sxml, / '<some-element>'
+                     'block 1 block 2'
+                     '</some-element>'
+                   /, 'two blocks on an element';
+    !]
+
+    $p [!
+      Using '!' and '=' just after the block start '[' makes the interpretation
+      of it a bit different. Using '\[\!' ... '\!\]' makes sure that the content
+      does not get interpreted. It will then be easy to use a dollar '$'
+      without escaping it. It follows that it is not possible to nest elements.
+      Combinations with '=' makes sure that the content is left as it is typed in.
+      For example a html <pre> element can be used like that: '\$pre \[= ... \]'.
+      Another example for code '\$script \[\!= ... \!\]'.
+    !]
+
+    $!test.code [!=
+      $sxml.parse(:content("\$a1 [! \$a2 [ ] \!\]"));
+#      like ~$sxml, / '<a>$a2 [ ] </a>' /, 'Inner element is not translated';
+    !]
+  ]
 ]

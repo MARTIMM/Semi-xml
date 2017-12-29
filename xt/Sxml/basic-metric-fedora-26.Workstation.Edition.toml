@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2017-12-23T16:13:19.059924Z'
+  date         = '2017-12-26T15:09:12.210466Z'
   oskernel     = 'linux:4.14.4.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -15,22 +15,34 @@
 [ purpose ]
   purposetitle = 'Testing the basic use of SemiXML'
   purpose      = '''
-Purpose of this report is that it tests the parsing and translating process. 
+Purpose of this report is that it tests the parsing and translating process of the several parts of the language. Here only the simple structures are tested and not the methods to generate new content. 
 '''
 
 [ chapters ]
-  list         = [ 'Generate a simple element', 'jklzflkjhflkja fd', 'Add an attribute. Then add more and play with quotes and type.', 'Nested elements.', 'Elements with more than one block.', 'Elements with different types of blocks.' ]
+  list         = [ 'Generate a simple element', 'Add attributes.', 'Nested elements.', 'Element blocks and their different types.' ]
 
 [ chapter.'Generate a simple element' ]
   success      = 2
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Add attributes.' ]
+  success      = 7
   fail         = 1
   todo         = 0
   skipped      = 0
 
-[ chapter.'jklzflkjhflkja fd' ]
-  success      = 2
-  fail         = 2
-  todo         = 1
+[ chapter.'Nested elements.' ]
+  success      = 1
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Element blocks and their different types.' ]
+  success      = 1
+  fail         = 0
+  todo         = 0
   skipped      = 0
 
 [ summary.line-7 ]
@@ -39,76 +51,73 @@ Purpose of this report is that it tests the parsing and translating process.
     ok 1 - The object is-a 'SemiXML::Sxml'
 """
 
-[ summary.line-12 ]
+[ summary.line-10 ]
   chapter      = 'Generate a simple element'
   diagnostic   = """
     ok 2 - The generated xml is conforming the standard
 """
 
-[ summary.line-15 ]
-  chapter      = 'Generate a simple element'
+[ summary.line-13 ]
+  chapter      = 'Add attributes.'
   diagnostic   = """
-    not ok 3 - uhmm...
-    Failed test 'uhmm...'
-    at xt/Sxml/basic.t line 15
-    expected: '3'
-    got: '2'
+    ok 3 - attribute without spaces in value
 """
 
-[ summary.line-16 ]
-  chapter      = 'jklzflkjhflkja fd'
+[ summary.line-17 ]
+  chapter      = 'Add attributes.'
   diagnostic   = """
-    not ok 4 - jhg djhgasd asjh
-    Looks like you planned 7 tests, but ran 4
-    Looks like you failed 2 tests of 4
-    Failed test 'jhg djhgasd asjh'
-    at xt/Sxml/basic.t line 16
-"""
-
-[ summary.line-19 ]
-  chapter      = 'jklzflkjhflkja fd'
-  diagnostic   = """
-    ok 1 - yes one is one
-"""
-
-[ summary.line-20 ]
-  chapter      = 'jklzflkjhflkja fd'
-  diagnostic   = """
-    ok 2 - and two is two
+    ok 4 - attribute with double quoted value
 """
 
 [ summary.line-21 ]
-  chapter      = 'jklzflkjhflkja fd'
+  chapter      = 'Add attributes.'
   diagnostic   = """
-    not ok 3 - and two is not three
-    Failed test 'and two is not three'
-    at xt/Sxml/basic.t line 21
-    expected: '3'
-    got: '2'
+    ok 5 - attribute with single quoted value
 """
 
-[ summary.line-23 ]
-  chapter      = 'jklzflkjhflkja fd'
+[ summary.line-25 ]
+  chapter      = 'Add attributes.'
   diagnostic   = """
-    not ok 4 - return a failure
-    Failed test 'right exception type (Str)'
-    at /home/marcel/Software/perl6/rakudo/install/share/perl6/precomp/F361351ED957B4147A315862EE8FA5E0886319B7.1513967070.02457/C7/C712FE6969F786C9380D643DF17E85D06868219E line 1
-    Expected: Str
-    Got:      X::AdHoc
-    Exception message: awkward
-    Looks like you failed 1 test of 3
-    Failed test 'return a failure'
-    at xt/Sxml/basic.t line 23
+    ok 6 - attribute with bracketed <> value
 """
 
-[ summary.line-27 ]
-  chapter      = 'jklzflkjhflkja fd'
+[ summary.line-29 ]
+  chapter      = 'Add attributes.'
   diagnostic   = """
-    not ok 5 - jhgj jh jh jhg # TODO working on it
+    ok 7 - attribute a1 found
 """
 
-[ summary.line-28 ]
-  chapter      = 'jklzflkjhflkja fd'
+[ summary.line-30 ]
+  chapter      = 'Add attributes.'
   diagnostic   = """
-    not ok 1 - not yet, maybe later # TODO working on it
+    ok 8 - attribute a2 found
+"""
+
+[ summary.line-35 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 9 - true boolean attribute a1 found
+"""
+
+[ summary.line-36 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    not ok 10 - false boolean attribute a2 found
+    Failed test 'false boolean attribute a2 found'
+    at xt/Sxml/basic.t line 36
+    expected: '/ 'a2="0"' /'
+    got: '<?xml version="1.0" encoding="UTF-8"?>
+    <some-element a1="1"/>'
+"""
+
+[ summary.line-38 ]
+  chapter      = 'Nested elements.'
+  diagnostic   = """
+    ok 11 - An element within another
+"""
+
+[ summary.line-43 ]
+  chapter      = 'Element blocks and their different types.'
+  diagnostic   = """
+    ok 12 - two blocks on an element
 """
