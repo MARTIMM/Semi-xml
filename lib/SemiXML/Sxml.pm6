@@ -92,7 +92,7 @@ class Sxml {
     return False unless self!prepare-config;
 
     # Parse the content. Parse can be recursively called
-    $SemiXML::Grammar::trace = ($!trace and $!refined-config<T><parse>);
+    $SemiXML::Grammar::trace = $SemiXML::Actions::trace = ($!trace and $!refined-config<T><parse>);
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
 
     # Throw an exception when there is a parsing failure
