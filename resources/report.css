@@ -13,91 +13,30 @@ pre {
   line-height:          14pt; /* keep lines in all sections at same height */
 }
 
-/*
-pre.test-block-code {
-  background-color:     #eaefea;
-  display:              inline;
-}
-*/
-
 pre.prettyprint {
   box-sizing:           border-box; /* need to use width in percentages */
   position:             normal;
   float:                left;
+  margin-left:          5px;
   width:                92%;
   background-color:     #244;
 }
 
 pre.aside-check {
+  margin-right:         5px;
   box-sizing:           border-box;
   position:             normal;
   float:                right;
-  width:                7%; /* keep 1% in between */
+  width:                6%; /* keep 1% in between */
   background-color:     #dff;
 }
-
-/*
-pre.example {
-  color:                #00401e;
-  background-color:     #ffeeee;
-  font-family:          FreeMono;
-  font-size:            11pt;
-}
-*/
 
 pre.cleaner {
 	clear: both;
-/*	height: 1px;*/
-  margin: 0;
+  margin:               0 5px 2px 5px;
   border-width:         0px;
   background-color:     #dff;
-/*  color:                #cff; */
 }
-
-/*
-table {
-  width:                95%;
-}
-
-td {
-  vertical-align:       top;
-}
-
-td.toc-number {
-  width:                30pt;
-}
-
-table.test-table {
-  width:                95%;
-  margin:               0;
-  padding:              0;
-}
-
-table.test-table tr {
-  margin:               0;
-  padding:              0;
-}
-
-td.check-mark {
-  width:                68px;
-  font-size:            11pt;
-  margin:               0;
-  padding:              0;
-}
-
-td.smaller-check-mark {
-  width:                33px;
-  font-size:            11pt;
-  margin:               0;
-  padding:              0;
-}
-
-td.test-comment {
-  font-size:            10pt;
-  margin:               0;
-  padding:              0;
-}
-*/
 
 .green {
   color:                #00aa00;
@@ -141,29 +80,8 @@ a:hover {
   text-decoration:      underline;
 }
 
-/*
-a.u {
-  color:                #607f00;
-  text-decoration:      none;
-}
-
-
-a.u:hover {
-  color:                #607f00;
-  text-decoration:      underline;
-}
-
-p.subtitle {
-  font-size:            1.3em;
-}
-
-code {
-  color:                #307452;
-}
-*/
-
 div.repsection {
-  margin:               10px;
+  margin:               10px 4px 10px 4px;
   padding:              3px;
   border-radius:        6px;
   border-width:         1px;
@@ -208,20 +126,7 @@ strong.chapter {
   color:                #00501e;
 }
 
-/*
-div.repheader {
-  grid-column:          1 3;
-  grid-row:             1;
-}
-*/
-
 .footer {
-/*
-  position:             absolute;
-  right:                0;
-  bottom:               0;
-  left:                 0;
-*/
   right:                0;
   left:                 0;
   padding-right:        3px;
@@ -237,15 +142,7 @@ div.repheader {
 }
 
 /* SVG Elements */
-svg {
-/*
-  width:                100;
-  height:               100;
-  transform:            rotate(-90) translate(-100);
-  background:           yellowgreen;
-  border-radius:        50%;
-*/
-}
+svg { }
 
 /* Used for path and rectangles */
 /*
@@ -319,12 +216,13 @@ table.summary-table {
 
 th.summary-header {
   background-color:     #cfef9f;
+  width:                14%;
 }
 
 th.class-header {
   text-align:           left;
   vertical-align:       top;
-  width:                50%;
+  width:                60%;
 }
 
 td.summary-header {
