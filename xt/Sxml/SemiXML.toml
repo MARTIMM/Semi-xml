@@ -1,5 +1,5 @@
 [ C ]
-  tracing       = true
+  tracing       = false
 
 #------------------------------------------------------------------------------
 [ ML ]
@@ -24,6 +24,6 @@
 #  config        = true
 #  tables        = true
 #  modules       = true
-  parse         = true
+#  parse         = true
 #  parse-result  = true
   file-handling = true

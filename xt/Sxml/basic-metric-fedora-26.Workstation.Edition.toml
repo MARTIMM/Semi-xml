@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2017-12-26T15:09:12.210466Z'
+  date         = '2017-12-30T10:35:37.388359Z'
   oskernel     = 'linux:4.14.4.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -28,8 +28,8 @@ Purpose of this report is that it tests the parsing and translating process of t
   skipped      = 0
 
 [ chapter.'Add attributes.' ]
-  success      = 7
-  fail         = 1
+  success      = 8
+  fail         = 0
   todo         = 0
   skipped      = 0
 
@@ -40,7 +40,7 @@ Purpose of this report is that it tests the parsing and translating process of t
   skipped      = 0
 
 [ chapter.'Element blocks and their different types.' ]
-  success      = 1
+  success      = 2
   fail         = 0
   todo         = 0
   skipped      = 0
@@ -57,67 +57,68 @@ Purpose of this report is that it tests the parsing and translating process of t
     ok 2 - The generated xml is conforming the standard
 """
 
-[ summary.line-13 ]
+[ summary.line-14 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 3 - attribute without spaces in value
 """
 
-[ summary.line-17 ]
+[ summary.line-19 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 4 - attribute with double quoted value
 """
 
-[ summary.line-21 ]
+[ summary.line-24 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 5 - attribute with single quoted value
 """
 
-[ summary.line-25 ]
+[ summary.line-29 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 6 - attribute with bracketed <> value
 """
 
-[ summary.line-29 ]
+[ summary.line-34 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 7 - attribute a1 found
 """
 
-[ summary.line-30 ]
+[ summary.line-35 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 8 - attribute a2 found
 """
 
-[ summary.line-35 ]
+[ summary.line-39 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 9 - true boolean attribute a1 found
 """
 
-[ summary.line-36 ]
+[ summary.line-40 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
-    not ok 10 - false boolean attribute a2 found
-    Failed test 'false boolean attribute a2 found'
-    at xt/Sxml/basic.t line 36
-    expected: '/ 'a2="0"' /'
-    got: '<?xml version="1.0" encoding="UTF-8"?>
-    <some-element a1="1"/>'
+    ok 10 - false boolean attribute a2 found
 """
 
-[ summary.line-38 ]
+[ summary.line-42 ]
   chapter      = 'Nested elements.'
   diagnostic   = """
     ok 11 - An element within another
 """
 
-[ summary.line-43 ]
+[ summary.line-47 ]
   chapter      = 'Element blocks and their different types.'
   diagnostic   = """
     ok 12 - two blocks on an element
+"""
+
+[ summary.line-52 ]
+  chapter      = 'Element blocks and their different types.'
+  diagnostic   = """
+    ok
 """
