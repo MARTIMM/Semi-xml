@@ -5,7 +5,7 @@ use SemiXML::Sxml;
 #-------------------------------------------------------------------------------
 # Testing;
 #   Test $tag [ ... ]   Normal content
-#   Test $tag [! ... !] Text only no child elements
+#   Test $tag « ... »   Text only no child elements
 #   Test $*!tag [ ... ] Spacing around tags
 #
 #-------------------------------------------------------------------------------
@@ -19,16 +19,16 @@ my $f2 = 't/D103/f1.html';
 spurt( $f1, q:to/EOSX/);
 $html [
   $head [
-    $style type=text/css [!=
+    $style type=text/css «=
       green {
         color: #0f0;
         background-color: #f0f;
       }
-    !]
-    $script [!=
+    »
+    $script «=
       var a_tags = $('a');
       var b = a_tags[1];
-    !]
+    »
   ]
 
   $body [

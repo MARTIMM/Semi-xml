@@ -23,7 +23,7 @@ $html [
       $tr [ trrr                                # trrr
         $th[header \# th ]                      # outside th
         $td[data \# td ]                        # outside td
-        $td [! # inside protected body !]
+        $td { # inside protected body }
       ]
     ][
     # comment on its own in 2nd body

@@ -7,7 +7,7 @@ use SemiXML::Sxml;
 subtest 'test oneliners', {
 
   my $xml = parse('$st');
-  is $xml, '<st/>', "1 tag: $xml";
+  is $xml, '<st></st>', "1 tag: $xml";
 
   $xml = parse(Q:q@$st a1=w a2='g g' a3="h h" [ ]@);
   like $xml, /'a1="w"'/, 'a1 attribute';
@@ -52,7 +52,7 @@ subtest 'test multi liners', {
     EOXML
 
   is $xml, '<aa><bb></bb></aa>', "2 tags: $xml";
-
+#`{{
   try {
     $xml = parse(Q:q:to/EOXML/);
       $aa [
@@ -70,7 +70,7 @@ subtest 'test multi liners', {
       }
     }
   }
-
+}}
 
   $xml = parse(Q:q:to/EOXML/);
     $aa [
@@ -83,11 +83,7 @@ subtest 'test multi liners', {
 
   is $xml, '<aa><bb><cc></cc></bb></aa>', "3 tags: $xml";
 
-  $xml = parse(Q:q:to/EOXML/);
-    $aa [
-      $bb [!$x[abc]!]
-    ]
-    EOXML
+  $xml = parse('$aa [ $bb { $x[abc] } ]');
 
   is $xml, '<aa><bb>$x[abc]</bb></aa>', "2 tags and preserving content: $xml";
 
@@ -114,7 +110,7 @@ exit(0);
 
 =finish
 
-parse('$html a=x [ abc $|*a x=y [! pqr $xc [] !] p534 tyu ]');
+parse('$html a=x [ abc $|*a x=y { pqr $xc [] } p534 tyu ]');
 
 
 parse('$html xml:lang=en [ abc p534 ]');
