@@ -386,7 +386,7 @@ class SxmlHelper {
   #-----------------------------------------------------------------------------
   my $local-action;
   sub escape-attr-and-elements (
-    XML::Element $x,
+    XML::Node $node,
     $action is copy where .^name eq 'SemiXML::Actions' = $local-action
   ) is export {
 
@@ -395,58 +395,46 @@ class SxmlHelper {
     $local-action = $action if ?$action;
 
     # process body text to escape special chars
-    for $x.nodes -> $node {
 
-      if $node ~~ any( SemiXML::Text, XML::Text) {
-        my Str $s = process-esc(~$node);
-        $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
-      }
+    if $node ~~ any( SemiXML::Text, XML::Text) {
+      my Str $s = process-esc(~$node);
+      $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
+    }
 
-      elsif $node ~~ XML::Element {
-        my Array $self-closing = $action.F-table<self-closing> // [];
-        my Array $no-escaping = $action.F-table<no-escaping> // [];
+    elsif $node ~~ XML::Element {
+      my Array $self-closing = $action.F-table<self-closing> // [];
+      my Array $no-escaping = $action.F-table<no-escaping> // [];
 
 #note "Ftab: $node.name()", $self-closing, $no-escaping;
-        # Check for self closing tag, and if so remove content if any
-        if $node.name ~~ any(@$self-closing) {
-          before-element( $node, $node.name, $node.attribs);
-          $node.remove;
-          next;
-        }
-
-        else {
-          # ensure that there is at least a text element as its content
-          # otherwise XML will make it self-closing
-          unless $node.nodes.elems {
-            append-element( $node, :text(''));
-          }
-        }
-
-        # some elements mast not be processed to escape characters
-        if $node.name ~~ any(@$no-escaping) {
-          # no escaping must be performed on its contents
-          # for these kinds of nodes
-          next;
-        }
-
-        # no processing for these kinds of nodes
-        if $node.name ~~ m/^ 'sxml:' / {
-          next;
-        }
-
-        # recurively process through other type of elements
-        escape-attr-and-elements($node);
-
-#        # If this is not a self closing element and there is no content, insert
-#        # an empty string to get <a></a> instead of <a/>
-#        if ! $node.nodes {
-#          $node.append(SemiXML::Text.new(:text('')));
-#        }
+      # Check for self closing tag, and if so remove content if any
+      if $node.name ~~ any(@$self-closing) {
+        before-element( $node, $node.name, $node.attribs);
+        $node.remove;
+        next;
       }
 
-#        elsif $node ~~ any(XML::Text|SemiXML::Text) {
-#
-#        }
+      else {
+        # ensure that there is at least a text element as its content
+        # otherwise XML will make it self-closing
+        unless $node.nodes.elems {
+          append-element( $node, :text(''));
+        }
+      }
+
+      # some elements mast not be processed to escape characters
+      if $node.name ~~ any(@$no-escaping) {
+        # no escaping must be performed on its contents
+        # for these kinds of nodes
+        next;
+      }
+
+      # no processing for these kinds of nodes
+      if $node.name ~~ m/^ 'sxml:' / {
+        next;
+      }
+
+      # recurively process through other type of elements
+      escape-attr-and-elements($_) for $node.nodes;
     }
   }
 
