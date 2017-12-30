@@ -86,15 +86,21 @@ class Actions {
 
     # conversion to xml escapes is done as late as possible
     escape-attr-and-elements( $parent, self);
+    note "After esc. and table checks: $parent" if $trace;
 
     # search for variables and substitute them
     subst-variables($parent);
+    note "After variable sub: $parent" if $trace;
 
     # move around some elements
     remap-content($parent);
+    note "After remapping: $parent" if $trace;
 
     # remove leftovers from sxml namespace
     remove-sxml($parent);
+    note "After ns removal: $parent" if $trace;
+
+    note '-' x 80 if $trace;
 
     # return the completed document
     $!xml-document .= new($parent);
@@ -350,12 +356,13 @@ class Actions {
           note "  doc_ast: $d" if $trace;
           #self!drop-parent-container($d);
           $parent.append($d);
-note "P: $parent";
 
 #TODO see above
           # Test if spaces are needed after the document
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $|* >);
+
+          note "  result parent: '$parent'" if $trace;
         }
       }
     }
@@ -478,7 +485,6 @@ note "P: $parent";
 
           my $tag-ast = $v<tag-spec>.made;
           my $body-ast = $v<tag-body>;
-note "Bast: '$body-ast'";
           $ast.push: { :$tag-ast, :$body-ast, :doc-ast($v.made)};
         }
       }
