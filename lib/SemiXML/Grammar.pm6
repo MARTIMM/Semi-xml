@@ -32,7 +32,6 @@ grammar Grammar {
       <document>
     ]
     <.comment>*
-    { note '-' x 80 if $trace; }
   }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
@@ -163,8 +162,9 @@ grammar Grammar {
     [ '«'  ~ '»' [ $<keep-as-typed>=<[=]>? <body-c> ] ]
   }
 
-  token body-a { [ <.escaped-char> || <-[\\\$\#\]]> ]+ }
-  token body-b { [ <.escaped-char> || <-[\\\}]> ]* }
+  # opening brackets [ and { must also be escaped. « is weird enaugh.
+  token body-a { [ <.escaped-char> || <-[\\\$\#\[\]]> ]+ }
+  token body-b { [ <.escaped-char> || <-[\\\{\}]> ]* }
   token body-c { [ <.escaped-char> || <-[\\»]> ]* }
 
   token escaped-char { '\\' . }
