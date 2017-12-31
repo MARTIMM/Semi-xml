@@ -4,6 +4,11 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers.
 
+* 0.42.0
+  * Changed grammar of element bodies. We now have:
+    * **$a [ abc ]**  Normal elements. Can nest other elements and have comments
+    * **$a { abc }**  Non nestable. Also it cannot have comments.
+    * **$a « abc »**  Also nonnestable but is better suited for code text.
 * 0.41.0
   * Added summary report
 * 0.40.0

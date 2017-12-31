@@ -30,34 +30,34 @@ Attribute values which are empty like '' or "" are translated wrong
       Current syntax          Becomes             Note    Done
 
       $|xyz []                $xyz                        x
-      $|xyz [x]               $xyz [x]            2       x
+      $|xyz [x]               $xyz [x]                    x
 
       $*|inline [x]           $inline [x]         1,3
       $|*inline [x]           $inline [x]         1,3
       $**inline [x]           $inline [x]         1,3
 
-      $|nonnest [! x !]       $nonnest [x]        3,5     ?
-      $|spcresrv [= x ]       $spcresrv [x]       3,5
+      $|nonnest [! x !]       $nonnest {x}                x
+                              $nonnest «x»                x
+      $|spcresrv [= x ]       $spcresrv [= x]     3,5     x
 
-      $!key.method [x]        Remains the same    4
-                              or perhaps $key:method.
+      $!key.method [x]        Remains the same    4       x
 
 ```
 * Notes;
-  1) `$*|`, `$|*` and `$**` might still be used when other spacing around elements is desired then the configuration prescribes. These will then mean; add space to the left, add space to the right and add spaces to the left and right resp.
+  1) `$*|`, `$|*` and `$**` might still be used when other spacing around elements is desired than the configuration prescribes. These will then mean; add space to the left, add space to the right and add spaces to the left and right resp.
 
-  2) `$|` can also be used now to change spacing around elements when needed. Here the meaning is to remove all spacing around the element.
+  2) removed comment
 
   3) The configuration will be searched for those elements which are inline and need a special treatment of spacing around elements. Also non nest-able and space reserving elements are searched for in the configuration. The inline elements must also check for some non-alphanumeric characters following the block. E.g. in case of `,` or `.` etc. no space should be placed between the block and the following character.
 
   4) The key is a label mapped to the module in the configuration. The method must of course be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call. Perhaps a method in the module like `method is-method-inline ( Str $method-name --> Bool ) { }` returning True or False for handling top level element as in-lining or block element. When method is unavailable it is always assumed False. A long name is chosen to prevent name clashes. An example is made in SxmlCore but not called yet from the Actions module.
 
-  5) The space reserving '=' and non nesting '!' characters at the start of a block does not have to be removed completely but can just be used occasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
+  5) The space reserving '=' character at the start of a block does not have to be removed completely but can just be used occasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
 
 * Addition of several types of comments
   * [x] **# \<text> EOL**. Comments are removed and can only be used at top level and in **\$x [ ]** parts. Not within **\$x [! !]**.
   * [x] Generated XML Comments using **\$!SxmlCore.comment [ ]**.
-  * [ ] Javascript and css like comments **// \<text> EOL** and **/\* \<text> \*/**. Can be used only within **\$x [! !]** and special checks must be done for these character strings within string variable values.
+  * [ ] Javascript and css like comments **// \<text> EOL** and **/\* \<text> \*/**. Can be used only within **\$x { }** and special checks must be done for these character strings within string variable values.
   * [ ] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere.
 
 
@@ -68,7 +68,7 @@ Attribute values which are empty like '' or "" are translated wrong
 
 
 ## Attribute grammar addition
-* [ ] Boolean attributes can be expressed as **=x** and  **=!x** meaning **x=true** or **x=false**.
+* [x] Boolean attributes can be expressed as **=x** and  **=!x** meaning **x=true** or **x=false**.
 * [x] Attributes are also given as argument to module methods. In this case it might be possible to have hashes, arrays and more. Values are string or perhaps boolean. The attribute values are StringList types which can be stringyfied or used as an array.
 
 
