@@ -68,7 +68,7 @@ class Css {
 
     # if the css body is not a string of only spaces, add it to the style
     if $is-block and $css-body !~~ m/^ \s* $/ {
-note "Body: $css-body";
+#note "Body: $css-body";
 
       $css-body ~~ s:g/ \s\s+ / /;
       $css-body ~~ s:g/ \n / /;
