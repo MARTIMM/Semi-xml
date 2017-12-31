@@ -410,7 +410,6 @@ class SxmlHelper {
       if $node.name ~~ any(@$self-closing) {
         before-element( $node, $node.name, $node.attribs);
         $node.remove;
-        next;
       }
 
       else {
@@ -425,15 +424,15 @@ class SxmlHelper {
       if $node.name ~~ any(@$no-escaping) {
         # no escaping must be performed on its contents
         # for these kinds of nodes
-        next;
+
       }
 
       # no processing for these kinds of nodes
       if $node.name ~~ m/^ 'sxml:' / {
-        next;
+
       }
 
-      # recurively process through other type of elements
+      # recurively process through child elements
       escape-attr-and-elements($_) for $node.nodes;
     }
   }
