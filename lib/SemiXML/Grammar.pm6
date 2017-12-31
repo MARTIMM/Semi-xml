@@ -163,11 +163,16 @@ grammar Grammar {
   }
 
   # opening brackets [ and { must also be escaped. « is weird enaugh.
-  token body-a { [ <.escaped-char> || <-[\\\$\#\[\]]> ]+ }
+  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\#\[\]]> ]+ }
   token body-b { [ <.escaped-char> || <-[\\\{\}]> ]* }
   token body-c { [ <.escaped-char> || <-[\\»]> ]* }
 
   token escaped-char { '\\' . }
+
+  # entities must be parsed separately because some of them can use a
+  # use a '#' which interferes with the comment start. This is only
+  # necessary in the normal block 'body-a'
+  token entity          { '&' <-[;]>+ ';' }
 
 #`{{
   # No comments recognized in [! ... !], << ... >> or « ... ». This works
