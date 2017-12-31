@@ -1,8 +1,8 @@
 [ C ]
-  tracing       = false
+  tracing       = true
 
 #------------------------------------------------------------------------------
-[ ML ]
+[ ML.html ]
   test          = 'SxmlLib::Testing::Test'
   summary       = 'SxmlLib::Testing::Summary'
 #  lorem         = 'SxmlLib::LoremIpsum'
@@ -16,7 +16,7 @@
 [ T ]
 #  config        = true
 #  tables        = true
-#  modules       = true
+  modules       = true
 #  parse         = true
 #  parse-result  = true
   file-handling = true
