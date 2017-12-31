@@ -1,4 +1,4 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=Db5 --out=pdf
+# sxml2xml.pl6 --in=Db5 --out=pdf doc/Manual/Manual.sxml
 
 $!Db5b.article [
   $title [ Package &pack; to describe and use semi XML ]
@@ -49,7 +49,7 @@ $!Db5b.article [
 
       $example [
         $title [ Input &lang; text ]
-        $programlisting language=sxml [!=
+        $programlisting language=sxml {=
           $html [
             $head [
               $title [ My First Sxml Document ]
@@ -57,15 +57,15 @@ $!Db5b.article [
 
             $body [
               $h1 [ My First Sxml Document ]
-              $p [ Hello world\! And it is said on $\!SxmlCore.date. ]
+              $p [ Hello world! And it is said on $!SxmlCore.date. ]
             ]
           ]
-        !]
+        }
       ]
 
       $example [
         $title [ Generated html text ]
-        $programlisting language=html [!=
+        $programlisting language=html {=
           <html>
             <head>
               <title>My First Sxml Document</title>
@@ -75,7 +75,7 @@ $!Db5b.article [
               <p>Hello world\! And it is said on 2016-03-22.</p>
             </body>
           </html>
-        !]
+        }
       ]
     ]
 
@@ -164,7 +164,7 @@ $!Db5b.article [
         ]
 
         $listitem [
-        
+
           $para [
             $emphasis[Configuration]. The toml configuration file will be
             explained. This section explains how to control the output
@@ -279,9 +279,9 @@ $!SxmlCore.comment [
         A document always starts with an element as you probably know from any XML
         dialect. At the toplevel there may be only one element. The first example
         shows the most simple html document ever.
-        $programlisting [!
+        $programlisting {
           $html
-        !]
+        }
         Something to mention here is that there is no need to add a xml description
         or doctype. These are all controlled by the configuration data.
       ]
@@ -289,7 +289,7 @@ $!SxmlCore.comment [
       $para [
 #TODO RSS in glossary
         A more complex example shows a part of RSS or Really Simple Syndication.
-        $programlisting [!=
+        $programlisting {=
           $rss version=2.0 [
             $channel [
               $title [W3Schools Home Page]
@@ -302,7 +302,7 @@ $!SxmlCore.comment [
               ]
             ]
           ]
-        !]
+        }
 #TODO link to w3schools
         As you might have guessed it, the example is taken from w3schools where
         all sorts of xml languages are described.
@@ -335,7 +335,7 @@ $!SxmlCore.comment [
       ]
 #    ]
 
-$!SxmlCore.comment [!
+$!SxmlCore.comment {
     $para [
       Below you see a simple example.
 
@@ -369,9 +369,9 @@ $!SxmlCore.comment [!
         ]
       ]
     ]
-!]
+}
 
-$!SxmlCore.comment [!
+$!SxmlCore.comment {
     $para [
       The result after running through &prog; is shown below. Importend to
       note that this text is nicely formatted for this example and the output
@@ -407,7 +407,7 @@ $!SxmlCore.comment [!
         ]
       ]
     ]
-!]
+}
 
       $sect3 [
         $title [Comment]
@@ -421,19 +421,19 @@ $!SxmlCore.comment [!
 
       $sect3 [
         $title [Escaping characters]
-        $para [!
+        $para {
           When you want to use a character which is used as a delimiter ('[')
           or start of an element ('$') you must escape that character to prevent
           the action that takes place when encountering that character. Writing
           '\\' before that character escapes them from that interpretation.
           Examples are '\\[' or '$'.
-        !]
+        }
       ]
 
       $sect3 [
         $title [Unicode characters]
         $para [
-          All available unicode characters from the utf-8 set may be used in the
+          All available Unicode characters from the utf-8 set may be used in the
           text. These can be inserted directly by cut and paste, using special
           keyboards, entity codes when describing html text such symbol &copy;
           as &amp;copy;, or using numeric codes symbol &#9986; as
@@ -447,29 +447,33 @@ $!SxmlCore.comment [!
           There are several ways to contain the text between delimiters
           depending on the contents or even the absence of content.
           Take, for example the html break element <br/>. This element does not
-          have content. We could write this as $**emphasis[!$br []!]. But we can
-          leave off the brackets to make it shorter like so; $**emphasis[!$br!].
+          have content. We could write this as $**emphasis{$br []}. But we can
+          leave off the brackets to make it shorter like so; $**emphasis{$br}.
           There are however situations where you must use the brackets when the
           following text is in a argument=value format to prevent them to be
-          interpreted as such. E.g. $**emphasis [! $br [] after=break !].
+          interpreted as such. E.g. $**emphasis { $br [] after=break }.
         ]
 
         $para [
           As described above under $**emphasis[Escaping characters] it is possible
           to insert characters which are otherwise interpreted as something
           special. However, it gets annoying when there are many of them like in
-          a piece of javascript or perl code. There is a solution for that luckily,
-#TODO tests for all characters like '!'.
-          just enclose the text between '[!' and '!\]'. Nothing gets interpreted
+          a piece of JavaScript or Perl code. There is a solution for that luckily,
+          just enclose the text between '{' and '}'. Nothing gets interpreted
           between these delimiters as well as comments are kept in the text.
+          That works for simple code and is easier to type. But these brackets
+          can be used a lot in code so there is another possibility. Use '«' and
+          '»' for that. Not many program languages beside perl6 use these characters.
+          It might come in handy to program a compose key for this, otherwise it
+          becomes a pain to insert those characters.
         ]
 
         $para [
-          In html the text is justified automatically except in sertain sections
+          In html the text is justified automatically except in certain sections
           such as within <pre> elements. Sxml does not have any notion of these
           sections and treat those as xml and all excess of space is removed. To
           cope with these sections another set of container delimiters are used.
-          These are $**emphasis[! [= ... \] !] and $*|emphasis[! [\!= ... \!] !].
+          These are $**emphasis{ [= ... ] } and $*|emphasis{ [= ... \!] !].
           With these brackets, all indenting and newlines are fixed and protected.
         ]
 
