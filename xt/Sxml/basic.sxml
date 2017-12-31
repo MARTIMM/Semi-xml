@@ -107,9 +107,10 @@ $!test.run title='Basic SemiXML tests'
       have a normal block with possible nested elements. It is also possible to
       add comments starting with a '#' character. The use of '\{ ... \}'
       however, will inhibit the nesting of elements. The body '« ... »' works in
-      the same way as '\{ ... \}' and is added as a convenience. If you want to
-      use those markers of the body, the characters must be escaped with a '\\'
-      character. For example '\\\{'. For the normal block '[ ... ]' the '$' and '#'
+      the same way as '\{ ... \}' and is added as a convenience to enclose code
+      more easily. If you want to use those markers of the body in text, the
+      characters must be escaped with a '\\' character. For example '\\\{'.
+      For the normal block '[ ... ]' the '$' and '#'
       must also be escaped if you want the character in the text.
     }
 

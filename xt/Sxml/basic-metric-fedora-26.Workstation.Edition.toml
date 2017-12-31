@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2017-12-30T10:35:37.388359Z'
+  date         = '2017-12-30T12:37:56.188017Z'
   oskernel     = 'linux:4.14.4.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
