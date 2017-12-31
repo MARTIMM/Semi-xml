@@ -405,11 +405,14 @@ class SxmlHelper {
       my Array $self-closing = $action.F-table<self-closing> // [];
       my Array $no-escaping = $action.F-table<no-escaping> // [];
 
-#note "Ftab: $node.name()", $self-closing, $no-escaping;
+#note "Ftab: $node.name()";#, $self-closing, $no-escaping;
       # Check for self closing tag, and if so remove content if any
       if $node.name ~~ any(@$self-closing) {
         before-element( $node, $node.name, $node.attribs);
         $node.remove;
+
+        # return because there are no child elements left to recurse
+        return;
       }
 
       else {
@@ -424,12 +427,12 @@ class SxmlHelper {
       if $node.name ~~ any(@$no-escaping) {
         # no escaping must be performed on its contents
         # for these kinds of nodes
-
+        return;
       }
 
       # no processing for these kinds of nodes
       if $node.name ~~ m/^ 'sxml:' / {
-
+        return;
       }
 
       # recurively process through child elements
