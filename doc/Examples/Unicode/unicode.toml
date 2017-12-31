@@ -1,13 +1,17 @@
-[ option.doctype ]
-  show          = 1
+[ C ]
+  tracing       = true
 
-[ option.xml-prelude ]
-  show          = 0
-
-[ output ]
-  fileext       = 'html'
-
-[ output.program ]
+#------------------------------------------------------------------------------
+[ R.html ]
   pdf           = 'wkhtmltopdf - %op/%of.pdf'
   lint          = 'xmllint --format - > %op%of.%oe'
 
+#------------------------------------------------------------------------------
+# Tracing tables
+[ T ]
+#  config        = true
+#  tables        = true
+  modules       = true
+#  parse         = true
+#  parse-result  = true
+  file-handling = true
