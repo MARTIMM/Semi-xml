@@ -1,31 +1,20 @@
-# sxml2xml.pl6 --in=Db5 --out=pdf doc/Manual/Manual.sxml
+# sxml2xml.pl6 --in=db5 --out=pdf doc/Manual/Manual.sxml
 
-$!Db5b.article [
+$!db5b.article [
   $title [ Package &pack; to describe and use semi XML ]
-  $!Db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
+  $!db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
               city=Haarlem country=Netherlands
               copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
     $para [
-      The &pack; package comprises a set of Perl 6 modules to convert a
-      language coined 'semi xml' or &lang; text into $**emphasis[XML]
-      languages such as $*|emphasis[HTML], $**emphasis[SOAP],
-      $**emphasis[Docbook] or $*|emphasis[XSL].
+      The &pack; package comprises of a set of Perl 6 modules to convert a language coined 'semi xml' or &lang; text into $emphasis[XML] languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[XSL].
     ]
 
     $para [
-      In the package there is also a program called &prog; which uses &pack;
-      to transform &lang; text from a given file into XML after which it
-      is stored in another file. The generated XML can also be send to any
-      program for conversion to other formats or for checking. Examples are
-      xsltproc, xmllint, rnv, wkhtmltopdf, xep etcetera.
+      In the package there is also a program called $emphasis[&prog;] which uses &pack; to transform &lang; text from a given file into XML after which it is stored in another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
     ]
 
     $para [
-      Furthermore there are modules designed to generate fragments of html,
-      docbook or other
-      specific constucts like epub and testing reports. Much of this code need
-      some more refinements but it gives the programmer a good insight in the
-      strength of this package.
+      Furthermore there are modules designed to generate fragments of html, docbook or other specific constructs like Epub and testing reports. Much of this code need some more refinements but it shows the strength of this package.
     ]
 
     $para [
@@ -37,9 +26,7 @@ $!Db5b.article [
   $sect1 xml:id=Introduction [
     $title [ Introduction of package &pack; ]
     $para [
-      Welcome to the $*|emphasis[&pack;] package. As mentioned in the abstract, the
-      modules and programs in this package help to convert &lang; text
-      into $*|emphasis[XML].
+      Welcome to the $emphasis[&pack;] package. As mentioned in the abstract, the modules and programs in this package help to convert &lang; text into $emphasis[XML] or any dialect thereof.
     ]
 
     $para [
@@ -49,7 +36,7 @@ $!Db5b.article [
 
       $example [
         $title [ Input &lang; text ]
-        $programlisting language=sxml {=
+        $programlisting language=sxml {
           $html [
             $head [
               $title [ My First Sxml Document ]
@@ -65,7 +52,7 @@ $!Db5b.article [
 
       $example [
         $title [ Generated html text ]
-        $programlisting language=html {=
+        $programlisting language=html {
           <html>
             <head>
               <title>My First Sxml Document</title>
@@ -195,7 +182,7 @@ $!Db5b.article [
           ]
         ]
 
-$!SxmlCore.comment [
+$!SxmlCore.drop [
         $listitem [
           $emphasis[].
         ]
@@ -231,29 +218,14 @@ $!SxmlCore.comment [
     $sect2 [
       $title [External modules]
       $para [
-        External modules can be written to add functionality to the language. This
-        package comes with few modules to insert text, read text from files,
-        specific html or docbook tasks, epub generation and test report documents.
-        The modules Delivered in this package and how to write such a module is
-        explained also in a separate chapter.
+        External modules can be written to add functionality to the language. This package comes with few modules to insert text, read text from files, specific HTML or Docbook tasks, Epub generation and test report documents. The modules Delivered in this package and how to write such a module is explained also in a separate chapter.
       ]
     ]
 
     $sect2 [
       $title [Parsing and translation]
       $para [
-        Parsing is the the process of taking the text and checking it for the &lang;
-        language. Together with this process translation of the text takes place.
-        How this translation takes place is depending on the way parsing is done.
-        Roughly it starts with the toplevel element and arriving at the first
-        bracket '[' it may see a mix of text and new elements before the closing
-        bracket '\]'. The new elements
-        content (between the elements brackets) is looked into in turn. So the
-        translation of the deepest level must be done first before the second
-        deepest etc. up to the toplevel. This knowledge is not important when
-        using the simple element form and the predefined methods. However, when
-        designing your own methods your method will get the processed xml of
-        the content between its brackets.
+        Parsing is the the process of taking the text and checking it for the &lang; language. Together with this process translation of the text takes place. How this translation takes place is depending on the way parsing is done. Roughly it starts with the top level element and arriving at the first bracket '\[' it may see a mix of text and new elements before the closing bracket '\]'. The new elements content (between the elements brackets) is looked into in turn. So the translation of the deepest level must be done first before the second deepest etc. up to the top level. This knowledge is not important when using the simple element form and the predefined methods. However, when designing your own methods your method will get the processed XML of the content between its brackets.
       ]
     ]
 
@@ -263,7 +235,7 @@ $!SxmlCore.comment [
         After the translation the result is extended with some extra textlines.
         This result can be saved into a file on disk. The other option to saving
         is sending the result to program for further processing. For example if
-        the result happens to be html, this can be converted to pdf using a
+        the result happens to be HTML, this can be converted to PDF using a
         program like wkhtmltopdf.
       ]
     ]
@@ -276,14 +248,11 @@ $!SxmlCore.comment [
     $sect2 [
       $title [The document]
       $para [
-        A document always starts with an element as you probably know from any XML
-        dialect. At the toplevel there may be only one element. The first example
-        shows the most simple html document ever.
+        A document always starts with an element as you probably know from any XML dialect. At the top level there may be only one element. The first example shows the most simple HTML document ever.
         $programlisting {
           $html
         }
-        Something to mention here is that there is no need to add a xml description
-        or doctype. These are all controlled by the configuration data.
+        Something to mention here is that there is no need to add a XML description or Doctype. These are all controlled by the configuration data.
       ]
 
       $para [
@@ -305,18 +274,18 @@ $!SxmlCore.comment [
         }
 #TODO link to w3schools
         As you might have guessed it, the example is taken from w3schools where
-        all sorts of xml languages are described.
+        all sorts of XML languages are described.
       ]
 
       $para [
-        The example shows how nesting is done using brackets ('[' and '\]') and
+        The example shows how nesting is done using brackets ('\[' and '\]') and
         that between brackets there can be a mix of text and other elements.
         What we learn from this example is:
         $itemizedlist [
           $listitem [
             $para [
               $emphasis[Elements]. A simple element is created by using
-              a dollar in front of an identifier like $emphasis[\$rss].
+              a dollar in front of an identifier like $emphasis{$rss}.
             ]
           ]
 
@@ -324,9 +293,9 @@ $!SxmlCore.comment [
             $para [
               $emphasis[Attributes]. Elements may have any number of attributes
               and are written as a key value pair separated by an equal ('='). like
-              $emphasis[version=2.0] on the \$rss element. The keyname cannot be
+              $emphasis[version=2.0] on the \$rss element. The key name cannot be
               repeated on the same element, only one attribute of the duplicated
-              keynames will survive. The values do not have to be quoted if there
+              key names will survive. The values do not have to be quoted if there
               are no spaces in the value. If there are any, single and double
               quote characters (' and ") can be used.
             ]
@@ -335,11 +304,11 @@ $!SxmlCore.comment [
       ]
 #    ]
 
-$!SxmlCore.comment {
+$!SxmlCore.drop «
     $para [
       Below you see a simple example.
 
-      $!Db5f.load-test-example
+      $!db5f.load-test-example
          path=Book-Examples/BE-001.sxml
          start='$!SxmlCore.comment [Start]'
          stop='$!SxmlCore.comment [Stop]'
@@ -350,10 +319,10 @@ $!SxmlCore.comment {
 
       $calloutlist [
         $callout arearefs=BE-001.a01 [
-          $para [!
+          $para {
             An element which becomes <html> with a body starting with '['
             enclosing other elements and text.
-          !]
+          }
         ]
 
         $callout arearefs=BE-001.a02 [
@@ -363,21 +332,21 @@ $!SxmlCore.comment {
         ]
 
         $callout arearefs=BE-001.a03 [
-          $para [!
+          $para {
             The html element ends here with the ']' generating </html>.
-          !]
+          }
         ]
       ]
     ]
-}
+»
 
-$!SxmlCore.comment {
+$!SxmlCore.drop «
     $para [
       The result after running through &prog; is shown below. Importend to
       note that this text is nicely formatted for this example and the output
       would be more like a one-liner.
 
-      $!Db5f.load-test-example
+      $!db5f.load-test-example
          path=Book-Examples/BE-001.xml
          start='<!--Start-->'
          stop='<!--Stop-->'
@@ -389,32 +358,32 @@ $!SxmlCore.comment {
 
       $calloutlist [
         $callout arearefs=BE-001.b01 [
-          $para [!
+          $para {
             Result of '$html \[' starts with <html>.
-          !]
+          }
         ]
 
         $callout arearefs=BE-001.b02 [
-          $para [!
+          $para {
             The title element is generated as <title>... text ... </title>.
-          !]
+          }
         ]
 
         $callout arearefs=BE-001.b03 [
-          $para [!
+          $para {
             The html element ends here with the generated </html>.
-          !]
+          }
         ]
       ]
     ]
-}
+»
 
       $sect3 [
         $title [Comment]
         $para [
-          Comments are possible on several places and starts with '#'. To be
-          more exact, all space before '#', the character '#' and characters
-          after it up to the end of line includeing the end of line characters
+          Comments are possible on several places and starts with '\#'. To be
+          more exact, all space before '\#', the character '\#' and characters
+          after it up to the end of line including the end of line characters
           are removed.
         ]
       ]
@@ -426,7 +395,7 @@ $!SxmlCore.comment {
           or start of an element ('$') you must escape that character to prevent
           the action that takes place when encountering that character. Writing
           '\\' before that character escapes them from that interpretation.
-          Examples are '\\[' or '$'.
+          Examples are '\\[' or '\\\$'.
         }
       ]
 
@@ -435,9 +404,9 @@ $!SxmlCore.comment {
         $para [
           All available Unicode characters from the utf-8 set may be used in the
           text. These can be inserted directly by cut and paste, using special
-          keyboards, entity codes when describing html text such symbol &copy;
+          keyboards, compose keys, entity codes such symbol &copy;
           as &amp;copy;, or using numeric codes symbol &#9986; as
-          &amp;\#9986; or &amp;\#x2702;.
+          &amp;\#9986; or &amp;\#x2702;. The entity code must be known by the specific XML code using e.g. the DTD of the language.
         ]
       ]
 
@@ -446,26 +415,18 @@ $!SxmlCore.comment {
         $para [
           There are several ways to contain the text between delimiters
           depending on the contents or even the absence of content.
-          Take, for example the html break element <br/>. This element does not
+          Take, for example the HTML break element <br/>. This element does not
           have content. We could write this as $**emphasis{$br []}. But we can
           leave off the brackets to make it shorter like so; $**emphasis{$br}.
           There are however situations where you must use the brackets when the
           following text is in a argument=value format to prevent them to be
           interpreted as such. E.g. $**emphasis { $br [] after=break }.
+#TODO self closing brackets F-Table.
+#TODO naming the brackets correctly
         ]
 
         $para [
-          As described above under $**emphasis[Escaping characters] it is possible
-          to insert characters which are otherwise interpreted as something
-          special. However, it gets annoying when there are many of them like in
-          a piece of JavaScript or Perl code. There is a solution for that luckily,
-          just enclose the text between '{' and '}'. Nothing gets interpreted
-          between these delimiters as well as comments are kept in the text.
-          That works for simple code and is easier to type. But these brackets
-          can be used a lot in code so there is another possibility. Use '«' and
-          '»' for that. Not many program languages beside perl6 use these characters.
-          It might come in handy to program a compose key for this, otherwise it
-          becomes a pain to insert those characters.
+          As described above under $**emphasis[Escaping characters] it is possible to insert characters which are otherwise interpreted as something special. However, it gets annoying when there are many of them like in a piece of JavaScript or Perl code. There is a solution for that luckily, just enclose the text between '{' and '}'. Nothing gets interpreted between these delimiters as well as comments are kept in the text. That works for simple code and is easier to type. But these brackets can be used a lot in code so there is another possibility. Use '«' and '»' for that. Not many program languages beside perl6 use these characters. It might come in handy to program a compose key for this, otherwise it becomes a pain to insert those characters.
         ]
 
         $para [
@@ -473,15 +434,16 @@ $!SxmlCore.comment {
           such as within <pre> elements. Sxml does not have any notion of these
           sections and treat those as xml and all excess of space is removed. To
           cope with these sections another set of container delimiters are used.
-          These are $**emphasis{ [= ... ] } and $*|emphasis{ [= ... \!] !].
+          These are $**emphasis{ [= ... ] }.
+#TODO
           With these brackets, all indenting and newlines are fixed and protected.
         ]
 
         $para [
           Multiple content bodies are also possible when there are parts which
           need protection and in other parts, elements are needed. E.g.
-          $**emphasis[! $p [The line; ][\! my Int $x = 10; \!][ is an $b[Int]
-          declaration] !]
+          $**emphasis{ $p [The line; ]« my Int $x = 10; »[ is an $b[Int]
+          declaration] }
         ]
       ]
 
@@ -489,20 +451,21 @@ $!SxmlCore.comment {
         $title [Element types]
         $para [
           Some examples of elements are already shown at the start
-          of this chapter like $**emphasis[! $html !] for instance. It is written
+          of this chapter like $**emphasis{ $html } for instance. It is written
           as a name with a dollar prefixed to it. Normally, spacing around an
           element is minimized but at some places there must be a space before
           or after the element. Examples from html are <a>, <b> and <strong> among
           other inline elements. To get this spacing right one can use
-          $*|emphasis[! $**element !],
-          $**emphasis[! $*|element !] or $**emphasis[! $|*element !] to have a
-          space on both sides, on the left side or on the right side respectively.
+          $*|emphasis{ $**element },
+          $**emphasis{ $*|element } or $**emphasis{ $|*element } to have a
+          space on both sides, on the left side or on the right side
+          respectively.
 #TODO $|element no spaces.
         ]
 
         $para [
           Another type is a special one. It is defined as
-          $**emphasis[! $\!module-key.method-name !] where the module-key is mapped
+          $**emphasis{ $!module-key.method-name } where the module-key is mapped
           to a real module in the configuration file. One key is predefined: SxmlCore
           and is mapped to SxmlLib::SxmlCore. The methods defined in that module
           are explained in a separate chapter. How a module is initialized and
@@ -599,17 +562,17 @@ $!SxmlCore.comment {
       $para [
         Below you see an example of two options to let the xml prelude be
         written as well as a doctype at the start of the result.
-        $programlisting [!=
-        !]
+        $programlisting {=
+        }
       ]
 
-$!SxmlCore.comment [!
+$!SxmlCore.drop {
         $sect4 [
           $title [  ]
           $para [
           ]
         ]
-!]
+}
 
       $sect3 [
         $title [ Options used by the library &pack; ]
@@ -623,14 +586,14 @@ $!SxmlCore.comment [!
         $sect4 [
           $title [ option/doctype/definition ]
           $para [
-            $programlisting [!=
-option/doctype/definition: \[
+            $programlisting {
+option/doctype/definition: [
   <!ENTITY company "Acme Mc Carpenter, Inc">
   <!ENTITY program "sxml2xml">
   <!ENTITY library "Semi-xml">
   <!ENTITY nbsp " ">
-\]
-            !]
+]
+            }
           ]
         ]
 
@@ -685,12 +648,12 @@ option/doctype/definition: \[
         $sect4 [
           $title [ output/program ]
           $para [
-            $programlisting [!=
+            $programlisting {=
 output/program/pdf:
   | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
   | xep -fo - -pdf sxml2xml.pdf
   ;
-            !]
+            }
           ]
         ]
       ]
@@ -733,9 +696,9 @@ output/program/pdf:
     $sect2 [
       $title [Program arguments]
       $para [
-        $synopsis [!=
+        $synopsis {=
           sxml2xml [--run=<run-selector>] <sxml-file>
-        !]
+        }
       ]
     ]
 
@@ -757,19 +720,19 @@ output/program/pdf:
     ]
   ]
 
-$!SxmlCore.comment [!
+$!SxmlCore.drop {
     $sect2 [
       $title []
       $para [
       ]
     ]
-!]
+}
 
   #----------------------------------------------------------------------------
   $sect1 xml:id=syntax [
     $title [Syntax]
     $para [
-      $programlisting [!=
+      $programlisting {=
 <sxml-syntax> ::= <prelude-section>? <document>;
 
 <prelude-section> ::= '---' <new-line> <key-value-pairs>* '---' <new-line>;
@@ -793,7 +756,7 @@ $!SxmlCore.comment [!
 
 <body-start-control> ::= '\!=' | '\!' | '=';
 <body-end-control> ::= '\!';
-      !]
+      }
     ]
   ]
 

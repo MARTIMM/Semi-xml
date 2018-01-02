@@ -1,4 +1,4 @@
-#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6 --in=xml --run=xsl
+# run: sxml2xml.pl6 --in=xml --out=xsl doc/Manual/ss-xhtml.sxml
 
 # Stylesheet for use with setup.sxml
 $xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
@@ -69,5 +69,3 @@ $xsl:stylesheet xmlns:xsl=http://www.w3.org/1999/XSL/Transform version=1.0 [
     ]
   ]
 ]
-
-
