@@ -10,6 +10,8 @@ use XML::XPath;
 #-------------------------------------------------------------------------------
 class SxmlHelper {
 
+  my $local-action;
+
   #-----------------------------------------------------------------------------
 #TODO $config should come indirectly from $!refined-config
   multi sub save-xml (
@@ -384,7 +386,6 @@ class SxmlHelper {
   }
 
   #-----------------------------------------------------------------------------
-  my $local-action;
   sub escape-attr-and-elements (
     XML::Node $node,
     $action is copy where .^name eq 'SemiXML::Actions' = $local-action
@@ -467,6 +468,122 @@ class SxmlHelper {
 }}
 
     return $esc;
+  }
+
+  #-----------------------------------------------------------------------------
+  sub check-inline (
+    XML::Element $parent,
+    $action is copy where .^name eq 'SemiXML::Actions'
+  ) is export {
+
+    # get xpath object
+    my XML::Document $xml-document .= new($parent);
+    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+    # set namespace first
+    my $x = XML::XPath.new(:document($xml-document));
+    $x.set-namespace: 'sxml' => 'github.MARTIMM';
+
+    # check every element if it is an inline element. If so, check for
+    # surrounding spaces.
+    # first check inner text
+    for $x.find( '//*', :to-list) -> $v {
+      if $v.name ~~ any(@($action.F-table<inline>)) {
+#note "CI: $v.name()";
+        if $v.nodes[0] ~~ XML::Text {
+          my XML::Text $t = $v.nodes[0];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.insert($t);
+        }
+
+        elsif $v.nodes[0] ~~ SemiXML::Text {
+          my SemiXML::Text $t = $v.nodes[0];
+          my Str $text = $t.txt;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.insert($t);
+        }
+
+        elsif $v.nodes[*-1] ~~ XML::Text {
+          my XML::Text $t = $v.nodes[*-1];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.append($t);
+        }
+
+        elsif $v.nodes[*-1] ~~ SemiXML::Text {
+          my SemiXML::Text $t = $v.nodes[*-1];
+          my Str $text = $t.txt;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.append($t);
+        }
+
+
+        # check outer text
+        my XML::Node $ps = $v.previousSibling;
+        if $ps ~~ XML::Element {
+          my Str $text = ~$ps;
+          if $text ~~ /\S $/ {
+            my XML::Text $t .= new(:text(' '));
+            $v.before($t);
+          }
+        }
+
+        elsif $ps ~~ XML::Text {
+          my XML::Text $t := $ps;
+          my Str $text = $t.text;
+          $text ~= ' ';
+          $t.remove;
+          $t .= new(:$text);
+          $v.before($t);
+        }
+
+        elsif $ps ~~ SemiXML::Text {
+          my SemiXML::Text $t := $ps;
+          my Str $text = $t.txt;
+          $text ~= ' ';
+          $t.remove;
+          $t .= new(:$text);
+          $v.before($t);
+        }
+
+
+        my XML::Node $ns = $v.nextSibling;
+        if $ns ~~ XML::Element {
+          my Str $text = ~$ns;
+          if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
+            my XML::Text $t .= new(:text(' '));
+            $v.after($t);
+          }
+        }
+
+        elsif $ns ~~ XML::Text {
+          my XML::Text $t := $ns;
+          my Str $text = $t.text;
+          if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
+            $t .= new(:text(' '));
+            $v.after($t);
+          }
+        }
+
+        elsif $ns ~~ SemiXML::Text {
+          my SemiXML::Text $t := $ns;
+          my Str $text = $t.txt;
+          if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
+            $t .= new(:text(' '));
+            $v.after($t);
+          }
+        }
+      }
+    }
   }
 
   #-----------------------------------------------------------------------------

@@ -105,6 +105,9 @@ class Actions {
     remove-sxml($parent);
     note "After ns removal: $parent" if $trace;
 
+    # check spacing around elements
+    check-inline( $parent, self);
+
     note '-' x 80 if $trace;
 
     # return the completed document
@@ -257,8 +260,11 @@ class Actions {
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
         note "  Tag: $tt$tag" if $trace;
 
-        # A bit of hassle to get the StringList values converted into Str explicitly
-        $x .= new( :name($tag), :attribs(%($attrs.keys Z=> $attrs.values>>.Str)));
+        # A bit of hassle to get the StringList values converted into
+        # Str explicitly
+        $x .= new(
+          :name($tag), :attribs(%($attrs.keys Z=> $attrs.values>>.Str))
+        );
 
         # Check for xmlns uri definitions and set them on the current node
         for $attrs.keys {
