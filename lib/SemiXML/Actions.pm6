@@ -333,7 +333,7 @@ class Actions {
             # only spaces between texts
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
             $parent.append(SemiXML::Text.new(:text($txt)));
-            note "  Text: '$txt'" if $trace;
+            note "  Text: $txt.substr( 0, 68) ..." if $trace;
           }
         }
 
@@ -353,7 +353,7 @@ class Actions {
 
 #TODO not sure if this is the only place to remove sxml:parent_container
           my $d = $_<doc-ast>;
-          note "  doc_ast: $d" if $trace;
+          note "  Doc Ast: {(~$d).substr( 0, 65)} ..." if $trace;
           #self!drop-parent-container($d);
           $parent.append($d);
 
@@ -362,7 +362,7 @@ class Actions {
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $|* >);
 
-          note "  result parent: '$parent'" if $trace;
+          note "  Result: {(~$parent).substr( 0, 66)} ..." if $trace;
         }
       }
     }
@@ -380,7 +380,6 @@ class Actions {
     my Array $ast = [];
     my Str $symbol = $match<tag><sym>.Str;
     $ast.push: $symbol;
-#note "Tag: ", $match<tag>.kv;
 
     # define the attributes for the element. attr value is of type StringList
     # where ~$strlst gives string, @$strlst returns list and $strlist.value
@@ -409,7 +408,7 @@ class Actions {
           :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
         );
       }
-#note "AV $a<attr-key>: ", $av;
+
       $attrs{$a<attr-key>.Str} = $av;
     }
 
@@ -436,7 +435,6 @@ class Actions {
 
     # Add to the list
     $!tag-list.push($tag-name);
-#note "Tag name: $tag-name";
 
     $ast.push: $attrs;
 
@@ -465,23 +463,23 @@ class Actions {
 
         # part from
         when 'body-a' {
-          note "  body a: '$v'" if $trace;
+          note "  body a: $v.substr( 0, 66) ..." if $trace;
           $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
         }
 
         #
         when 'body-b' {
-          note "  body b: '$v'" if $trace;
+          note "  body b: $v.substr( 0, 66) ..." if $trace;
           $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
         }
 
         when 'body-c' {
-          note "  body c: '$v'" if $trace;
+          note "  body c: $v.substr( 0, 66) ..." if $trace;
           $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
         }
 
         when 'document' {
-          note "  Document: >>>", ~$v, '<<<' if $trace;
+          note "  Document: {(~$v).substr( 0, 64)} ..."  if $trace;
 
           my $tag-ast = $v<tag-spec>.made;
           my $body-ast = $v<tag-body>;
