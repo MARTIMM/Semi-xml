@@ -31,7 +31,8 @@ class Sxml {
 
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
-  has Bool $!trace = False;
+#TODO doc
+  has Bool $.trace = False;
   has Bool $!force;
 
   # structure to check for dependencies
@@ -257,11 +258,7 @@ class Sxml {
   #-----------------------------------------------------------------------------
   multi method get-config ( Str:D :$table, Str:D :$key --> Any ) {
 
-    return (
-      $!refined-config{$table}:exists
-        ?? $!refined-config{$table}{$key}
-        !! Any
-    );
+    $!refined-config{$table}:exists ?? $!refined-config{$table}{$key} !! Any
   }
 
   #-----------------------------------------------------------------------------
