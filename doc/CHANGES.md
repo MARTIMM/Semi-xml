@@ -4,6 +4,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers.
 
+* 0.43.0
+  * Add $!SxmlCore.drop [ ... ] to throw all that is enclosed
 * 0.42.0
   * Changed grammar of element bodies. We now have:
     * **$a [ abc ]**  Normal elements. Can nest other elements and have comments

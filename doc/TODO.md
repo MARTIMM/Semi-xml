@@ -58,7 +58,7 @@ Attribute values which are empty like '' or "" are translated wrong
   * [x] **# \<text> EOL**. Comments are removed and can only be used at top level and in **\$x [ ]** parts. Not within **\$x [! !]**.
   * [x] Generated XML Comments using **\$!SxmlCore.comment [ ]**.
   * [ ] Javascript and css like comments **// \<text> EOL** and **/\* \<text> \*/**. Can be used only within **\$x { }** and special checks must be done for these character strings within string variable values.
-  * [ ] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere.
+  * [x] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere. This plan is aborted and a method is introduced to do just that. $!SxmlCore.drop [ ... ] throws away all that is enclosed.
 
 
 ## External modules located in SxmlLib tree

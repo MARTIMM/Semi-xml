@@ -33,7 +33,7 @@ class SxmlCore {
 
     append-element( $parent, :text(Date.new( $year, $month, $day).Str));
 
-    $parent;
+    $parent
   }
 
   #-----------------------------------------------------------------------------
@@ -67,7 +67,7 @@ class SxmlCore {
     }
 
     append-element( $parent, :text($dtstr));
-    $parent;
+    $parent
   }
 
   #-----------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class SxmlCore {
     my Str $comment-content = [~] $content-body.nodes;
 
     $parent.append(XML::Comment.new(:data($comment-content)));
-    $parent;
+    $parent
   }
 
   #-----------------------------------------------------------------------------
@@ -101,7 +101,7 @@ class SxmlCore {
     my Str $cdata-content = [~] $content-body.nodes;
 
     $parent.append(XML::CDATA.new(:data($cdata-content)));
-    $parent;
+    $parent
   }
 
   #-----------------------------------------------------------------------------
@@ -118,7 +118,8 @@ class SxmlCore {
         ))
       )
     );
-    $parent;
+
+    $parent
   }
 
   #-----------------------------------------------------------------------------
@@ -134,6 +135,16 @@ class SxmlCore {
     my $e = append-element( $parent, 'sxml:variable', %$attrs);
     $e.append($content-body);
 
-    $parent;
+    $parent
+  }
+
+  #-----------------------------------------------------------------------------
+  # $!SxmlCore.drop []
+  # Remove all that is enclosed
+  method drop (
+    XML::Element $parent, Hash $attrs, XML::Node :$content-body
+    --> XML::Node
+  ) {
+    $parent
   }
 }
