@@ -55,8 +55,9 @@ class Summary {
   ) {
 
     my Str $basename = ($attrs<metric>//'no-metric-attribute').Str;
-    my Str $path = $SemiXML::Sxml::filename.IO.absolute;
-    $path = $path.IO.dirname;
+#    my Str $path = $SemiXML::Sxml::filename.IO.absolute;
+#    $path = $path.IO.dirname;
+    my Str $path = $!sxml.get-config( :table<S>, :key<rootpath>);
 
     my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
 

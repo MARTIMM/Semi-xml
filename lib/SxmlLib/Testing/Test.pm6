@@ -849,8 +849,9 @@ note $code-text;
   method !save-metric-data ( ) {
 
     # metric filename
-    my $metric-file = $SemiXML::Sxml::filename;
     my $c = $*PERL.compiler();
+    my $metric-file = $!sxml.get-config( :table<S>, :key<rootpath>) ~
+                      '/' ~ $SemiXML::Sxml::filename.IO.basename;
     $metric-file ~~ s/\.sxml $/-metric/;
     $metric-file ~= [~] "-$*DISTRO.name()", "-$*DISTRO.version()", ".toml";
 
@@ -950,6 +951,8 @@ note $code-text;
       $metric-text ~= "  diagnostic   = \"\"\"\n$test-line[DIAGNOSTIC].indent(4)\"\"\"\n";
     }
 
+    # save all metric data
+note "MF: $metric-file";
     $metric-file.IO.spurt($metric-text);
   }
 }
