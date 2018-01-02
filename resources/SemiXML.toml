@@ -39,6 +39,24 @@
     'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
   ]
 
+
+[ F.db5 ]
+  inline            = [
+    'emphasis'
+  ]
+
+  no-escaping       = [
+
+  ]
+
+  space-preserve    = [
+    'programlisting'
+  ]
+
+  self-closing      = [
+
+  ]
+
 #------------------------------------------------------------------------------
 # Header table
 [ H.html ]
@@ -55,6 +73,9 @@
 
 #------------------------------------------------------------------------------
 # Running programs tables
+[ R ]
+  cat             = 'cat > "%op/%of.%oe"'
+
 [ R.xml ]
   fmt             = 'xmllint --format - > "%op/%of.%oe"'
 #  fmt             = 'xmllint --format --noent - > %op/%of.%oe'
@@ -64,6 +85,10 @@
 
 #------------------------------------------------------------------------------
 # Storage tables
+# [ S.* ]
+#   rootpath
+#   filepath
+#   fileext
 [ S ]
   fileext       = 'xml'
 
