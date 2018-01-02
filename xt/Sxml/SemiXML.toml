@@ -8,6 +8,9 @@
 #  lorem         = 'SxmlLib::LoremIpsum'
 
 #-------------------------------------------------------------------------------
+[ R ]
+  cat             = 'cat > "%op/Xml/%of.%oe"'
+
 [ R.html ]
   pdf           = 'wkhtmltopdf - %op/%of.pdf'
 

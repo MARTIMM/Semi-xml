@@ -952,7 +952,7 @@ note $code-text;
     }
 
     # save all metric data
-note "MF: $metric-file";
+    note "Saved metrics in $metric-file" if $!sxml.trace;
     $metric-file.IO.spurt($metric-text);
   }
 }
