@@ -15,6 +15,11 @@ class Actions {
   # Show what is found
   our $trace = False;
 
+  # Keep as typed is a convenient way to keep the result as it was typed in
+  # as if all should be like the <pre> tag. This is used to have a convenient
+  # way to check the result
+  our $keep-as-typed = False;
+
   # Caller SemiXML::Sxml object
   has $!sxml-obj;
 
@@ -446,6 +451,11 @@ class Actions {
   method tag-body ( $match ) {
 
     my Bool $fixed = False;
+    my Array $sp-elements = $!sxml-obj.get-config(
+      :table<F>, :key<space-preserve>
+    ) // [];
+    my $current-tag = $!tag-list[*-1];
+    $fixed = $current-tag ~~ any(@$sp-elements);
 
     self!current-state( $match, 'tag body');
     my Array $ast = [];
@@ -457,8 +467,9 @@ class Actions {
       note "  Body type: $k" if $trace;
       given ~$k {
         when 'keep-as-typed' {
-          $fixed = (~$v eq '=');
-          note "  Value: $fixed" if $trace;
+          $fixed or= ($keep-as-typed or (~$v eq '='));
+          #$fixed = (~$v eq '=');
+          note "  Value: $keep-as-typed or $fixed" if $trace;
         }
 
         # part from
@@ -627,17 +638,8 @@ class Actions {
     $t ~~ s:g/ <.ws> '#' \N* \n // if $comment;
     $t ~~ s:g/^ '#' \N* \n // if $comment;
 
-    # remove leading spaces at begin of text
-    $t ~~ s/^ \s+ // unless $fixed;
-
     # remove trailing spaces at every line
     $t ~~ s:g/ \h+ $$ //;
-
-    # substitute multiple spaces with one space
-    $t ~~ s:g/ \s\s+ / / unless $fixed;
-
-    # remove return characters if found
-    $t ~~ s:g/ \n+ / / unless $fixed;
 
     # remove leading spaces for the minimum number of spaces when the content
     # should be fixed
@@ -659,6 +661,17 @@ class Actions {
         $new-t ~= "$l\n";
       }
       $t = $new-t;
+    }
+
+    else {
+      # remove leading spaces at begin of text
+      $t ~~ s/^ \s+ //;
+
+      # substitute multiple spaces with one space
+      $t ~~ s:g/ \s\s+ / /;
+
+      # remove return characters if found
+      $t ~~ s:g/ \n+ / /;
     }
 
     $t;

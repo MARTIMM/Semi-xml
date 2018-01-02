@@ -6,6 +6,8 @@ Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md w
 
 * 0.43.0
   * Add $!SxmlCore.drop [ ... ] to throw all that is enclosed
+  * F-table space-preserve elements are now processed. If element is defined here, the effect is the same as having the '=' character at the start of a body.
+  * Global flag :keep on Sxml BUILD(), --keep in sxml2xml will keep text as it is typed in on all elements.
 * 0.42.0
   * Changed grammar of element bodies. We now have:
     * **$a [ abc ]**  Normal elements. Can nest other elements and have comments

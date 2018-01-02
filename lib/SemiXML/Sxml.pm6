@@ -34,17 +34,21 @@ class Sxml {
 #TODO doc
   has Bool $.trace = False;
   has Bool $!force;
+  has Bool $!keep;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
 
   #-----------------------------------------------------------------------------
   submethod BUILD (
-    Array :$!refine = [], Bool :$!force, Bool :$!trace
+    Array :$!refine = [], Bool :$!force, Bool :$!trace, Bool :$!keep
   ) {
 
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
+    $SemiXML::Grammar::trace = $SemiXML::Actions::trace =
+      ($!trace and $!refined-config<T><parse>);
+    $SemiXML::Actions::keep-as-typed = $!keep;
 
     # Make sure that in and out keys are defined with defaults
     $!refine[IN] = 'xml' unless ?$!refine[IN];
@@ -93,7 +97,6 @@ class Sxml {
     return False unless self!prepare-config;
 
     # Parse the content. Parse can be recursively called
-    $SemiXML::Grammar::trace = $SemiXML::Actions::trace = ($!trace and $!refined-config<T><parse>);
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
 
     # Throw an exception when there is a parsing failure
