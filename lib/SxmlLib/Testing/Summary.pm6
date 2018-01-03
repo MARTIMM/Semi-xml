@@ -19,7 +19,7 @@ class Summary {
   has XML::Element $!body;
 
   has Bool $!initialized = False;
-  has Globals $!globals .= instance;
+  has SemiXML::Globals $!globals .= instance;
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
@@ -57,20 +57,28 @@ class Summary {
   ) {
 
     my Str $basename = ($attrs<metric>//'no-metric-attribute').Str;
-    my Str $path = $!globals.refine-tables<S><rootpath>;
+    my Str $path = $!globals.refined-tables<S><rootpath>;
+note "Path $path";
 
-    my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
+    my XML::Element $div = append-element(
+      $parent, 'div', {:class<repsection>}
+    );
 
     my Bool $first-metric-file = True;
     my @mfs = (dir($path).grep(/ $basename '-metric-'/)>>.Str);
     if ?@mfs {
       for @mfs -> $metric-file {
+        note "Load metric file '$metric-file'"
+          if $!globals.trace and $!globals.refined-tables<T><file-handling>;
         self!process-metric( $div, $metric-file, :$first-metric-file);
         $first-metric-file = False;
       }
     }
 
     else {
+      note "Metric files for '$basename' not found"
+        if $!globals.trace and $!globals.refined-tables<T><file-handling>;
+
       append-element(
         $div, 'h2', {:class<repheader>}, :text($basename.tc ~ ' metrics')
       );
