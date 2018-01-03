@@ -56,11 +56,9 @@ grammar Grammar {
   token tag:sym<$|*>  { <sym> <tag-name> }
   token tag:sym<$*|>  { <sym> <tag-name> }
   token tag:sym<$**>  { <sym> <tag-name> }
-  #TODO token tag:sym<$|> { <sym> <tag-name> }
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
-#  token sym-name      { <.identifier> }
   token meth-name     { <.identifier> }
   token tag-name      { [ <namespace> ':' ]? <element> }
   token element       { <.xml-identifier> }
@@ -85,67 +83,13 @@ grammar Grammar {
   token attr-value-spec {
     [ "'" ~ "'" $<attr-value>=<.attr-q-value> ]  ||
     [ '"' ~ '"' $<attr-value>=<.attr-qq-value> ] ||
-#TODO somewhere in a test the following is still used
-#    [\^ $<attr-value>=<.attr-pw-value> \^] ||
     [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||
     $<attr-value>=<.attr-s-value>
   }
   token attr-q-value  { [ <.escaped-char> || <-[\']> ]* }
   token attr-qq-value { [ <.escaped-char> || <-[\"]> ]* }
-#TODO somewhere in a test the following is still used
-#  token attr-pw-value { [ <.escaped-char> || <-[\^]> ]+ }
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]* }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
-
-
-#`{{
-  # important to use token instead of rule to get spaces in the body*-contents
-  token tag-body {
-    [ '[!=' ~ '!]'   <body1-contents>
-      { note "Parse: body type [!= ... !]" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ] |
-
-    [ '<<=' ~ '>>'   <body1a-contents>
-      { note "Parse: body type <<= ... >>" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ] |
-
-    [ '«='  ~ '»'    <body1b-contents>
-      { note "Parse: body type «= ... »" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ] |
-
-    [ '[!'  ~  '!]'  <body2-contents>
-      { note "Parse: body type [! ... !]" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ] |
-
-    [ '<<'  ~  '>>'  <body2a-contents>
-      { note "Parse: body type << ... >>" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ] |
-
-    [ '«'   ~  '»'   <body2b-contents>
-      { note "Parse: body type « ... »" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ] |
-
-    [ '[='  ~   ']'  <body3-contents>
-      { note "Parse: body type [= ... ]" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ] |
-
-    [ '['   ~    ']' <body4-contents>
-      { note "Parse: body type [ ... ]" if $globals.trace and $globals.refined-tables<T><parse>; }
-    ]
-  }
-
-  # The content can be anything mixed with document tags except following the
-  # no-elements character. To use the brackets and other characters in the
-  # text one can use one of the other enclosures like << ... >>
-  token body1-contents  { <body1-text> }
-  token body1a-contents { <body1a-text> }
-  token body1b-contents { <body1b-text> }
-  token body2-contents  { <body2-text> }
-  token body2a-contents { <body2a-text> }
-  token body2b-contents { <body2b-text> }
-  token body3-contents  { [ <body3-text> || <document> || <.comment> ]* }
-  token body4-contents  { [ <body4-text> || <document> || <.comment> ]* }
-}}
 
   token tag-body {
     # Content body can have child elements. Comments starting with '#'
@@ -176,80 +120,6 @@ grammar Grammar {
   # necessary in the normal block 'body-a'
   token entity          { '&' <-[;]>+ ';' }
 
-#`{{
-  # No comments recognized in [! ... !], << ... >> or « ... ». This works
-  # because nested documents are not included and thus no nesting is possible.
-  token body1-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      '!' <!before ']'> ||  # single '!'
-      ']' <!after '!'>  ||  # single ']'
-      <-[\\]>               # any other character not being '\'
-    ]+
-  }
-
-  token body1a-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      '>' <!before '>'> ||  # single '>'
-      <-[\\]>               # any other character not being '\'
-    ]+
-  }
-
-  token body1b-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      <-[\\]>               # any other character not being '\'
-    ]+
-  }
-
-  token body2-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      '!' <!before ']'> ||  # '!'
-      ']' <!after '!'>  ||  # single ']'
-      <-[\\\!]>             # any other character not being '\'
-    ]+
-  }
-
-  token body2a-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      '>' <!before '>'> ||  # single '>'
-      <-[\\]>               # any other character not being '\'
-    ]+
-  }
-
-  token body2b-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      <-[\\]>               # any other character not being '\'
-    ]+
-  }
-
-  token body3-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      <-[\$\]\#\\]>         # any other character not being '\', '$', '#' or ']'
-    ]+
-  }
-
-  token body4-text {
-    [ <.escaped-char>   ||  # an escaped character
-      <entity>          ||  # &abc;
-      <-[\$\]\#\\]>         # any other character not being '\', '$', '#' or ']'
-    ]+
-  }
-
-  token escaped-char {
-    '\\' .            #||
-#    [ "'" ~ "'" [ . || '[!' || '!]' ] ]   ||
-#    [ '"' ~ '"' [ . || '[!' || '!]' ] ]
-  }
-
-  token entity          { '&' <-[;]>+ ';' }
-}}
-
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.
   token identifier { <.ident> [ '-' <.ident> ]* }
@@ -261,6 +131,7 @@ grammar Grammar {
 
   # From w3c https://www.w3.org/TR/2004/REC-xml-names11-20040204/#ns-decl
   token xml-ns-identifier { <.ns-name-start-char> <.ns-name-char>* }
+
   # Don't know which characters are covered by the :Alpha definition so I take
   # the description from the w3c
   token ns-name-start-char {
@@ -269,6 +140,7 @@ grammar Grammar {
     <[\x2070..\x218F]> || <[\x2C00..\x2FEF]> || <[\x3001..\xd7ff]> ||
     <[\xf900..\xfdcf]> || <[\xFDF0..\xFFFD]> || <[\x10000..\xEFFFF]>
   }
+
   token ns-name-char {
     <.name-start-char> | <[- . 0..9]> | <[\xB7]> |
     <[\x0300..\x036F]> | <[\x203F..\x2040]>

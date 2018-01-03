@@ -343,7 +343,6 @@ class Actions {
         when Str {
           my Str $txt = $_;
           if ? $txt {
-#TODO maybe all lines prefixed with a space and one at the end.
             # only spaces between texts
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
             $parent.append(SemiXML::Text.new(:text($txt)));
@@ -362,19 +361,15 @@ class Actions {
           note "  Tag hash keys: $_.keys()"
             if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-#TODO see above
           # Test if spaces are needed before the document
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $*| >);
 
-#TODO not sure if this is the only place to remove sxml:parent_container
           my $d = $_<doc-ast>;
           note "  Doc Ast: {(~$d).substr( 0, 65)} ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-          #self!drop-parent-container($d);
           $parent.append($d);
 
-#TODO see above
           # Test if spaces are needed after the document
           $parent.append(SemiXML::Text.new(:text(' ')))
             if $tag-ast[0] ~~ any(< $** $|* >);
@@ -479,6 +474,7 @@ class Actions {
 
       note "  Body type: $k"
         if $!globals.trace and $!globals.refined-tables<T><parse>;
+
       given ~$k {
         when 'keep-as-typed' {
           $fixed or= ($!globals.keep or (~$v eq '='));
@@ -518,73 +514,6 @@ class Actions {
       }
 
       note " " if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-#`{{
-      # Text cannot have nested documents and text must be taken literally
-      if $p ~~ / 'body1' <[ab]>? '-contents' / {
-
-        $ast.push: self!clean-text( $v<body1-text>.Str, :fixed, :!comment);
-      }
-
-      # Text cannot have nested documents and text may be re-formatted
-      elsif $p ~~ / 'body2' <[ab]>? '-contents' / {
-
-        $ast.push: self!clean-text( $v<body2-text>.Str, :!fixed, :!comment);
-      }
-
-      # Text can have nested documents and text must be taken literally
-      if $p eq 'body3-contents' {
-
-        for $match<body3-contents>.caps {
-
-          # keys can be body3-text or document
-          my $p3 = $^a.key;
-          my $v3 = $^a.value;
-
-          # body2-text
-          if $p3 eq 'body3-text' {
-
-            $ast.push: self!clean-text( $v3.Str, :fixed, :comment);
-          }
-
-          # document
-          elsif $p3 eq 'document' {
-
-            my $d = $v3;
-            my $tag-ast = $d<tag-spec>.made;
-            my $body-ast = $d<tag-body>;
-            $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.made)};
-          }
-        }
-      }
-
-      # Text can have nested documents and text may be re-formatted
-      elsif $p eq 'body4-contents' {
-
-        # walk through all body pieces
-        for $match<body4-contents>.caps {
-
-          # keys can be body4-text or document
-          my $p4 = $^a.key;
-          my $v4 = $^a.value;
-
-          # body2-text
-          if $p4 eq 'body4-text' {
-
-            $ast.push: self!clean-text( $v4.Str, :!fixed, :comment);
-          }
-
-          # document
-          elsif $p4 eq 'document' {
-
-            my $d = $v4;
-            my $tag-ast = $d<tag-spec>.made;
-            my $body-ast = $d<tag-body>;
-            $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.made)};
-          }
-        }
-      }
-}}
     }
 
     note " " if $!globals.trace and $!globals.refined-tables<T><parse>;
@@ -592,30 +521,6 @@ class Actions {
     # Set AST on node tag-body
     $match.make($ast);
   }
-
-#`{{
-  #-----------------------------------------------------------------------------
-  method body-a ( Match $match ) {
-    note "\nBa: $match";
-  }
-
-  #-----------------------------------------------------------------------------
-  method body-b ( Match $match ) {
-    note "\nBb: $match";
-  }
-
-  #-----------------------------------------------------------------------------
-  method body-c ( Match $match ) {
-    note "\nBc: $match";
-  }
-}}
-
-#`{{
-  #-----------------------------------------------------------------------------
-  method comment ( Match $match ) {
-    dump $match;
-  }
-}}
 
   #-----------------------------------------------------------------------------
   # Return object if module and method is found. Otherwise return Any
