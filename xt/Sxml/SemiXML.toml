@@ -9,21 +9,22 @@
 
 #-------------------------------------------------------------------------------
 [ R ]
-  cat             = 'cat > "%op/Xml/%of.%oe"'
+  cat           = 'cat > "%op/Xml/%of.%oe"'
 
 [ R.html ]
   pdf           = 'wkhtmltopdf - %op/%of.pdf'
 
 #-------------------------------------------------------------------------------
-[ S.html ]
+#[ S.html ]
+[ S ]
   rootpath      = 'xt/Sxml/Reports'
 
 #-------------------------------------------------------------------------------
 # Tracing tables
 [ T ]
-#  config        = true
-#  tables        = true
+  config        = true
+  tables        = true
   modules       = true
-  parse         = true
+#  parse         = true
 #  parse-result  = true
   file-handling = true
