@@ -4,8 +4,6 @@
   xml-show          = false
   doctype-show      = false
   header-show       = false
-#TODO tracing on/off by :trace on Sxml BUILD()
-  tracing           = false
 
 [ C.xml ]
   xml-show          = true

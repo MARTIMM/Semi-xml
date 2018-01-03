@@ -3,11 +3,12 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<github:MARTIMM>;
 
-use XML;
-use XML::XPath;
+use SemiXML;
 use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
 use Config::TOML;
+use XML;
+use XML::XPath;
 
 #-------------------------------------------------------------------------------
 class Summary {
@@ -18,6 +19,7 @@ class Summary {
   has XML::Element $!body;
 
   has Bool $!initialized = False;
+  has Globals $!globals .= instance;
 
   #-----------------------------------------------------------------------------
   method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
@@ -55,9 +57,7 @@ class Summary {
   ) {
 
     my Str $basename = ($attrs<metric>//'no-metric-attribute').Str;
-#    my Str $path = $SemiXML::Sxml::filename.IO.absolute;
-#    $path = $path.IO.dirname;
-    my Str $path = $!sxml.get-config( :table<S>, :key<rootpath>);
+    my Str $path = $!globals.refine-tables<S><rootpath>;
 
     my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
 

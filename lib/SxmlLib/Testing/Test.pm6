@@ -3,15 +3,17 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SxmlLib::Testing:auth<github:MARTIMM>;
 
-use XML;
-use XML::XPath;
+use SemiXML;
 use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
+use XML;
+use XML::XPath;
 
 #-------------------------------------------------------------------------------
 class Test {
 
   has $!sxml;
+  my SemiXML::Globals $globals .= instance;
 
   has XML::Element $!html;
   has XML::Element $!body;
@@ -952,7 +954,8 @@ note $code-text;
     }
 
     # save all metric data
-    note "Saved metrics in $metric-file" if $!sxml.trace;
+    note "Saved metrics in $metric-file"
+      if $globals.trace and $globals.refined-tables<T><file-handling>;
     $metric-file.IO.spurt($metric-text);
   }
 }
