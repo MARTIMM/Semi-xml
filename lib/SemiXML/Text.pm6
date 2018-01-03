@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
@@ -32,4 +32,3 @@ class Text does XML::Node {
     }
   }
 }
-
