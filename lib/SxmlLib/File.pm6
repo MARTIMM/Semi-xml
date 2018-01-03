@@ -18,17 +18,18 @@ class File {
     XML::Element $parent, Hash $attrs, XML::Element :$content-body
   ) {
 
+    my SemiXML::Globals $globals .= instance;
+
     my $type = ($attrs<type> // 'reference').Str;
     my $reference = ~$attrs<reference> // '';
 
     # make reference in reference to the parsed sxml file
     if $reference !~~ m/^ '/'/ {
       $reference =
-        $!globals.filename.IO.absolute.IO.dirname ~
+        $globals.filename.IO.absolute.IO.dirname ~
         "/$reference";
     }
 
-note "Ref: $SemiXML::Filename";
     # check if readable
     if $reference.IO !~~ :r {
 

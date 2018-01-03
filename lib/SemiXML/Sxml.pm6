@@ -34,14 +34,14 @@ class Sxml {
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
 #TODO doc and specificity of T-Table tracing
-  has Bool $.trace = False;
+  has Bool $!trace = False;
   has Bool $!force;
   has Bool $!keep;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
 
-  has SemiXML::Globals $!globals .= instance;
+  has SemiXML::Globals $!globals;
 
   #-----------------------------------------------------------------------------
   submethod BUILD (
@@ -49,12 +49,15 @@ class Sxml {
     Bool :$!trace = False, Bool :$!keep = False
   ) {
 
+    $!globals .= instance;
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
 
 #TODO make sure that the objects read T-Table before show traces of anything
-    $SemiXML::Grammar::trace = $SemiXML::Actions::trace = $!trace;
+#TODO also in globals!
     $SemiXML::Actions::keep-as-typed = $!keep;
+
+    $!globals.trace = $!trace;
 
     # Make sure that in and out keys are defined with defaults
     $!refine[IN] = 'xml' unless ?$!refine[IN];
@@ -359,9 +362,6 @@ class Sxml {
 
     # $c is bound to the config in the configuration object.
     my Hash $c := $!configuration.config;
-
-    # Do we need to show things
-    #$!trace = $c<C><tracing>;
 
     # set filename, path etc. if not set, extension is set in default config.
     $c<S> = {} unless $c<S>:exists;

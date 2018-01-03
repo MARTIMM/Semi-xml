@@ -2,18 +2,17 @@ use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
-#parser fails when:
-#use Grammar::Tracer;
-#use Grammar::Debugger;
+
+use SemiXML;
 
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
-  # Show what is found
-  our $trace = False;
+  # get global object to get tracing info
+  my SemiXML::Globals $globals .= instance;
 
   # Actions initialize
-  rule init-doc { <?> { note " " if $trace; } }
+  rule init-doc { <?> { note " " if $globals.trace and $globals.refined-tables<T><parse>; } }
 
   # A document is only a tag with its content in a body. Defined like this
   # there can only be one toplevel document. In the following body documents
@@ -26,8 +25,8 @@ grammar Grammar {
                         # Only here is needed body*-contents is taking care for
                         # the rest.
     [ <?> {
-      note "\n", '-' x 80, "\nParse document\n",
-           $/.orig.Str.substr( 0, 80), "\n " if $trace;
+      note "\n", '-' x 80, "\nParse document\n", $/.orig.Str.substr( 0, 80),
+           "\n " if $globals.trace and $globals.refined-tables<T><parse>;
       }
       <document>
     ]
@@ -40,7 +39,10 @@ grammar Grammar {
   #
   rule pop-tag-from-list { <?> }
   rule document {
-    <tag-spec> { note "Parse: Tag $/<tag-spec>" if $trace; }
+    <tag-spec> {
+      note "Parse: Tag $/<tag-spec>"
+        if $globals.trace and $globals.refined-tables<T><parse>;
+    }
     <tag-body>* <.pop-tag-from-list>
   }
 
@@ -100,35 +102,35 @@ grammar Grammar {
   # important to use token instead of rule to get spaces in the body*-contents
   token tag-body {
     [ '[!=' ~ '!]'   <body1-contents>
-      { note "Parse: body type [!= ... !]" if $trace; }
+      { note "Parse: body type [!= ... !]" if $globals.trace and $globals.refined-tables<T><parse>; }
     ] |
 
     [ '<<=' ~ '>>'   <body1a-contents>
-      { note "Parse: body type <<= ... >>" if $trace; }
+      { note "Parse: body type <<= ... >>" if $globals.trace and $globals.refined-tables<T><parse>; }
     ] |
 
     [ '«='  ~ '»'    <body1b-contents>
-      { note "Parse: body type «= ... »" if $trace; }
+      { note "Parse: body type «= ... »" if $globals.trace and $globals.refined-tables<T><parse>; }
     ] |
 
     [ '[!'  ~  '!]'  <body2-contents>
-      { note "Parse: body type [! ... !]" if $trace; }
+      { note "Parse: body type [! ... !]" if $globals.trace and $globals.refined-tables<T><parse>; }
     ] |
 
     [ '<<'  ~  '>>'  <body2a-contents>
-      { note "Parse: body type << ... >>" if $trace; }
+      { note "Parse: body type << ... >>" if $globals.trace and $globals.refined-tables<T><parse>; }
     ] |
 
     [ '«'   ~  '»'   <body2b-contents>
-      { note "Parse: body type « ... »" if $trace; }
+      { note "Parse: body type « ... »" if $globals.trace and $globals.refined-tables<T><parse>; }
     ] |
 
     [ '[='  ~   ']'  <body3-contents>
-      { note "Parse: body type [= ... ]" if $trace; }
+      { note "Parse: body type [= ... ]" if $globals.trace and $globals.refined-tables<T><parse>; }
     ] |
 
     [ '['   ~    ']' <body4-contents>
-      { note "Parse: body type [ ... ]" if $trace; }
+      { note "Parse: body type [ ... ]" if $globals.trace and $globals.refined-tables<T><parse>; }
     ]
   }
 
