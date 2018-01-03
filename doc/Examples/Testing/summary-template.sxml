@@ -9,18 +9,17 @@ $!summary.report title=' ... title of report ... ' [
       A Simple 12 Steps Guide to Write an Effective Test Summary Report
     ].
 
-    Keep what$strong[is needed]and throw the rest.
+    Keep what is needed and throw away the rest.
   ]
-
 
   $h2 [Purpose of the document]
   $p [ $i [Short description about the objective of preparing the document]]
 
   $h2 [Application overview]
-  $p [ $**i [Brief description about the application tested]]
+  $p [ $i [Brief description about the application tested]]
 
   $h2 [Testing Scope]
-  $p [ $**i [
+  $p [ $i [
       This section explains about the functions or modules in scope & out of
       scope for testing; Any items which are not tested due to any constraints,
       dependencies or restrictions.
@@ -28,7 +27,9 @@ $!summary.report title=' ... title of report ... ' [
   ]
 
   $h3 [In scope]
-  $p [ $i [List of functionalities tested]]
+  $p [
+    Each of the tests further on in this report will show what is tested or what isn't yet tested.
+  ]
 
   $h3 [Out of scope]
   $p [ $i [E.g. performance tests are not executed]]
@@ -46,8 +47,6 @@ $!summary.report title=' ... title of report ... ' [
     ]
   ]
 
-  $!report.metrics filter=report metric-dir='doc/Examples/Documenting tests'
-
   $h2 [Types of tests]
   $p [ $i [
       Describe the various types of Testing performed for the Project. This will
@@ -61,10 +60,13 @@ $!summary.report title=' ... title of report ... ' [
 
   $h3 [Smoke test]
   $p [ $i [
-    This testing was done whenever a Build is received (deployed into Test
-    environment) for Testing to make sure the major functionality are working
-    fine, Build can be accepted and Testing can start.
-  ]]
+      This testing was done whenever a Build is received (deployed into Test
+      environment) for Testing to make sure the major functionality are working
+      fine, Build can be accepted and Testing can start.
+    ]
+    $!summary.load metric=basic
+    $!summary.load metric=configuration
+  ]
 
   $h3 [System integration tests]
   $p [
