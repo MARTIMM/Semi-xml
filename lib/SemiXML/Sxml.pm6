@@ -31,7 +31,7 @@ class Sxml {
 
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
-#TODO doc
+#TODO doc and specificity of T-Table tracing
   has Bool $.trace = False;
   has Bool $!force;
   has Bool $!keep;
@@ -41,13 +41,15 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   submethod BUILD (
-    Array :$!refine = [], Bool :$!force, Bool :$!trace, Bool :$!keep
+    Array :$!refine = [], Bool :$!force = False,
+    Bool :$!trace = False, Bool :$!keep = False
   ) {
 
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
-    $SemiXML::Grammar::trace = $SemiXML::Actions::trace =
-      ($!trace and $!refined-config<T><parse>);
+
+#TODO make sure that the objects read T-Table before show traces of anything
+    $SemiXML::Grammar::trace = $SemiXML::Actions::trace = $!trace;
     $SemiXML::Actions::keep-as-typed = $!keep;
 
     # Make sure that in and out keys are defined with defaults
