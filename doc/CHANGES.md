@@ -4,6 +4,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers.
 
+* 0.44.0
+  * F-Table inline elements are now processed.
 * 0.43.0
   * Add $!SxmlCore.drop [ ... ] to throw all that is enclosed
   * F-table space-preserve elements are now processed. If element is defined here, the effect is the same as having the '=' character at the start of a body.

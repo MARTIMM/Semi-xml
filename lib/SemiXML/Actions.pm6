@@ -107,6 +107,7 @@ class Actions {
 
     # check spacing around elements
     check-inline( $parent, self);
+    note "After inline check: $parent" if $trace;
 
     note '-' x 80 if $trace;
 

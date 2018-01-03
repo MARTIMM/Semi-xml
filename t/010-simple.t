@@ -14,19 +14,11 @@ subtest 'test oneliners', {
   like $xml, /'a2="g g"'/, 'a2 attribute';
   like $xml, /'a3="h h"'/, 'a2 attribute';
 
-  #dies-ok { $xml = parse('$st [ $f w [] hj ]'); }, 'Parse failure';
-
-  try {
-    $xml = parse('$st [ $f w [] hj ]');
-
-    CATCH {
-      default {
-        my $m = .message;
-        $m ~~ s/\n/ /;
-        like $m, /^ "Parse failure just after 'at the top'"/, $m;
-      }
-    }
-  }
+  throws-like(
+    { $xml = parse('$st [ $f w [] hj ]'); },
+    X::AdHoc, 'Parse failure',
+    :message(/^ "Parse failure just after 'at the top'"/)
+  );
 
   $xml = parse('$t1 [ $t2 [] $t3[]]');
   is $xml, '<t1><t2></t2><t3></t3></t1>', "nested tags: $xml";
@@ -93,10 +85,13 @@ subtest 'test multi liners', {
 sub parse ( Str $content is copy --> Str ) {
 
   state SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
-  my Bool $r = $x.parse(:$content);
-  $content ~~ s:g/\n/ /;
-  $content ~~ s:g/\s+/ /;
-  ok $r, "match $content";
+  my Bool $r = $x.parse(
+    :$content,
+    :config( { T => { :!config, :!parse} } )
+  );
+#  $content ~~ s:g/\n/ /;
+#  $content ~~ s:g/\s+/ /;
+#  ok $r, "match $content";
 
   my Str $xml = ~$x;
   $xml;
