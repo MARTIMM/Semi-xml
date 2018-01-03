@@ -27,7 +27,7 @@ subtest 'self-closing', {
     EOSXML
 
   my SemiXML::Sxml $x;
-  $x .= new( :trace, :merge, :refine([ <t210 xml>]));
+  $x .= new( :!trace, :merge, :refine([ <t210 xml>]));
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;
@@ -60,7 +60,7 @@ subtest 'self-closing on html defaults', {
     EOSXML
 
   my SemiXML::Sxml $x;
-  $x .= new( :trace, :merge, :refine([ <html html>]));
+  $x .= new( :!trace, :merge, :refine([ <html html>]));
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;

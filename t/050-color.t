@@ -123,7 +123,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 
   # See the result
   my Str $xml-text = ~$x;
-  diag $xml-text;
+  #diag $xml-text;
 
   XML::XPath.new(:xml($xml-text))
 }

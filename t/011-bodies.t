@@ -3,7 +3,7 @@ use Test;
 use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
-my SemiXML::Sxml $x .= new( :trace, :refine([<in out>]));
+my SemiXML::Sxml $x .= new( :!trace, :refine([<in out>]));
 
 my Hash $config = {
   T => { :parse, :!config},
