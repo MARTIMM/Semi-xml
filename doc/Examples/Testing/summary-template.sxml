@@ -1,18 +1,20 @@
 # run: sxml2xml.pl6 --in=html --run=pdf
 
-$!report.summary title='Test Summary Report' [
+$!summary.report title=' ... title of report ... ' [
 
-  $h1 [Overview of the tests for this application]
-
+  $h2 [ Test report template ]
   $p [
     This doc is following steps from
-    $*|a href=http://www.softwaretestinghelp.com/test-summary-report-template-download-sample/ [
+    $a href=http://www.softwaretestinghelp.com/test-summary-report-template-download-sample/ [
       A Simple 12 Steps Guide to Write an Effective Test Summary Report
-    ]
+    ].
+
+    Keep what$strong[is needed]and throw the rest.
   ]
 
-  $h2 [Purpose of tests]
-  $p [ $**i [Short description about the objective of preparing the document]]
+
+  $h2 [Purpose of the document]
+  $p [ $i [Short description about the objective of preparing the document]]
 
   $h2 [Application overview]
   $p [ $**i [Brief description about the application tested]]
