@@ -487,8 +487,9 @@ class SxmlHelper {
     # check every element if it is an inline element. If so, check for
     # surrounding spaces.
     # first check inner text
+
     for $x.find( '//*', :to-list) -> $v {
-      if $v.name ~~ any(@($action.F-table<inline>)) {
+      if $v.name ~~ any(@($action.F-table<inline> // [])) {
 #note "CI: $v.name()";
         if $v.nodes[0] ~~ XML::Text {
           my XML::Text $t = $v.nodes[0];
@@ -584,6 +585,9 @@ class SxmlHelper {
         }
       }
     }
+
+    # remove the namespace
+    $parent.attribs{"xmlns:sxml"}:delete;
   }
 
   #-----------------------------------------------------------------------------
