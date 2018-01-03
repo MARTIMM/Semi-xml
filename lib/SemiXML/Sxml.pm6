@@ -36,7 +36,6 @@ class Sxml {
 #TODO doc and specificity of T-Table tracing
   has Bool $!trace = False;
   has Bool $!force;
-  has Bool $!keep;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
@@ -46,18 +45,15 @@ class Sxml {
   #-----------------------------------------------------------------------------
   submethod BUILD (
     Array :$!refine = [], Bool :$!force = False,
-    Bool :$!trace = False, Bool :$!keep = False
+    Bool :$!trace = False, Bool :$keep = False
   ) {
 
     $!globals .= instance;
+    $!globals.trace = $!trace;
+    $!globals.keep = $keep;
+
     $!grammar .= new;
     $!actions .= new(:sxml-obj(self));
-
-#TODO make sure that the objects read T-Table before show traces of anything
-#TODO also in globals!
-    $SemiXML::Actions::keep-as-typed = $!keep;
-
-    $!globals.trace = $!trace;
 
     # Make sure that in and out keys are defined with defaults
     $!refine[IN] = 'xml' unless ?$!refine[IN];

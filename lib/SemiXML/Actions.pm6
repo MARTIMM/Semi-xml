@@ -16,11 +16,6 @@ class Actions {
   # get global object to get tracing info
   has SemiXML::Globals $!globals .= instance;
 
-  # Keep as typed is a convenient way to keep the result as it was typed in
-  # as if all should be like the <pre> tag. This is used to have a convenient
-  # way to check the result
-  our $keep-as-typed = False;
-
   # Caller SemiXML::Sxml object
   has $!sxml-obj;
 
@@ -486,9 +481,9 @@ class Actions {
         if $!globals.trace and $!globals.refined-tables<T><parse>;
       given ~$k {
         when 'keep-as-typed' {
-          $fixed or= ($keep-as-typed or (~$v eq '='));
+          $fixed or= ($!globals.keep or (~$v eq '='));
           #$fixed = (~$v eq '=');
-          note "  Value: $keep-as-typed or $fixed"
+          note "  Value: $!globals.keep() or $fixed"
             if $!globals.trace and $!globals.refined-tables<T><parse>;
         }
 
