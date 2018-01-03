@@ -27,9 +27,6 @@ class Actions {
   has Hash $.objects is rw = {};
   has XML::Document $!xml-document;
 
-  # The F-table is devised elsewhere as well. This table is read from the config
-  has Hash $.F-table is rw = {};
-
   # Keep current state of affairs. Hopefully some info when parsing fails
   has Int $.from;
   has Int $.to;
@@ -90,7 +87,7 @@ class Actions {
     }
 
     # conversion to xml escapes is done as late as possible
-    escape-attr-and-elements( $parent, self);
+    escape-attr-and-elements($parent);
     note "After esc. and table checks: $parent" if $trace;
 
     # search for variables and substitute them
@@ -106,7 +103,7 @@ class Actions {
     note "After ns removal: $parent" if $trace;
 
     # check spacing around elements
-    check-inline( $parent, self);
+    check-inline($parent);
     note "After inline check: $parent" if $trace;
 
     note '-' x 80 if $trace;

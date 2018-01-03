@@ -3,19 +3,20 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<github:MARTIMM>;
 
-use XML;
+use SemiXML;
 use SemiXML::Sxml;
+use XML;
 
 #-------------------------------------------------------------------------------
 class File {
 
   has Hash $.symbols = {};
+  has SemiXML::Globals $!globals .= instance;
 
   #-----------------------------------------------------------------------------
-  method include ( XML::Element $parent,
-                   Hash $attrs,
-                   XML::Element :$content-body
-                 ) {
+  method include (
+    XML::Element $parent, Hash $attrs, XML::Element :$content-body
+  ) {
 
     my $type = ($attrs<type> // 'reference').Str;
     my $reference = ~$attrs<reference> // '';
@@ -23,10 +24,11 @@ class File {
     # make reference in reference to the parsed sxml file
     if $reference !~~ m/^ '/'/ {
       $reference =
-        $SemiXML::Sxml::filename.IO.absolute.IO.dirname ~
+        $!globals.filename.IO.absolute.IO.dirname ~
         "/$reference";
     }
 
+note "Ref: $SemiXML::Filename";
     # check if readable
     if $reference.IO !~~ :r {
 

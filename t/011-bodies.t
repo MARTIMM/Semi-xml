@@ -6,14 +6,12 @@ use SemiXML::Sxml;
 my SemiXML::Sxml $x .= new( :trace, :refine([<in out>]));
 
 my Hash $config = {
-  C => {:tracing},
   T => { :parse, :!config},
 };
 
 my Hash $cc = {
-  C => {:!tracing},
   F => { in => { self-closing => [ 'b', ], } },
-  T => { :parse, :!config},
+  T => { :parse, :!config, :tables},
 };
 
 #-------------------------------------------------------------------------------

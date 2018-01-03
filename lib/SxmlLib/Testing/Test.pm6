@@ -70,7 +70,7 @@ class Test {
       EOINIT
     $!line-number = 5;
 
-    $!test-filename = $SemiXML::Sxml::filename;
+    $!test-filename = $SemiXML::Sxml::Filename;
     $!test-filename ~~ s/ '.sxml' $/.t/;
 
     $!run-data<title> = ($attrs<title>//'-').Str;
@@ -851,7 +851,7 @@ note $code-text;
     # metric filename
     my $c = $*PERL.compiler();
     my $metric-file = $!sxml.get-config( :table<S>, :key<rootpath>) ~
-                      '/' ~ $SemiXML::Sxml::filename.IO.basename;
+                      '/' ~ $SemiXML::Sxml::Filename.IO.basename;
     $metric-file ~~ s/\.sxml $/-metric/;
     $metric-file ~= [~] "-$*DISTRO.name()", "-$*DISTRO.version()", ".toml";
 

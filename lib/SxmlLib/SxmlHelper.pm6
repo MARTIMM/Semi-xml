@@ -3,6 +3,7 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<github:MARTIMM>;
 
+use SemiXML;
 use SemiXML::Text;
 use XML;
 use XML::XPath;
@@ -10,7 +11,8 @@ use XML::XPath;
 #-------------------------------------------------------------------------------
 class SxmlHelper {
 
-  my $local-action;
+  #my $local-action;
+  my SemiXML::Globals $globals .= instance;
 
   #-----------------------------------------------------------------------------
 #TODO $config should come indirectly from $!refined-config
@@ -388,12 +390,12 @@ class SxmlHelper {
   #-----------------------------------------------------------------------------
   sub escape-attr-and-elements (
     XML::Node $node,
-    $action is copy where .^name eq 'SemiXML::Actions' = $local-action
+    #$action is copy where .^name eq 'SemiXML::Actions' = $local-action
   ) is export {
 
     # when called from Action $action is set, otherwise it was from the
     # recursive call. this saves some stack space.
-    $local-action = $action if ?$action;
+    #$local-action = $action if ?$action;
 
     # process body text to escape special chars
 
@@ -403,8 +405,10 @@ class SxmlHelper {
     }
 
     elsif $node ~~ XML::Element {
-      my Array $self-closing = $action.F-table<self-closing> // [];
-      my Array $no-escaping = $action.F-table<no-escaping> // [];
+      my Array $self-closing =
+         $globals.refined-tables<F><self-closing> // [];
+      my Array $no-escaping =
+         $globals.refined-tables<F><no-escaping> // [];
 
 #note "Ftab: $node.name()";#, $self-closing, $no-escaping;
       # Check for self closing tag, and if so remove content if any
@@ -473,7 +477,7 @@ class SxmlHelper {
   #-----------------------------------------------------------------------------
   sub check-inline (
     XML::Element $parent,
-    $action is copy where .^name eq 'SemiXML::Actions'
+    #$action is copy where .^name eq 'SemiXML::Actions'
   ) is export {
 
     # get xpath object
@@ -489,7 +493,8 @@ class SxmlHelper {
     # first check inner text
 
     for $x.find( '//*', :to-list) -> $v {
-      if $v.name ~~ any(@($action.F-table<inline> // [])) {
+      if $v.name ~~ any(@($globals.refined-tables<F><inline> // []))
+         and $v.nodes.elems {
 #note "CI: $v.name()";
         if $v.nodes[0] ~~ XML::Text {
           my XML::Text $t = $v.nodes[0];
