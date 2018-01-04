@@ -67,9 +67,12 @@ Attribute values which are empty like '' or "" are translated wrong
 * [ ] Now XML::Text is improved, SemiXML::Text should be abandoned to use XML::Text again.
 
 
-## Attribute grammar addition
-* [x] Boolean attributes can be expressed as **=x** and  **=!x** meaning **x=true** or **x=false**.
-* [x] Attributes are also given as argument to module methods. In this case it might be possible to have hashes, arrays and more. Values are string or perhaps boolean. The attribute values are StringList types which can be stringyfied or used as an array.
+## Attribute grammar
+* [x] **key=value**. Value cannot have spaces.
+* [x] **key='v a l u e'**. Value can have spaces.
+* [x] **key="v a l u e"**. Value can have spaces.
+* [x] **=x** and  **=!x** meaning **x=true** or **x=false**. Boolean attributes
+* [x] **key=<v a l u e>**. Attributes are also given as argument to module methods. In this case the attribute value becomes a list of values ('v','a','l','u',e'). The items are split on spaces and the characters ',', ';', ':'. The value can therefore also be written like **key=<v, a,l,u :;e>**. Of course, choose wisely for readability! Empty items are not possible.
 
 
 ## Items needed in program sxml2xml or SemiXML/Sxml.pm6
@@ -150,6 +153,11 @@ Attribute values which are empty like '' or "" are translated wrong
     # [T] Trace table. Does not use in or out keys, only the filename
     [ T ]
     [ T.file ]
+
+    [ U ]
+    [ U.in-key ]
+    [ U.in-key.out-key ]
+    [ U.in-key.out-key.file ]
 
     # [X] xml description table
     [ X ]
