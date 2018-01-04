@@ -2,6 +2,37 @@
 
 $!summary.report title=' ... title of report ... ' [
 
+  # Possibility to change the report makeup
+  $!css.style [
+    $!css.b s=body {
+      margin: auto;
+      width: 700px;
+      background: #fff0f0;
+    }
+
+    $!css.b s=div.title [
+      margin: 10 0 0 0;
+      padding: 0;
+      background-color: inherit;
+      border-width: 0;
+      background-image: url("../Css/top2.jpg");
+      height: 200px;
+      background-size: 700px 200px;
+    ]
+
+    $!css.b s=h1.title-text {
+      color: #ffa000;
+      padding: 150px 0 0 150px;
+      margin: 0;
+      font-size: 2em;
+    }
+
+    $!css.b s=h2.repheader {
+      background-color: #ffa000;
+      color: #00a0af;
+    }
+  ]
+
   $h2 [ Test report template ]
   $p [
     This doc is following steps from
