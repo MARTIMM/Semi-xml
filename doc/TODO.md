@@ -172,8 +172,10 @@ Many parts of any xml like language can be coded so this will never be finished,
 
 ### What a module must be able to do
 
-* [x] Get hold of the primary sxml file name which is parsed. It is now stored at $SemiXML::Sxml::filename and for every module readable.
+* [x] Get hold of the primary sxml file name which is parsed. It is now stored as a filename attribute in the Globals class and is readable for every module.
 * [ ] Call another sxml module.
+* [x] Access to the configuration.
+* [x] A module user may define entries in the configuration for the module to use. These entries could reside in the [ U ] table (or user table).
 
 
 ### Html

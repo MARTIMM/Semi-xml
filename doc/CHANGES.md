@@ -4,6 +4,8 @@
 
 Future changes regarding modules in SxmlLib are recorded in SxmlLib/Changes.md with their own version numbers.
 
+* 0.45.0
+  * Added a U-table for module developers.
 * 0.44.0
   * F-Table inline elements are now processed.
 * 0.43.0

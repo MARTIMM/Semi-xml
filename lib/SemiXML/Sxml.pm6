@@ -60,7 +60,7 @@ class Sxml {
     $!refine[OUT] = 'xml' unless ?$!refine[OUT];
 
     # Initialize the refined config tables
-    $!table-names = [<C D E F H ML R S T X>];
+    $!table-names = [<C D E F H ML R S T U X>];
     $!refined-tables = %(@$!table-names Z=> ( {} xx $!table-names.elems ));
   }
 
@@ -265,10 +265,12 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
+#`{{
   multi method get-config ( Str:D :$table, Str:D :$key --> Any ) {
 
     $!refined-tables{$table}:exists ?? $!refined-tables{$table}{$key} !! Any
   }
+}}
 
   #-----------------------------------------------------------------------------
   method root-element ( --> XML::Element ) {
@@ -412,12 +414,11 @@ class Sxml {
           $!configuration.refine( $table, $basename);
       }
 
-#`{{
-      elsif $table eq 'S' {
-        $!refined-tables{$table} =
-          $!configuration.refine( $table, $basename);
+      elsif $table eq 'U' {
+        $!refined-tables{$table} = $!configuration.refine(
+          $table, $!refine[IN], $!refine[OUT], $basename
+        );
       }
-}}
     }
 
     note "\nComplete configuration: ", $!configuration.perl,
