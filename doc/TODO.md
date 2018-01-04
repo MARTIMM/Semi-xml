@@ -310,15 +310,11 @@ Methods can only generate something in a given parent container. This parent con
 * [ ] Handle and generate ebooks
 
 * [ ] Supporting perl6 module testing to generate reports
-  * [ ] **SxmlLib::Testing::Bug**
-  * [ ] **SxmlLib::Testing::Code**
-  * [ ] **SxmlLib::Testing::Report**
-  * [ ] **SxmlLib::Testing::Skip**
-  * [ ] **SxmlLib::Testing::Test**
-  * [ ] **SxmlLib::Testing::Testing**
-  * [ ] **SxmlLib::Testing::Todo**
+  * [x] **SxmlLib::Testing::Test**
+  * [x] **SxmlLib::Testing::Summary**
   * [ ] Make benchmark reports using `Bench`
   * [ ] Make code coverage reports with `Rakudo::Perl6::Tracer`.
+  * [x] Possibility to modify layout with css
 
 * [ ] avatar linking
 * [ ] Generating tables
