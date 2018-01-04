@@ -99,8 +99,11 @@ class Test {
     # add the html to the parent
     $parent.append($!html);
 
-    self!run-tests;
     self!modify-purpose;
+
+    self!run-tests;
+    self!save-metric-data;
+
     self!footer;
 
     $parent
@@ -283,6 +286,8 @@ note $code-text;
     );
     my XML::Element $ul = append-element( $purpose, 'ul');
     append-element( $ul, 'li', :text($_)) for @$!chapters;
+
+    $!purpose = ~$purpose;
   }
 
   #-----------------------------------------------------------------------------
@@ -585,7 +590,6 @@ note $code-text;
 
     self!modify-aside-check-panels;
     self!modify-diagnostic-panel(@diag-lines);
-    self!save-metric-data;
   }
 
   #-----------------------------------------------------------------------------

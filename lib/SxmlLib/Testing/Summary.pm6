@@ -156,9 +156,8 @@ class Summary {
         $parent, 'h2', {:class<repheader>},
         :text(%metrics<purpose><purposetitle>)
       );
-      append-element(
-        $parent, 'p', :text(%metrics<purpose><purpose>)
-      );
+
+      $parent.append(from-xml(%metrics<purpose><purpose>).root);
     }
 
     my XML::Element $div = append-element( $parent, 'div', {:class<repbody>});
