@@ -53,7 +53,7 @@ class Sxml {
     $!globals.keep = $keep;
 
     $!grammar .= new;
-    $!actions .= new(:sxml-obj(self));
+    $!actions .= new;
 
     # Make sure that in and out keys are defined with defaults
     $!refine[IN] = 'xml' unless ?$!refine[IN];

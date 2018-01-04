@@ -16,8 +16,6 @@ class Actions {
   # get global object to get tracing info
   has SemiXML::Globals $!globals .= instance;
 
-  # Caller SemiXML::Sxml object
-
   # Objects hash with one predefined object for core methods
   has Hash $.objects is rw = {};
   has XML::Document $!xml-document;
