@@ -13,8 +13,6 @@ use XML::XPath;
 #-------------------------------------------------------------------------------
 class Summary {
 
-  has $!sxml;
-
   has XML::Element $!html;
   has XML::Element $!body;
 
@@ -22,7 +20,7 @@ class Summary {
   has SemiXML::Globals $!globals .= instance;
 
   #-----------------------------------------------------------------------------
-  method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
+  method initialize ( Hash $attrs ) {
 
     return if $!initialized;
 
@@ -58,7 +56,6 @@ class Summary {
 
     my Str $basename = ($attrs<metric>//'no-metric-attribute').Str;
     my Str $path = $!globals.refined-tables<S><rootpath>;
-note "Path $path";
 
     my XML::Element $div = append-element(
       $parent, 'div', {:class<repsection>}

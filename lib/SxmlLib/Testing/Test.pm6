@@ -12,8 +12,7 @@ use XML::XPath;
 #-------------------------------------------------------------------------------
 class Test {
 
-  has $!sxml;
-  my SemiXML::Globals $globals .= instance;
+  has SemiXML::Globals $!globals .= instance;
 
   has XML::Element $!html;
   has XML::Element $!body;
@@ -52,7 +51,7 @@ class Test {
 #  package version from META6.json when package attribute is used
 
   #-----------------------------------------------------------------------------
-  method initialize ( SemiXML::Sxml $!sxml, Hash $attrs ) {
+  method initialize ( Hash $attrs ) {
 
     return if $!initialized;
 
@@ -72,7 +71,7 @@ class Test {
       EOINIT
     $!line-number = 5;
 
-    $!test-filename = $SemiXML::Sxml::Filename;
+    $!test-filename = $!globals.filename;
     $!test-filename ~~ s/ '.sxml' $/.t/;
 
     $!run-data<title> = ($attrs<title>//'-').Str;
@@ -852,8 +851,8 @@ note $code-text;
 
     # metric filename
     my $c = $*PERL.compiler();
-    my $metric-file = $!sxml.get-config( :table<S>, :key<rootpath>) ~
-                      '/' ~ $SemiXML::Sxml::Filename.IO.basename;
+    my $metric-file = $!globals.refined-tables<S><rootpath> ~
+                      '/' ~ $!globals.filename.IO.basename;
     $metric-file ~~ s/\.sxml $/-metric/;
     $metric-file ~= [~] "-$*DISTRO.name()", "-$*DISTRO.version()", ".toml";
 
@@ -955,7 +954,7 @@ note $code-text;
 
     # save all metric data
     note "Saved metrics in $metric-file"
-      if $globals.trace and $globals.refined-tables<T><file-handling>;
+      if $!globals.trace and $!globals.refined-tables<T><file-handling>;
     $metric-file.IO.spurt($metric-text);
   }
 }

@@ -17,7 +17,6 @@ class Actions {
   has SemiXML::Globals $!globals .= instance;
 
   # Caller SemiXML::Sxml object
-  has $!sxml-obj;
 
   # Objects hash with one predefined object for core methods
   has Hash $.objects is rw = {};
@@ -38,10 +37,6 @@ class Actions {
   # method name or symbol name. The xml namesspace and module name are not
   # added because these can be any name defined by the user.
   has Array $!tag-list = [];
-
-  #-----------------------------------------------------------------------------
-#TODO can we remove the BUILD?
-  submethod BUILD ( :$!sxml-obj ) { }
 
   #-----------------------------------------------------------------------------
   method init-doc ( $match ) {
@@ -441,9 +436,7 @@ class Actions {
       # Check if there is a method initialize in the module. If so call it
       # with the found attributes.
       my $module = self!can-method( $tn<mod-name>.Str, 'initialize');
-      $module.initialize(
-        $!sxml-obj, $attrs, :method($tn<meth-name>.Str)
-      ) if $module;
+      $module.initialize( $attrs, :method($tn<meth-name>.Str)) if $module;
     }
 
     # Add to the list
@@ -459,9 +452,7 @@ class Actions {
   method tag-body ( $match ) {
 
     my Bool $fixed = False;
-    my Array $sp-elements = $!sxml-obj.get-config(
-      :table<F>, :key<space-preserve>
-    ) // [];
+    my Array $sp-elements = $!globals.refined-tables<F><space-preserve> // [];
     my $current-tag = $!tag-list[*-1];
     $fixed = $current-tag ~~ any(@$sp-elements);
 
