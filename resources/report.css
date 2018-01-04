@@ -54,12 +54,12 @@ pre.cleaner {
   color:                #aa00aa;
 }
 
-h1.title {
+div.title {
   border-width:         1px;
   border-style:         solid;
   border-color:         #006000;
   height:               40px;
-  font-size:            2em;
+  margin:               10px 0 0 0;
   padding:              2px 0 5px 2.1em;
   background-color:     #c0e472;
   background-image:     url("https://docs.perl6.org/images/Camelia.svg");
@@ -68,6 +68,12 @@ h1.title {
   background-size:      45px;
   box-shadow:           10px 10px 5px #a0b060;
   border-radius:        4px;
+}
+
+h1.title-text {
+  padding:              0 0 0 40px;
+  margin:               0;
+  font-size:            2em;
 }
 
 a {
