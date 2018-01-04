@@ -134,11 +134,23 @@ class Summary {
   method !body ( XML::Element $html, Hash $attrs ) {
     $!body = append-element( $html, 'body');
 
+#`{{
     # if there is a title attribute, make a h1 title
     append-element(
       $!body, 'h1', { id => '___top', class => 'title'},
       :text(~$attrs<title>)
     ) if ? $attrs<title>;
+}}
+    if ? $attrs<title> {
+      my XML::Element $t = append-element(
+        $!body, 'div', {class => 'title'}
+      );
+
+      append-element(
+        $t, 'h1', {class => 'title-text'},
+        :text(~$attrs<title>)
+      );
+    }
   }
 
   #-----------------------------------------------------------------------------

@@ -85,6 +85,8 @@ class Test {
 #      )
 #    ).List;
 
+#TODO add type of test; Smoke tests, System integration tests, Regression tests
+
     # title of test report
     $!run-data<title> = ($attrs<title>//'-').Str;
 
@@ -265,11 +267,25 @@ class Test {
     $!body = append-element( $html, 'body');
     $!body.set( 'onload', 'prettyPrint()') if $!highlight-code;
 
+#`{{
     # if there is a title attribute, make a h1 title
     append-element(
       $!body, 'h1', { id => '___top', class => 'title'},
       :text(~$attrs<title>)
     ) if ? $attrs<title>;
+}}
+
+    if ? $attrs<title> {
+      my XML::Element $t = append-element(
+        $!body, 'div', {class => 'title'}
+      );
+
+      append-element(
+        $t, 'h1', {class => 'title-text'},
+        :text(~$attrs<title>)
+      );
+    }
+
   }
 
 
