@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2018-01-04T09:48:58.028310Z'
+  date         = '2018-01-04T13:55:16.770559Z'
   oskernel     = 'linux:4.14.8.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -15,7 +15,7 @@
 [ purpose ]
   purposetitle = 'Testing the basic use of SemiXML'
   purpose      = '''
-Purpose of this report is that it tests the parsing and translating process of the several parts of the language. Here only the simple structures are tested and not the methods to generate new content. 
+<p title="purpose">Purpose of this report is that it tests the parsing and translating process of the several parts of the language. Here only the simple structures are tested and not the methods to generate new content. <p>The tests comprises the following chapters</p><ul><li>Generate a simple element</li><li>Add attributes.</li><li>Nested elements.</li><li>Element blocks and their different types.</li></ul></p>
 '''
 
 [ chapters ]

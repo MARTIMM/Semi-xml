@@ -44,8 +44,6 @@ class Test {
   has Hash $!run-data = {};
 
 #TODO
-#  paragraphs ?
-#  summary report
 #  bench marking
 #  github issues
 #  package version from META6.json when package attribute is used
@@ -71,15 +69,32 @@ class Test {
       EOINIT
     $!line-number = 5;
 
+    # test information
     $!test-filename = $!globals.filename;
     $!test-filename ~~ s/ '.sxml' $/.t/;
+#TODO
+# attribute test command to support other languages
+# attribute location of generated test file
 
+#    $!run-data<test-location> = ($attrs<test-location>//'.').Str;
+#    $!run-data<test-program> = ($attrs<test-program>//'prove').Str;
+#    $!run-data<test-options> = ($attrs<test-options>//(
+#        '--exec', 'perl6', '--verbose',
+#        '--ignore-exit', '--failures', "--rules='seq=**'",
+#        '--nocolor', '--norc',
+#      )
+#    ).List;
+
+    # title of test report
     $!run-data<title> = ($attrs<title>//'-').Str;
+
+    # extra information for metric file
     $!run-data<package> = ($attrs<package>//'-').Str;
     $!run-data<class> = ($attrs<class>//'-').Str;
     $!run-data<module> = ($attrs<module>//'-').Str;
     $!run-data<distribution> = ($attrs<distribution>//'-').Str;
     $!run-data<label> = ($attrs<label>//'-').Str;
+
 
     self!initialize-report($attrs);
     $!initialized = True;
@@ -117,10 +132,12 @@ class Test {
     --> XML::Node
   ) {
 
+    # save the title. purpose content is saved later
     $!purpose-title = ($attrs<title>//$!purpose-title).Str;
+
     my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
     append-element( $div, 'h2', {:class<repheader>}, :text($!purpose-title));
-    $!purpose = [~] $content-body.nodes;
+
     my XML::Element $p = append-element( $div, 'p', {:title<purpose>});
     $p.append($content-body);
 
@@ -672,6 +689,8 @@ note $code-text;
     # finish program and write to test file
     $!program-text ~= "\n\ndone-testing;\n";
     $!test-filename.IO.spurt($!program-text);
+
+    #$!run-data<test-location>
 
     #'--timer', '--merge', "--archive $!test-filename.tgz",
     my Proc $p = run 'prove', '--exec', 'perl6', '--verbose',
