@@ -1,0 +1,249 @@
+# run: sxml2xml.pl6 --in=html --out=html doc/Resources/test-report-style.sxml
+$!css.style =!map [
+  $!css.b s=pre {
+    border-width:         2px;
+    border-style:         solid;
+    border-color:         #006000;
+    padding:              0 0 0 5px;
+    margin:               4px 0 8px 0;
+    color:                #00501e;
+    box-shadow:           6px 6px 4px #aaafaa;
+    border-radius:        4px;
+    page-break-inside:    avoid;
+    font-family:          FreeMono;
+    font-size:            12pt;
+    line-height:          14pt; /* keep lines in all sections at same height */
+  }
+
+  $!css.b s=pre.prettyprint {
+    box-sizing:           border-box; /* need to use width in percentages */
+    position:             normal;
+    float:                left;
+    margin-left:          5px;
+    width:                92%;
+    background-color:     #244;
+  }
+
+  $!css.b s=pre.aside-check {
+    margin-right:         5px;
+    box-sizing:           border-box;
+    position:             normal;
+    float:                right;
+    width:                6%; /* keep 1% in between */
+    background-color:     #dff;
+  }
+
+  $!css.b s=pre.cleaner {
+  	clear: both;
+    margin:               0 5px 2px 5px;
+    border-width:         0px;
+    background-color:     #dff;
+  }
+
+  $!css.b s=.green {
+    color:                #00aa00;
+  }
+
+  $!css.b s=.red {
+    color:                #aa0000;
+  }
+
+  $!css.b s=.orange {
+    color:                #cc9900;
+  }
+
+  $!css.b s=.purple {
+    color:                #aa00aa;
+  }
+
+  $!css.b s=div.title {
+    border-width:         1px;
+    border-style:         solid;
+    border-color:         #006000;
+    height:               40px;
+    margin:               10px 0 0 0;
+    padding:              2px 0 5px 2.1em;
+    background-color:     #c0e472;
+    background-image:     url("https://docs.perl6.org/images/Camelia.svg");
+    background-repeat:    no-repeat;
+    background-position:  7px 4px;
+    background-size:      45px;
+    box-shadow:           10px 10px 5px #a0b060;
+    border-radius:        4px;
+  }
+
+  $!css.b s=h1.title-text {
+    padding:              0 0 0 40px;
+    margin:               0;
+    font-size:            2em;
+  }
+
+  $!css.b s=a {
+    color:                blue;
+    text-decoration:      none;
+  }
+
+  $!css.b s=a:hover {
+    color:                blue;
+    text-decoration:      underline;
+  }
+
+  $!css.b s=div.repsection {
+    margin:               10px 4px 10px 4px;
+    padding:              3px;
+    border-radius:        6px;
+    border-width:         1px;
+    border-style:         solid;
+    border-color:         #006f40;
+
+    color:                #00501e;
+    background-color:     #ffffef;
+    box-shadow:           6px 6px 4px #aaafaa;
+  }
+
+  $!css.b s=div.repsection p {
+    padding-left:         10px;
+  }
+
+  $!css.b s=h2.repheader {
+    margin:               0;
+    background-color:     #cfef9f;
+    padding-left:         10px;
+  }
+
+  $!css.b s=strong.os {
+  /*  font-size:            smaller;*/
+    color:                #00501e;
+  }
+
+  $!css.b s=div.repbody {
+    margin:               5px 5px 5px 10px;
+    padding:              3px;
+    border-radius:        6px;
+    border-width:         1px;
+    border-style:         solid;
+    border-color:         #006f40;
+
+    color:                #00501e;
+    background-color:     #ffffef;
+    box-shadow:           6px 6px 4px #aaafaa;
+  }
+
+  $!css.b s=strong.chapter {
+    font-size:            smaller;
+    color:                #00501e;
+  }
+
+  $!css.b s=.footer {
+    right:                0;
+    left:                 0;
+    padding-right:        3px;
+    margin:               10px 0 10px 0;
+    background-color:     #c0e472;
+    font-size:            7pt;
+    text-align:           right;
+    box-shadow:           6px 6px 4px #a0b060;
+    border-radius:        4px;
+    border-width:         1px;
+    border-style:         solid;
+    border-color:         #006000;
+  }
+
+  /* SVG Elements */
+  $!css.b s=svg { }
+
+  /* Used for path and rectangles */
+  /*
+  $!css.b s=.test-ok {
+    fill:                 #0a0;
+    stroke:               black;
+    stroke-width:         1;
+  }
+
+  $!css.b s=.test-nok {
+    fill:                 #a00;
+    stroke:               black;
+    stroke-width:         1;
+  }
+
+  $!css.b s=.bug-ok {
+    fill:                 #0a0;
+    stroke:               black;
+    stroke-width:         1;
+  }
+
+  $!css.b s=.bug-nok {
+    fill:                 #f00;
+    stroke:               black;
+    stroke-width:         1;
+  }
+
+  $!css.b s=.todo-ok {
+    fill:                 #0a0;
+    stroke:               black;
+    stroke-width:         1;
+  }
+
+  $!css.b s=.todo-nok {
+    fill:                 #ff8800;
+    stroke:               black;
+    stroke-width:         1;
+  }
+
+
+  $!css.b s=.skip {
+    fill:                 white;
+    stroke:               black;
+    stroke-width:         1;
+  }
+
+  $!css.b s=path.line {
+    stroke:               black;
+    stroke-width:         2;
+  }
+
+  $!css.b s=text.legend {
+    font-size:            11;
+  }
+  */
+
+  /* metrics summary table */
+  $!css.b s=table.summary-table {
+  /*
+    border-style:         solid;
+    border-color:         #006000;
+    border-width:         1px;
+    box-shadow:           10px 10px 5px #a0b060;
+    background-size:      45px;
+  */
+    border-radius:        7px;
+    margin-bottom:        5px;
+    page-break-inside:    avoid;
+    font-size:            11pt;
+  }
+
+  $!css.b s=th.summary-header {
+    background-color:     #cfef9f;
+    width:                14%;
+  }
+
+  $!css.b s=th.class-header {
+    text-align:           left;
+    vertical-align:       top;
+    width:                60%;
+  }
+
+  $!css.b s=td.summary-header {
+    background-color:     #dfefaf;
+    font-weight:          bold;
+  }
+
+  $!css.b s=td.summary-pie {
+    vertical-align:       top;
+    width:                200px;
+  }
+
+  $!css.b s=th.chapterth {
+    text-align:           left;
+  }
+]
