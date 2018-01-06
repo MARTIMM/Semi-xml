@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2018-01-04T13:55:16.770559Z'
+  date         = '2018-01-06T21:27:28.213596Z'
   oskernel     = 'linux:4.14.8.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -28,7 +28,7 @@
   skipped      = 0
 
 [ chapter.'Add attributes.' ]
-  success      = 8
+  success      = 7
   fail         = 0
   todo         = 0
   skipped      = 0
@@ -78,46 +78,40 @@
 [ summary.line-29 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
-    ok 6 - attribute with bracketed <> value
+    ok 6 - attribute a1 found
+"""
+
+[ summary.line-30 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 7 - attribute a2 found
 """
 
 [ summary.line-34 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
-    ok 7 - attribute a1 found
+    ok 8 - true boolean attribute a1 found
 """
 
 [ summary.line-35 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
-    ok 8 - attribute a2 found
+    ok 9 - false boolean attribute a2 found
 """
 
-[ summary.line-39 ]
-  chapter      = 'Add attributes.'
+[ summary.line-37 ]
+  chapter      = 'Nested elements.'
   diagnostic   = """
-    ok 9 - true boolean attribute a1 found
-"""
-
-[ summary.line-40 ]
-  chapter      = 'Add attributes.'
-  diagnostic   = """
-    ok 10 - false boolean attribute a2 found
+    ok 10 - An element within another
 """
 
 [ summary.line-42 ]
-  chapter      = 'Nested elements.'
+  chapter      = 'Element blocks and their different types.'
   diagnostic   = """
-    ok 11 - An element within another
+    ok 11 - two blocks on an element
 """
 
 [ summary.line-47 ]
-  chapter      = 'Element blocks and their different types.'
-  diagnostic   = """
-    ok 12 - two blocks on an element
-"""
-
-[ summary.line-52 ]
   chapter      = 'Element blocks and their different types.'
   diagnostic   = """
     ok

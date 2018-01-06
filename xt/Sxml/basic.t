@@ -24,11 +24,6 @@ $sxml.parse(:content("\$some-element attribute='v a l u e'"));
 like ~$sxml, / 'attribute="v a l u e"' /,
              'attribute with single quoted value';
 
-# bracketed value
-$sxml.parse(:content('$some-element attribute=<v a l u e>'));
-like ~$sxml, / 'attribute="v a l u e"' /,
-             'attribute with bracketed <> value';
-
 # more than one attribute
 $sxml.parse(:content('$some-element a1=v1 a2=v2'));
 like ~$sxml, / 'a1="v1"' /, 'attribute a1 found';

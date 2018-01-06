@@ -5,6 +5,7 @@
 [ ML.html ]
   test          = 'SxmlLib::Testing::Test'
   summary       = 'SxmlLib::Testing::Summary'
+  css           = 'SxmlLib::Css'
 #  lorem         = 'SxmlLib::LoremIpsum'
 
 #-------------------------------------------------------------------------------
