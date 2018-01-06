@@ -52,11 +52,13 @@ class File {
         my $sxml-text = slurp($reference);
 
         # new parser object
+note "File.new from $reference";
         my SemiXML::Sxml $x .= new;
 
         # the top level node xx-xx-xx is used to be sure there is only one
         # element at the top when parsing starts.
-        my $e = $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
+note "Parse";
+        my $e = $x.parse( :content("\$XX-XX-XX [ $sxml-text ]"), :raw);
 
         # move nodes to the parent node
         $parent.insert($_) for $x.root-element.nodes.reverse;

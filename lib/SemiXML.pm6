@@ -6,9 +6,12 @@ unit package SemiXML:auth<github:MARTIMM>;
 #-------------------------------------------------------------------------------
 class Globals {
   has Str $.filename is rw;
+  has Array $.refine is rw = [<xml xml>];
   has Hash $.refined-tables is rw;
   has Bool $.trace is rw;
   has Bool $.keep is rw;
+  has Bool $.raw is rw;
+  has Hash $.objects is rw;
 
   my Globals $instance;
 

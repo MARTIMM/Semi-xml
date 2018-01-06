@@ -5,6 +5,8 @@
 
 * 0.45.0
   * Added a U-table for module developers.
+  * Tests are made to call a module from another one.
+  * Introduced new flags to BUILD. :raw to skip some cleanup at the end of the parsing process. This needed when a second parse operation is started while parsing another and the second result is to be merged into the first. With this flag, the cleanup can be postponed until the very end.
 * 0.44.0
   * F-Table inline elements are now processed.
 * 0.43.0

@@ -16,8 +16,6 @@ class Actions {
   # get global object to get tracing info
   has SemiXML::Globals $!globals .= instance;
 
-  # Objects hash with one predefined object for core methods
-  has Hash $.objects is rw = {};
   has XML::Document $!xml-document;
 
   # Keep current state of affairs. Hopefully some info when parsing fails
@@ -52,56 +50,58 @@ class Actions {
 
     my $parent = $match<document>.made;
 
-    drop-parent-container($parent);
+    unless $!globals.raw {
+      drop-parent-container($parent);
 
-    # process top level method container
-    if $parent.name eq 'sxml:parent_container' {
-      if +$parent.nodes == 0 {
-        # No nodes generated
-        $parent = XML::Element.new;
+      # process top level method container
+      if $parent.name eq 'sxml:parent_container' {
+        if +$parent.nodes == 0 {
+          # No nodes generated
+          $parent = XML::Element.new;
+        }
+
+        elsif +$parent.nodes == 1 {
+          # One node generated
+          $parent = $parent.nodes[0];
+        }
+
+        else {
+          my $tag-ast = $match<document><tag-spec>.made;
+          $parent = XML::Element.new(
+            :name('method-generated-too-many-nodes'),
+            :attribs( module => $tag-ast[3], method => $tag-ast[4])
+          );
+        }
       }
 
-      elsif +$parent.nodes == 1 {
-        # One node generated
-        $parent = $parent.nodes[0];
-      }
+      # conversion to xml escapes is done as late as possible
+      escape-attr-and-elements($parent);
+      note "After esc. and table checks: $parent"
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-      else {
-        my $tag-ast = $match<document><tag-spec>.made;
-        $parent = XML::Element.new(
-          :name('method-generated-too-many-nodes'),
-          :attribs( module => $tag-ast[3], method => $tag-ast[4])
-        );
-      }
+      # search for variables and substitute them
+      subst-variables($parent);
+      note "After variable sub: $parent"
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+      # move around some elements
+      remap-content($parent);
+      note "After remapping: $parent"
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+      # remove leftovers from sxml namespace
+      remove-sxml($parent);
+      note "After ns removal: $parent"
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+      # check spacing around elements
+      check-inline($parent);
+      note "After inline check: $parent"
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+      note '-' x 80
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
     }
-
-    # conversion to xml escapes is done as late as possible
-    escape-attr-and-elements($parent);
-    note "After esc. and table checks: $parent"
-      if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-    # search for variables and substitute them
-    subst-variables($parent);
-    note "After variable sub: $parent"
-      if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-    # move around some elements
-    remap-content($parent);
-    note "After remapping: $parent"
-      if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-    # remove leftovers from sxml namespace
-    remove-sxml($parent);
-    note "After ns removal: $parent"
-      if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-    # check spacing around elements
-    check-inline($parent);
-    note "After inline check: $parent"
-      if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-    note '-' x 80
-      if $!globals.trace and $!globals.refined-tables<T><parse>;
 
     # return the completed document
     $!xml-document .= new($parent);
@@ -517,7 +517,8 @@ class Actions {
 
     my XML::Element $x;
 
-    my $module = $!objects{$mod-name} if $!objects{$mod-name}:exists;
+    my $module = $!globals.objects{$mod-name}
+      if $!globals.objects{$mod-name}:exists;
 
     if $module.defined {
       if $module.^can($meth-name) {
@@ -600,12 +601,15 @@ class Actions {
     $!state = $state;
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   method Xset-objects( Hash:D $objects ) {
 
     $!objects = $objects;
   }
+}}
 
+#`{{
   #-----------------------------------------------------------------------------
   method Xprocess-modules ( Hash :$lib = {}, Hash :$mod = {} ) {
 
@@ -631,6 +635,7 @@ class Actions {
       }
     }
   }
+}}
 
   #-----------------------------------------------------------------------------
   method get-document ( --> XML::Document ) {

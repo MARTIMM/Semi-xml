@@ -26,7 +26,7 @@ class Sxml {
   has Array $!table-names;
   has Hash $!refined-tables;
 
-  has Hash $!objects = {};
+#  has Hash $!objects = {};
 
   has Str $!filename;
   has Str $!target-fn;
@@ -36,6 +36,7 @@ class Sxml {
 #TODO doc and specificity of T-Table tracing
   has Bool $!trace = False;
   has Bool $!force;
+  has Bool $!keep;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
@@ -44,28 +45,28 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   submethod BUILD (
-    Array :$!refine = [], Bool :$!force = False,
-    Bool :$!trace = False, Bool :$keep = False
+    Array :$!refine = [<xml xml>], Bool :$!force = False,
+    Bool :$!trace = False, Bool :$!keep = False
   ) {
 
     $!globals .= instance;
-    $!globals.trace = $!trace;
-    $!globals.keep = $keep;
 
-    $!grammar .= new;
-    $!actions .= new;
+    # initialize the refined config tables
+    $!table-names = [<C D E F H ML R S T U X>];
+    $!refined-tables = %(@$!table-names Z=> ( {} xx $!table-names.elems ));
 
-    # Make sure that in and out keys are defined with defaults
     $!refine[IN] = 'xml' unless ?$!refine[IN];
     $!refine[OUT] = 'xml' unless ?$!refine[OUT];
 
-    # Initialize the refined config tables
-    $!table-names = [<C D E F H ML R S T U X>];
-    $!refined-tables = %(@$!table-names Z=> ( {} xx $!table-names.elems ));
+    $!grammar .= new;
+    $!actions .= new;
   }
 
   #-----------------------------------------------------------------------------
-  multi method parse ( Str:D :$!filename!, Hash :$config --> Bool ) {
+  multi method parse (
+    Str:D :$!filename!, Hash :$config, Bool :$raw = False
+    --> Bool
+  ) {
 
     my Bool $pr;
 
@@ -75,7 +76,7 @@ class Sxml {
       $!globals.filename //= $!filename;
 
       my $text = slurp($!filename);
-      $pr = self.parse( :content($text), :$config, :!drop-cfg-filename);
+      $pr = self.parse( :content($text), :$config, :!drop-cfg-filename, :$raw);
       die "Parse failure" if $pr ~~ Nil;
     }
 
@@ -90,17 +91,39 @@ class Sxml {
   #-----------------------------------------------------------------------------
   multi method parse (
     Str:D :$content! is copy, Hash :$config,
-    Bool :$!drop-cfg-filename = True
+    Bool :$!drop-cfg-filename = True, Bool :$raw = False
     --> Bool
   ) {
 
     $!user-config = $config;
     $!filename = Str if $!drop-cfg-filename;
+    $!globals.raw = $raw;
 
-    # Prepare config and process dependencies. If result is newer than source
-    # prepare returns False to note that further work is not needed.
-    # Generate a proper Match object to return.
-    return False unless self!prepare-config;
+    if $!globals.refined-tables.defined
+      and $!refine[0] eq $!globals.refine[0]
+      and $!refine[1] eq $!globals.refine[1]
+      and ! $!user-config and ! $!drop-cfg-filename
+    {
+      $!refined-tables = $!globals.refined-tables;
+      $!refine = $!globals.refine;
+      #self!process-modules;
+    }
+
+    else {
+      # If there were tables, clean them up
+      #$!globals.refined-tables = Nil;
+
+      # start filling items in
+      $!globals.trace = $!trace;
+      $!globals.keep = $!keep;
+
+      # make sure that in and out keys are defined with defaults
+      $!globals.refine = $!refine;
+
+      # Prepare config and process dependencies. If result is newer than source
+      # prepare returns False to note that further work is not needed.
+      return False unless self!prepare-config;
+    }
 
     # Parse the content. Parse can be recursively called
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
@@ -117,7 +140,9 @@ class Sxml {
     if $m.to != $content.chars {
       my Str $before = $!actions.prematch();
       my Str $after = $!actions.postmatch();
-      my Str $current = $content.substr( $!actions.from, $!actions.to - $!actions.from);
+      my Str $current = $content.substr(
+        $!actions.from, $!actions.to - $!actions.from
+      );
 
       $before ~ $current ~~ m:g/ (\n) /;
       my Int $nth-line = $/.elems + 1;
@@ -397,6 +422,7 @@ class Sxml {
 
     # Fill the special purpose tables with the refined searches in the config
     for @$!table-names -> $table {
+
       # document control
       if $table ~~ any(<D E F ML R>) {
         $!refined-tables{$table} =
@@ -557,6 +583,7 @@ class Sxml {
     # no entries, no work
     return unless ? $!refined-tables<ML>;
 
+    $!globals.objects //= {};
     my Hash $lib = {};
     my Hash $mod = {};
     for $!refined-tables<ML>.keys -> $modkey {
@@ -568,16 +595,18 @@ class Sxml {
       $mod{$modkey} = $m;
     }
 
+#`{{
     # cleanup old objects
     for $!objects.keys -> $k {
       undefine $!objects{$k};
       $!objects{$k}:delete;
     }
+}}
 
     # load and instantiate
     note " " if $!trace and $!refined-tables<T><modules>;
     for $mod.kv -> $key, $value {
-      if $!objects{$key}:!exists {
+      if $!globals.objects{$key}:!exists {
         if $lib{$key}:exists {
 
 #TODO test for duplicate paths
@@ -589,7 +618,7 @@ class Sxml {
 
         (try require ::($value)) === Nil and say "Failed to load $value\n$!";
         my $obj = ::($value).new;
-        $!objects{$key} = $obj if $obj.defined;
+        $!globals.objects{$key} = $obj if $obj.defined;
 
         note "Object for key '$key' installed from class $value"
              if $!trace and $!refined-tables<T><modules>;
@@ -602,9 +631,10 @@ class Sxml {
     }
 
     # Place in actions object.
-    $!actions.objects = $!objects;
+    #$!globals.objects = $objects;
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   method get-sxml-object ( Str $class-name ) {
 
@@ -618,6 +648,7 @@ class Sxml {
 
     $object;
   }
+}}
 
   #-----------------------------------------------------------------------------
   method !load-config (
