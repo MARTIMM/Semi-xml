@@ -29,9 +29,17 @@ class Css {
 
     # because of this a style can be placed anywhere in the document and then
     # it will be remapped to the end of the head.
-    my XML::Element $remap-style = append-element(
-      $parent, 'sxml:remap', { map-to => "/html/head",}
-    );
+    my XML::Element $remap-style;
+    my Bool $map = ($attrs<map>//1).Int.Bool;
+    if $map {
+      $remap-style = append-element(
+        $parent, 'sxml:remap', { map-to => "/html/head",}
+      );
+    }
+
+    else {
+      $remap-style := $parent;
+    }
 
     my XML::Element $style = append-element(
       $remap-style, 'style', :text("\n")
