@@ -12,7 +12,6 @@ use XML::XPath;
 class SxmlHelper {
 
   #my $local-action;
-  my SemiXML::Globals $globals .= instance;
 
   #-----------------------------------------------------------------------------
 #TODO $config should come indirectly from $!refined-config
@@ -393,6 +392,8 @@ class SxmlHelper {
     #$action is copy where .^name eq 'SemiXML::Actions' = $local-action
   ) is export {
 
+    my SemiXML::Globals $globals .= instance;
+
     # when called from Action $action is set, otherwise it was from the
     # recursive call. this saves some stack space.
     #$local-action = $action if ?$action;
@@ -479,6 +480,8 @@ class SxmlHelper {
     XML::Element $parent,
     #$action is copy where .^name eq 'SemiXML::Actions'
   ) is export {
+
+    my SemiXML::Globals $globals .= instance;
 
     # get xpath object
     my XML::Document $xml-document .= new($parent);
