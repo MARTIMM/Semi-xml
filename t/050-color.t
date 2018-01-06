@@ -111,7 +111,7 @@ subtest 'generate monochromatic color variables', {
 #-------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
 
-  my SemiXML::Sxml $x .= new;
+  my SemiXML::Sxml $x .= new(:!trace);
   $x.parse(
     config => {
       F => { xml => { space-preserve => [<set0 set1 set2>], }, },
