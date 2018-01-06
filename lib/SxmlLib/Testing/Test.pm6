@@ -6,6 +6,7 @@ unit package SxmlLib::Testing:auth<github:MARTIMM>;
 use SemiXML;
 use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
+use SxmlLib::File;
 use XML;
 use XML::XPath;
 
@@ -220,7 +221,12 @@ class Test {
   #===[ private methods ]=======================================================
   method !initialize-report ( Hash $attrs ) {
 
-    $!html .= new(:name<html>);
+    $!html .= new(
+      :name<html>, :attribs(
+        xmlns => 'http://www.w3.org/199/xhtml', 'xml:lang' => 'en'
+      )
+    );
+
     my XML::Element $head = self!head( $!html, $attrs);
 
     self!body( $!html, $attrs);
@@ -232,9 +238,17 @@ class Test {
     my XML::Element $head = append-element( $html, 'head');
     append-element( $head, 'title', :text(~$attrs<title>)) if ? $attrs<title>;
     append-element( $head, 'meta', {charset => 'UTF-8'});
+    append-element(
+      $head, 'meta', { :name<description>, content => 'Test report'}
+    );
+    append-element(
+      $head, 'meta', { :name<keywords>, content => 'sxml report test'}
+    );
+    append-element(
+      $head, 'meta', { 'http-equiv' => "language", :content<EN>}
+    );
 
     if $!highlight-code {
-
       # temporary check of RESOURCES path when using uninstalled version
       my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
       append-element(
@@ -251,11 +265,20 @@ class Test {
       append-element( $jse, :text(' '));
     }
 
+#`{{
     my $css = %?RESOURCES<report.css>.Str;
     append-element(
       $head, 'link', {
         :href("file://$css"),
         :type<text/css>, :rel<stylesheet>
+      }
+    );
+}}
+    my SxmlLib::File $sf .= new;
+    $sf.include(
+      $head, {
+        :type<include-xml>,
+        :reference(%?RESOURCES<test-report-style.html>.Str)
       }
     );
 
@@ -788,8 +811,8 @@ note $code-text;
             }
 
             append-element(
-              $acheck, 'span', {:$class},
-              :text($mark-symbol ~ "\n")
+              #$acheck, 'span', {:$class}, :text($mark-symbol ~ "\n")
+              $acheck, 'div', {:$class}, :text($mark-symbol ~ "\n")
             );
 
             # add chapter to the test lines
@@ -800,13 +823,15 @@ note $code-text;
           }
 
           else {
-            append-element( $acheck, 'span', :text("\n"));
+            #append-element( $acheck, 'span', :text("\n"));
+            append-element( $acheck, 'div', :text("\n"));
           }
         }
 
         # fill last lines up
         else {
-          append-element( $acheck, 'span', :text("\n"));
+          #append-element( $acheck, 'span', :text("\n"));
+          append-element( $acheck, 'div', :text("\n"));
         }
       }
     }
