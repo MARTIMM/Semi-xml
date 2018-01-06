@@ -106,7 +106,12 @@ class Summary {
   #===[ private methods ]=======================================================
   method !initialize-report ( Hash $attrs ) {
 
-    $!html .= new(:name<html>);
+    $!html .= new(
+      :name<html>, :attribs(
+        xmlns => 'http://www.w3.org/199/xhtml', 'xml:lang' => 'en'
+      )
+    );
+
     my XML::Element $head = self!head( $!html, $attrs);
 
     self!body( $!html, $attrs);
@@ -118,6 +123,15 @@ class Summary {
     my XML::Element $head = append-element( $html, 'head');
     append-element( $head, 'title', :text(~$attrs<title>)) if ? $attrs<title>;
     append-element( $head, 'meta', {charset => 'UTF-8'});
+    append-element(
+      $head, 'meta', { name => "description", content => "Test report"}
+    );
+    append-element(
+      $head, 'meta', { :name<keywords>, content => 'sxml report summary'}
+    );
+    append-element(
+      $head, 'meta', { 'http-equiv' => "language", :content<EN>}
+    );
 
     my $css = %?RESOURCES<report.css>.Str;
     append-element(
