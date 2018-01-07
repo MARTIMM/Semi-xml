@@ -2,7 +2,6 @@
 
 # Changes in SemiXML:: * and sxml2xml
 
-
 * 0.45.0
   * Added a U-table for module developers.
   * Tests are made to call a module from another one.
