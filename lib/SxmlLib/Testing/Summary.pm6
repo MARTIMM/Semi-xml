@@ -6,6 +6,7 @@ unit package SxmlLib::Testing:auth<github:MARTIMM>;
 use SemiXML;
 use SemiXML::Sxml;
 use SxmlLib::SxmlHelper;
+use SxmlLib::File;
 use Config::TOML;
 use XML;
 use XML::XPath;
@@ -133,11 +134,20 @@ class Summary {
       $head, 'meta', { 'http-equiv' => "language", :content<EN>}
     );
 
+#`{{
     my $css = %?RESOURCES<report.css>.Str;
     append-element(
       $head, 'link', {
         :href("file://$css"),
         :type<text/css>, :rel<stylesheet>
+      }
+    );
+}}
+    my SxmlLib::File $sf .= new;
+    $sf.include(
+      $head, {
+        :type<include-xml>,
+        :reference(%?RESOURCES<test-report-style.xml>.Str)
       }
     );
 
@@ -186,11 +196,20 @@ class Summary {
       $parent.append(from-xml(%metrics<purpose><purpose>).root);
     }
 
+
     my XML::Element $div = append-element( $parent, 'div', {:class<repbody>});
-    my Str $osdistro = %metrics<general><osdistro>.split(':')[0..1].join(', ');
+
+    my Str $date = %metrics<general><date>;
+    $date ~~ s/ 'T' / /;
+    $date ~~ s/\. \d+ 'Z'//;
+    append-element(
+      $div, 'strong', {:class<os>}, :text("Tested on $date (zulu),")
+    );
+
+    my Str $osdistro = %metrics<general><osdistro>.split(':')[0,2].join(' ');
     my Str $oskernel = %metrics<general><oskernel>.split(':').join(', ');
     append-element(
-      $div, 'strong', {:class<os>}, :text($osdistro ~ ', ' ~ $oskernel)
+      $div, 'strong', {:class<os>}, :text("on $osdistro, $oskernel")
     );
 
     # get names of all chapters and all chapter sections
@@ -199,11 +218,6 @@ class Summary {
     # find out if tests went well
     my Bool $all-chapters-have-tests = True;
     my Bool $all-tests-are-successful = True;
-    my Num $percent-success = 0e0;
-    my Num $percent-fail = 0e0;
-    my Num $percent-todo = 0e0;
-    my Num $percent-skipped = 0e0;
-    my Num $total-tests = 0e0;
 
     for @$chapters -> $chapter {
       if %metrics<chapter>{$chapter}:exists {
@@ -220,10 +234,19 @@ class Summary {
     }
 
     if $all-chapters-have-tests and $all-tests-are-successful {
-      append-element( $div, :text(' All tests are 100% successful'));
+      #my XML::Element $div = append-element( $parent, 'div', {:class<repbody>});
+      append-element( $div, 'br');
+      append-element(
+        $div, 'strong', {:class<green>}, :text(' All tests are 100% successful')
+      );
     }
 
     else {
+      my Num $percent-success = 0e0;
+      my Num $percent-fail = 0e0;
+      my Num $percent-todo = 0e0;
+      my Num $percent-skipped = 0e0;
+      my Num $total-tests = 0e0;
 
       # table items
       my XML::Element $table = append-element(

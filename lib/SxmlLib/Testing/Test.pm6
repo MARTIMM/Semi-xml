@@ -278,7 +278,7 @@ class Test {
     $sf.include(
       $head, {
         :type<include-xml>,
-        :reference(%?RESOURCES<test-report-style.html>.Str)
+        :reference(%?RESOURCES<test-report-style.xml>.Str)
       }
     );
 
