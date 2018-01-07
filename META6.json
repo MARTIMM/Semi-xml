@@ -15,6 +15,7 @@
   "perl": "6",
   "tags": [ "xml"],
   "provides": {
+    "SemiXML":                          "lib/SemiXML.pm6",
     "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
     "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
     "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
@@ -42,17 +43,12 @@
     "SxmlLib::Html::List":              "lib/SxmlLib/Html/List.pm6",
     "SxmlLib::Html::Menu":              "lib/SxmlLib/Html/Menu.pm6",
 
-    "SxmlLib::Testing::Bug":            "lib/SxmlLib/Testing/Bug.pm6",
-    "SxmlLib::Testing::Code":           "lib/SxmlLib/Testing/Code.pm6",
-    "SxmlLib::Testing::Report":         "lib/SxmlLib/Testing/Report.pm6",
-    "SxmlLib::Testing::Skip":           "lib/SxmlLib/Testing/Skip.pm6",
     "SxmlLib::Testing::Test":           "lib/SxmlLib/Testing/Test.pm6",
-    "SxmlLib::Testing::Testing":        "lib/SxmlLib/Testing/Testing.pm6",
-    "SxmlLib::Testing::Todo":           "lib/SxmlLib/Testing/Todo.pm6"
+    "SxmlLib::Testing::Summary":        "lib/SxmlLib/Testing/Summary.pm6"
   },
   "resources": [
     "SemiXML.toml",
-    "report.css",
+    "test-report-style.xml",
 
     "google-code-prettify/desert.css",
     "google-code-prettify/doxy.css",
