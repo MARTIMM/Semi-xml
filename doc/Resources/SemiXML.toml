@@ -1,22 +1,15 @@
 [ C ]
-  tracing       = true
+  tracing       = false
+
+[ C.xml ]
+  xml-show      = false
+  doctype-show  = false
 
 #-------------------------------------------------------------------------------
 [ ML.html ]
-#  test          = 'SxmlLib::Testing::Test'
-#  summary       = 'SxmlLib::Testing::Summary'
   css           = 'SxmlLib::Css'
-#  lorem         = 'SxmlLib::LoremIpsum'
 
 #-------------------------------------------------------------------------------
-[ R ]
-  cat             = 'cat > "%op/Xml/%of.%oe"'
-
-[ R.html ]
-  pdf           = 'wkhtmltopdf - %op/%of.pdf'
-
-#-------------------------------------------------------------------------------
-#[ S.html ]
 [ S ]
   rootpath      = 'resources'
 
@@ -25,7 +18,7 @@
 [ T ]
 #  config        = true
 #  tables        = true
-  modules       = true
+#  modules       = true
 #  parse         = true
 #  parse-result  = true
   file-handling = true
