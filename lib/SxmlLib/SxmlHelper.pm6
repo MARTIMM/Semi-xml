@@ -349,12 +349,13 @@ class SxmlHelper {
         die "node '$map-to' to map to, not found" unless ? $n;
         if ?$as {
           my $top-node = XML::Element.new(:name($as));
-          $top-node.append(clone-node($_)) for $remap.nodes;
+          $top-node.insert($_) for $remap.nodes.reverse;
           $n.append($top-node);
         }
 
         else {
-          $n.append(clone-node($_)) for $remap.nodes;
+          my XML::Node $last-child = $n.lastChild;
+          $last-child.after($_) for $remap.nodes.reverse;
         }
       }
 
@@ -364,14 +365,13 @@ class SxmlHelper {
         die "node '$map-after' to map after, not found" unless ? $n;
         if ?$as {
           my $top-node = XML::Element.new(:name($as));
-          $top-node.append(clone-node($_)) for $remap.nodes;
+          $top-node.insert($_) for $remap.nodes.reverse;
           $n.after($top-node);
         }
 
         else {
-          my XML::Element $hook = after-element( $n, 'sxml:hook');
-          $hook.before(clone-node($_)) for $remap.nodes;
-          $hook.remove;
+          my XML::Node $last-child = $n.lastChild;
+          $last-child.after($_) for $remap.nodes.reverse;
         }
       }
 
