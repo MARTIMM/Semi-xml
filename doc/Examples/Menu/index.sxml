@@ -6,7 +6,7 @@ $html [
     $meta charset=UTF-8
     $meta http-equiv=Content-Style-Type content=text/css
 
-    $!css.style compress=0 id=reset [
+    $!css.style compress=0 id=reset =!map [
       $!css.reset type=condensed-universal
     ]
 

@@ -354,12 +354,14 @@ class SxmlHelper {
         }
 
         else {
-          my XML::Node $last-child = $n.lastChild;
-          $last-child.after($_) for $remap.nodes.reverse;
+          my XML::Element $hook = after-element( $n, 'sxml:hook');
+          $hook.after($_) for $remap.nodes.reverse;
+          $hook.remove;
         }
       }
 
       elsif ? $map-after {
+note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
         # if more nodes are found take only the first one
         my $n = $x.find( $map-after, :to-list)[0];
         die "node '$map-after' to map after, not found" unless ? $n;
@@ -370,8 +372,9 @@ class SxmlHelper {
         }
 
         else {
-          my XML::Node $last-child = $n.lastChild;
-          $last-child.after($_) for $remap.nodes.reverse;
+          my XML::Element $hook = after-element( $n, 'sxml:hook');
+          $hook.after($_) for $remap.nodes.reverse;
+          $hook.remove;
         }
       }
 

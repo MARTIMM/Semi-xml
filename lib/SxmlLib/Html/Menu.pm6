@@ -141,7 +141,7 @@ class Html::Menu {
   method !create-style( XML::Element $parent, Str $id, Str $class, Str $side ) {
 
     my XML::Element $remap-style = append-element(
-      $parent, 'sxml:remap', { map-after => "/html/head/style[1]",}
+      $parent, 'sxml:remap', { map-to => "/html/head",}
     );
 
     my XML::Element $style = append-element( $remap-style, 'style');
