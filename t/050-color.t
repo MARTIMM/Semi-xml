@@ -10,13 +10,15 @@ subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
     $x [
-      $!Colors.palette outspec=rgbhex base-rgb='#1200ff' type=blended mode=averaged
-      $set0 [$sxml:base-color]
+      $!Colors.palette outspec=rgbhex base-rgb='#1200ff'
+                       type=blended mode=averaged
+      $set0 [ $sxml:var-ref name=base-color ]
       $set1 [
-        $sxml:blend-color1 $sxml:blend-color2 $sxml:blend-color3
-        $sxml:blend-color4 $sxml:blend-color5
+        $sxml:var-ref name=blend-color1 $sxml:var-ref name=blend-color2
+        $sxml:var-ref name=blend-color3 $sxml:var-ref name=blend-color4
+        $sxml:var-ref name=blend-color5
       ]
-      $set2 [$sxml:blend-color6]
+      $set2 [ $sxml:var-ref name=blend-color6 ]
     ]
     EOTXT
 
@@ -38,12 +40,13 @@ subtest 'generated blended color variables', {
       $!Colors.palette
         base-rgb='#1200ff' type=blended mode=hard opacity=0.8
         ncolors=10
-      $set0 [$sxml:base-color]
+      $set0 [ $sxml:var-ref name=base-color ]
       $set1 [
-        $sxml:blend-color1 $sxml:blend-color2 $sxml:blend-color3
-        $sxml:blend-color4 $sxml:blend-color5
+        $sxml:var-ref name=blend-color1 $sxml:var-ref name=blend-color2
+        $sxml:var-ref name=blend-color3 $sxml:var-ref name=blend-color4
+        $sxml:var-ref name=blend-color5
       ]
-      $set2 [$sxml:blend-color6 $sxml:blend-color9]
+      $set2 [ $sxml:var-ref name=blend-color6 $sxml:var-ref name=blend-color9 ]
     ]
     EOTXT
 
@@ -57,14 +60,15 @@ subtest 'generated blended color variables', {
 
   my $text = q:to/EOTXT/;
     $html [
-      $!Colors.palette outspec=rgbhex base-rgb='#1200ffff' type=blended mode=hard
+      $!Colors.palette outspec=rgbhex base-rgb='#1200ffff'
+                       type=blended mode=hard
       $head [
         $style [
-          strong {
-            color: $sxml:base-color;
-            border-color: $sxml:blend-color2;
-            background-color: $sxml:blend-color5;
-          }
+          strong [
+            color: $sxml:var-ref name=base-color [];
+            border-color: $sxml:var-ref name=blend-color2 [];
+            background-color: $sxml:var-ref name=blend-color5 [];
+          ]
         ]
       ]
       $body [
@@ -91,12 +95,12 @@ subtest 'generate monochromatic color variables', {
       $!Colors.palette base-hsl='0 100 50' type=color-scheme mode=monochromatic
                        lighten=20 ncolors=6 outspec=hsl set-name=mono
       $set1 [
-        $sxml:mono-scheme-color1
-        $sxml:mono-scheme-color2
-        $sxml:mono-scheme-color3
-        $sxml:mono-scheme-color4
-        $sxml:mono-scheme-color5
-        $sxml:mono-scheme-color6
+        $sxml:var-ref name=mono-scheme-color1
+        $sxml:var-ref name=mono-scheme-color2
+        $sxml:var-ref name=mono-scheme-color3
+        $sxml:var-ref name=mono-scheme-color4
+        $sxml:var-ref name=mono-scheme-color5
+        $sxml:var-ref name=mono-scheme-color6
       ]
     ]
     EOTXT

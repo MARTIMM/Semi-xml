@@ -20,7 +20,7 @@ class Colors {
 
   #-----------------------------------------------------------------------------
   # $!Colors.colors base-rgb=<color> generates
-  # <sxml:variable name=xyz>color</sxml:variable> variables where xyz becomes
+  # <sxml:var-decl name=xyz>color</sxml:var-decl> variables where xyz becomes
   # one of base-color, ....
   # The namespace xmlns:sxml="github:MARTIMM" is placed on top level element
   # and removed later when document is ready.
@@ -124,7 +124,7 @@ note "X: $attrs.perl()";
     my Str $output-spec = ($attrs<outspec>//'rgbhex').Str;
 
     # create a variable for the base color
-    my $bce = append-element( $parent, 'sxml:variable', %(:name<base-color>));
+    my $bce = append-element( $parent, 'sxml:var-decl', %(:name<base-color>));
     append-element( $bce, :text(self!output-spec( $base-color, $output-spec)));
 
     # create a variable for each color
@@ -132,7 +132,7 @@ note "X: $attrs.perl()";
     for @$color-set -> $color {
       my Str $name = [~] (?$set-name ?? "$set-name-" !! ''),
                      $oper-name, '-', $color-name, $color-count++;
-      my XML::Element $e = append-element( $parent, 'sxml:variable', %(:$name));
+      my XML::Element $e = append-element( $parent, 'sxml:var-decl', %(:$name));
       append-element( $e, :text(self!output-spec( $color, $output-spec)));
     }
 
