@@ -101,24 +101,59 @@ subtest 'empty map-to path', {
 }
 
 #-------------------------------------------------------------------------------
+subtest 'closing / no self closing', {
+  my Str $text = Q:to/EOXML/;
+    $x [
+      $abc
+      $def
+      $y [
+        $sxml:remap map-to=/x/z1 [ $abc ]
+        $sxml:remap map-to=/x/z2 [ $def ]
+      ]
+      $z1
+      $z2
+    ]
+    EOXML
+
+  my Str $xml-text = get-text($text);
+  diag $xml-text;
+  like $xml-text, /'<x><abc/><def></def>'/, 'abc self close, def is not';
+  like $xml-text, /'<z1><abc/></z1>'/, 'abc self close, after remap';
+  like $xml-text, /'<z2><def></def></z2>'/, 'def not self closing after remap';
+  like $xml-text, /'<y/><z1>'/, 'y is now empty';
+}
+
+#-------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
 
   my SemiXML::Sxml $x .= new;
-  $x.parse(
-    config => {
-      ML => {
-        :colors<SxmlLib::Colors>,
-        :css<SxmlLib::Css>,
-      }
-    },
-    :$content
-  );
+  $x.parse(:$content);
 
-  # See the result
+  # see the result
   my Str $xml-text = ~$x;
   #diag $xml-text;
 
   XML::XPath.new(:xml($xml-text))
+}
+
+#-------------------------------------------------------------------------------
+sub get-text ( Str $content --> Str ) {
+
+  my SemiXML::Sxml $x .= new;
+  $x.parse(
+    config => {
+      C => {
+        xml => { :!xml-show }
+      },
+      F => {
+        self-closing => [<abc y>],
+      },
+    },
+    :$content
+  );
+
+  # return result
+  ~$x
 }
 
 #-------------------------------------------------------------------------------

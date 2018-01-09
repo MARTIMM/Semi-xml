@@ -11,8 +11,6 @@ use XML::XPath;
 #-------------------------------------------------------------------------------
 class SxmlHelper {
 
-  #my $local-action;
-
   #-----------------------------------------------------------------------------
 #TODO $config should come indirectly from $!refined-config
   multi sub save-xml (
@@ -240,42 +238,52 @@ class SxmlHelper {
     $x.set-namespace: 'sxml' => 'github.MARTIMM';
 
     # look for variable declarations
-    for $x.find( '//sxml:variable', :to-list) -> $vdecl {
+    for $x.find( '//sxml:var-decl', :to-list) -> $vdecl {
+#note "\nDeclaration: $vdecl";
 
       # get the name of the variable
       my Str $var-name = ~$vdecl.attribs<name>;
+#note "Name: $var-name";
 
-      # and the content of this declaration
-      my @var-value = $vdecl.nodes;
+#      # and the content of this declaration
+#      my Array $var-value = $vdecl.nodes;
 
       # see if it is a global declaration
       my Bool $var-global = $vdecl.attribs<global>:exists;
+#note "Global: $var-global";
 
       # now look for the variable to substitute
-      my @var-use;
+      my Array $var-use;
       if $var-global {
-        @var-use = $x.find( '//sxml:' ~ $var-name, :to-list);
+        $var-use = [ $x.find(
+            '//sxml:var-ref[@name="' ~ $var-name ~ '"]', :to-list
+          );
+        ]
       }
 
       else {
-#note "Parent: $vdecl.parent()";
-#note "search for './/sxml:$var-name'";
-        @var-use = $x.find(
-          './/sxml:' ~ $var-name, :start($vdecl.parent), :to-list
-        );
+        $var-use = [ $x.find(
+            './/sxml:var-ref[@name="' ~ $var-name ~ '"]',
+            :start($vdecl.parent), :to-list
+          );
+        ]
       }
+#note "Search for 'sxml:var-ref[\@name=\"$var-name\"]";
 
-      for @var-use -> $vuse {
+      for @$var-use -> $vuse {
+#note "RN P0: $vuse.parent()";
         for $vdecl.nodes -> $vdn {
-          my XML::Node $x = clone-node($vdn);
-          $vuse.parent.before( $vuse, $x);
+          # insert cloned node just before the variable ref
+          $vuse.before(clone-node( $vuse.parent, $vdn));
         }
+#note "RN P1: $vuse.parent()";
 
-        # the variable is substituted, remove the element
+        # the variable declaration is substituted in all references,
+        # remove the element
         $vuse.remove;
       }
 
-      # all variable are substituted, remove declaration too, unless it is
+      # all variables are substituted, remove declaration too, unless it is
       # defined global. Other parts may have been untouched.
       $vdecl.remove unless $var-global;
     }
@@ -285,38 +293,48 @@ class SxmlHelper {
   }
 
   #-----------------------------------------------------------------------------
-  sub clone-node ( XML::Node $node --> XML::Node ) is export {
+  # clone given node
+  sub clone-node (
+    XML::Element $new-parent, XML::Node $node --> XML::Node
+  ) is export {
+
+#note "  Clone parent: $new-parent.name()";
+#note "  Clone the node: $node";
 
     my XML::Node $clone;
 
+    # if an element must be cloned, clone everything recursively
     if $node ~~ XML::Element {
 
-#note "Node is element, name: $node.name()";
+#note "  Node is an element, name: $node.name()";
       $clone = XML::Element.new( :name($node.name), :attribs($node.attribs));
       $clone.idattr = $node.idattr;
 
       $clone.nodes = [];
       for $node.nodes -> $n {
-        $clone.nodes.push: clone-node($n);
+        $clone.append(clone-node( $clone, $n));
       }
     }
 
     elsif $node ~~ XML::Text {
-#note "Node is text";
+#note "  Node is XML text";
       $clone = XML::Text.new(:text($node.text));
     }
 
     elsif $node ~~ SemiXML::Text {
-#note "Node is text";
-      $clone = SemiXML::Text.new(:text($node.txt));
+#note "  Node is SemiXML text";
+      $clone = XML::Text.new(:text($node.txt));
     }
 
     else {
-#note "Node is ", $node.WHAT;
+#note "  Node is a", $node.WHAT;
       $clone = $node.cloneNode;
     }
 
-#note "Clone: ", $clone.perl;
+    # set the parent right
+    #$clone.parent = $new-parent;
+
+#note "  Cloned to: $clone";
     $clone
   }
 
@@ -349,32 +367,35 @@ class SxmlHelper {
         die "node '$map-to' to map to, not found" unless ? $n;
         if ?$as {
           my $top-node = XML::Element.new(:name($as));
-          $top-node.insert($_) for $remap.nodes.reverse;
           $n.append($top-node);
+          #$top-node.insert($_) for $remap.nodes.reverse;
+          append-in( $remap, $top-node);
         }
 
         else {
-          my XML::Element $hook = after-element( $n, 'sxml:hook');
-          $hook.after($_) for $remap.nodes.reverse;
-          $hook.remove;
+          #my XML::Element $hook = after-element( $n, 'sxml:hook');
+          #$hook.after($_) for $remap.nodes.reverse;
+          #$hook.remove;
+          append-in( $remap, $n);
         }
       }
 
       elsif ? $map-after {
-note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
         # if more nodes are found take only the first one
         my $n = $x.find( $map-after, :to-list)[0];
         die "node '$map-after' to map after, not found" unless ? $n;
         if ?$as {
           my $top-node = XML::Element.new(:name($as));
-          $top-node.insert($_) for $remap.nodes.reverse;
           $n.after($top-node);
+          #$top-node.insert($_) for $remap.nodes.reverse;
+          append-in( $remap, $top-node);
         }
 
         else {
-          my XML::Element $hook = after-element( $n, 'sxml:hook');
-          $hook.after($_) for $remap.nodes.reverse;
-          $hook.remove;
+          #my XML::Element $hook = after-element( $n, 'sxml:hook');
+          #$hook.after($_) for $remap.nodes.reverse;
+          #$hook.remove;
+          append-after( $remap, $n);
         }
       }
 
@@ -390,22 +411,39 @@ note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
   }
 
   #-----------------------------------------------------------------------------
+  sub append-in ( XML::Element $from, XML::Element $in) {
+
+    my XML::Element $hook .= new(:name('sxml:hook'));
+    $in.append($hook);
+    $hook.after($_) for $from.nodes.reverse;
+    $hook.remove;
+  }
+
+  #-----------------------------------------------------------------------------
+  sub append-after ( XML::Element $from, XML::Element $in) {
+
+    my XML::Element $hook .= new(:name('sxml:hook'));
+    $in.after($hook);
+    $hook.after($_) for $from.nodes.reverse;
+    $hook.remove;
+  }
+
+  #-----------------------------------------------------------------------------
   sub escape-attr-and-elements (
     XML::Node $node,
-    #$action is copy where .^name eq 'SemiXML::Actions' = $local-action
   ) is export {
 
     my SemiXML::Globals $globals .= instance;
 
-    # when called from Action $action is set, otherwise it was from the
-    # recursive call. this saves some stack space.
-    #$local-action = $action if ?$action;
-
-    # process body text to escape special chars
+    # process body text to escape special chars. we can process this always
+    # because parent elements are already accepted to process escaping of some
+    # characters.
+#note "\nNode: $node";
 
     if $node ~~ any( SemiXML::Text, XML::Text) {
       my Str $s = process-esc(~$node);
-      $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
+      my XML::Node $p = $node.parent;
+      $p.replace( $node, SemiXML::Text.new(:text($s)));
     }
 
     elsif $node ~~ XML::Element {
@@ -414,22 +452,29 @@ note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
       my Array $no-escaping =
          $globals.refined-tables<F><no-escaping> // [];
 
-#note "Ftab: $node.name()";#, $self-closing, $no-escaping;
+#note "Ftab: $node.name(), ", $self-closing, ', ', $no-escaping;
       # Check for self closing tag, and if so remove content if any
       if $node.name ~~ any(@$self-closing) {
+#note "$node.name() = self closing";
+
+        # make a new empty element with the same tag-name and then remove the
+        # original element.
         before-element( $node, $node.name, $node.attribs);
         $node.remove;
 
-        # return because there are no child elements left to recurse
+        # return because there are no child elements left to call recursively
         return;
       }
 
       else {
+#note "$node.name() = not self closing";
+#note "Nodes: $node.nodes.elems(), ", $node.nodes.join(', ');
         # ensure that there is at least a text element as its content
         # otherwise XML will make it self-closing
         unless $node.nodes.elems {
           append-element( $node, :text(''));
         }
+#note "Nodes: $node.nodes.elems(), ", $node.nodes.join(', ');
       }
 
       # some elements mast not be processed to escape characters
@@ -439,7 +484,7 @@ note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
         return;
       }
 
-      # no processing for these kinds of nodes
+      # no processing either for nodes in the SemiXML namespace
       if $node.name ~~ m/^ 'sxml:' / {
         return;
       }
@@ -481,7 +526,6 @@ note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
   #-----------------------------------------------------------------------------
   sub check-inline (
     XML::Element $parent,
-    #$action is copy where .^name eq 'SemiXML::Actions'
   ) is export {
 
     my SemiXML::Globals $globals .= instance;
@@ -604,6 +648,7 @@ note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
   #-----------------------------------------------------------------------------
   # remove leftovers from sxml namespace
   sub remove-sxml ( XML::Element $parent ) is export {
+    my SemiXML::Globals $globals .= instance;
 
     # get xpath object
     my XML::Document $xml-document .= new($parent);
@@ -616,7 +661,10 @@ note "\nFind:\n", $x.find( '/html/head', :to-list)[0];
     # drop some leftover sxml namespace elements
     for $x.find( '//*', :to-list) -> $v {
       if $v.name() ~~ /^ 'sxml:'/ {
-        note "Leftover in sxml namespace removed: '$v.name()', parent is '$v.parent.name()'";
+        note "Leftover in sxml namespace removed: '$v.name()',",
+             " parent is '$v.parent.name()'"
+          if $globals.trace and $globals.refined-tables<T><parse>;
+
         $v.remove;
       }
     }

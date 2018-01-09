@@ -1,5 +1,4 @@
 use v6;
-use lib 'lib';
 
 use Test;
 use SemiXML::Sxml;
@@ -11,11 +10,11 @@ subtest 'variables', {
   my $text = q:to/EOTXT/;
     $html [
       #$!SxmlCore.var name=aCommonText [ $strong [Lorem ipsum dolor simet ...] ]
-      $sxml:variable name=aCommonText [ $strong [Lorem ipsum dolor simet ...] ]
+      $sxml:var-decl name=aCommonText [ $strong [Lorem ipsum dolor simet ...] ]
       $body [
         $h1 id=h1001 [ Introduction ]
-        $p [ $sxml:aCommonText ]
-        $ul [ $li [ $sxml:aCommonText ] ]
+        $p [ $sxml:var-ref name=aCommonText ]
+        $ul [ $li [ $sxml:var-ref name=aCommonText ] ]
       ]
     ]
     EOTXT
@@ -25,7 +24,7 @@ subtest 'variables', {
 
   # See the result
   my Str $xml-text = ~$x;
-  #diag $xml-text;
+  diag $xml-text;
 
   my XML::XPath $p .= new(:xml($xml-text));
 
@@ -36,7 +35,6 @@ subtest 'variables', {
   is $p.find( '//ul/li/strong/text()', :to-list)[0].text(),
      'Lorem ipsum dolor simet ...',
      'Found 2nd substitution';
-
 }
 
 #-------------------------------------------------------------------------------
@@ -46,7 +44,7 @@ subtest 'undeclared variable', {
     $html [
       $body [
         $h1 id=h1001 [ Introduction ]
-        $p [ $sxml:someCommonText ]
+        $p [ $sxml:var-use name=someCommonText ]
       ]
     ]
     EOTXT
@@ -56,12 +54,12 @@ subtest 'undeclared variable', {
 
   # See the result
   my Str $xml-text = ~$x;
-  #diag $xml-text;
+  diag $xml-text;
 
   my XML::XPath $p .= new(:xml($xml-text));
 
-  is ~$p.find( '//p/sxml:someCommonText', :to-list),
-     '', 'undeclared variable sxml:someCommonText removed';
+  is ~$p.find( '//p/sxml:var-use[@name="someCommonText"]', :to-list),
+     '', 'undeclared variable sxml:var-use name=someCommonText removed';
 }
 
 #-------------------------------------------------------------------------------
