@@ -74,11 +74,6 @@ class Actions {
         }
       }
 
-      # conversion to xml escapes is done as late as possible
-      escape-attr-and-elements($parent);
-      note "After esc. and table checks: $parent"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
-
       # search for variables and substitute them
       subst-variables($parent);
       note "After variable sub: $parent"
@@ -92,6 +87,11 @@ class Actions {
       # remove leftovers from sxml namespace
       remove-sxml($parent);
       note "After ns removal: $parent"
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+      # conversion to xml escapes is done as late as possible
+      escape-attr-and-elements($parent);
+      note "After esc. and table checks: $parent"
         if $!globals.trace and $!globals.refined-tables<T><parse>;
 
       # check spacing around elements
