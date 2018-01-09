@@ -140,6 +140,7 @@ class Html::Menu {
   # create a style element with the properties for a menu
   method !create-style( XML::Element $parent, Str $id, Str $class, Str $side ) {
 
+    # map the contents to the end of /html/head
     my XML::Element $remap-style = append-element(
       $parent, 'sxml:remap', { map-to => "/html/head",}
     );
