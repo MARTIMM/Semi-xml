@@ -256,7 +256,8 @@ class Actions {
     given $tt {
 
       # Any normal tag
-      when any(< $** $*| $|* $ >) {
+      #when any(< $** $*| $|* $ >) {
+      when any(< $ >) {
 
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
         note "  Tag: $tt$tag"
@@ -330,8 +331,6 @@ class Actions {
     --> XML::Element
   ) {
 
-#    my Array $comments = $match<comment>;
-#note "\nComments: ", $comments[*].join("\n");
     my Array $tag-bodies = $match<tag-body>;
     loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
@@ -364,8 +363,8 @@ class Actions {
             if $!globals.trace and $!globals.refined-tables<T><parse>;
 
           # Test if spaces are needed before the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $*| >);
+#          $parent.append(SemiXML::Text.new(:text(' ')))
+#            if $tag-ast[0] ~~ any(< $** $*| >);
 
           my $d = $_<doc-ast>;
           note "  Doc Ast: {(~$d).substr( 0, 65)} ..."
@@ -373,8 +372,8 @@ class Actions {
           $parent.append($d);
 
           # Test if spaces are needed after the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $|* >);
+#          $parent.append(SemiXML::Text.new(:text(' ')))
+#            if $tag-ast[0] ~~ any(< $** $|* >);
 
           note "  Result: {(~$parent).substr( 0, 66)} ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
@@ -427,7 +426,8 @@ class Actions {
       $attrs{$a<attr-key>.Str} = $av;
     }
 
-    if $symbol ~~ any(< $** $|* $*| $ >) {
+#    if $symbol ~~ any(< $** $|* $*| $ >) {
+    if $symbol ~~ any(< $ >) {
 
       my $tn = $match<tag><tag-name>;
       $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';

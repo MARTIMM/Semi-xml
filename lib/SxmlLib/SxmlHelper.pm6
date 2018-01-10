@@ -368,14 +368,10 @@ class SxmlHelper {
         if ?$as {
           my $top-node = XML::Element.new(:name($as));
           $n.append($top-node);
-          #$top-node.insert($_) for $remap.nodes.reverse;
           append-in( $remap, $top-node);
         }
 
         else {
-          #my XML::Element $hook = after-element( $n, 'sxml:hook');
-          #$hook.after($_) for $remap.nodes.reverse;
-          #$hook.remove;
           append-in( $remap, $n);
         }
       }
@@ -387,14 +383,10 @@ class SxmlHelper {
         if ?$as {
           my $top-node = XML::Element.new(:name($as));
           $n.after($top-node);
-          #$top-node.insert($_) for $remap.nodes.reverse;
           append-in( $remap, $top-node);
         }
 
         else {
-          #my XML::Element $hook = after-element( $n, 'sxml:hook');
-          #$hook.after($_) for $remap.nodes.reverse;
-          #$hook.remove;
           append-after( $remap, $n);
         }
       }
@@ -429,28 +421,35 @@ class SxmlHelper {
   }
 
   #-----------------------------------------------------------------------------
+  sub apply-f-table ( XML::Node $node ) is export {
+    #clean-text($node);
+    escape-attr-and-elements($node);
+    check-inline($node);
+  }
+
+  #-----------------------------------------------------------------------------
   sub escape-attr-and-elements (
-    XML::Node $node,
-  ) is export {
+    XML::Node $node, Bool :$space-preserve is copy
+  ) {
 
     my SemiXML::Globals $globals .= instance;
 
     # process body text to escape special chars. we can process this always
-    # because parent elements are already accepted to process escaping of some
-    # characters.
-#note "\nNode: $node";
-
+    # because parent elements are already accepted to modify the content.
     if $node ~~ any( SemiXML::Text, XML::Text) {
-      my Str $s = process-esc(~$node);
+      my Str $s = process-esc( ~$node, :$space-preserve);
       my XML::Node $p = $node.parent;
       $p.replace( $node, SemiXML::Text.new(:text($s)));
     }
 
     elsif $node ~~ XML::Element {
-      my Array $self-closing =
+      my Array $self-closing :=
          $globals.refined-tables<F><self-closing> // [];
-      my Array $no-escaping =
+      my Array $no-escaping :=
          $globals.refined-tables<F><no-escaping> // [];
+
+      $space-preserve =
+        $node.name ~~ any(@($globals.refined-tables<F><space-preserve> // []));
 
 #note "Ftab: $node.name(), ", $self-closing, ', ', $no-escaping;
       # Check for self closing tag, and if so remove content if any
@@ -490,14 +489,14 @@ class SxmlHelper {
       }
 
       # recurively process through child elements
-      escape-attr-and-elements($_) for $node.nodes;
+      escape-attr-and-elements( $_, :$space-preserve) for $node.nodes;
     }
   }
 
   #-----------------------------------------------------------------------------
   # Substitute some escape characters in entities and remove the remaining
   # backslashes.
-  sub process-esc ( Str $esc is copy --> Str ) {
+  sub process-esc ( Str $esc is copy, :$space-preserve --> Str ) {
 
     # Entity must be known in the xml result!
     $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;
@@ -506,6 +505,45 @@ class SxmlHelper {
     $esc ~~ s:g/ '>' /\&gt;/;
 
     $esc ~~ s:g/'\\'//;
+
+    # remove comments
+    $esc ~~ s/^^ \s* '#' \N* \n//;
+
+    # remove trailing spaces at every line
+    $esc ~~ s:g/ \h+ $$ //;
+
+    # remove leading spaces for the minimum number of spaces when the content
+    # should be fixed
+    if $space-preserve {
+      my Int $min-indent = 1_000_000_000;
+      for $esc.lines -> $line {
+        $line ~~ m/^ $<indent>=(\s*) /;
+        my Int $c = $/<indent>.Str.chars;
+
+        # adjust minimum only when there is something non-spacical on the line
+        $min-indent = $c if $line ~~ m/\S/ and $c < $min-indent;
+      }
+
+      my $new-t = '';
+      my Str $indent = ' ' x $min-indent;
+      for $esc.lines {
+        my $l = $^line;
+        $l ~~ s/^ $indent//;
+        $new-t ~= "$l\n";
+      }
+      $esc = $new-t;
+    }
+
+    else {
+      # remove leading spaces at begin of text
+      $esc ~~ s/^ \s+ //;
+
+      # substitute multiple spaces with one space
+      $esc ~~ s:g/ \s\s+ / /;
+
+      # remove return characters if found
+      $esc ~~ s:g/ \n+ / /;
+    }
 
 #`{{
     # Remove rest of the backslashes unless followed by hex numbers prefixed
@@ -520,13 +558,11 @@ class SxmlHelper {
     }
 }}
 
-    return $esc;
+    $esc
   }
 
   #-----------------------------------------------------------------------------
-  sub check-inline (
-    XML::Element $parent,
-  ) is export {
+  sub check-inline ( XML::Element $parent ) {
 
     my SemiXML::Globals $globals .= instance;
 
@@ -644,6 +680,44 @@ class SxmlHelper {
     # remove the namespace
     $parent.attribs{"xmlns:sxml"}:delete;
   }
+
+#`{{
+  #-----------------------------------------------------------------------------
+  sub clean-text ( XML::Node $node ) {
+
+    state SemiXML::Globals $globals .= instance;
+
+    # check every element for its contents.
+    if $v.name ~~ any(@($globals.refined-tables<F><inline> // []))
+         and $v.nodes.elems {
+
+note "CI: $v.name()";
+        if $v.nodes[0] ~~ XML::Text {
+          my XML::Text $t = $v.nodes[0];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.insert($t);
+        }
+
+        elsif $v.nodes[0] ~~ SemiXML::Text {
+          my XML::Text $t = $v.nodes[0];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.insert($t);
+        }
+      }
+    }
+
+
+    # remove the namespace
+    $parent.attribs{"xmlns:sxml"}:delete;
+
+  }
+}}
 
   #-----------------------------------------------------------------------------
   # remove leftovers from sxml namespace

@@ -21,16 +21,14 @@ grammar Grammar {
   # Possible comments outside toplevel document
   rule TOP {
     <.init-doc>
-    <.comment>*         # Needed to make empty lines between comments possible.
-                        # Only here is needed body*-contents is taking care for
-                        # the rest.
+    <.prelude>          # Any number of characters except a '$'
     [ <?> {
         note "\n", '-' x 80, "\nParse document\n", $/.orig.Str.substr( 0, 80),
              "\n " if $globals.trace and $globals.refined-tables<T><parse>;
       }
       <document>
     ]
-    <.comment>*
+    <.post>             # drop remaining characters
   }
 
   # Rule to pop the current bottomlevel element from the stack. It is not
@@ -53,9 +51,9 @@ grammar Grammar {
 
   proto token tag { * }
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
-  token tag:sym<$|*>  { <sym> <tag-name> }
-  token tag:sym<$*|>  { <sym> <tag-name> }
-  token tag:sym<$**>  { <sym> <tag-name> }
+  #token tag:sym<$|*>  { <sym> <tag-name> }
+  #token tag:sym<$*|>  { <sym> <tag-name> }
+  #token tag:sym<$**>  { <sym> <tag-name> }
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
@@ -92,17 +90,11 @@ grammar Grammar {
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
   token tag-body {
-    # Content body can have child elements. Comments starting with '#'
-    # are removed. Content is kept as it is typed in when '=' is used
-    # right at the start.
-    [ '[' ~ ']' [ $<keep-as-typed>=<[=]>? [
-#        <body-a> || <document> || <.comment> ]*
-        <body-a> || <document> ]*
-      ]
-    ] ||
+    # Content body can have child elements.
+    [ '[' ~ ']' [ $<keep-as-typed>=<[=]>? [ <body-a> || <document> ]* ] ] ||
 
-    # Content body can not have child elements. All characters like '#'
-    # and '$' remain unprocessed
+    # Content body can not have child elements. All other characters
+    # remain unprocessed
     [ '{' ~ '}' [ $<keep-as-typed>=<[=]>? <body-b> ] ] ||
 
     # Alternative for '{ ... }'
@@ -110,7 +102,6 @@ grammar Grammar {
   }
 
   # opening brackets [ and { must also be escaped. « is weird enaugh.
-#  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\#\[\]]> ]+ }
   token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]> ]+ }
   token body-b { [ <.escaped-char> || <-[\\\{\}]> ]* }
   token body-c { [ <.escaped-char> || <-[\\»]> ]* }
@@ -148,5 +139,6 @@ grammar Grammar {
     <[\x0300..\x036F]> | <[\x203F..\x2040]>
   }
 
-  token comment { \s* '#' \N* \n }
+  rule prelude { ^ <-[$]>* }
+  rule post { .* $ }
 }
