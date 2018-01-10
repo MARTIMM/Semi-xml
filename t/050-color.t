@@ -64,7 +64,7 @@ subtest 'generated blended color variables', {
                        type=blended mode=hard
       $head [
         $style [
-          strong [
+          $strong [
             color: $sxml:var-ref name=base-color [];
             border-color: $sxml:var-ref name=blend-color2 [];
             background-color: $sxml:var-ref name=blend-color5 [];
@@ -80,9 +80,10 @@ subtest 'generated blended color variables', {
 
   my XML::XPath $p = get-xpath($text);
 
-  my Str $style-text = $p.find( '//style/text()', :to-list)[0].text;
+  my Str $style-text = $p.find( '//style/strong/text()', :to-list)[0].text;
   like $style-text, /:i 'color:#1200ffff;' /, 'Found base color';
-  like $style-text, /:i 'border-color:#' <xdigit>**8 ';' /, 'Found border color';
+  like $style-text, /:i 'border-color:#' <xdigit>**8 ';' /,
+       'Found border color';
   like $style-text, /:i 'background-color:#' <xdigit>**8 ';' /,
        'Found background color';
 }
@@ -92,7 +93,7 @@ subtest 'generate monochromatic color variables', {
 
   my $text = q:to/EOTXT/;
     $x [
-      $!Colors.palette base-hsl='0 100 50' type=color-scheme mode=monochromatic
+      $!Colors.palette base-hsl=<0 100 50> type=color-scheme mode=monochromatic
                        lighten=20 ncolors=6 outspec=hsl set-name=mono
       $set1 [
         $sxml:var-ref name=mono-scheme-color1
@@ -127,7 +128,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 
   # See the result
   my Str $xml-text = ~$x;
-  #diag $xml-text;
+  diag $xml-text;
 
   XML::XPath.new(:xml($xml-text))
 }
