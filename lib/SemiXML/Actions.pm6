@@ -50,6 +50,9 @@ class Actions {
 
     my $parent = $match<document>.made;
 
+#note "Raw: $!globals.raw()";
+#note "\n$parent";
+#exit(0);
     unless $!globals.raw {
       drop-parent-container($parent);
 
@@ -89,6 +92,11 @@ class Actions {
       note "After ns removal: $parent"
         if $!globals.trace and $!globals.refined-tables<T><parse>;
 
+      # process everything and modify according to the F-Table
+      apply-f-table($parent);
+      note "After applying the F-Table: $parent"
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
+#`{{
       # conversion to xml escapes is done as late as possible
       escape-attr-and-elements($parent);
       note "After esc. and table checks: $parent"
@@ -98,7 +106,7 @@ class Actions {
       check-inline($parent);
       note "After inline check: $parent"
         if $!globals.trace and $!globals.refined-tables<T><parse>;
-
+}}
       note '-' x 80
         if $!globals.trace and $!globals.refined-tables<T><parse>;
     }
@@ -322,7 +330,8 @@ class Actions {
     --> XML::Element
   ) {
 
-    my Array $comments = $match<comment>;
+#    my Array $comments = $match<comment>;
+#note "\nComments: ", $comments[*].join("\n");
     my Array $tag-bodies = $match<tag-body>;
     loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
@@ -476,20 +485,23 @@ class Actions {
         when 'body-a' {
           note "  body a: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-          $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+          #$ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+          $ast.push: $v.Str;
         }
 
         #
         when 'body-b' {
           note "  body b: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-          $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+          #$ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+          $ast.push: $v.Str;
         }
 
         when 'body-c' {
           note "  body c: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-          $ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+          #$ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
+          $ast.push: $v.Str;
         }
 
         when 'document' {
@@ -539,6 +551,7 @@ class Actions {
     }
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   method !clean-text (
     Str $t is copy, Bool :$fixed = False, Bool :$comment = True
@@ -590,7 +603,7 @@ class Actions {
 
     $t;
   }
-
+}}
   #-----------------------------------------------------------------------------
   method !current-state ( Match $match, Str $state ) {
 

@@ -25,8 +25,8 @@ grammar Grammar {
                         # Only here is needed body*-contents is taking care for
                         # the rest.
     [ <?> {
-      note "\n", '-' x 80, "\nParse document\n", $/.orig.Str.substr( 0, 80),
-           "\n " if $globals.trace and $globals.refined-tables<T><parse>;
+        note "\n", '-' x 80, "\nParse document\n", $/.orig.Str.substr( 0, 80),
+             "\n " if $globals.trace and $globals.refined-tables<T><parse>;
       }
       <document>
     ]
@@ -96,7 +96,8 @@ grammar Grammar {
     # are removed. Content is kept as it is typed in when '=' is used
     # right at the start.
     [ '[' ~ ']' [ $<keep-as-typed>=<[=]>? [
-        <body-a> || <document> || <.comment> ]*
+#        <body-a> || <document> || <.comment> ]*
+        <body-a> || <document> ]*
       ]
     ] ||
 
@@ -109,15 +110,16 @@ grammar Grammar {
   }
 
   # opening brackets [ and { must also be escaped. « is weird enaugh.
-  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\#\[\]]> ]+ }
+#  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\#\[\]]> ]+ }
+  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]> ]+ }
   token body-b { [ <.escaped-char> || <-[\\\{\}]> ]* }
   token body-c { [ <.escaped-char> || <-[\\»]> ]* }
 
   token escaped-char { '\\' . }
 
-  # entities must be parsed separately because some of them can use a
-  # use a '#' which interferes with the comment start. This is only
-  # necessary in the normal block 'body-a'
+  # entities must be parsed separately because some of them can
+  # use a '#' which interferes with the comment start. This is
+  # only necessary in the normal block 'body-a'
   token entity          { '&' <-[;]>+ ';' }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
