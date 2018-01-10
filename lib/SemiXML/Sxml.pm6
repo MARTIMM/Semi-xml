@@ -219,8 +219,8 @@ class Sxml {
   method Str ( --> Str ) {
     my Str $text = self.get-xml-text;
 
-    # substitute back all single quotes. it is never a problem to
-    # have them escaped
+    # substitute back all single quotes. it is never a problem that it needs
+    # to be escaped
     $text ~~ s:g/'&#39;'/'/;
 
     $text
