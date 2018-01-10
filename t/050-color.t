@@ -68,6 +68,8 @@ subtest 'generated blended color variables', {
             color: $sxml:var-ref name=base-color [];
             border-color: $sxml:var-ref name=blend-color2 [];
             background-color: $sxml:var-ref name=blend-color5 [];
+
+            color is thus $sxml:var-ref name=blend-color5 [].
           ]
         ]
       ]
@@ -86,6 +88,8 @@ subtest 'generated blended color variables', {
        'Found border color';
   like $style-text, /:i 'background-color:#' <xdigit>**8 ';' /,
        'Found background color';
+  like $style-text, /:i 'color is thus#' <xdigit>**8 '.' /,
+       'Found background color somewhere else';
 }
 
 #-------------------------------------------------------------------------------
@@ -128,7 +132,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 
   # See the result
   my Str $xml-text = ~$x;
-  diag $xml-text;
+  #diag $xml-text;
 
   XML::XPath.new(:xml($xml-text))
 }

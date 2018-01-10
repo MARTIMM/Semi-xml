@@ -21,7 +21,7 @@ class Css {
     # put everything into a style variable to prevent any escape substitutions
 #`{{
     my XML::Element $var = append-element(
-      $parent, 'sxml:variable', {name => 'style'}
+      $parent, 'sxml:var-decl', {name => 'style'}
     );
     my XML::Element $style = append-element( $var, 'style', :text("\n"));
     append-element( $parent, 'sxml:style');

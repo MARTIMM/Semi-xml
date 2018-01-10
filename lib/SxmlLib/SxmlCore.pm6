@@ -123,16 +123,16 @@ class SxmlCore {
   }
 
   #-----------------------------------------------------------------------------
-  # $!SxmlCore.var name=xyz [<data>] generates
-  # <sxml:variable name=xyz name="aCommonText">...</sxml:variable>
+  # $!SxmlCore.var-decl name=xyz [<data>] generates
+  # <sxml:var-decl name=xyz name="aCommonText">...</sxml:var-decl>
   # namespace xmlns:sxml="github:MARTIMM" is placed on top level element
   # and removed later when document is ready.
-  method var (
+  method var-decl (
     XML::Element $parent, Hash $attrs, XML::Node :$content-body
     --> XML::Node
   ) {
 
-    my $e = append-element( $parent, 'sxml:variable', %$attrs);
+    my $e = append-element( $parent, 'sxml:var-decl', %$attrs);
     $e.append($content-body);
 
     $parent

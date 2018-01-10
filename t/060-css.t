@@ -17,11 +17,11 @@ subtest 'generated blended color variables', {
 
           $!css.b s='.infobox >' [
             $!css.b s=.message [
-              border: 1px solid $*|sxml:blend-color1;
+              border: 1px solid $*|sxml:var-ref name=blend-color1;
               padding: 10px;
 
               $!css.b s='> .title' [
-                color: $sxml:blend-color5;
+                color: $sxml:var-ref name=blend-color5;
               ]
             ]
             $!css.b s=.user [

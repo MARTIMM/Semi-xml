@@ -8,13 +8,14 @@ $html [
     $!css.style compress=0 [
       $!css.reset type=condensed-universal
 
-      # generate names like 'mono-scheme-color1'
-      $!colors.palette base-hsl='180 100 50' type=color-scheme mode=monochromatic
-                       lighten=15 ncolors=6 outspec=rgbhex set-name=mono
+      /* generate names like 'mono-scheme-color1' */
+      $!colors.palette base-hsl='180 100 50' type=color-scheme
+                       mode=monochromatic lighten=15 ncolors=6
+                       outspec=rgbhex set-name=mono
 
       $!css.b s=body [
       	background: white;
-      	color: $sxml:mono-scheme-color2;
+      	color: $sxml:var-ref name=mono-scheme-color2;
       	font: 12px/1.5 'segoe ui', 'lucida sans unicode', 'lucida grande', lucida, sans-serif;
       ]
 
@@ -34,7 +35,7 @@ $html [
       $!css.b s='#topbg' [
       	position: absolute; top: 0; left: 0; z-index: -1;
       	width: 100%; height: 143px;
-      	background: $sxml:mono-scheme-color6;
+      	background: $sxml:var-ref name=mono-scheme-color6 [];
     	]
 
       /* @group Header */
@@ -42,7 +43,7 @@ $html [
       $!css.b s='#header' [
       	position: relative;
       	width: 780px; height: 130px;
-      	background: $sxml:mono-scheme-color2;
+      	background: $sxml:var-ref name=mono-scheme-color2 [];
 
         $!css.b s=h1 [
         	display: none;
@@ -51,7 +52,7 @@ $html [
         $!css.b s=.box [
         	position: absolute; top: 6px;
         	width: 75px; height: 25px;
-        	#background: silver;
+/*        	background: silver; */
       	]
 
         $!css.b s=h2 [
@@ -69,32 +70,32 @@ $html [
 
       $!css.b s='#hdr-box1' [
         left: 15px;
-        background: $*|sxml:mono-scheme-color1;
+        background: $sxml:var-ref name=mono-scheme-color1 [];
       ]
 
       $!css.b s='#hdr-box2' [
         left: 100px;
-        background: $sxml:mono-scheme-color2;
+        background: $sxml:var-ref name=mono-scheme-color2 [];
       ]
 
       $!css.b s='#hdr-box3' [
         left: 185px;
-        background: $sxml:mono-scheme-color3;
+        background: $sxml:var-ref name=mono-scheme-color3 [];
       ]
 
       $!css.b s='#hdr-box4' [
         left: 270px;
-        background: $sxml:mono-scheme-color4;
+        background: $sxml:var-ref name=mono-scheme-color4 [];
       ]
 
       $!css.b s='#hdr-box5' [
         left: 355px;
-        background: $sxml:mono-scheme-color5;
+        background: $sxml:var-ref name=mono-scheme-color5 [];
       ]
 
       $!css.b s='#hdr-box6' [
         left: 440px;
-        background: $sxml:mono-scheme-color6;
+        background: $sxml:var-ref name=mono-scheme-color6 [];
       ]
 
       /* @end */
@@ -111,8 +112,10 @@ $html [
         	float: left;
         	margin: 0; padding: 0;
         	width: 20%;
-#        	background: $sxml:mono-scheme-color2;
-#        	color: $sxml:mono-scheme-color6;
+/*
+        	background: $sxml:var-ref name=mono-scheme-color2 [];
+        	color: $sxml:var-ref name=mono-scheme-color6;
+*/
       	]
 
         $!css.b s=a [
@@ -125,8 +128,8 @@ $html [
         	text-decoration: none;
         	text-transform: uppercase;
         	text-align: center;
-        	background: $sxml:mono-scheme-color2;
-        	color: $sxml:mono-scheme-color6;
+        	background: $sxml:var-ref name=mono-scheme-color2 [];
+        	color: $sxml:var-ref name=mono-scheme-color6 [];
 
           $!css.b s=span [
           	display: block;
@@ -137,13 +140,13 @@ $html [
       	]
 
         $!css.b s='a:hover' [
-        	background: $sxml:mono-scheme-color6;
-        	color: $sxml:mono-scheme-color2;
+        	background: $sxml:var-ref name=mono-scheme-color6 [];
+        	color: $sxml:var-ref name=mono-scheme-color2;
       	]
 
         $!css.b s=a.sel [
-        	background: $sxml:mono-scheme-color3;
-        	color: $sxml:mono-scheme-color2;
+        	background: $sxml:var-ref name=mono-scheme-color3 [];
+        	color: $sxml:var-ref name=mono-scheme-color2 [];
       	]
     	]
 
@@ -152,7 +155,7 @@ $html [
       $!css.b s='#content' [
       	padding: 1px;
       	background: white;
-      	color: $sxml:mono-scheme-color1;
+      	color: $sxml:var-ref name=mono-scheme-color1 [];
 
         $!css.b s=ttl [
           font-family: monospace;
@@ -191,7 +194,7 @@ $html [
           	margin-right: 1em;
           	border: 1px solid black;
           	vertical-align: middle;
-            background: $sxml:mono-scheme-color3
+            background: $sxml:var-ref name=mono-scheme-color3 [];
         	]
       	]
 
@@ -208,22 +211,22 @@ $html [
         padding: 1px;
         width: 90px;
         height: 90px;
-#        background: $sxml:mono-scheme-color6;
+/*        background: $sxml:var-ref name=mono-scheme-color6 []; */
         border-radius: 5px;
-        border-bottom: 2px solid $sxml:mono-scheme-color1;
-        border-right: 2px solid $sxml:mono-scheme-color1;
-        border-top: 2px solid $sxml:mono-scheme-color4;
-        border-left: 2px solid $sxml:mono-scheme-color4;
+        border-bottom: 2px solid $sxml:var-ref name=mono-scheme-color1 [];
+        border-right: 2px solid $sxml:var-ref name=mono-scheme-color1 [];
+        border-top: 2px solid $sxml:var-ref name=mono-scheme-color4 [];
+        border-left: 2px solid $sxml:var-ref name=mono-scheme-color4 [];
 
         $!css.b s=svg [
           $!css.b s=path [
-#            color: $sxml:mono-scheme-color1;
-            fill: $sxml:mono-scheme-color2;
+/*            color: $sxml:var-ref name=mono-scheme-color1 []; */
+            fill: $sxml:var-ref name=mono-scheme-color2 [];
           ]
 
           $!css.b s=circle [
-#            color: $sxml:mono-scheme-color1;
-            fill: $sxml:mono-scheme-color2;
+/*            color: $sxml:var-ref name=mono-scheme-color1 []; */
+            fill: $sxml:var-ref name=mono-scheme-color2 [];
           ]
         ]
     	]
@@ -237,22 +240,22 @@ $html [
         padding: 1px;
         width: 80px;
         height: 80px;
-#        background: $sxml:mono-scheme-color6;
+/*        background: $sxml:var-ref name=mono-scheme-color6 []; */
         border-radius: 5px;
-        border-bottom: 2px solid $sxml:mono-scheme-color3;
-        border-right: 2px solid $sxml:mono-scheme-color3;
-        border-top: 2px solid $sxml:mono-scheme-color6;
-        border-left: 2px solid $sxml:mono-scheme-color6;
+        border-bottom: 2px solid $sxml:var-ref name=mono-scheme-color3 [];
+        border-right: 2px solid $sxml:var-ref name=mono-scheme-color3 [];
+        border-top: 2px solid $sxml:var-ref name=mono-scheme-color6 [];
+        border-left: 2px solid $sxml:var-ref name=mono-scheme-color6 [];
 
         $!css.b s=svg [
           $!css.b s=path [
-#           color: $sxml:mono-scheme-color1;
-            fill: $sxml:mono-scheme-color5;
+/*           color: $sxml:var-ref name=mono-scheme-color1 []; */
+            fill: $sxml:var-ref name=mono-scheme-color5 [];
           ]
 
           $!css.b s=circle [
-#           color: $sxml:mono-scheme-color1;
-            fill: $sxml:mono-scheme-color5;
+/*           color: $sxml:var-ref name=mono-scheme-color1 []; */
+            fill: $sxml:var-ref name=mono-scheme-color5 [];
           ]
         ]
     	]
@@ -331,12 +334,12 @@ $html [
       $!css.b s='#footer' [
       	margin: 10px 0 10px 0;
       	padding: 5px 0;
-#        font-size: smaller;
+/*        font-size: smaller; */
       	text-align: center;
-      	border-top: 2px solid $sxml:mono-scheme-color2;
-      	border-bottom: 2px solid $sxml:mono-scheme-color2;
-        background: $sxml:mono-scheme-color5;
-        color: $sxml:mono-scheme-color2;
+      	border-top: 2px solid $sxml:var-ref name=mono-scheme-color2 [];
+      	border-bottom: 2px solid $sxml:var-ref name=mono-scheme-color2 [];
+        background: $sxml:var-ref name=mono-scheme-color5 [];
+        color: $sxml:var-ref name=mono-scheme-color2 [];
         line-height: 15px;
 
         $!css.b s=a [
@@ -378,7 +381,9 @@ $html [
     	$div id=content [
     		$div id=left [
     			$h3 class=ttl    [ $span $!lorem.words n=1 tc=1 ]
-    			$p               [ $!lorem.standard1500 ]
+
+          # Comment lines should disapear!
+          $p               [ $!lorem.standard1500 ]
     			$dl [
     				$dt class=ttl  [ $!lorem.words n=1 tc=1 ]
     				$dd            [ $!lorem.samuel-ipsum ]
