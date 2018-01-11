@@ -521,9 +521,6 @@ class SxmlHelper {
     # remove backslashes
     $esc ~~ s:g/'\\'//;
 
-    # remove trailing spaces at every line
-    $esc ~~ s:g/ \h+ $$ //;
-
     # remove leading spaces for the minimum number of spaces when the content
     # should be fixed
     if $space-preserve {
@@ -543,18 +540,22 @@ class SxmlHelper {
         $l ~~ s/^ $indent//;
         $new-t ~= "$l\n";
       }
+
       $esc = $new-t;
     }
 
     else {
       # remove leading spaces at begin of text
-      $esc ~~ s/^ \s+ //;
+      $esc ~~ s:g/^^ \h+ //;
+
+      # remove trailing spaces at every line
+      $esc ~~ s:g/ \h+ $$//;
 
       # substitute multiple spaces with one space
       $esc ~~ s:g/ \s\s+ / /;
 
       # remove return characters if found
-      $esc ~~ s:g/ \n+ / /;
+      $esc ~~ s:g/ \n / /;
     }
 
 #`{{
