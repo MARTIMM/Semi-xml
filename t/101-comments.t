@@ -37,7 +37,7 @@ spurt( $filename, q:to/EOSX/);
 my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<xml xml>]));
 $x.parse( :$filename, :config({C => {xml => {:!xml-show}}}), :!raw);
 my Str $xml-text = ~$x;
-diag $xml-text;
+#diag $xml-text;
 
 ok $xml-text ~~ m/\<html\>/, 'Top level html found';
 ok $xml-text !~~ m/\<head\>/, 'Head not found';
