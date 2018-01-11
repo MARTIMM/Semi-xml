@@ -53,7 +53,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
         :css<SxmlLib::Css>,
       }
     },
-    :$content, :raw
+    :$content
   );
 
   # See the result
