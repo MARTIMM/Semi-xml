@@ -1,8 +1,8 @@
 # Changes in SemiXML:: * and sxml2xml
 
 * 0.46.0
-  * Comments in text are now processed at the end of the parse process.
-  * All elements are processed according to table F from the config. This means that '=' just inside the '[', '{' and '«' are not processed anymore to let the content as it is typed (`space-preserve`). Also $\*\*, $|\* and $\*| are now obsolete (`inline`). 
+  * Comments in text are now processed at the end of the parse process. Because of this, the texts in each content block is processed separately. So, the following snippet `$x [ text # comment ] $y # easy as but what` is translated into `<x>text</x><y/>`. When a **#** character is needed in the text, it can be escaped like so **\#**.
+  * All elements are processed according to table F from the configuration. This means that '=' just inside the '[', '{' and '«' are not processed anymore to let the content as it is typed (`space-preserve`). Also $\*\*, $|\* and $\*| are now obsolete (`inline`). 
 * 0.45.0
   * Added a U-table for module developers.
   * Tests are made to call a module from another one.
