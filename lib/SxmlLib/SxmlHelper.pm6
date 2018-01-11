@@ -523,6 +523,7 @@ class SxmlHelper {
 
     # remove leading spaces for the minimum number of spaces when the content
     # should be fixed
+#note "Space: '$esc'";
     if $space-preserve {
       my Int $min-indent = 1_000_000_000;
       for $esc.lines -> $line {
@@ -555,9 +556,11 @@ class SxmlHelper {
       $esc ~~ s:g/ \s\s+ / /;
 
       # remove return characters if found
-      $esc ~~ s/ \n $//;
-      $esc ~~ s:g/ \n / /;
+      $esc ~~ s/^ \n+ //;
+      $esc ~~ s/ \n+ $//;
+      $esc ~~ s:g/ \n+ / /;
     }
+#note "--> '$esc'";
 
 #`{{
     # Remove rest of the backslashes unless followed by hex numbers prefixed
