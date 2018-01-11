@@ -54,7 +54,7 @@ my Hash $config = {
 #-------------------------------------------------------------------------------
 # Parse
 my SemiXML::Sxml $x .= new( :merge, :refine([<in-fmt out-fmt>]));
-$x.parse( :filename($f1), :$config);
+$x.parse( :filename($f1), :$config, :!raw, :!keep);
 my Str $xml-text = ~$x;
 #note $xml-text;
 
