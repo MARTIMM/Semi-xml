@@ -11,13 +11,13 @@ subtest 'generated blended color variables', {
   my $text = q:to/EOTXT/;
     $html [
       $head [
-        $!css.style compress=0 [
+        $!css.style compress=0 =!map [
           $!css.reset type=condensed-universal
           $!colors.palette base-rgb='#1200ff' type=blended mode=averaged
 
           $!css.b s='.infobox >' [
             $!css.b s=.message [
-              border: 1px solid $*|sxml:var-ref name=blend-color1;
+              border: 1px solid $sxml:var-ref name=blend-color1;
               padding: 10px;
 
               $!css.b s='> .title' [
@@ -53,7 +53,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
         :css<SxmlLib::Css>,
       }
     },
-    :$content
+    :$content, :raw
   );
 
   # See the result
