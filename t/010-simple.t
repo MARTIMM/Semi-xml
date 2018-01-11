@@ -15,22 +15,13 @@ subtest 'test oneliners', {
   like $xml, /'a3="h h"'/, 'a2 attribute';
 
   throws-like(
-    { $xml = parse('$st [ $f w [] hj ]'); },
+    { $xml = parse('$st [ $f w [] hj ]');},
     X::AdHoc, 'Parse failure',
-    :message(/^ "Parse failure just after 'at the top'"/)
+    :message(/^ "Parse failure just after 'document'"/)
   );
 
   $xml = parse('$t1 [ $t2 [] $t3[]]');
   is $xml, '<t1><t2></t2><t3></t3></t1>', "nested tags: $xml";
-
-  $xml = parse('$t1 [ $**t2 [] $t3[]]');
-  is $xml, '<t1> <t2></t2> <t3></t3></t1>', "nested tags with \$**: $xml";
-
-  $xml = parse('$t1 [ $|*t2 [] $t3[]]');
-  is $xml, '<t1><t2></t2> <t3></t3></t1>', "nested tags with \$|*: $xml";
-
-  $xml = parse('$t1 [ $*|t2 [] $t3[]]');
-  is $xml, '<t1> <t2></t2><t3></t3></t1>', "nested tags with \$*|: $xml";
 }
 
 #-------------------------------------------------------------------------------

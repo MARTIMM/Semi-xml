@@ -51,9 +51,6 @@ grammar Grammar {
 
   proto token tag { * }
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
-  #token tag:sym<$|*>  { <sym> <tag-name> }
-  #token tag:sym<$*|>  { <sym> <tag-name> }
-  #token tag:sym<$**>  { <sym> <tag-name> }
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
