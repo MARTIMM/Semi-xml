@@ -79,11 +79,7 @@ class SxmlCore {
 
     # cleanup parent-containers
     drop-parent-container($content-body);
-
-    # Textify all body content
-    my Str $comment-content = [~] $content-body.nodes;
-
-    $parent.append(XML::Comment.new(:data($comment-content)));
+    $parent.append(XML::Comment.new(:data($content-body.nodes)));
     $parent
   }
 
@@ -96,11 +92,7 @@ class SxmlCore {
 
     # cleanup parent-containers
     drop-parent-container($content-body);
-
-    # Textify all body content
-    my Str $cdata-content = [~] $content-body.nodes;
-
-    $parent.append(XML::CDATA.new(:data($cdata-content)));
+    $parent.append(XML::CDATA.new(:data($content-body.nodes)));
     $parent
   }
 
@@ -111,11 +103,14 @@ class SxmlCore {
     --> XML::Node
   ) {
 
+    drop-parent-container($content-body);
     $parent.append(
       XML::PI.new(
-        :data((
-          (( ~$attrs<target> // 'no-target'), $content-body.nodes).join(' ')
-        ))
+        :data(
+          XML::Text.new(
+            :text(($attrs<target> // 'no-target').Str)
+          ), |$content-body.nodes
+        )
       )
     );
 

@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 use Test;
 use SemiXML::Sxml;
 
@@ -23,12 +23,12 @@ $html [
     $!SxmlCore.comment [ comment text $!SxmlCore.date [] ]
     $!SxmlCore.comment [ comment text $p [ data in section ] $br ]
 
-    $!SxmlCore.cdata [ cdata text ]
-    $!SxmlCore.cdata [ cdata text $!SxmlCore.date [] ]
-    $!SxmlCore.cdata [ cdata text $p [ data in section ] $br ]
+    $!SxmlCore.cdata [cdata text]
+    $!SxmlCore.cdata [cdata text $!SxmlCore.date []]
+    $!SxmlCore.cdata [cdata text $p [ data in section] $br ]
 
     $!SxmlCore.pi target=perl6 [ instruction text ]
-    $!SxmlCore.pi target=xml-stylesheet [ href="mystyle.css" type="text/css" ]
+    $!SxmlCore.pi target=xml-stylesheet [href="mystyle.css" type="text/css"]
 
     $h1 [ End of tests ]
   ]
@@ -36,39 +36,44 @@ $html [
 EOSX
 
 #-------------------------------------------------------------------------------
-my Hash $config = {};
-$config<S><test-file><fileext> = 'html';
+my Hash $config = {
+  S => { xml => { :fileext<html>, }, },
+  C => { xml => { :!xml-show, :!doctype-show, }, },
+};
 
 #-------------------------------------------------------------------------------
 # Parse
-my SemiXML::Sxml $x .= new( :!trace, :merge);
-$x.parse( :filename($f1), :$config);
+my SemiXML::Sxml $x .= new;
+$x.parse( :filename($f1), :$config, :!raw, :!keep);
 my Str $xml-text = ~$x;
-#note $xml-text;
+diag $xml-text;
 
 my $d = Date.today();
-ok $xml-text ~~ m/'<!--comment text-->'/, 'Check comments';
-like $xml-text, / :s '<!--comment text' \d**4 '-' \d\d '-' \d\d '-->'/,
+like $xml-text, /:s '<!--' comment text '-->'/, 'Check comments';
+like $xml-text, /:s '<!--' comment text \d**4 '-' \d\d '-' \d\d '-->'/,
    'Check comments with other method';
-ok $xml-text ~~ m/'<!--comment text<p>data in section</p><br/>-->'/,
+like $xml-text, /:s '<!--' comment text
+                    '<p>' data in section '</p>'
+                    '<br/>' '-->'
+                /,
    'Check comments with embedded tags';
 
-ok $xml-text ~~ m/'<![CDATA[cdata text]]>'/, 'Check cdata';
-like $xml-text, / :s '<![CDATA[cdata text' \d**4 '-' \d\d '-' \d\d ']]>'/,
+like $xml-text, /:s '<![' CDATA '[' cdata text ']]>'/, 'Check cdata';
+like $xml-text, /:s '<![' CDATA '[' cdata text \d**4 '-' \d\d '-' \d\d ']]>'/,
    'Check cdata with other method';
-ok $xml-text ~~ m/'<![CDATA[cdata text<p>data in section</p><br/>]]>'/,
-   'Check cdata with embedded tags';
+like $xml-text, /:s '<![' CDATA '[' cdata text
+                    '<p>' data in section '</p>'
+                    '<br/>' ']]>'
+                /, 'Check cdata with embedded tags';
 
-ok $xml-text ~~ m/'<?perl6 instruction text?>'/, 'Check pi data 1';
-like $xml-text, /'<?xml-stylesheet href="mystyle.css" type="text/css"?>'/,
-     'Check pi data 2';
+like $xml-text, /:s '<?' perl6 instruction text '?>'/, 'Check pi data 1';
+like $xml-text, /'<?xml-stylesheet href="mystyle.css" type="text/css"?>'
+                /, 'Check pi data 2';
 
 
 #-------------------------------------------------------------------------------
 # Cleanup
-
 unlink $f1;
 rmdir $dir;
 
 done-testing();
-exit(0);

@@ -700,9 +700,44 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   # remove leftover elements and attributes from SemiXML namespace
-  sub remove-sxml ( XML::Element $parent ) is export {
+  sub remove-sxml ( XML::Node $node ) is export {
     my SemiXML::Globals $globals .= instance;
 
+#note "T: $node";
+    if $node ~~ XML::Element {
+#note "\nE: ", $node.name;
+      if $node.name ~~ m/^ sxml \: / {
+        $node.remove;
+        return;
+      }
+
+      else {
+        for $node.attribs.keys -> $k {
+          $node.unset($k) if $k ~~ m/^ sxml \: /;
+          $node.unset($k) if $k ~~ m/^ xmlns \: sxml /;
+        }
+      }
+
+      remove-sxml($_) for $node.nodes;
+    }
+
+    elsif $node ~~ XML::Comment {
+#note "\nC: ", $node.data[*].join('; ');
+      remove-sxml($_) for $node.data;
+    }
+
+    elsif $node ~~ XML::PI {
+#note "\nP: ", $node.data;
+      remove-sxml($_) for $node.data;
+    }
+
+    if $node ~~ XML::CDATA {
+#note "\nCD: ", $node.data;
+      remove-sxml($_) for $node.data;
+    }
+
+
+#`{{
     # get xpath object
     my XML::Document $xml-document .= new($parent);
     $parent.setNamespace( 'github.MARTIMM', 'sxml');
@@ -730,5 +765,7 @@ class SxmlHelper {
 
     # remove the namespace declaration
     $parent.unset("xmlns:sxml");
+}}
+
   }
 }
