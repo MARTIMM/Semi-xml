@@ -30,8 +30,6 @@ sub MAIN (
   Bool :$raw = False
 ) {
 
-  my SemiXML::Sxml $x .= new(
-    :refine([ $in, $out]), :$force, :$trace, :$keep
-  );
-  $x.save if $x.parse( :$filename, :$raw);
+  my SemiXML::Sxml $x .= new(:refine([ $in, $out]));
+  $x.save if $x.parse( :$filename, :$raw, :$force, :$trace, :$keep);
 }

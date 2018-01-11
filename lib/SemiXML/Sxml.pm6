@@ -44,10 +44,7 @@ class Sxml {
   has SemiXML::Globals $!globals;
 
   #-----------------------------------------------------------------------------
-  submethod BUILD (
-    Array :$!refine = [<xml xml>], Bool :$!force = False,
-    Bool :$!trace = False, Bool :$!keep = False
-  ) {
+  submethod BUILD ( Array :$!refine = [<xml xml>] ) {
 
     $!globals .= instance;
 
@@ -64,7 +61,9 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   multi method parse (
-    Str:D :$!filename!, Hash :$config, Bool :$raw = False
+    Str:D :$!filename!, Hash :$config,
+    Bool :$raw = False, Bool :$!force = False,
+    Bool :$!trace = False, Bool :$!keep = False
     --> Bool
   ) {
 
@@ -90,8 +89,9 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   multi method parse (
-    Str:D :$content! is copy, Hash :$config,
-    Bool :$!drop-cfg-filename = True, Bool :$raw = False
+    Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
+    Bool :$raw = False, Bool :$!force = False,
+    Bool :$!trace = False, Bool :$!keep = False
     --> Bool
   ) {
 
