@@ -184,9 +184,7 @@ class SxmlHelper {
   }
 
   #-----------------------------------------------------------------------------
-  sub std-attrs (
-    XML::Element $node, Hash $attributes
-  ) is export {
+  sub std-attrs ( XML::Element $node, Hash $attributes ) is export {
 
     return unless ?$attributes;
 
@@ -429,7 +427,8 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   sub escape-attr-and-elements (
-    XML::Node $node, Bool :$space-preserve is copy
+    XML::Node $node, Bool :$space-preserve is copy = False,
+    Bool :$comment-preserve is copy = False
   ) {
 
     my SemiXML::Globals $globals .= instance;
@@ -437,7 +436,7 @@ class SxmlHelper {
     # process body text to escape special chars. we can process this always
     # because parent elements are already accepted to modify the content.
     if $node ~~ any( SemiXML::Text, XML::Text) {
-      my Str $s = process-esc( ~$node, :$space-preserve);
+      my Str $s = cleanup-text( ~$node, :$space-preserve, :$comment-preserve);
       my XML::Node $p = $node.parent;
       $p.replace( $node, SemiXML::Text.new(:text($s)));
     }
@@ -449,7 +448,12 @@ class SxmlHelper {
          $globals.refined-tables<F><no-escaping> // [];
 
       $space-preserve =
-        $node.name ~~ any(@($globals.refined-tables<F><space-preserve> // []));
+        ( $globals.keep or $node.name ~~ any(
+            @($globals.refined-tables<F><space-preserve> // [])
+          )
+        );
+
+      $comment-preserve = $node.attribs<sxml:content> ~~ any([<B C>]);
 
 #note "Ftab: $node.name(), ", $self-closing, ', ', $no-escaping;
       # Check for self closing tag, and if so remove content if any
@@ -489,25 +493,33 @@ class SxmlHelper {
       }
 
       # recurively process through child elements
-      escape-attr-and-elements( $_, :$space-preserve) for $node.nodes;
+      escape-attr-and-elements(
+        $_, :$space-preserve, :$comment-preserve
+      ) for $node.nodes;
     }
   }
 
   #-----------------------------------------------------------------------------
-  # Substitute some escape characters in entities and remove the remaining
-  # backslashes.
-  sub process-esc ( Str $esc is copy, :$space-preserve --> Str ) {
+  # Substitute some characters by XML entities, remove the remaining
+  # backslashes, remove comments if possible, remove trailing spaces,
+  # substitute multiple spaces by one space if possible.
+  sub cleanup-text (
+    Str $esc is copy, Bool :$space-preserve = False,
+    Bool :$comment-preserve = False
+    --> Str
+  ) {
 
-    # Entity must be known in the xml result!
+    # entity must be known in the xml result!
     $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;
     $esc ~~ s:g/\\\s/\&nbsp;/;
     $esc ~~ s:g/ '<' /\&lt;/;
     $esc ~~ s:g/ '>' /\&gt;/;
 
-    $esc ~~ s:g/'\\'//;
+    # remove comments only if :$comment-preserve = False
+    $esc ~~ s/ \s* <!after <[\\]>> '#' .*: $$// unless $comment-preserve;
 
-    # remove comments
-    $esc ~~ s/^^ \s* '#' \N* \n//;
+    # remove backslashes
+    $esc ~~ s:g/'\\'//;
 
     # remove trailing spaces at every line
     $esc ~~ s:g/ \h+ $$ //;
@@ -681,46 +693,8 @@ class SxmlHelper {
     $parent.attribs{"xmlns:sxml"}:delete;
   }
 
-#`{{
   #-----------------------------------------------------------------------------
-  sub clean-text ( XML::Node $node ) {
-
-    state SemiXML::Globals $globals .= instance;
-
-    # check every element for its contents.
-    if $v.name ~~ any(@($globals.refined-tables<F><inline> // []))
-         and $v.nodes.elems {
-
-note "CI: $v.name()";
-        if $v.nodes[0] ~~ XML::Text {
-          my XML::Text $t = $v.nodes[0];
-          my Str $text = $t.text;
-          $text ~~ s/^ \s+ //;
-          $t.remove;
-          $t .= new(:$text);
-          $v.insert($t);
-        }
-
-        elsif $v.nodes[0] ~~ SemiXML::Text {
-          my XML::Text $t = $v.nodes[0];
-          my Str $text = $t.text;
-          $text ~~ s/^ \s+ //;
-          $t.remove;
-          $t .= new(:$text);
-          $v.insert($t);
-        }
-      }
-    }
-
-
-    # remove the namespace
-    $parent.attribs{"xmlns:sxml"}:delete;
-
-  }
-}}
-
-  #-----------------------------------------------------------------------------
-  # remove leftovers from sxml namespace
+  # remove leftover elements and attributes from SemiXML namespace
   sub remove-sxml ( XML::Element $parent ) is export {
     my SemiXML::Globals $globals .= instance;
 
@@ -741,9 +715,15 @@ note "CI: $v.name()";
 
         $v.remove;
       }
+
+      else {
+        for $v.attribs.keys -> $k {
+          $v.unset($k) if $k ~~ m/^ sxml \: /;
+        }
+      }
     }
 
-    # remove the namespace
-    $parent.attribs{"xmlns:sxml"}:delete;
+    # remove the namespace declaration
+    $parent.unset("xmlns:sxml");
   }
 }

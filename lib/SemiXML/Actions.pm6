@@ -46,6 +46,7 @@ class Actions {
   #-----------------------------------------------------------------------------
   method TOP ( $match ) {
 
+    my Bool $trace = $!globals.trace and $!globals.refined-tables<T><parse>;
     self!current-state( $match, 'at the top');
 
     my $parent = $match<document>.made;
@@ -79,36 +80,21 @@ class Actions {
 
       # search for variables and substitute them
       subst-variables($parent);
-      note "After variable sub: $parent"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
+      note "After variable sub: $parent" if $trace;
 
       # move around some elements
       remap-content($parent);
-      note "After remapping: $parent"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-      # remove leftovers from sxml namespace
-      remove-sxml($parent);
-      note "After ns removal: $parent"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
+      note "After remapping: $parent" if $trace;
 
       # process everything and modify according to the F-Table
       apply-f-table($parent);
-      note "After applying the F-Table: $parent"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
-#`{{
-      # conversion to xml escapes is done as late as possible
-      escape-attr-and-elements($parent);
-      note "After esc. and table checks: $parent"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
+      note "After applying the F-Table: $parent" if $trace;
 
-      # check spacing around elements
-      check-inline($parent);
-      note "After inline check: $parent"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
-}}
-      note '-' x 80
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
+      # remove leftovers from sxml namespace
+      remove-sxml($parent);
+      note "After ns removal: $parent" if $trace;
+
+      note '-' x 80 if $trace;
     }
 
     # return the completed document
@@ -256,8 +242,7 @@ class Actions {
     given $tt {
 
       # Any normal tag
-      #when any(< $** $*| $|* $ >) {
-      when any(< $ >) {
+      when '$' {
 
         my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
         note "  Tag: $tt$tag"
@@ -340,13 +325,19 @@ class Actions {
       my $match = $tag-bodies[$mi];
       for @($match.made) {
 
-        # Any piece of found text in bodies. Filter out any comments.
-        when Str {
-          my Str $txt = $_;
+        when Array {
+          my Str $txt = $_[0];
           if ? $txt {
-            # only spaces between texts
+            # only spaces between texts (loop count $mi > 0)
             $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
+
+            # insert the text
             $parent.append(SemiXML::Text.new(:text($txt)));
+
+            # add a content type attribute in the element using the SemiXML
+            # namespace
+            $parent.set( 'sxml:content', $_[1]);
+
             note "  Text: $txt.substr( 0, 68) ..."
               if $!globals.trace and $!globals.refined-tables<T><parse>;
           }
@@ -362,18 +353,10 @@ class Actions {
           note "  Tag hash keys: $_.keys()"
             if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-          # Test if spaces are needed before the document
-#          $parent.append(SemiXML::Text.new(:text(' ')))
-#            if $tag-ast[0] ~~ any(< $** $*| >);
-
           my $d = $_<doc-ast>;
           note "  Doc Ast: {(~$d).substr( 0, 65)} ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
           $parent.append($d);
-
-          # Test if spaces are needed after the document
-#          $parent.append(SemiXML::Text.new(:text(' ')))
-#            if $tag-ast[0] ~~ any(< $** $|* >);
 
           note "  Result: {(~$parent).substr( 0, 66)} ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
@@ -426,8 +409,7 @@ class Actions {
       $attrs{$a<attr-key>.Str} = $av;
     }
 
-#    if $symbol ~~ any(< $** $|* $*| $ >) {
-    if $symbol ~~ any(< $ >) {
+    if $symbol eq '$' {
 
       my $tn = $match<tag><tag-name>;
       $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
@@ -458,10 +440,7 @@ class Actions {
   #-----------------------------------------------------------------------------
   method tag-body ( $match ) {
 
-    my Bool $fixed = False;
-    my Array $sp-elements = $!globals.refined-tables<F><space-preserve> // [];
     my $current-tag = $!tag-list[*-1];
-    $fixed = $current-tag ~~ any(@$sp-elements);
 
     self!current-state( $match, 'tag body');
     my Array $ast = [];
@@ -474,34 +453,27 @@ class Actions {
         if $!globals.trace and $!globals.refined-tables<T><parse>;
 
       given ~$k {
-        when 'keep-as-typed' {
-          $fixed or= ($!globals.keep or (~$v eq '='));
-          #$fixed = (~$v eq '=');
-          note "  Value: $!globals.keep() or $fixed"
-            if $!globals.trace and $!globals.refined-tables<T><parse>;
-        }
-
         # part from
         when 'body-a' {
           note "  body a: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-          #$ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
-          $ast.push: $v.Str;
+
+          $ast.push: [ $v.Str, 'A'];
         }
 
         #
         when 'body-b' {
           note "  body b: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-          #$ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
-          $ast.push: $v.Str;
+
+          $ast.push: [ $v.Str, 'B'];
         }
 
         when 'body-c' {
           note "  body c: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-          #$ast.push: self!clean-text( $v.Str, :$fixed, :!comment);
-          $ast.push: $v.Str;
+
+          $ast.push: [ $v.Str, 'C'];
         }
 
         when 'document' {
