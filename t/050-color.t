@@ -6,7 +6,7 @@ use SemiXML::Sxml;
 use XML::XPath;
 
 #-------------------------------------------------------------------------------
-subtest 'generated blended color variables', {
+subtest 'generated blended color variables 1', {
 
   my $text = q:to/EOTXT/;
     $x [
@@ -28,10 +28,10 @@ subtest 'generated blended color variables', {
   like $c, /:i '#1200ff' /, 'Found base color';
 
   $c = $p.find( '/x/set1/text()', :to-list)[0].text;
-  ok $c ~~ / [ '#' <xdigit>**6 ]**5 /, 'Found 5 other colors in set 1';
+  ok $c ~~ / [ '#' <xdigit>**6 \s* ]**5 /, 'Found 5 other colors in set 1';
 
   $c = $p.find( '/x/set2/text()', :to-list)[0].text;
-  ok !$c, 'There is no 6th color';
+  like $c, / \s* /, 'There is no 6th color';
 
 
 
@@ -52,11 +52,11 @@ subtest 'generated blended color variables', {
 
   $p = get-xpath($text);
   $c = $p.find( '/x/set2/text()', :to-list)[0].text;
-  ok $c ~~ / [ '#' <xdigit>**6 ]**2 /, 'Found 6th and 9th color2 in set 2';
+  ok $c ~~ / [ '#' <xdigit>**6 \s* ]**2 /, 'Found 6th and 9th color2 in set 2';
 }
 
 #-------------------------------------------------------------------------------
-subtest 'generated blended color variables', {
+subtest 'generated blended color variables 2', {
 
   my $text = q:to/EOTXT/;
     $html [
@@ -64,31 +64,31 @@ subtest 'generated blended color variables', {
                        type=blended mode=hard
       $head [
         $style [
-          $strong [
-            color: $sxml:var-ref name=base-color [];
-            border-color: $sxml:var-ref name=blend-color2 [];
-            background-color: $sxml:var-ref name=blend-color5 [];
-
-            color is thus $sxml:var-ref name=blend-color5 [].
-          ]
+          color: $sxml:var-ref name=base-color [];
+          border-color: $sxml:var-ref name=blend-color2 [];
+          background-color: $sxml:var-ref name=blend-color5 [];
         ]
       ]
       $body [
         $h1 id=h1001 [ Introduction ]
-        $p [ $strong [some text] ]
+        $p [ $strong [some text]
+          color is thus $set0 [$sxml:var-ref name=blend-color5 []].
+        ]
       ]
     ]
     EOTXT
 
   my XML::XPath $p = get-xpath($text);
 
-  my Str $style-text = $p.find( '//style/strong/text()', :to-list)[0].text;
-  like $style-text, /:i 'color:#1200ffff;' /, 'Found base color';
-  like $style-text, /:i 'border-color:#' <xdigit>**8 ';' /,
+  my Str $style-text = $p.find( '//style/text()', :to-list)[0].text;
+  like $style-text, /:s color ':' '#1200FFFF;' /, 'Found base color';
+  like $style-text, / 'border-color: #' <xdigit>**8 ';' /,
        'Found border color';
-  like $style-text, /:i 'background-color:#' <xdigit>**8 ';' /,
+  like $style-text, / 'background-color: #' <xdigit>**8 ';' /,
        'Found background color';
-  like $style-text, /:i 'color is thus#' <xdigit>**8 '.' /,
+
+  $style-text = $p.find( '//body/p/set0/text()', :to-list)[0].text;
+  like $style-text, / '#' <xdigit>**8 /,
        'Found background color somewhere else';
 }
 
@@ -120,14 +120,19 @@ subtest 'generate monochromatic color variables', {
 #-------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
 
-  my SemiXML::Sxml $x .= new(:!trace);
+  my SemiXML::Sxml $x .= new( :!trace, :keep);
   $x.parse(
     config => {
-      F => { xml => { space-preserve => [<set0 set1 set2>], }, },
+      C => { xml => { :!xml-show }},
+      F => { xml => {
+          space-preserve => [<set0 set1 set2>],
+          no-escaping => [<set0 set1 set2 style>],
+        },
+      },
       ML => { :Colors<SxmlLib::Colors>, },
       T => { :config, :tables, :modules, :parse, },
     },
-    :$content
+    :$content, :!raw
   );
 
   # See the result
