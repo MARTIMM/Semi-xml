@@ -139,6 +139,6 @@ grammar Grammar {
     <[\x0300..\x036F]> | <[\x203F..\x2040]>
   }
 
-  rule prelude { ^ <-[$]>* }
-  rule post { .* $ }
+  rule prelude { <-[$]>* }
+  rule post { \s* $ }
 }
