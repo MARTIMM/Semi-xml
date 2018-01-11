@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 use Test;
 use SemiXML::Sxml;
@@ -75,10 +75,13 @@ subtest 'test multi liners', {
 #-------------------------------------------------------------------------------
 sub parse ( Str $content is copy --> Str ) {
 
-  state SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
+  state SemiXML::Sxml $x .= new(:refine([<in-fmt out-fmt>]));
   my Bool $r = $x.parse(
     :$content,
-    :config( { T => { :!config, :!parse} } )
+    :config( {
+        T => { :!config, :!parse },
+      }
+    )
   );
 #  $content ~~ s:g/\n/ /;
 #  $content ~~ s:g/\s+/ /;

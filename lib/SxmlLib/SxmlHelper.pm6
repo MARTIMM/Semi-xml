@@ -555,6 +555,7 @@ class SxmlHelper {
       $esc ~~ s:g/ \s\s+ / /;
 
       # remove return characters if found
+      $esc ~~ s/ \n $//;
       $esc ~~ s:g/ \n / /;
     }
 
