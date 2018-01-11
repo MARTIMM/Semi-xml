@@ -62,8 +62,8 @@ class Sxml {
   #-----------------------------------------------------------------------------
   multi method parse (
     Str:D :$!filename!, Hash :$config,
-    Bool :$raw = False, Bool :$!force = False,
-    Bool :$!trace = False, Bool :$!keep = False
+    Bool :$raw = False, Bool :$force = False,
+    Bool :$trace = False, Bool :$keep = False
     --> Bool
   ) {
 
@@ -75,7 +75,10 @@ class Sxml {
       $!globals.filename //= $!filename;
 
       my $text = slurp($!filename);
-      $pr = self.parse( :content($text), :$config, :!drop-cfg-filename, :$raw);
+      $pr = self.parse(
+        :content($text), :$config, :!drop-cfg-filename,
+        :$raw, :$force, :$trace, :$keep
+      );
       die "Parse failure" if $pr ~~ Nil;
     }
 
@@ -127,6 +130,13 @@ class Sxml {
 
     # Parse the content. Parse can be recursively called
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
+
+    # reset all flags to its defaults until next parse will set them
+    $!drop-cfg-filename = True;
+    $!force = $!trace = $!keep = False;
+    $!globals.trace = $!trace;
+    $!globals.raw = False;
+    $!globals.keep = $!keep;
 
     # Throw an exception when there is a parsing failure
     my $last-bracket-index = $content.rindex(']') // $content.chars;
