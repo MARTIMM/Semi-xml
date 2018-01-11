@@ -24,7 +24,7 @@ subtest 'variables', {
 
   # See the result
   my Str $xml-text = ~$x;
-  diag $xml-text;
+  #diag $xml-text;
 
   my XML::XPath $p .= new(:xml($xml-text));
 
@@ -54,7 +54,7 @@ subtest 'undeclared variable', {
 
   # See the result
   my Str $xml-text = ~$x;
-  diag $xml-text;
+  #diag $xml-text;
 
   my XML::XPath $p .= new(:xml($xml-text));
 

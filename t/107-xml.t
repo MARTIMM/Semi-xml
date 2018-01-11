@@ -43,7 +43,7 @@ my SemiXML::Sxml $x .= new;
 $x.parse( :filename($f1), :$config, :!trace, :!raw, :!keep);
 my Date $d = Date.today;
 my Str $xml-text = ~$x;
-note $xml-text;
+#diag $xml-text;
 
 my Str $dt = $d.Str;
 my Str $dm = $d.month.fmt('%02d');
@@ -92,5 +92,3 @@ done-testing();
 
 unlink $f1;
 rmdir $dir;
-
-exit(0);

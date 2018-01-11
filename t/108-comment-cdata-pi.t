@@ -46,7 +46,7 @@ my Hash $config = {
 my SemiXML::Sxml $x .= new;
 $x.parse( :filename($f1), :$config, :!raw, :!keep);
 my Str $xml-text = ~$x;
-diag $xml-text;
+#diag $xml-text;
 
 my $d = Date.today();
 like $xml-text, /:s '<!--' comment text '-->'/, 'Check comments';

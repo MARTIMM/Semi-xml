@@ -116,7 +116,7 @@ subtest 'closing / no self closing', {
     EOXML
 
   my Str $xml-text = get-text($text);
-  diag $xml-text;
+  #diag $xml-text;
   like $xml-text, /'<x><abc/><def></def>'/, 'abc self close, def is not';
   like $xml-text, /'<z1><abc/></z1>'/, 'abc self close, after remap';
   like $xml-text, /'<z2><def></def></z2>'/, 'def not self closing after remap';
