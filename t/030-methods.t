@@ -1,5 +1,6 @@
 use v6;
 
+use XML;
 use Test;
 use SemiXML::Sxml;
 
@@ -49,7 +50,7 @@ spurt( $mod, q:to/EOMOD/);
       #
       my Int $nbr-nodes = $content-body.nodes.elems;
       $p.insert($_) for $content-body.nodes.reverse;
-      $p.append(SemiXML::Text.new(:text("Added $nbr-nodes xml nodes")));
+      $p.append(XML::Text.new(:text("Added $nbr-nodes xml nodes")));
 
       $parent;
     }
@@ -110,18 +111,22 @@ $r = $x.parse( :$config, :$content);
 ok $r, "match $content";
 
 $xml = $x.get-xml-text;
-#note "XML: \n$xml";
+#diag "XML: \n$xml";
 like $xml, /'<?xml version="1.0" encoding="UTF-8"?>'/, 'found prelude';
-like $xml, /'<x><p></p><p>Added 0 xml nodes</p></x>'/, "generated content from mth2";
+like $xml, /'<x><p></p><p>Added 1 xml nodes</p></x>'/,
+     "mth2 sees at least 1 space in its content";
 
 
-$content = '$x =a =!b [ $!mod1.mth2 [ $h [abc] $h[def]]]';
+$content = '$x =a =!b [ $!mod1.mth2 [$h [abc] $h[def]]]';
 $r = $x.parse( :$config, :$content);
 ok $r, "match $content";
 
 $xml = $x.get-xml-text;
-like $xml, /'<x a="1" b="0"><p></p><p><h>abc</h><h>def</h>Added 2 xml nodes</p></x>'/,
-           "generated: $xml";
+like $xml, / '<x a="1" b="0">'
+             '<p></p>'
+             '<p><h>abc</h><h>def</h>Added 2 xml nodes</p>'
+             '</x>'
+           /, "generated: $xml";
 
 
 $content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
