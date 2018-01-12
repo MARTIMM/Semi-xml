@@ -88,14 +88,14 @@ grammar Grammar {
 
   token tag-body {
     # Content body can have child elements.
-    [ '[' ~ ']' [ $<keep-as-typed>=<[=]>? [ <body-a> || <document> ]* ] ] ||
+    [ '[' ~ ']' [  <body-a> || <document> ]* ] ||
 
     # Content body can not have child elements. All other characters
     # remain unprocessed
-    [ '{' ~ '}' [ $<keep-as-typed>=<[=]>? <body-b> ] ] ||
+    [ '{' ~ '}' <body-b> ] ||
 
     # Alternative for '{ ... }'
-    [ '«'  ~ '»' [ $<keep-as-typed>=<[=]>? <body-c> ] ]
+    [ '«'  ~ '»' <body-c> ]
   }
 
   # opening brackets [ and { must also be escaped. « is weird enaugh.
