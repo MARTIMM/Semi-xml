@@ -88,7 +88,7 @@ grammar Grammar {
 
   token tag-body {
     # Content body can have child elements.
-    [ '[' ~ ']' [  <body-a> || <document> ]* ] ||
+    [ '[' ~ ']' [ <body-a> || <document> ]* ] ||
 
     # Content body can not have child elements. All other characters
     # remain unprocessed
@@ -100,8 +100,8 @@ grammar Grammar {
 
   # opening brackets [ and { must also be escaped. « is weird enaugh.
   token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]> ]+ }
-  token body-b { [ <.escaped-char> || <-[\\\{\}]> ]* }
-  token body-c { [ <.escaped-char> || <-[\\»]> ]* }
+  token body-b { [ <.escaped-char> || <-[\\\{\}]> ]+ }
+  token body-c { [ <.escaped-char> || <-[\\«»]> ]+ }
 
   token escaped-char { '\\' . }
 
