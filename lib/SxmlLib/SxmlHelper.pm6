@@ -421,14 +421,14 @@ class SxmlHelper {
   #-----------------------------------------------------------------------------
   sub apply-f-table ( XML::Node $node ) is export {
     #clean-text($node);
-    escape-attr-and-elements($node);
+    escape-attr-and-elements( $node, :!space-preserve, :!comment-preserve);
     check-inline($node);
   }
 
   #-----------------------------------------------------------------------------
   sub escape-attr-and-elements (
-    XML::Node $node, Bool :$space-preserve is copy = False,
-    Bool :$comment-preserve is copy = False
+    XML::Node $node, Bool :$space-preserve is copy,
+    Bool :$comment-preserve is copy
   ) {
 
     my SemiXML::Globals $globals .= instance;
@@ -447,11 +447,12 @@ class SxmlHelper {
       my Array $no-escaping :=
          $globals.refined-tables<F><no-escaping> // [];
 
-      $space-preserve =
-        ( $globals.keep or $node.name ~~ any(
-            @($globals.refined-tables<F><space-preserve> // [])
-          )
-        );
+      # space preservation must be kept for all innner elements as well
+      $space-preserve or= (
+        $globals.keep or $node.name ~~ any(
+          @($globals.refined-tables<F><space-preserve> // [])
+        )
+      );
 
       $comment-preserve = $node.attribs<sxml:content> ~~ any([<B C>]);
 
@@ -599,6 +600,7 @@ class SxmlHelper {
       if $v.name ~~ any(@($globals.refined-tables<F><inline> // []))
          and $v.nodes.elems {
 #note "CI: $v.name()";
+
         if $v.nodes[0] ~~ XML::Text {
           my XML::Text $t = $v.nodes[0];
           my Str $text = $t.text;
