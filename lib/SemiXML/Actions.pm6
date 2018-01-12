@@ -276,6 +276,7 @@ class Actions {
         # When module and/or method is not found an error is generated in the
         # form of XML.
         if $module ~~ XML::Element {
+#TODO show error message
           $x = $module;
         }
 
@@ -301,6 +302,7 @@ class Actions {
               :name('method-returned-no-result'),
               :attribs( module => $mod, method => $meth)
             );
+#TODO show error message
           }
         }
       }
@@ -336,7 +338,10 @@ class Actions {
 
             # add a content type attribute in the element using the SemiXML
             # namespace
-            $parent.set( 'sxml:content', $_[1]);
+            unless $parent.name eq 'sxml:parent_container' {
+              $parent.set( 'sxml:content', $_[1]);
+note "Set sxml:content of $parent.name() to $_[1]";
+            }
 
             note "  Text: $txt.substr( 0, 68) ..."
               if $!globals.trace and $!globals.refined-tables<T><parse>;
@@ -345,19 +350,22 @@ class Actions {
 
         # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
         when Hash {
-#note "Ast tag: ", $_<tag-ast>;
-#note "Ast body: ", $_<body-ast>;
+note "\nAst tag: ", $_<tag-ast>;
+#note "Ast body[0]: ", $_<body-ast>[0] // '-';
+note "Ast body[0] keys: ", $_<body-ast>[0].keys;
+for $_<body-ast>[0].keys -> $key { note "B0 $key: ", $_<body-ast>[0]{$key} }
 #note "Ast doc: ", $_<doc-ast>;
           # tag ast: [ tag type, namespace, tag name, module, method, attributes ]
           my Array $tag-ast = $_<tag-ast>;
-          note "  Tag hash keys: $_.keys()"
-            if $!globals.trace and $!globals.refined-tables<T><parse>;
+#note "  Tag hash keys: $_.keys()";
+
 
           my $d = $_<doc-ast>;
+
           note "  Doc Ast: {(~$d).substr( 0, 65)} ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
           $parent.append($d);
-
+note "P: $parent.name()";
           note "  Result: {(~$parent).substr( 0, 66)} ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
         }
@@ -453,7 +461,7 @@ class Actions {
         if $!globals.trace and $!globals.refined-tables<T><parse>;
 
       given ~$k {
-        # part from
+        # Body like [ ... ]
         when 'body-a' {
           note "  body a: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
@@ -461,7 +469,7 @@ class Actions {
           $ast.push: [ $v.Str, 'A'];
         }
 
-        #
+        # Body like { ... }
         when 'body-b' {
           note "  body b: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
@@ -469,6 +477,7 @@ class Actions {
           $ast.push: [ $v.Str, 'B'];
         }
 
+        # Body like « ... »
         when 'body-c' {
           note "  body c: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;

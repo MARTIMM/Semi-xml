@@ -5,8 +5,8 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2018-01-07T10:20:24.967841Z'
-  oskernel     = 'linux:4.14.8.200.fc.26.x.86._.64'
+  date         = '2018-01-12T14:33:24.712662Z'
+  oskernel     = 'linux:4.14.11.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
   compiler     = 'rakudo:2017.12.14.gf.137.c.2510'
@@ -15,7 +15,11 @@
 [ purpose ]
   purposetitle = 'Testing the basic use of SemiXML'
   purpose      = '''
-<p title="purpose">Purpose of this report is that it tests the parsing and translating process of the several parts of the language. Here only the simple structures are tested and not the methods to generate new content. <p>The tests comprises the following chapters</p><ul><li>Generate a simple element</li><li>Add attributes.</li><li>Nested elements.</li><li>Element blocks and their different types.</li></ul></p>
+<p title="purpose">
+    Purpose of this report is that it tests the parsing and translating process
+    of the several parts of the language. Here only the simple structures are
+    tested and not the methods to generate new content.
+  <p>The tests comprises the following chapters</p><ul><li>Generate a simple element</li><li>Add attributes.</li><li>Nested elements.</li><li>Element blocks and their different types.</li></ul></p>
 '''
 
 [ chapters ]
@@ -40,8 +44,8 @@
   skipped      = 0
 
 [ chapter.'Element blocks and their different types.' ]
-  success      = 2
-  fail         = 0
+  success      = 1
+  fail         = 1
   todo         = 0
   skipped      = 0
 
@@ -57,62 +61,91 @@
     ok 2 - The generated xml is conforming the standard
 """
 
-[ summary.line-14 ]
+[ summary.line-15 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 3 - attribute without spaces in value
 """
 
-[ summary.line-19 ]
+[ summary.line-20 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 4 - attribute with double quoted value
 """
 
-[ summary.line-24 ]
+[ summary.line-25 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 5 - attribute with single quoted value
 """
 
-[ summary.line-29 ]
+[ summary.line-30 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 6 - attribute a1 found
 """
 
-[ summary.line-30 ]
+[ summary.line-31 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 7 - attribute a2 found
 """
 
-[ summary.line-34 ]
+[ summary.line-35 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 8 - true boolean attribute a1 found
 """
 
-[ summary.line-35 ]
+[ summary.line-36 ]
   chapter      = 'Add attributes.'
   diagnostic   = """
     ok 9 - false boolean attribute a2 found
 """
 
-[ summary.line-37 ]
+[ summary.line-39 ]
   chapter      = 'Nested elements.'
   diagnostic   = """
     ok 10 - An element within another
 """
 
-[ summary.line-42 ]
+[ summary.line-45 ]
   chapter      = 'Element blocks and their different types.'
   diagnostic   = """
-    ok 11 - two blocks on an element
+    not ok 11 - two blocks on an element
+    E0: 
+    E1: 
+    E0: 
+    E1: 
+    E0: 
+    E1: 
+    E0: 
+    E1: 
+    E0: 
+    E1: 
+    E0: 
+    E1: 
+    Set sxml:content of some-element to A
+
+    Ast tag: [$  some-other-element   {}]
+    Ast body[0] keys: ()
+    P: some-element
+    E0:  
+    E1:  
+    E0: 
+    E1: 
+    Set sxml:content of some-element to A
+    Set sxml:content of some-element to A
+    E0:  block 1 
+    E1:  block 1 
+    E0:  
+    E1:  
+    E0:  block 2 
+    E1:  block 2 
 """
 
-[ summary.line-47 ]
+[ summary.line-51 ]
   chapter      = 'Element blocks and their different types.'
   diagnostic   = """
-    ok
+    ok 12 - Inner element is not translated
 """

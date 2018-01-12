@@ -447,7 +447,7 @@ class SxmlHelper {
       my Array $no-escaping :=
          $globals.refined-tables<F><no-escaping> // [];
 
-      # space preservation must be kept for all innner elements as well
+      # space preservation must be kept for all inner elements as well
       $space-preserve or= (
         $globals.keep or $node.name ~~ any(
           @($globals.refined-tables<F><space-preserve> // [])
@@ -517,7 +517,9 @@ class SxmlHelper {
     $esc ~~ s:g/ '>' /\&gt;/;
 
     # remove comments only if :$comment-preserve = False
-    $esc ~~ s/ \s* <!after <[\\]>> '#' .*: $$// unless $comment-preserve;
+note "E0: $esc";
+    $esc ~~ s:g/ \s* <!after <[\\]>> '#' \N*: $$// unless $comment-preserve;
+note "E1: $esc";
 
     # remove backslashes
     $esc ~~ s:g/'\\'//;

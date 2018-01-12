@@ -143,8 +143,6 @@ done-testing;
 unlink $mod;
 rmdir $dir;
 
-exit(0);
-
 
 =finish
 
