@@ -416,17 +416,17 @@ $!SxmlCore.drop «
           There are several ways to contain the text between delimiters
           depending on the contents or even the absence of content.
           Take, for example the HTML break element <br/>. This element does not
-          have content. We could write this as $**emphasis{$br []}. But we can
-          leave off the brackets to make it shorter like so; $**emphasis{$br}.
+          have content. We could write this as $emphasis{$br []}. But we can
+          leave off the brackets to make it shorter like so; $emphasis{$br}.
           There are however situations where you must use the brackets when the
           following text is in a argument=value format to prevent them to be
-          interpreted as such. E.g. $**emphasis { $br [] after=break }.
+          interpreted as such. E.g. $emphasis { $br [] after=break }.
 #TODO self closing brackets F-Table.
 #TODO naming the brackets correctly
         ]
 
         $para [
-          As described above under $**emphasis[Escaping characters] it is possible to insert characters which are otherwise interpreted as something special. However, it gets annoying when there are many of them like in a piece of JavaScript or Perl code. There is a solution for that luckily, just enclose the text between '{' and '}'. Nothing gets interpreted between these delimiters as well as comments are kept in the text. That works for simple code and is easier to type. But these brackets can be used a lot in code so there is another possibility. Use '«' and '»' for that. Not many program languages beside perl6 use these characters. It might come in handy to program a compose key for this, otherwise it becomes a pain to insert those characters.
+          As described above under $emphasis[Escaping characters] it is possible to insert characters which are otherwise interpreted as something special. However, it gets annoying when there are many of them like in a piece of JavaScript or Perl code. There is a solution for that luckily, just enclose the text between '{' and '}'. Nothing gets interpreted between these delimiters as well as comments are kept in the text. That works for simple code and is easier to type. But these brackets can be used a lot in code so there is another possibility. Use '«' and '»' for that. Not many program languages beside perl6 use these characters. It might come in handy to program a compose key for this, otherwise it becomes a pain to insert those characters.
         ]
 
         $para [
@@ -434,7 +434,7 @@ $!SxmlCore.drop «
           such as within <pre> elements. Sxml does not have any notion of these
           sections and treat those as xml and all excess of space is removed. To
           cope with these sections another set of container delimiters are used.
-          These are $**emphasis{ [= ... ] }.
+          These are $emphasis{ [ ... ] }.
 #TODO
           With these brackets, all indenting and newlines are fixed and protected.
         ]
@@ -442,7 +442,7 @@ $!SxmlCore.drop «
         $para [
           Multiple content bodies are also possible when there are parts which
           need protection and in other parts, elements are needed. E.g.
-          $**emphasis{ $p [The line; ]« my Int $x = 10; »[ is an $b[Int]
+          $emphasis{ $p [The line; ]« my Int $x = 10; »[ is an $b[Int]
           declaration] }
         ]
       ]
@@ -451,13 +451,11 @@ $!SxmlCore.drop «
         $title [Element types]
         $para [
           Some examples of elements are already shown at the start
-          of this chapter like $**emphasis{ $html } for instance. It is written
+          of this chapter like $emphasis{ $html } for instance. It is written
           as a name with a dollar prefixed to it. Normally, spacing around an
           element is minimized but at some places there must be a space before
           or after the element. Examples from html are <a>, <b> and <strong> among
-          other inline elements. To get this spacing right one can use
-          $*|emphasis{ $**element },
-          $**emphasis{ $*|element } or $**emphasis{ $|*element } to have a
+          other inline elements. ... F Table config .... to have a
           space on both sides, on the left side or on the right side
           respectively.
 #TODO $|element no spaces.
@@ -465,7 +463,7 @@ $!SxmlCore.drop «
 
         $para [
           Another type is a special one. It is defined as
-          $**emphasis{ $!module-key.method-name } where the module-key is mapped
+          $emphasis{ $!module-key.method-name } where the module-key is mapped
           to a real module in the configuration file. One key is predefined: SxmlCore
           and is mapped to SxmlLib::SxmlCore. The methods defined in that module
           are explained in a separate chapter. How a module is initialized and
@@ -744,7 +742,7 @@ $!SxmlCore.drop {
                '[' <body-start-control> <body> <body-end-control>
                ']';
 
-<prefix> ::= '$.' | '$\!' | '$*|' | '$|*' | '$**' | '$';
+<prefix> ::= '$.' | '$';
 
 <element> ::= <identifier>;
 <attribute> ::= <identifier>;

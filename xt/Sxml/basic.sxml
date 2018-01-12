@@ -12,14 +12,14 @@ $!test.run title='Basic SemiXML tests'
   $!test.chapter title='Generate a simple element' [
     $p [
       The code below will test a simple top level structure. A one liner
-      $**strong { $some-element [ ] } should translate into $*|strong
+      $strong { $some-element [ ] } should translate into $strong
       { <some-element></some-element> }.
       Because there is no added configuration, it defaults to XML as its input
       as well as output so it will have an XML prelude. Also, because of the lack
       of this configuration, the element is interpreted as not self closing.
     ]
 
-    $!test.code {=
+    $!test.code {
       use SemiXML::Sxml;
       my SemiXML::Sxml $sxml .= new;
       isa-ok $sxml, SemiXML::Sxml;
@@ -47,7 +47,7 @@ $!test.run title='Basic SemiXML tests'
 #      like ~$sxml, / 'attribute="v a l u e"' /,
 #                   'attribute with bracketed <> value';
 
-    $!test.code {=
+    $!test.code {
       # unquoted value
       $sxml.parse(:content('$some-element attribute=value'));
       like ~$sxml, / 'attribute="value"' /,
@@ -81,7 +81,7 @@ $!test.run title='Basic SemiXML tests'
       some ways to control this behavior.
     ]
 
-    $!test.code {=
+    $!test.code {
       $sxml.parse(:content('$some-element [ $some-other-element ]'));
       like ~$sxml, / '<some-element>'
                      '<some-other-element></some-other-element>'
@@ -97,7 +97,7 @@ $!test.run title='Basic SemiXML tests'
       more than one block.
     ]
 
-    $!test.code {=
+    $!test.code {
       $sxml.parse(:content('$some-element [ block 1 ][ block 2 ]'));
       like ~$sxml, / '<some-element>'
                      'block 1 block 2'
@@ -117,15 +117,7 @@ $!test.run title='Basic SemiXML tests'
       must also be escaped if you want the character in the text.
     }
 
-    $p {
-      Using '=' just after the block start, makes the interpretation
-      of it a bit different.
-      Combinations with '=' makes sure that the content is left as it is typed in.
-      For example an html <pre> element can be used like that: '$pre [= ... ]'.
-      Another example for code '$script «= ... »'.
-    }
-
-    $!test.code «=
+    $!test.code «
       $sxml.parse(:content('$a1 { $a2 [ ] }'));
       like ~$sxml, / '<a1>$a2 [ ]</a1>' /, 'Inner element is not translated';
     »
