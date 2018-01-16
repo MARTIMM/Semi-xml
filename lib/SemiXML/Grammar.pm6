@@ -26,7 +26,10 @@ grammar Grammar {
         note "\n", '-' x 80, "\nParse document\n", $/.orig.Str.substr( 0, 80),
              "\n " if $globals.trace and $globals.refined-tables<T><parse>;
       }
-      <document>
+
+      # A normal XML document has only one document. When there are more,
+      # convert the result into a XML fragment.
+      <document>+
     ]
     <.post>             # drop remaining characters
   }
@@ -35,13 +38,13 @@ grammar Grammar {
   # possible to use a rule to add the element to this stack. This happens in
   # the actions method for <tag-spec>.
   #
-  rule pop-tag-from-list { <?> }
+  #rule pop-tag-from-list { <?> }
   rule document {
     <tag-spec> {
       note "Parse: Tag $/<tag-spec>"
         if $globals.trace and $globals.refined-tables<T><parse>;
     }
-    <tag-body>* <.pop-tag-from-list>
+    <tag-bodies>* #<.pop-tag-from-list>
   }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
@@ -86,7 +89,7 @@ grammar Grammar {
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]* }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
-  token tag-body {
+  token tag-bodies {
     # Content body can have child elements.
     [ '[' ~ ']' [ <body-a> || <document> ]* ] ||
 
@@ -95,7 +98,7 @@ grammar Grammar {
     [ '{' ~ '}' <body-b> ] ||
 
     # Alternative for '{ ... }'
-    [ '«'  ~ '»' <body-c> ]
+    [ '«' ~ '»' <body-c> ]
   }
 
   # opening brackets [ and { must also be escaped. « is weird enaugh.

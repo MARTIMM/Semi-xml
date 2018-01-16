@@ -3,9 +3,132 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
 
+use SemiXML::SxmlElement;
+use SemiXML::SxmlBody;
+use SemiXML::SxmlContent;
+use SemiXML::SxmlText;
+
+
+#-------------------------------------------------------------------------------
+class Actions {
+
+  # The root should only have one element. When there are more, convert
+  # the result into a fragment.
+  has SemiXML::SxmlElement $!root;
+  has SemiXML::SxmlElement $!element;
+
+  #-----------------------------------------------------------------------------
+  submethod BUILD ( ) {
+    $!root .= new(:name<root>);
+  }
+
+
+
+  #-----------------------------------------------------------------------------
+  method TOP ( $match ) {
+
+  }
+
+  #-----------------------------------------------------------------------------
+  method document ( $match ) {
+
+  }
+
+  #-----------------------------------------------------------------------------
+  method tag-spec ( $match ) {
+note "\nTS: $match";
+
+    my Hash $attributes = self!attributes([$match<attributes>.caps]);
+
+    my $tag = $match<tag>;
+
+    my Str $symbol = $tag<sym>.Str;
+    if $symbol eq '$' {
+      $!element .= new( :name($tag<tag-name>.Str), :$attributes);
+    }
+
+    elsif $symbol eq '$!' {
+      $!element .= new(
+        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str),
+        :$attributes
+      );
+    }
+
+    # set root element if this is the first element
+    #$!element.parent = ...
+note $!element.perl;
+  }
+
+  #-----------------------------------------------------------------------------
+  method tag-bodies ( $match ) {
+
+  }
+
+
+
+
+  #-----------------------------------------------------------------------------
+  method !attributes ( Array $attr-specs --> Hash ) {
+
+    # define the attributes for the element. attr value is of type StringList
+    # where ~$strlst gives string, @$strlst returns list and $strlist.value
+    # either string or list depending on :use-as-list which in turn depends
+    # on the way an attribute is defined att='val1 val2' or att=<val1 val2>.
+    my Hash $attrs = {};
+    for @$attr-specs -> $as {
+      next unless $as<attribute>:exists;
+      my $a = $as<attribute>;
+      my SemiXML::StringList $av;
+
+      # when =attr is same as attr=1
+      if ? $a<bool-true-attr> {
+        $av .= new( :string<1>, :!use-as-list);
+      }
+
+      # when =!attr is same as attr=0
+      elsif ? $a<bool-false-attr> {
+        $av .= new( :string<0>, :!use-as-list);
+      }
+
+      else {
+        # when attr=<a b c> attr-list-value is set
+        $av .= new(
+          :string($a<attr-value-spec><attr-value>.Str),
+          :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
+        );
+      }
+
+      $attrs{$a<attr-key>.Str} = $av;
+    }
+
+    $attrs;
+  }
+
+  #-----------------------------------------------------------------------------
+  # temporary provision for the calling module returning an empty doument
+  use XML;
+  method get-document ( --> XML::Document ) {
+
+    my XML::Element $r .= new(:name<root>);
+    return XML::Document.new(:root($r));
+  }
+}
+
+
+
+
+
+
+
+=finish
+
+#-------------------------------------------------------------------------------
+unit package SemiXML:auth<github:MARTIMM>;
+
 use SemiXML;
 use SemiXML::Text;
 use SemiXML::StringList;
+use SemiXML::ContentBodies;
 use SxmlLib::SxmlHelper;
 use XML;
 use XML::XPath;
@@ -134,7 +257,7 @@ class Actions {
     #
     my Str $orig = $match.orig;
 
-    my Array $tag-bodies = $match<tag-body>;
+    my Array $tag-bodies = $match<tag-bodies>;
     loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
       my Int $b-from = $match.from;
@@ -264,7 +387,11 @@ class Actions {
 
         note "  Attr keys: $x.attribs().keys()"
           if $!globals.trace and $!globals.refined-tables<T><parse>;
-        self!build-content-body( $match, $x);
+
+        # Call to modify $match as a side effect
+        #self!build-content-body( $match, $x);
+#TODO this must change
+        my SemiXML::ContentBodies $cb .= new( :$match, :node($x));
       }
 
       # Method tag
@@ -289,9 +416,9 @@ class Actions {
             XML::Element.new(:name('sxml:parent_container')),
             $attrs,
             :content-body(
-              self!build-content-body(
-                $match,
-                XML::Element.new(:name('sxml:parent_container'))
+              SemiXML::ContentBodies.new(
+                :$match,
+                :node(XML::Element.new(:name('sxml:parent_container')))
               )
             ),
             :$!tag-list
@@ -312,13 +439,14 @@ class Actions {
     $match.make($x);
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   method !build-content-body (
     Match $match, XML::Element $parent
     --> XML::Element
   ) {
 
-    my Array $tag-bodies = $match<tag-body>;
+    my Array $tag-bodies = $match<tag-bodies>;
     loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
 
       note "  Body count: {$mi+1}"
@@ -338,10 +466,10 @@ class Actions {
 
             # add a content type attribute in the element using the SemiXML
             # namespace
-            unless $parent.name eq 'sxml:parent_container' {
+            #unless $parent.name eq 'sxml:parent_container' {
               $parent.set( 'sxml:content', $_[1]);
 note "Set sxml:content of $parent.name() to $_[1]";
-            }
+            #}
 
             note "  Text: $txt.substr( 0, 68) ..."
               if $!globals.trace and $!globals.refined-tables<T><parse>;
@@ -374,6 +502,7 @@ note "P: $parent.name()";
 
     $parent;
   }
+}}
 
   #-----------------------------------------------------------------------------
   method tag-spec ( $match ) {
@@ -446,9 +575,7 @@ note "P: $parent.name()";
   }
 
   #-----------------------------------------------------------------------------
-  method tag-body ( $match ) {
-
-    my $current-tag = $!tag-list[*-1];
+  method tag-bodies ( $match ) {
 
     self!current-state( $match, 'tag body');
     my Array $ast = [];
@@ -466,7 +593,7 @@ note "P: $parent.name()";
           note "  body a: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-          $ast.push: [ $v.Str, 'A'];
+          $ast.push: { :text($v.Str), :type<A>};
         }
 
         # Body like { ... }
@@ -474,7 +601,7 @@ note "P: $parent.name()";
           note "  body b: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-          $ast.push: [ $v.Str, 'B'];
+          $ast.push: { :text($v.Str), :type<B>};
         }
 
         # Body like « ... »
@@ -482,7 +609,7 @@ note "P: $parent.name()";
           note "  body c: $v.substr( 0, 66) ..."
             if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-          $ast.push: [ $v.Str, 'C'];
+          $ast.push: { :text($v.Str), :type<C>};
         }
 
         when 'document' {
@@ -490,7 +617,7 @@ note "P: $parent.name()";
             if $!globals.trace and $!globals.refined-tables<T><parse>;
 
           my $tag-ast = $v<tag-spec>.made;
-          my $body-ast = $v<tag-body>;
+          my $body-ast = $v<tag-bodies>;
           $ast.push: { :$tag-ast, :$body-ast, :doc-ast($v.made)};
         }
       }
@@ -500,7 +627,7 @@ note "P: $parent.name()";
 
     note " " if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-    # Set AST on node tag-body
+    # Set AST on node tag-bodies
     $match.make($ast);
   }
 
