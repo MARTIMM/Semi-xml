@@ -1,0 +1,5 @@
+# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/basic.sxml
+
+$a [
+  $b [ B1 ]{ B2 }« B3 »
+]
