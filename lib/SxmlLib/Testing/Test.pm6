@@ -844,7 +844,7 @@ note $code-text;
     state Int $counter = 1;
 
     my Int $test-lines-idx = 0;
-    my Str $diag-title = $!test-lines[$test-lines-idx][CHAPTER];
+    my Str $diag-title = $!test-lines[$test-lines-idx][CHAPTER] // '-';
 
     # search for the aside check panels
     my XML::Document $document .= new($!html);
