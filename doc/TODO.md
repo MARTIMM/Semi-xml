@@ -32,9 +32,9 @@ Attribute values which are empty like '' or "" are translated wrong
       $|xyz []                $xyz                        x
       $|xyz [x]               $xyz [x]                    x
 
-      $*|inline [x]           $inline [x]         1,3
-      $|*inline [x]           $inline [x]         1,3
-      $**inline [x]           $inline [x]         1,3
+      $*|inline [x]           $inline [x]         3       x
+      $|*inline [x]           $inline [x]         3       x
+      $**inline [x]           $inline [x]         3       x
 
       $|nonnest [! x !]       $nonnest {x}                x
                               $nonnest «x»                x
@@ -44,21 +44,21 @@ Attribute values which are empty like '' or "" are translated wrong
 
 ```
 * Notes;
-  1) `$*|`, `$|*` and `$**` might still be used when other spacing around elements is desired than the configuration prescribes. These will then mean; add space to the left, add space to the right and add spaces to the left and right resp.
+  1) `$*|`, `$|*` and `$**` All types are removed.
 
-  2) removed comment
+  2) Removed comment parsing and is done at a later phase after parsing.
 
-  3) The configuration will be searched for those elements which are inline and need a special treatment of spacing around elements. Also non nest-able and space reserving elements are searched for in the configuration. The inline elements must also check for some non-alphanumeric characters following the block. E.g. in case of `,` or `.` etc. no space should be placed between the block and the following character.
+  3) The configuration will be searched for those elements which are inline and need a special treatment of spacing around elements. Also non nestable and space preserving elements are searched for in the configuration. The inline elements must also check for some non-alphanumeric characters following the block. E.g. in case of `,` or `.` etc. no space should be placed between the block and the following character.
 
-  4) The key is a label mapped to the module in the configuration. The method must of course be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call. Perhaps a method in the module like `method is-method-inline ( Str $method-name --> Bool ) { }` returning True or False for handling top level element as in-lining or block element. When method is unavailable it is always assumed False. A long name is chosen to prevent name clashes. An example is made in SxmlCore but not called yet from the Actions module.
+  4) The key is a label mapped to the module in the configuration. The method must be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call.
 
-  5) The space reserving '=' character at the start of a block does not have to be removed completely but can just be used occasionally in case it is needed in a particular situation. E.g. To write css text it is not needed to have a space reserving block of text. However, to check the result, it is better to view it in a readable format.
+  5) The space reserving '=' character at the start of a block is removed completely. One can specify that some elements are to be space preserving in a local configuration file. Furthermore the :keep option will keep all spacing as was typed in.
 
-* Addition of several types of comments
+## Addition of several types of comments
   * [x] **# \<text> EOL**. Comments are removed and can only be used at top level and in **\$x [ ]** parts. Not within **\$x [! !]**.
   * [x] Generated XML Comments using **\$!SxmlCore.comment [ ]**.
   * [ ] Javascript and css like comments **// \<text> EOL** and **/\* \<text> \*/**. Can be used only within **\$x { }** and special checks must be done for these character strings within string variable values.
-  * [x] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere. This plan is aborted and a method is introduced to do just that. $!SxmlCore.drop [ ... ] throws away all that is enclosed.
+  * [x] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere. This plan is aborted and a method is introduced to do just that. $!SxmlCore.drop « ... » throws away all that is enclosed.
 
 
 ## External modules located in SxmlLib tree
