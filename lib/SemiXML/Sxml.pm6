@@ -147,6 +147,7 @@ class Sxml {
       note "\nMatch: $m.from(), $m.to(), $last-bracket-index\n$mtrace";
     }
 #    if $m.to != $last-bracket-index {
+#`{{
     if $m.to != $content.chars {
       my Str $before = $!actions.prematch();
       my Str $after = $!actions.postmatch();
@@ -178,6 +179,7 @@ class Sxml {
             color('red') ~ "\x[23CF]$after" ~ color('reset');
       }
     }
+}}
 
     True;
   }
