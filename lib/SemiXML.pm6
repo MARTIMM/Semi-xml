@@ -4,6 +4,9 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 #-------------------------------------------------------------------------------
+enum ElementType <Element Method>;
+
+#-------------------------------------------------------------------------------
 class Globals {
   has Str $.filename is rw;
   has Array $.refine is rw = [<xml xml>];
