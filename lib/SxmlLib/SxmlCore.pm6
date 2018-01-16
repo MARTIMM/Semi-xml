@@ -12,11 +12,6 @@ use XML;
 class SxmlCore {
 
   #-----------------------------------------------------------------------------
-  method is-method-inline ( Str $method-name --> Bool ) {
-    $method-name ~~ any(<date date-time>);
-  }
-
-  #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
   method date (
     XML::Element $parent, Hash $attrs, XML::Node :$content-body
