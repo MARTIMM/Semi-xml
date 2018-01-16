@@ -18,6 +18,89 @@ Attribute values which are empty like '' or "" are translated wrong
 
 # Todo
 
+## Redesigning the program
+The program is redesigned to cope with the several actions which got more and more mingled in the parsing phase. It is however possible to pull several actions out of the parsing phase and do it after parsing. This will become a better separation of concerns. There is however a problem with calling external modules which already generate XML code and returning that.
+Perhaps it can generate better error messages when problems are encountered.
+
+```plantuml
+
+Start: Semi XML text
+
+[*] --> Start
+Start --> element
+Start -> method
+
+
+state "Process element" as element {
+  state "Element attributes" as eattr
+  [*] --> eattr
+  eattr:  "Get atributes"
+  eattr --> [*]
+}
+
+state "Process method" as method {
+  state "Method attributes" as mattr
+  [*] --> mattr
+  mattr:  "Get atributes"
+  mattr --> [*]
+}
+
+element -> content
+method --> content
+state "Process body content" as content {
+  state "Normal content" as normal
+  normal: Content between\n[ ... ]
+  [*] --> normal
+  normal --> text
+  text --> normal
+  normal --> subelement
+  subelement: process element\nand content
+  subelement --> normal
+  note top of subelement : recursively\nprocess\nelement
+  subelement --> [*]
+
+  normal --> submethod
+  note top of submethod : recursively\nprocess\nmethod
+  submethod: process element\nand content
+  submethod --> [*]
+
+  state "Flat content" as flat
+  flat: Content between\n{ ... } or « ... »
+  [*] --> flat
+  flat --> text
+
+  text --> [*]
+}
+
+tree: Tree of result objects
+content --> tree
+tree --> [*]
+```
+
+```plantuml
+
+class Element {
+  Element: parent
+  Array[Element]: children
+  enum: element-type
+}
+
+class Body {
+  Element: owner-parent
+  Array[Content]: content
+}
+
+class Content {
+  enum: content-type
+}
+
+Element *- "*" Body
+Body *-> "*" Content
+
+Content *--> "*" Text
+Content *--> "*" Element
+
+```
 
 ## Parser and actions.
 * [ ] Error messages when parser fails can still be improved.
