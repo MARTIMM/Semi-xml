@@ -19,8 +19,7 @@ Attribute values which are empty like '' or "" are translated wrong
 # Todo
 
 ## Redesigning the program
-The program is redesigned to cope with the several actions which got more and more mingled in the parsing phase. It is however possible to pull several actions out of the parsing phase and do it after parsing. This will become a better separation of concerns. There is however a problem with calling external modules which already generate XML code and returning that.
-Perhaps it can generate better error messages when problems are encountered.
+The program is redesigned to cope with the several actions which got more and more mingled in the parsing phase. It is however possible to pull several actions out of the parsing phase and do it after parsing. This will become a better separation of concerns. Calling methods in external modules will be called after the parsing process providing the attributes and arguments (bodies) to the methods.
 
 ```plantuml
 
@@ -79,26 +78,26 @@ tree --> [*]
 
 ```plantuml
 
-class Element {
+class Node {
   Element: parent
-  Array[Element]: children
   enum: element-type
+  Array[Node]: nodes
+  Array[Body]: bodies
 }
 
 class Body {
-  Element: owner-parent
   Array[Content]: content
 }
 
 class Content {
-  enum: content-type
+  Array: parts
 }
 
-Element *- "*" Body
+Node *- "*" Body
 Body *-> "*" Content
 
 Content *--> "*" Text
-Content *--> "*" Element
+Content *--> "*" Node
 
 ```
 
@@ -136,6 +135,8 @@ Content *--> "*" Element
   4) The key is a label mapped to the module in the configuration. The method must be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call.
 
   5) The space reserving '=' character at the start of a block is removed completely. One can specify that some elements are to be space preserving in a local configuration file. Furthermore the :keep option will keep all spacing as was typed in.
+
+  6) Some of the above can be changed by using boolean attributes like `sxml:inline`, `sxml:keep`, `sxml:noesc` and `sxml:close`.
 
 ## Addition of several types of comments
   * [x] **# \<text> EOL**. Comments are removed and can only be used at top level and in **\$x [ ]** parts. Not within **\$x [! !]**.
