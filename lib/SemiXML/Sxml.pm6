@@ -204,6 +204,7 @@ class Sxml {
       $cmd = $!refined-tables<R>{$!refine[OUT]};
     }
 
+note "Cmd: {$cmd//'-'}";
     # command is defined and non-empty
     if ?$cmd {
 
@@ -220,6 +221,7 @@ class Sxml {
     else {
 
       my $filename = self!process-cmd-str("%op/%of.%oe");
+note "Fname: $filename";
 
       spurt( $filename, $document);
       note "Saved file in $filename"
