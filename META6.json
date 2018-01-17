@@ -21,6 +21,7 @@
     "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
     "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
     "SemiXML::StringList":              "lib/SemiXML/StringList.pm6",
+    "SemiXML::ContentBodies":           "lib/SemiXML/ContentBodies.pm6",
 
 
     "SxmlLib::SxmlHelper":              "lib/SxmlLib/SxmlHelper.pm6",
@@ -60,5 +61,5 @@
     "google-code-prettify/run_prettify.js"
   ],
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.46.0"
+  "version": "v0.46.1"
 }
