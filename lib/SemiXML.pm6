@@ -4,7 +4,7 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 #-------------------------------------------------------------------------------
-enum ElementType <Element Method>;
+enum NodeType <Fragment Element Method CData PI Comment>;
 
 #-------------------------------------------------------------------------------
 class Globals {
