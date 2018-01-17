@@ -3,26 +3,43 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
 
-use SemiXML::SxmlElement;
-use SemiXML::SxmlBody;
-use SemiXML::SxmlContent;
-use SemiXML::SxmlText;
-
+use SemiXML;
+use SemiXML::Node;
+use SemiXML::Body;
+use SemiXML::Content;
+use SemiXML::Text;
+use XML;
 
 #-------------------------------------------------------------------------------
 class Actions {
 
-  # The root should only have one element. When there are more, convert
+  has SemiXML::Globals $!globals;
+
+  # the root should only have one element. when there are more, convert
   # the result into a fragment.
-  has SemiXML::SxmlElement $!root;
-  has SemiXML::SxmlElement $!element;
+  has SemiXML::Node $!root;
+
+  # array of element showing the path to the currently parsed element. therefore
+  # an element in the array will always be the parent of the one next to it.
+  has Array $!elements;
+  has Int $!element-idx;
+
+  has XML::Document $!document;
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( ) {
+
+    $!globals .= instance;
+
+    # initialize root node and place in the array. this node will never be
+    # overwritten.
     $!root .= new(:name<root>);
+    $!elements = [$!root];
+    $!element-idx = 1;
+note "Idx A: $!element-idx";
+
+    #.= new(:name<root>)
   }
-
-
 
   #-----------------------------------------------------------------------------
   method TOP ( $match ) {
@@ -36,36 +53,105 @@ class Actions {
 
   #-----------------------------------------------------------------------------
   method tag-spec ( $match ) {
-note "\nTS: $match";
 
-    my Hash $attributes = self!attributes([$match<attributes>.caps]);
+    note "\nParse $match"
+      if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-    my $tag = $match<tag>;
+    my SemiXML::Node $element;
+    for $match.caps -> $pair {
 
-    my Str $symbol = $tag<sym>.Str;
-    if $symbol eq '$' {
-      $!element .= new( :name($tag<tag-name>.Str), :$attributes);
+      my $k = $pair.key;
+      my $v = $pair.value;
+note "  k,v: $k, $v";
+
+      given $k {
+        when 'tag' {
+          $element = self!create-element($v);
+          $!elements[$!element-idx] = $element;
+          $!elements[$!element-idx - 1].append($element);
+        }
+
+        when 'attributes' {
+          $element.attributes(self!attributes([$v.caps]));
+          note "  Created element: ", $element.perl
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
+      }
     }
 
-    elsif $symbol eq '$!' {
-      $!element .= new(
-        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str),
-        :$attributes
-      );
-    }
-
-    # set root element if this is the first element
-    #$!element.parent = ...
-note $!element.perl;
+    $!element-idx++;
+note "Idx B: $!element-idx";
   }
 
   #-----------------------------------------------------------------------------
   method tag-bodies ( $match ) {
 
+    note "  Body: $match"
+      if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+    # get a new body object
+    my SemiXML::Body $body = $!elements[$!element-idx - 1].body;
+
+    for $match.caps -> $pair {
+
+      # create an object for the body content
+      my SemiXML::Content $content .= new;
+      $body.content($content);
+
+      my $k = $pair.key;
+      my $v = $pair.value;
+note "    k,v: $k, $v";
+
+      given $k {
+        when 'body-a' {
+          $content.part(SemiXML::Text.new(:text($v.Str)));
+        }
+
+        when 'body-b' {
+          $content.part(SemiXML::Text.new(:text($v.Str)));
+        }
+
+        when 'body-c' {
+          $content.part(SemiXML::Text.new(:text($v.Str)));
+        }
+
+        when 'document' {
+note "Doc: $!elements[$!element-idx - 1].name(), ",
+  " $!elements[$!element-idx - 1].type()",
+  " <-> $v<tag-spec><tag><sym> $v<tag-spec><tag><tag-name>";
+        }
+      }
+    }
   }
 
+  #-----------------------------------------------------------------------------
+  # get the result document
+  method get-document ( --> XML::Document ) {
 
+    $!document
 
+    #my XML::Element $r .= new(:name<root>);
+    #XML::Document.new(:root($r));
+  }
+
+  #----[ private stuff ]--------------------------------------------------------
+  method !create-element ( $tag --> SemiXML::Node ) {
+
+    my SemiXML::Node $element;
+
+    #my $tag = $match<tag>;
+
+    my Str $symbol = $tag<sym>.Str;
+    if $symbol eq '$' {
+      $element .= new( :name($tag<tag-name>.Str));
+    }
+
+    elsif $symbol eq '$!' {
+      $element .= new(
+        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str)
+      );
+    }
+  }
 
   #-----------------------------------------------------------------------------
   method !attributes ( Array $attr-specs --> Hash ) {
@@ -102,15 +188,6 @@ note $!element.perl;
     }
 
     $attrs;
-  }
-
-  #-----------------------------------------------------------------------------
-  # temporary provision for the calling module returning an empty doument
-  use XML;
-  method get-document ( --> XML::Document ) {
-
-    my XML::Element $r .= new(:name<root>);
-    return XML::Document.new(:root($r));
   }
 }
 
