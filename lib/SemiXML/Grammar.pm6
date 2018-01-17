@@ -3,30 +3,12 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
 
-use SemiXML;
-
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
-  # get global object to get tracing info
-  my SemiXML::Globals $globals .= instance;
-
-  # Actions initialize
-  rule init-doc { <?> { note " " if $globals.trace and $globals.refined-tables<T><parse>; } }
-
-  # A document is only a tag with its content in a body. Defined like this
-  # there can only be one toplevel document. In the following body documents
-  # can be nested.
-  #
-  # Possible comments outside toplevel document
   rule TOP {
-    <.init-doc>
     <.prelude>          # Any number of characters except a '$'
-    [ <?> {
-        note "\n", '-' x 80, "\nParse document\n", $/.orig.Str.substr( 0, 80),
-             "\n " if $globals.trace and $globals.refined-tables<T><parse>;
-      }
-
+    [
       # A normal XML document has only one document. When there are more,
       # convert the result into a XML fragment.
       <document>+
@@ -34,18 +16,7 @@ grammar Grammar {
     <.post>             # drop remaining characters
   }
 
-  # Rule to pop the current bottomlevel element from the stack. It is not
-  # possible to use a rule to add the element to this stack. This happens in
-  # the actions method for <tag-spec>.
-  #
-  #rule pop-tag-from-list { <?> }
-  rule document {
-    <tag-spec> {
-      note "Parse: Tag $/<tag-spec>"
-        if $globals.trace and $globals.refined-tables<T><parse>;
-    }
-    <tag-bodies>* #<.pop-tag-from-list>
-  }
+  rule document { <tag-spec> <tag-bodies>* }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
