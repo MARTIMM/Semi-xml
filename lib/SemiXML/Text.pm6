@@ -6,29 +6,53 @@ unit package SemiXML:auth<github:MARTIMM>;
 use XML;
 
 #-------------------------------------------------------------------------------
-# Must make this class to substitute on XML::Text. That class removes all
-# spaces at the start and end of the content and removes newlines too
-# This is bad for tags like HTML <pre> and friends. With this class stripping
-# can be controlled better.
-#
-class Text does XML::Node {
+class Text {
 
-  has Bool $.strip;
-  has Str $.txt;
+  has Str $.text;
 
-  method Str ( ) {
-    return $!txt;
-  }
+  #-----------------------------------------------------------------------------
+  submethod BUILD ( Str :$!text ) { }
 
-  submethod BUILD ( Bool :$strip = False, Str :$text ) {
+  #-----------------------------------------------------------------------------
+  method xml ( Bool :$keep = False --> XML::Text ) {
 
-    $!strip = $strip;
-    $!txt = $text;
+    my Str $text = $!text;
+    if $keep {
+      # remove leading spaces for the minimum number of spaces when the
+      # content should be kept as it is typed in. this is done to prevent
+      # that the indent in the text is too much it is compared to the element
+      # owning this part.
+      my Int $min-indent = 1_000_000_000;
+      for $text.lines -> $line {
 
-    if $strip {
-      $!txt ~~ s:g/\s+$$//;   ## Chop out trailing spaces from lines.
-      $!txt ~~ s:g/^^\s+//;   ## Chop out leading spaces from lines.
-      $!txt .= chomp;         ## Remove a trailing newline if it exists.
+        # get the number of chars for the indent.
+        $line ~~ m/^ $<indent>=(\s*) /;
+        my Int $c = $/<indent>.Str.chars;
+
+        # adjust minimum only when there is something non-spacical on the line
+        # to prevent that an empty line will minimize to the minimum possible
+        $min-indent = $c if $line ~~ m/\S/ and $c < $min-indent;
+      }
+
+      # create a spaces string which is 'substracted' from each line
+      my Str $indent = ' ' x $min-indent;
+      my $new-text = '';
+      for $text.lines -> $line {
+
+        my $l = $line;            # get line
+        $l ~~ s/^ $indent//;      # remove the spaces
+        $new-text ~= "$l\n";      # add a newline because .lines() removes it
+      }
+
+      $text = $new-text;
     }
-  }
+
+    else {
+      $text ~~ s:g/^^ \s+ //;     # remove leading spaces
+      $text ~~ s:g/ \s+ $$//;     # remove trailing spaces
+      $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
+      $text ~~ s:g/ \n+ / /;      # remove return characters
+    }
+
+    XML::Text.new(:$text)
 }
