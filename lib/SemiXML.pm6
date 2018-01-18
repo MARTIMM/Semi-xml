@@ -4,7 +4,8 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 #-------------------------------------------------------------------------------
-enum NodeType <Fragment Element Method CData PI Comment>;
+enum NodeType <Fragment Plain NText Method CData PI Comment>;
+enum BodyType <BodyA BodyB BodyC>;
 
 #-------------------------------------------------------------------------------
 class Globals {
