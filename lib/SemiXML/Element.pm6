@@ -1,0 +1,184 @@
+use v6;
+
+#-------------------------------------------------------------------------------
+unit package SemiXML:auth<github:MARTIMM>;
+
+use SemiXML;
+use SemiXML::StringList;
+use SemiXML::Node;
+use XML;
+
+#-------------------------------------------------------------------------------
+class Element does SemiXML::Node {
+
+  has Str $.name;
+  has Str $.namespace;
+
+  has Str $!module;
+  has Str $!method;
+
+  has Hash $.attributes;
+
+  #-----------------------------------------------------------------------------
+  multi submethod BUILD ( Str:D :$!name!, Hash :$!attributes = {} ) {
+    $!node-type = SemiXML::Plain;
+    $!globals .= instance;
+    $!nodes = [];
+
+    # a normal element(Plain) might have entries in the FTable configuration
+    self!process-FTable;
+
+    # it can be overidden by attributes
+    self!process-attributes;
+
+    # keep can be overruled by a global keep
+    $!keep = $!globals.keep;
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi submethod BUILD (
+    Str:D :$!module!, Str:D :$!method!, Hash :$!attributes = {}
+  ) {
+    $!node-type = SemiXML::Method;
+    $!globals .= instance;
+    $!nodes = [];
+
+    self!process-attributes;
+
+    # keep can be overruled by a global keep
+    $!keep = $!globals.keep;
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # can only be called from other code and cannot be used directly from
+  # sxml text
+  multi submethod BUILD ( Bool:D :$cdata! ) {
+    $!node-type = SemiXML::CData;
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi submethod BUILD ( Bool:D :$pi! ) {
+    $!node-type = SemiXML::PI;
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi submethod BUILD ( Bool:D :$comment! ) {
+    $!node-type = SemiXML::Comment;
+  }
+
+  #-----------------------------------------------------------------------------
+  method append ( SemiXML::Node:D $node ) {
+
+    # search for the node first in the array
+    my Bool $parent-has-node = False;
+    for @($!nodes) -> $n {
+      if $n === self {
+        $parent-has-node = True;
+        last;
+      }
+    }
+
+    # add the node when not found and set the parent in the node
+    unless $parent-has-node {
+      $!nodes.push($node);
+      $node.parent(self);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method attributes ( Hash $!attributes ) {
+    self!process-attributes;
+  }
+
+  #-----------------------------------------------------------------------------
+  method perl ( --> Str ) {
+
+    my Str $e;
+    my Str $modifiers = '(';
+    $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
+    $modifiers ~= $!noesc ?? '¬e ' !! 'e ';  # escape transform or not
+    $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
+    $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
+
+    $modifiers ~= '| ';
+
+    $modifiers ~= 'F' if $!node-type ~~ SemiXML::Fragment;
+    $modifiers ~= 'E' if $!node-type ~~ SemiXML::Plain;
+    $modifiers ~= 'D' if $!node-type ~~ SemiXML::CData;
+    $modifiers ~= 'P' if $!node-type ~~ SemiXML::PI;
+    $modifiers ~= 'C' if $!node-type ~~ SemiXML::Comment;
+
+    $modifiers ~= ')';
+
+    my Str $attrs = '';
+    for $!attributes.kv -> $k, $v {
+      $attrs ~= "$k=\"$v\" ";
+    }
+
+    if $!node-type ~~ SemiXML::Plain {
+      $e = [~] '$', $!name, " $modifiers", " $attrs", ' ...';
+    }
+
+    else {
+      $e = [~] '$!', $!module, '.', $!method, " $modifiers", " $attrs", ' ...';
+    }
+
+    $e
+  }
+
+  #-----------------------------------------------------------------------------
+  method xml ( XML::Node $parent ) {
+note "X: $!name, $!node-type, $parent";
+
+    given $!node-type {
+      when SemiXML::Plain {
+        my XML::Element $this-node-xml .= new(:$!name);
+        for $!attributes.kv -> $k, $v {
+          $this-node-xml.set( $k, ~$v);
+        }
+
+        $parent.append($this-node-xml);
+        for @$!nodes -> $node {
+          $node.xml($this-node-xml);
+        }
+      }
+    }
+  }
+
+  #----[ private stuff ]--------------------------------------------------------
+  method !process-FTable ( ) {
+
+    my Hash $ftable = $!globals.refined-tables<F> // {};
+    $!inline = $!name ~~ any(|@($ftable<inline> // []));
+    $!noesc = $!name ~~ any(|@($ftable<no-escaping> // []));
+    $!keep = $!name ~~ any(|@($ftable<space-preserve> // []));
+    $!close = $!name ~~ any(|@($ftable<self-closing> // []));
+  }
+
+  #-----------------------------------------------------------------------------
+  method !process-attributes ( ) {
+
+    for $!attributes.keys -> $key {
+      given $key {
+        when /^ sxml ':' inline / {
+          $!inline = True;
+          $!attributes<$key>:delete;
+        }
+
+        when /^ sxml ':' noesc / {
+          $!noesc = True;
+          $!attributes<$key>:delete;
+        }
+
+        when /^ sxml ':' keep / {
+          $!keep = True;
+          $!attributes<$key>:delete;
+        }
+
+        when /^ sxml ':' / {
+          $!attributes<$key>:delete;
+        }
+      }
+    }
+  }
+}
