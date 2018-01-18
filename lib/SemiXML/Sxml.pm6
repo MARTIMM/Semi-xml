@@ -133,10 +133,10 @@ class Sxml {
 
     # reset all flags to its defaults until next parse will set them
     $!drop-cfg-filename = True;
-    $!force = $!trace = $!keep = False;
-    $!globals.trace = $!trace;
+    #$!force = $!trace = $!keep = False;
+    #$!globals.trace = $!trace;
     $!globals.raw = False;
-    $!globals.keep = $!keep;
+    #$!globals.keep = $!keep;
 
     # Throw an exception when there is a parsing failure
     my $last-bracket-index = $content.rindex(']') // $content.chars;
@@ -204,7 +204,6 @@ class Sxml {
       $cmd = $!refined-tables<R>{$!refine[OUT]};
     }
 
-note "Cmd: {$cmd//'-'}";
     # command is defined and non-empty
     if ?$cmd {
 
@@ -221,11 +220,9 @@ note "Cmd: {$cmd//'-'}";
     else {
 
       my $filename = self!process-cmd-str("%op/%of.%oe");
-note "Fname: $filename";
-
       spurt( $filename, $document);
       note "Saved file in $filename"
-        if $!trace and $!refined-tables<T><file-handling>;
+        if $!globals.trace and $!globals.refined-tables<T><file-handling>;
     }
   }
 
