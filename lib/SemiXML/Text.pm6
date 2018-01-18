@@ -3,21 +3,28 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
 
+use SemiXML;
+use SemiXML::Node;
+use SemiXML::XMLText;
 use XML;
 
 #-------------------------------------------------------------------------------
-class Text {
+class Text does SemiXML::Node {
 
   has Str $.text;
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( Str :$!text ) { }
+  submethod BUILD ( Str :$!text ) {
+    $!node-type = SemiXML::NText;
+  }
 
   #-----------------------------------------------------------------------------
-  method xml ( Bool :$keep = False --> XML::Text ) {
+  method xml ( XML::Node $parent, Bool :$keep = False ) {
+note "Xt: $!node-type, $parent, '$!text'";
 
     my Str $text = $!text;
     if $keep {
+
       # remove leading spaces for the minimum number of spaces when the
       # content should be kept as it is typed in. this is done to prevent
       # that the indent in the text is too much it is compared to the element
@@ -29,7 +36,7 @@ class Text {
         $line ~~ m/^ $<indent>=(\s*) /;
         my Int $c = $/<indent>.Str.chars;
 
-        # adjust minimum only when there is something non-spacical on the line
+        # adjust minimum only when there is something non-space on the line
         # to prevent that an empty line will minimize to the minimum possible
         $min-indent = $c if $line ~~ m/\S/ and $c < $min-indent;
       }
@@ -48,11 +55,13 @@ class Text {
     }
 
     else {
-      $text ~~ s:g/^^ \s+ //;     # remove leading spaces
-      $text ~~ s:g/ \s+ $$//;     # remove trailing spaces
-      $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
-      $text ~~ s:g/ \n+ / /;      # remove return characters
+#      $text ~~ s:g/^^ \s+ //;     # remove leading spaces
+#      $text ~~ s:g/ \s+ $$//;     # remove trailing spaces
+#      $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
+#      $text ~~ s:g/ \n+ //;       # remove return characters
     }
 
-    XML::Text.new(:$text)
+#note "P: $parent";
+    $parent.append(SemiXML::XMLText.new(:$text));
+  }
 }
