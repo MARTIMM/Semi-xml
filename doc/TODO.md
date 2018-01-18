@@ -78,26 +78,19 @@ tree --> [*]
 
 ```plantuml
 
-class Node {
+class Node <<Role>>{
   Element: parent
   enum: element-type
   Array[Node]: nodes
+}
+
+class Element {
   Array[Body]: bodies
 }
 
-class Body {
-  Array[Content]: content
-}
+Node <|-- Element
+Node <|-- Text
 
-class Content {
-  Array: parts
-}
-
-Node *- "*" Body
-Body *-> "*" Content
-
-Content *--> "*" Text
-Content *--> "*" Node
 
 ```
 
