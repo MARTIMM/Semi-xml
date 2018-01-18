@@ -6,7 +6,9 @@ unit package SemiXML:auth<github:MARTIMM>;
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
-  rule TOP {
+  token TOP {
+    [ <body-a> || <document> ]*
+#`{{
     <.prelude>          # Any number of characters except a '$'
     [
       # A normal XML document has only one document. When there are more,
@@ -14,14 +16,15 @@ grammar Grammar {
       <document>+
     ]
     <.post>             # drop remaining characters
+}}
   }
 
-  rule document { <tag-spec> <tag-bodies>* }
+  token document { <tag-spec> <.ws> <tag-bodies>* }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
   #
-  rule tag-spec { <tag> <attributes> }
+  token tag-spec { <tag> <attributes> }
 
   proto token tag { * }
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
@@ -37,7 +40,7 @@ grammar Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   #
-  rule attributes     { [ <attribute> ]* }
+  token attributes     { [ <attribute> ]* }
 
   token attribute     {
     <attr-key> '=' <attr-value-spec> ||
@@ -72,7 +75,6 @@ grammar Grammar {
     [ '«' ~ '»' <body-c> ]
   }
 
-  # opening brackets [ and { must also be escaped. « is weird enaugh.
   token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]> ]+ }
   token body-b { [ <.escaped-char> || <-[\\\{\}]> ]+ }
   token body-c { [ <.escaped-char> || <-[\\«»]> ]+ }
