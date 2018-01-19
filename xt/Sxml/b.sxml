@@ -1,3 +1,3 @@
-$a [
+$a =sxml:keep [
   $b [ B1 ]{ B2 }« B3 »
 ]
