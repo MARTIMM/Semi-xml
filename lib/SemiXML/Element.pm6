@@ -6,6 +6,7 @@ unit package SemiXML:auth<github:MARTIMM>;
 use SemiXML;
 use SemiXML::StringList;
 use SemiXML::Node;
+use SemiXML::Text;
 use XML;
 
 #-------------------------------------------------------------------------------
@@ -127,8 +128,8 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method xml ( XML::Node $parent ) {
-note "X: $!name, $!node-type, $parent";
+  method xml ( XML::Node $parent, Bool :$keep is copy = False ) {
+note "X: $!name, $!node-type, $parent, $keep";
 
     given $!node-type {
       when SemiXML::Plain {
@@ -139,7 +140,9 @@ note "X: $!name, $!node-type, $parent";
 
         $parent.append($this-node-xml);
         for @$!nodes -> $node {
-          $node.xml($this-node-xml);
+          $keep = $node.node-type ~~ SemiXML::Text
+                  ?? $keep !! ($keep or $!keep);
+          $node.xml( $this-node-xml, :$keep);
         }
       }
     }
@@ -162,21 +165,21 @@ note "X: $!name, $!node-type, $parent";
       given $key {
         when /^ sxml ':' inline / {
           $!inline = True;
-          $!attributes<$key>:delete;
+          $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' noesc / {
           $!noesc = True;
-          $!attributes<$key>:delete;
+          $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' keep / {
           $!keep = True;
-          $!attributes<$key>:delete;
+          $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' / {
-          $!attributes<$key>:delete;
+          $!attributes{$key}:delete;
         }
       }
     }
