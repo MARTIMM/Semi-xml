@@ -6,19 +6,10 @@ unit package SemiXML:auth<github:MARTIMM>;
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
-  token TOP {
-    [ <body-a> || <document> ]*
-#`{{
-    <.prelude>          # Any number of characters except a '$'
-    [
-      # A normal XML document has only one document. When there are more,
-      # convert the result into a XML fragment.
-      <document>+
-    ]
-    <.post>             # drop remaining characters
-}}
-  }
+  #token TOP { [ <body-a> || <topdocument> ]* }
+  token TOP { [ <body-a> || <document> ]* }
 
+  #rule topdocument { <tag-spec> <tag-bodies>* }
   token document { <tag-spec> <tag-bodies>* }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
@@ -40,7 +31,7 @@ grammar Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   #
-  rule attributes     { [ <attribute> ]* }
+  token attributes     { [ <.ws> <attribute> ]* }
 
   token attribute     {
     <attr-key> '=' <attr-value-spec> ||
@@ -65,19 +56,19 @@ grammar Grammar {
 
   token tag-bodies {
     # Content body can have child elements.
-    [ '[' ~ ']' [ <body-a> || <document> ]* ] ||
+    [ '[' ~ ']' [ <body-a> || <document> || \s+ ]* {note "[ $/ ]";}] ||
 
     # Content body can not have child elements. All other characters
     # remain unprocessed
-    [ '{' ~ '}' <body-b> ] ||
+    [ '{' ~ '}' [ <body-b> || \s+ ] ] ||
 
     # Alternative for '{ ... }'
-    [ '«' ~ '»' <body-c> ]
+    [ '«' ~ '»' [ <body-c> || \s+ ] ]
   }
 
-  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]> ]+ }
-  token body-b { [ <.escaped-char> || <-[\\\{\}]> ]+ }
-  token body-c { [ <.escaped-char> || <-[\\«»]> ]+ }
+  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]>+ ]+ }
+  token body-b { [ <.escaped-char> || <-[\\\{\}]>+ ]+ }
+  token body-c { [ <.escaped-char> || <-[\\«»]>+ ]+ }
 
   token escaped-char { '\\' . }
 
@@ -111,7 +102,4 @@ grammar Grammar {
     <.name-start-char> | <[- . 0..9]> | <[\xB7]> |
     <[\x0300..\x036F]> | <[\x203F..\x2040]>
   }
-
-  rule prelude { <-[$]>* }
-  rule post { \s* $ }
 }

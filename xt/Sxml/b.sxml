@@ -1,3 +1,4 @@
 $a =sxml:keep [
-  $b [ B1 ]{ B2 }« B3 »
+  $b [ B1 $c B1 ]{ B2 $d B2 }« B3 $e B3 »
+  $e1 a=1 b=2 [ $e2 [ abc ] cde ]
 ]

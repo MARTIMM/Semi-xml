@@ -128,10 +128,15 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method xml ( XML::Node $parent, Bool :$keep is copy = False ) {
+  method xml (
+    XML::Node $parent, Bool :$inline is copy = False,
+    Bool :$noesc is copy = False, Bool :$keep is copy = False,
+    Bool :$close is copy = False
+  ) {
 note "X: $!name, $!node-type, $parent, $keep";
 
     given $!node-type {
+      when SemiXML::Fragment { proceed; }
       when SemiXML::Plain {
         my XML::Element $this-node-xml .= new(:$!name);
         for $!attributes.kv -> $k, $v {
@@ -140,9 +145,15 @@ note "X: $!name, $!node-type, $parent, $keep";
 
         $parent.append($this-node-xml);
         for @$!nodes -> $node {
+          $inline = $node.node-type ~~ SemiXML::Text
+                  ?? $inline !! ($inline or $!inline);
+          $noesc = $node.node-type ~~ SemiXML::Text
+                  ?? $noesc !! ($noesc or $!noesc);
           $keep = $node.node-type ~~ SemiXML::Text
                   ?? $keep !! ($keep or $!keep);
-          $node.xml( $this-node-xml, :$keep);
+          $close = $node.node-type ~~ SemiXML::Text
+                  ?? $close !! ($close or $!close);
+          $node.xml( $this-node-xml, :$inline, :$noesc, :$keep, :$close);
         }
       }
     }

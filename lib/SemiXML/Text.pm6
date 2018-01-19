@@ -19,7 +19,10 @@ class Text does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method xml ( XML::Node $parent, Bool :$keep = False ) {
+  method xml (
+    XML::Node $parent, Bool :$inline = False, Bool :$noes = False,
+    Bool :$keep = False, Bool :$close = False
+  ) {
 note "Xt: $!node-type, $parent, '$!text'";
 
     my Str $text = $!text;

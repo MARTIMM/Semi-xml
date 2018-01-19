@@ -54,6 +54,7 @@ note "  k: $k";
         when 'body-a' {
         }
 
+        #when 'topdocument' {
         when 'document' {
           $!root.append($!elements[1]);
         }
@@ -65,6 +66,7 @@ note "  k: $k";
     # see how many elements are stored in root
     # return an empty document
     if $!root.nodes.elems == 0 {
+note "No elements";
       my XML::Element $ed .= new(:name<sxml:EmptyDocument>);
       $ed.setNamespace( 'github.MARTIMM', 'sxml');
       $!document .= new($ed);
@@ -72,12 +74,14 @@ note "  k: $k";
 
     # normal xml document
     elsif $!root.nodes.elems == 1 {
+note "1 element";
       my XML::Element $root-xml .= new(:name($!root.name));
       $!root.nodes[0].xml($root-xml);
       $!document .= new($root-xml.nodes[0]);
     }
 
     elsif $!root.nodes.elems > 1 {
+note "More elements";
       $!root.node-type = SemiXML::Fragment;
 
       my XML::Element $root-xml .= new(:name($!root.name));
@@ -98,7 +102,35 @@ note "\nDocument";
 
       given $k {
         when 'tag-spec' {
-note "  tag: $v";
+#note "  tag: $v";
+
+          my SemiXML::Element $element;
+          for $v.caps -> $vpair {
+
+            my $vk = $vpair.key;
+            my $vv = $vpair.value;
+            note "  $vk, $vv"
+              if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+            given $vk {
+              when 'tag' {
+                $element = self!create-element($vv);
+                $!elements[$!element-idx] = $element;
+#                $!elements[$!element-idx - 1].append($!element-idx);
+#note "  append $element.name() to $!elements[$!element-idx - 1].name()";
+
+                note "  Created element: ", $element.perl
+                  if $!globals.trace and $!globals.refined-tables<T><parse>;
+              }
+
+              when 'attributes' {
+                $element.attributes(self!attributes([$vv.caps]));
+              }
+            }
+          }
+
+#          $!element-idx++;
+#note "Idx B: $!element-idx";
         }
 
         when 'tag-bodies' {
@@ -141,12 +173,17 @@ note "  $vk => '$vv'";
                   if $!globals.trace and $!globals.refined-tables<T><parse>;
               }
 
+              when 'topdocument' { proceed; }
               when 'document' {
-                $!elements[$!element-idx - 1].append($!elements[$!element-idx]);
 
-                note "  append $!elements[$!element-idx].name() to",
-                     " $!elements[$!element-idx - 1].name()"
+                $!elements[$!element-idx - 2].append(
+                  $!elements[$!element-idx - 1]
+                );
+
+                note "  append $!elements[$!element-idx - 1].name() to",
+                     " $!elements[$!element-idx - 2].name()"
                   if $!globals.trace and $!globals.refined-tables<T><parse>;
+
               }
             }
 
@@ -163,7 +200,7 @@ note "Idx C: $!element-idx";
   #-----------------------------------------------------------------------------
   method tag-spec ( $match ) {
 
-    note "\nParse $match"
+    note "tag-spec $match"
       if $!globals.trace and $!globals.refined-tables<T><parse>;
 
     my SemiXML::Element $element;
@@ -178,18 +215,22 @@ note "Idx C: $!element-idx";
         when 'tag' {
           $element = self!create-element($v);
           $!elements[$!element-idx] = $element;
+#          $!elements[$!element-idx - 1].append($element);
+#note "  append $element.name() to $!elements[$!element-idx - 1].name()";
         }
 
-        when 'attributes' {
-          $element.attributes(self!attributes([$v.caps]));
-          note "  Created element: ", $element.perl
-            if $!globals.trace and $!globals.refined-tables<T><parse>;
-        }
+#        when 'attributes' {
+#          $element.attributes(self!attributes([$v.caps]));
+#        }
       }
+
+#      note "  Created element: ", $element.perl
+#        if $!globals.trace and $!globals.refined-tables<T><parse>;
     }
 
     $!element-idx++;
 note "Idx B: $!element-idx";
+
   }
 
   #-----------------------------------------------------------------------------
