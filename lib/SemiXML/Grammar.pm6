@@ -19,12 +19,12 @@ grammar Grammar {
 }}
   }
 
-  token document { <tag-spec> <.ws> <tag-bodies>* }
+  token document { <tag-spec> <tag-bodies>* }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
   #
-  token tag-spec { <tag> <attributes> }
+  rule tag-spec { <tag> <attributes> }
 
   proto token tag { * }
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
@@ -40,7 +40,7 @@ grammar Grammar {
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
   #
-  token attributes     { [ <attribute> ]* }
+  rule attributes     { [ <attribute> ]* }
 
   token attribute     {
     <attr-key> '=' <attr-value-spec> ||
