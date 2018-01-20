@@ -20,8 +20,10 @@ role Node {
   # all nodes contained in the bodies.
   has Array $.nodes;
 
-  # body count in which the node was found and its type
-  has Int $.body-number is rw;
+  # body count kept in the node. the body number is the content body where
+  # the node was found.
+  has Int $.body-count is rw = 0;
+  has Int $.body-number is rw = 0;
   has SemiXML::BodyType $.body-type is rw;
 
   # this nodes type
