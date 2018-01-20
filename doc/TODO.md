@@ -132,10 +132,9 @@ Node <|-- Text
   6) Some of the above can be changed by using boolean attributes like `sxml:inline`, `sxml:keep`, `sxml:noesc` and `sxml:close`.
 
 ## Addition of several types of comments
-  * [x] **# \<text> EOL**. Comments are removed and can only be used at top level and in **\$x [ ]** parts. Not within **\$x [! !]**.
-  * [x] Generated XML Comments using **\$!SxmlCore.comment [ ]**.
-  * [ ] Javascript and css like comments **// \<text> EOL** and **/\* \<text> \*/**. Can be used only within **\$x { }** and special checks must be done for these character strings within string variable values.
-  * [x] Simple perl6 forms like **#`{{ \<text> }}**. Can be used everywhere. This plan is aborted and a method is introduced to do just that. $!SxmlCore.drop « ... » throws away all that is enclosed.
+  * [x] **# \<text> EOL**. Comments are removed and can only be used at top the level and in **\$x [ ... ]** parts. '#' Characters used within **\$x { ... }** or **\$x « ... »** are unprocessed. Comments are not parsed but removed after the parsing process.
+  * [x] Generated XML Comments using **\$!SxmlCore.comment [ ]**. These produce `<!-- ... -->` texts.
+  * [x] $!SxmlCore.drop « ... » throws away all that is enclosed.
 
 
 ## External modules located in SxmlLib tree
@@ -166,12 +165,20 @@ Node <|-- Text
 
 
 ## Configuration
-  * [x] Search for config files (assume parsed file is fpath/file.sxml)
-    Merge sequence is <resource-location>/<resource named SemiXML.toml>,  <fpath>/SemiXML.toml, ~/.SemiXML.toml, ./.SemiXML.toml, ./SemiXML.toml, <fpath>/file.toml, ~/.file.toml, ./.file.toml and ./file.toml
+The configuration is maintained in a `toml` type of config file. The user must edit this file to control the transformation process. There can be many files which are merged together using the Config::DataLang::Refined module. There are several steps to find and merge these config files;
+  * [x] **Perl6 Resource Location/sha1 translated resource for SemiXML.toml**. This one is read first and hold some defaults for use with XML, HTML and Docbook.
+  * [x] **users sxml file's directory/SemiXML.toml**.
+  * [x] **users home directory/.SemiXML.toml**.
+  * [x] **current directory/.SemiXML.toml**.
+  * [x] **current directory/SemiXML.toml**.
+  * [x] **users sxml file's directory/sxml filename.toml**.
+  * [x] **users home directory/.sxml filename.toml**.
+  * [x] **current directory/.sxml filename.toml**.
+  * [x] **current directory/.sxml filename.toml**.
 
-  * [x] When choosing the proper command line, one must keep the following in mind. First the document written is always **sxml**. What it represents should be the first option (by default **xml**) and what it should become the next option (by default **xml**). These options are provided by the sxml2xml program. The following **--in** and  **--out** with e.g. **--in=docbook5** and  **--out=pdf**. This way the configuration can describe what should be done with, for example, the xml prelude, the doctype declaration or which command to select to get the result. To also use the refine method from Config::DataLang::Refine, the options are used as keys to that method. A third key can be added, the basename of the file being parsed. So the next configuration tables are possible ();
+The configuration file represents a few tables which can be refined using keywords. These keywords are provided via the `:refine([in,out])` attribute or `--in=...`, `--out=...` commandline options. When choosing the proper keywords, one must keep the following in mind. First, the document you edit is always written in the **sxml** language. What XML Language it represents should be the first option (by default **xml**) and what it should become the next option (also by default **xml**). An example is `--in=docbook5` and  `--out=pdf` or `:refine([<docbook5 pdf>])`.
 
-    ```
+### Configuration table
     # [C] Content additions table. only used with out-key and file. Looked
     # up after parsing to prefix data to result. Used for booleans to control
     # inclusion of XML description(X table), doctype(E table) and message
@@ -241,7 +248,7 @@ Node <|-- Text
     [ X.out-key ]
     [ X.out-key.file ]
 
-    ```
+
   All these ideas could also replace the one option --run from the program which only had a selective influence on the [output.program] table. Also less files might be searched through as opposed to the list shown above.
   This is now implemented.
 
