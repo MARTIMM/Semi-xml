@@ -36,7 +36,7 @@ class Actions {
     $!root .= new(:name<root>);
     $!elements = [$!root];
     $!element-idx = 1;
-note "Idx A: $!element-idx";
+#note "Idx A: $!element-idx";
 
     #.= new(:name<root>)
   }
@@ -45,21 +45,7 @@ note "Idx A: $!element-idx";
   method TOP ( $match ) {
 
 note "At the end of parsing";
-    for $match.caps -> $pair {
-
-      my $k = $pair.key;
-      my $v = $pair.value;
-note "  k: $k";
-      given $k {
-        when 'body-a' {
-        }
-
-        #when 'topdocument' {
-        when 'document' {
-          $!root.append($!elements[1]);
-        }
-      }
-    }
+    self!process-ast($match);
 
 
 
@@ -91,165 +77,99 @@ note "More elements";
   }
 
   #-----------------------------------------------------------------------------
-  method document ( $match ) {
+  # get the result document
+  method get-document ( --> XML::Document ) {
 
-note "\nDocument";
-    for $match.caps -> $pair {
+    #$!document.new(XML::Element.new(:name<root>));
+    $!document
+  }
 
-      my $k = $pair.key;
-      my $v = $pair.value;
-#note "  V = $v";
+  #----[ private stuff ]--------------------------------------------------------
+  method !process-ast ( Match $m, Int $l = 0 ) {
+
+    # do not go deeper into the tree after having processed some parts via
+    # other calls
+    my Bool $prune = False;
+
+    for $m.caps -> Pair $pair ( :key($k), :value($v)) {
+
+      if $!globals.trace and $!globals.refined-tables<T><parse> {
+        unless $k ~~ any(<sym tag-name element attribute attr-key attr-value
+                          attr-value-spec bool-true-attr bool-false-attr
+                          pre-body
+                        >) {
+          my Str $value-text = $k ~~ any(<tag-bodies document>)
+                 ?? ( $v ~~ m/ \n / ?? " ... " !! $v.Str )
+                 !! $v.Str;
+          note "$k: '$value-text'".indent($l);
+        }
+      }
 
       given $k {
-        when 'tag-spec' {
-#note "  tag: $v";
+        when 'tag' {
+          my SemiXML::Element $element = self!create-element($v);
+          $!elements[$!element-idx] = $element;
+          $!elements[$!element-idx - 1].append($element);
 
-          my SemiXML::Element $element;
-          for $v.caps -> $vpair {
+          note ("--> Append element: $element.name() to " ~
+                "$!elements[$!element-idx - 1].name()").indent($l)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
 
-            my $vk = $vpair.key;
-            my $vv = $vpair.value;
-            note "  $vk, $vv"
-              if $!globals.trace and $!globals.refined-tables<T><parse>;
+        when 'attributes' {
+          my SemiXML::Element $element = $!elements[$!element-idx];
+          $element.attributes(self!attributes([$v.caps]));
 
-            given $vk {
-              when 'tag' {
-                $element = self!create-element($vv);
-                $!elements[$!element-idx] = $element;
-#                $!elements[$!element-idx - 1].append($!element-idx);
-#note "  append $element.name() to $!elements[$!element-idx - 1].name()";
+          note "--> Created element: $element.perl()".indent($l)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-                note "  Created element: ", $element.perl
-                  if $!globals.trace and $!globals.refined-tables<T><parse>;
-              }
-
-              when 'attributes' {
-                $element.attributes(self!attributes([$vv.caps]));
-              }
-            }
-          }
-
-#          $!element-idx++;
+          # note that bodies must use 'index - 1' because of the
+          # index of the elements array is now incremented
+          $!element-idx++;
 #note "Idx B: $!element-idx";
         }
 
         when 'tag-bodies' {
 
-          for $v.caps -> $vpair {
-            my Int $body-count = 0;
+          my Str $pre-body = self!process-bodies(
+            $!elements[$!element-idx - 1], [$v.caps], $l + 2
+          );
 
-            my $vk = $vpair.key;
-            my $vv = $vpair.value;
-note "  $vk => '$vv'";
+          # prune the rest because recursive calls are made from
+          # process-bodies() when a document is encountered
+          $prune = True;
 
-            given $vk {
-              when 'body-a' {
-                my SemiXML::Text $t .= new(:text($vv.Str));
-                $t.body-type = SemiXML::BodyA;
-                $t.body-number = $body-count;
-                $!elements[$!element-idx - 1].append($t);
+          # also don't bring this line before the call because
+          # of the same reasons.
+          $!element-idx--;
+#note "Idx C: $!element-idx";
 
-                note "  append text to", " $!elements[$!element-idx - 1].name()"
-                  if $!globals.trace and $!globals.refined-tables<T><parse>;
-              }
+          if ?$pre-body {
+            # to insert the space we must select the element just one lower on
+            # the stack of elements
+            my SemiXML::Element $element = $!elements[$!element-idx - 1];
+            my SemiXML::Text $t .= new(:text($pre-body.Str));
+            $t.body-type = SemiXML::BodyC;  # dont care really, only spaces
+            $t.body-number = $element.body-count;
+            $element.append($t);
 
-              when 'body-b' {
-                my SemiXML::Text $t .= new(:text($vv.Str));
-                $t.body-type = SemiXML::BodyB;
-                $t.body-number = $body-count;
-                $!elements[$!element-idx - 1].append($t);
-
-                note "  append text to", " $!elements[$!element-idx - 1].name()"
-                  if $!globals.trace and $!globals.refined-tables<T><parse>;
-              }
-
-              when 'body-c' {
-                my SemiXML::Text $t .= new(:text($vv.Str));
-                $t.body-type = SemiXML::BodyC;
-                $t.body-number = $body-count;
-                $!elements[$!element-idx - 1].append($t);
-
-                note "  append text to", " $!elements[$!element-idx - 1].name()"
-                  if $!globals.trace and $!globals.refined-tables<T><parse>;
-              }
-
-              when 'topdocument' { proceed; }
-              when 'document' {
-
-                $!elements[$!element-idx - 2].append(
-                  $!elements[$!element-idx - 1]
-                );
-
-                note "  append $!elements[$!element-idx - 1].name() to",
-                     " $!elements[$!element-idx - 2].name()"
-                  if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-              }
-            }
-
-            $body-count++;
+            my $v1 = $v;
+            $v1 ~~ s:g/ \n /\\n/;
+            note ("[$element.body-count()] --> moved down and append '$v1'" ~
+                  " to $element.name()").indent($l-4)
+              if $!globals.trace and $!globals.refined-tables<T><parse>;
           }
         }
       }
+
+      self!process-ast( $v, $l + 2) unless $prune;
     }
-
-    $!element-idx--;
-note "Idx C: $!element-idx";
   }
 
   #-----------------------------------------------------------------------------
-  method tag-spec ( $match ) {
-
-    note "tag-spec $match"
-      if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-    my SemiXML::Element $element;
-    for $match.caps -> $pair {
-
-      my $k = $pair.key;
-      my $v = $pair.value;
-      note "  $k, $v"
-        if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-      given $k {
-        when 'tag' {
-          $element = self!create-element($v);
-          $!elements[$!element-idx] = $element;
-#          $!elements[$!element-idx - 1].append($element);
-#note "  append $element.name() to $!elements[$!element-idx - 1].name()";
-        }
-
-#        when 'attributes' {
-#          $element.attributes(self!attributes([$v.caps]));
-#        }
-      }
-
-#      note "  Created element: ", $element.perl
-#        if $!globals.trace and $!globals.refined-tables<T><parse>;
-    }
-
-    $!element-idx++;
-note "Idx B: $!element-idx";
-
-  }
-
-  #-----------------------------------------------------------------------------
-  method tag-bodies ( $match ) {
-  }
-
-  #-----------------------------------------------------------------------------
-  # get the result document
-  method get-document ( --> XML::Document ) {
-
-    $!document
-  }
-
-  #----[ private stuff ]--------------------------------------------------------
   method !create-element ( $tag --> SemiXML::Element ) {
 
     my SemiXML::Element $element;
-
-    #my $tag = $match<tag>;
 
     my Str $symbol = $tag<sym>.Str;
     if $symbol eq '$' {
@@ -274,6 +194,7 @@ note "Idx B: $!element-idx";
     # on the way an attribute is defined att='val1 val2' or att=<val1 val2>.
     my Hash $attrs = {};
     for @$attr-specs -> $as {
+
       next unless $as<attribute>:exists;
       my $a = $as<attribute>;
       my SemiXML::StringList $av;
@@ -300,5 +221,84 @@ note "Idx B: $!element-idx";
     }
 
     $attrs;
+  }
+
+  #-----------------------------------------------------------------------------
+  method !process-bodies (
+    SemiXML::Element $element, Array $body-specs, Int $l
+    --> Str
+  ) {
+
+    my SemiXML::BodyType $btype;
+
+    # When there is something like '$a [ abc $b def ]' $b does not have a
+    # body but the 'pre-body' will eat the spaces following it anyway. These
+    # spaces belong to $a but will be ignored in that case. the next text $a
+    # gets is then 'def ' which should be ' def '. Now to get that right, we
+    # first see that this set will only have one member namely 'pre-body'.
+    #
+    # However, this is also true here '$a [ abc $b [] def ]. Here, the 'prebody'
+    # belongs to $b and must be ignored. So '$<body-started>=<?>' is inserted
+    # just after the opening '[' of the tag-nody token. This will only be
+    # visible in the AST when something of the rule is found and thus will
+    # allways force two or more members.
+
+    my Bool $only-pre-body = $body-specs.elems == 1;
+    return $body-specs[0].value.Str if $only-pre-body;
+
+    for @$body-specs -> Pair $pair ( :key($k), :value($v)) {
+
+      note "[$element.body-count()] $k".indent($l)
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+      given $k {
+        when 'body-started' {
+          $element.body-count++;
+        }
+
+        when 'body-a' {
+          my SemiXML::Text $t .= new(:text($v.Str));
+          $t.body-type = SemiXML::BodyA;
+          $t.body-number = $element.body-count;
+          $element.append($t);
+
+          my $v1 = $v;
+          $v1 ~~ s:g/ \n /\\n/;
+          note "--> append '$v1' to $element.name()".indent($l+4)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
+
+        when 'body-b' {
+          my SemiXML::Text $t .= new(:text($v.Str));
+          $t.body-type = SemiXML::BodyB;
+          $t.body-number = $element.body-count;
+          $!elements[$!element-idx - 1].append($t);
+
+          my $v1 = $v;
+          $v1 ~~ s:g/ \n /\\n/;
+          note "--> append '$v1' to $element.name()".indent($l+4)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
+
+        when 'body-c' {
+          my SemiXML::Text $t .= new(:text($v.Str));
+          $t.body-type = SemiXML::BodyC;
+          $t.body-number = $element.body-count;
+          $!elements[$!element-idx - 1].append($t);
+
+          my $v1 = $v;
+          $v1 ~~ s:g/ \n /\\n/;
+          note "--> append '$v1' to $element.name()".indent($l+4)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
+
+        #when 'topdocument' { proceed; }
+        when 'document' {
+          self!process-ast( $v, $l+4);
+        }
+      }
+    }
+
+    return '';
   }
 }

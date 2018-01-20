@@ -6,16 +6,16 @@ unit package SemiXML:auth<github:MARTIMM>;
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
-  #token TOP { [ <body-a> || <topdocument> ]* }
   token TOP { [ <body-a> || <document> ]* }
 
-  #rule topdocument { <tag-spec> <tag-bodies>* }
-  token document { <tag-spec> <tag-bodies>* }
+  token document { <tag-spec> <tag-bodies> }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
-  #
-  rule tag-spec { <tag> <attributes> }
+  # '<body-a>?' is attached to cope with spaces. When there is no body found it
+  # backtracks to only `<tag> <attributes>` and the rest is eaten in the parents
+  # production of the body.
+  token tag-spec { <tag> <attributes> }
 
   proto token tag { * }
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
@@ -54,16 +54,17 @@ grammar Grammar {
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]* }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
-  token tag-bodies {
-    # Content body can have child elements.
-    [ '[' ~ ']' [ <body-a> || <document> || \s+ ]* {note "[ $/ ]";}] ||
+  token tag-bodies { $<pre-body>=\s* [
+      # Content body can have child elements.
+      [ $<body-started>=<?> '[' ~ ']' [ <body-a> || <document> ]* ] ||
 
-    # Content body can not have child elements. All other characters
-    # remain unprocessed
-    [ '{' ~ '}' [ <body-b> || \s+ ] ] ||
+      # Content body can not have child elements. All other characters
+      # remain unprocessed
+      [ $<body-started>=<?> '{' ~ '}' <body-b> ] ||
 
-    # Alternative for '{ ... }'
-    [ '«' ~ '»' [ <body-c> || \s+ ] ]
+      # Alternative for '{ ... }'
+      [ $<body-started>=<?> '«' ~ '»' <body-c> ]
+    ]*
   }
 
   token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]>+ ]+ }
