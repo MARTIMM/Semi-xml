@@ -136,8 +136,7 @@ class Element does SemiXML::Node {
 note "X: $!name, $!node-type, $parent, $keep";
 
     given $!node-type {
-      when SemiXML::Fragment { proceed; }
-      when SemiXML::Plain {
+      when any( SemiXML::Fragment, SemiXML::Plain) {
         my XML::Element $this-node-xml .= new(:$!name);
         for $!attributes.kv -> $k, $v {
           $this-node-xml.set( $k, ~$v);
