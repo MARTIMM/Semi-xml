@@ -481,7 +481,7 @@ class SxmlHelper {
 #note "Nodes: $node.nodes.elems(), ", $node.nodes.join(', ');
       }
 
-      # some elements mast not be processed to escape characters
+      # some elements must not be processed to escape characters
       if $node.name ~~ any(@$no-escaping) {
         # no escaping must be performed on its contents
         # for these kinds of nodes
@@ -493,7 +493,7 @@ class SxmlHelper {
         return;
       }
 
-      # recurively process through child elements
+      # recursivly process through child elements
       escape-attr-and-elements(
         $_, :$space-preserve, :$comment-preserve
       ) for $node.nodes;
