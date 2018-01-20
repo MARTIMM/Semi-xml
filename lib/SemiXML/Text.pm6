@@ -20,7 +20,7 @@ class Text does SemiXML::Node {
 
   #-----------------------------------------------------------------------------
   method xml (
-    XML::Node $parent, Bool :$inline = False, Bool :$noes = False,
+    XML::Node $parent, Bool :$inline = False, Bool :$noesc = False,
     Bool :$keep = False, Bool :$close = False
   ) {
 note "Xt: $!node-type, $parent, '$!text'";
@@ -65,11 +65,29 @@ note "Xt: $!node-type, $parent, '$!text'";
     }
 
     else {
-      $text ~~ s:g/^^ \s+ //;     # remove leading spaces
-      $text ~~ s:g/ \s+ $$//;     # remove trailing spaces
-      $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
-      $text ~~ s:g/ \n+ //;       # remove return characters
+
+      unless $noesc {
+        $text ~~ s:g/^^ \s+ //;     # remove leading spaces
+        $text ~~ s:g/ \s+ $$//;     # remove trailing spaces
+        $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
+        $text ~~ s:g/ \n+ //;       # remove return characters
+
+
+        # replace & for &amp; except for cases which are entities
+        # like '&#123;' or '&copy;'
+        $text ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;
+
+        $text ~~ s:g/\\\s/\&nbsp;/;
+        $text ~~ s:g/ '<' /\&lt;/;
+        $text ~~ s:g/ '>' /\&gt;/;
+      }
     }
+
+    # remove comments only when in BodyA. the others are left alone.
+note "E0: $text";
+    $text ~~ s:g/ \s* <!after <[\\]>> '#' \N*: $$//
+      if $!body-type ~~ SemiXML::BodyA;
+note "E1: $text";
 
 #note "P: $parent";
     $parent.append(SemiXML::XMLText.new(:$text));
