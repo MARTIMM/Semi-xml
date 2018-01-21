@@ -27,5 +27,5 @@
 #  tables        = true
   modules       = true
   parse         = true
-#  parse-result  = true
+  parse-result  = true
   file-handling = true
