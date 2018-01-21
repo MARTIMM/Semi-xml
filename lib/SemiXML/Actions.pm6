@@ -8,6 +8,7 @@ use SemiXML::Node;
 use SemiXML::Element;
 use SemiXML::Text;
 use SemiXML::StringList;
+use SemiXML::Helper;
 use XML;
 
 #-------------------------------------------------------------------------------
@@ -30,6 +31,10 @@ class Actions {
   submethod BUILD ( ) {
 
     $!globals .= instance;
+  }
+
+  #-----------------------------------------------------------------------------
+  method TOP ( $match ) {
 
     # initialize root node and place in the array. this node will never be
     # overwritten.
@@ -38,11 +43,6 @@ class Actions {
     $!element-idx = 1;
 #note "Idx A: $!element-idx";
 
-    #.= new(:name<root>)
-  }
-
-  #-----------------------------------------------------------------------------
-  method TOP ( $match ) {
 
 note "At the end of parsing";
     self!process-ast($match);
@@ -63,7 +63,11 @@ note "No elements";
 note "1 element";
       my XML::Element $root-xml .= new(:name($!root.name));
       $!root.nodes[0].xml($root-xml);
-      $!document .= new($root-xml.nodes[0]);
+      $!document .= new(
+        $root-xml.nodes[0].defined
+          ?? $root-xml.nodes[0]
+          !! XML::Element.new(:name<sxml:noChildDefined>)
+      );
     }
 
     elsif $!root.nodes.elems > 1 {
@@ -71,10 +75,23 @@ note "More elements";
       $!root.node-type = SemiXML::Fragment;
 
       my XML::Element $root-xml .= new(:name($!root.name));
-      $!root.xml($root-xml);
+      for $!root.nodes -> $node {
+        $node.xml($root-xml);
+      }
+
       $!document .= new($root-xml);
     }
-  }
+
+    my XML::Element $root = $!document.root;
+    $root.setNamespace( 'github.MARTIMM', 'sxml');
+
+    subst-variables($!document);
+    remap-content($!document);
+    remove-sxml($!document);
+
+    # remove the namespace declaration
+    $root.unset("xmlns:sxml");
+}
 
   #-----------------------------------------------------------------------------
   # get the result document
@@ -84,6 +101,21 @@ note "More elements";
     $!document
   }
 
+#`{{
+  #-----------------------------------------------------------------------------
+  # messages
+  method tag-spec ( $match ) { self!make-note( $match, 'tag-spec'); }
+  method body-a ( $match ) { self!make-note( $match, 'body-a'); }
+  method body-b ( $match ) { self!make-note( $match, 'body-b'); }
+  method body-c ( $match ) { self!make-note( $match, 'body-c'); }
+  #method  ( $match ) {
+  #method  ( $match ) {
+
+  method !make-note ( $match, $routine-name ) {
+    note "$routine-name: $match"
+      if $!globals.trace and $!globals.refined-tables<T><parse>;
+  }
+}}
   #----[ private stuff ]--------------------------------------------------------
   method !process-ast ( Match $m, Int $l = 0 ) {
 
@@ -156,7 +188,7 @@ note "More elements";
             my $v1 = $v;
             $v1 ~~ s:g/ \n /\\n/;
             note ("[$element.body-count()] --> moved down and append '$v1'" ~
-                  " to $element.name()").indent($l-4)
+                  " to $element.name()").indent(max(0,$l-4))
               if $!globals.trace and $!globals.refined-tables<T><parse>;
           }
         }
