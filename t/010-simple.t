@@ -15,9 +15,9 @@ subtest 'test oneliners', {
   like $xml, /'a3="h h"'/, 'a2 attribute';
 
   throws-like(
-    { $xml = parse('$st [ $f w [] hj ]');},
-    X::AdHoc, 'Parse failure',
-    :message(/^ "Parse failure just after 'document'"/)
+    { $xml = parse('$st [ $f w [] hj ]'); },
+    X::SemiXML, 'Parse failure',
+    :message(/:s Cannot start a content body/)
   );
 
   $xml = parse('$t1 [ $t2 [] $t3[]]');
@@ -87,8 +87,7 @@ sub parse ( Str $content is copy --> Str ) {
 #  $content ~~ s:g/\s+/ /;
 #  ok $r, "match $content";
 
-  my Str $xml = ~$x;
-  $xml;
+  ~$x
 }
 
 #-------------------------------------------------------------------------------
