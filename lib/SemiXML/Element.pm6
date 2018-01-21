@@ -143,16 +143,26 @@ note "X: $!name, $!node-type, $parent, $keep";
         }
 
         $parent.append($this-node-xml);
-        for @$!nodes -> $node {
-          $inline = $node.node-type ~~ SemiXML::Text
-                  ?? $inline !! ($inline or $!inline);
-          $noesc = $node.node-type ~~ SemiXML::Text
-                  ?? $noesc !! ($noesc or $!noesc);
-          $keep = $node.node-type ~~ SemiXML::Text
-                  ?? $keep !! ($keep or $!keep);
-          $close = $node.node-type ~~ SemiXML::Text
-                  ?? $close !! ($close or $!close);
-          $node.xml( $this-node-xml, :$inline, :$noesc, :$keep, :$close);
+
+        unless $!close {
+          if $!nodes.elems {
+            for @$!nodes -> $node {
+              $inline = $node.node-type ~~ SemiXML::Text
+                      ?? $inline !! ($inline or $!inline);
+              $noesc = $node.node-type ~~ SemiXML::Text
+                      ?? $noesc !! ($noesc or $!noesc);
+              $keep = $node.node-type ~~ SemiXML::Text
+                      ?? $keep !! ($keep or $!keep);
+              $close = $node.node-type ~~ SemiXML::Text
+                      ?? $close !! ($close or $!close);
+
+              $node.xml( $this-node-xml, :$inline, :$noesc, :$keep, :$close);
+            }
+          }
+
+          else {
+            $this-node-xml.append(SemiXML::XMLText.new(:text('')));
+          }
         }
       }
     }
