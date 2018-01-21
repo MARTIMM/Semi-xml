@@ -1,15 +1,15 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SxmlLib:auth<github:MARTIMM>;
+unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
-use SemiXML::Text;
+use SemiXML::XMLText;
 use XML;
 use XML::XPath;
 
 #-------------------------------------------------------------------------------
-class SxmlHelper {
+class Helper {
 
   #-----------------------------------------------------------------------------
 #TODO $config should come indirectly from $!refined-config
@@ -98,7 +98,7 @@ class SxmlHelper {
   ) is export {
 
     # create a text element, even when it is an empty string.
-    my XML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
+    my XML::Node $text-element = SemiXML::XMLText.new(:$text) if $text.defined;
 
     # create an element only when the name is defined and not empty
     my XML::Node $element =
@@ -127,12 +127,12 @@ class SxmlHelper {
     --> XML::Node
   ) is export {
 
-    my XML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
+    my XML::Node $text-element = SemiXML::XMLText.new(:$text) if $text.defined;
     my XML::Node $element =
        XML::Element.new( :$name, :attribs(%$attributes)) if ? $name;
 
     if ? $element and ? $text-element {
-      $element = SemiXML::Text.new(:$text);
+      $element = SemiXML::XMLText.new(:$text);
     }
 
     elsif ? $text-element {
@@ -152,7 +152,7 @@ class SxmlHelper {
     my XML::Node $element;
 
     if ? $text {
-      $element = SemiXML::Text.new(:$text);
+      $element = SemiXML::XMLText.new(:$text);
     }
 
     else {
@@ -172,7 +172,7 @@ class SxmlHelper {
     my XML::Node $element;
 
     if ? $text {
-      $element = SemiXML::Text.new(:$text);
+      $element = SemiXML::XMLText.new(:$text);
     }
 
     else {
@@ -226,14 +226,28 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   # search for variables and substitute them
-  sub subst-variables ( XML::Element $parent ) is export {
+  sub subst-variables ( XML::Node $parent ) is export {
 
-    my XML::Document $xml-document .= new($parent);
-    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+    my  XML::XPath $x;
 
-    # set namespace first
-    my $x = XML::XPath.new(:document($xml-document));
-    $x.set-namespace: 'sxml' => 'github.MARTIMM';
+    if $parent ~~ XML::Element {
+      my XML::Document $xml-document .= new($parent);
+      $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+      # set namespace first
+      $x .= new(:document($xml-document));
+      $x.set-namespace: 'sxml' => 'github.MARTIMM';
+    }
+
+    # else it should be a document
+    elsif $parent ~~ XML::Document {
+      $x .= new(:document($parent));
+      $x.set-namespace: 'sxml' => 'github.MARTIMM';
+    }
+
+    else {
+      die "Wrong argument type, must be Element or Document";
+    }
 
     # look for variable declarations
     for $x.find( '//sxml:var-decl', :to-list) -> $vdecl {
@@ -286,8 +300,10 @@ class SxmlHelper {
       $vdecl.remove unless $var-global;
     }
 
-    # remove the namespace
-    $parent.attribs{"xmlns:sxml"}:delete;
+    if $parent ~~ XML::Element {
+      # remove the namespace
+      $parent.attribs{"xmlns:sxml"}:delete;
+    }
   }
 
   #-----------------------------------------------------------------------------
@@ -319,7 +335,7 @@ class SxmlHelper {
       $clone = XML::Text.new(:text($node.text));
     }
 
-    elsif $node ~~ SemiXML::Text {
+    elsif $node ~~ SemiXML::XMLText {
 #note "  Node is SemiXML text";
       $clone = XML::Text.new(:text($node.txt));
     }
@@ -338,14 +354,11 @@ class SxmlHelper {
 
   #-----------------------------------------------------------------------------
   # move content to some other place in the document
-  sub remap-content ( XML::Element $parent ) is export {
-
-    # get xpath object
-    my XML::Document $xml-document .= new($parent);
-    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+  sub remap-content ( XML::Document $parent ) is export {
 
     # set namespace first
-    my $x = XML::XPath.new(:document($xml-document));
+    my  XML::XPath $x;
+    $x .= new(:document($parent));
     $x.set-namespace: 'sxml' => 'github.MARTIMM';
 
     # look for remapping elements
@@ -395,9 +408,6 @@ class SxmlHelper {
 
       $remap.remove;
     }
-
-    # remove the namespace
-    $parent.attribs{"xmlns:sxml"}:delete;
   }
 
   #-----------------------------------------------------------------------------
@@ -435,10 +445,10 @@ class SxmlHelper {
 
     # process body text to escape special chars. we can process this always
     # because parent elements are already accepted to modify the content.
-    if $node ~~ any( SemiXML::Text, XML::Text) {
+    if $node ~~ any( SemiXML::XMLText, XML::Text) {
       my Str $s = cleanup-text( ~$node, :$space-preserve, :$comment-preserve);
       my XML::Node $p = $node.parent;
-      $p.replace( $node, SemiXML::Text.new(:text($s)));
+      $p.replace( $node, SemiXML::XMLText.new(:text($s)));
     }
 
     elsif $node ~~ XML::Element {
@@ -612,8 +622,8 @@ note "E1: $esc";
           $v.insert($t);
         }
 
-        elsif $v.nodes[0] ~~ SemiXML::Text {
-          my SemiXML::Text $t = $v.nodes[0];
+        elsif $v.nodes[0] ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t = $v.nodes[0];
           my Str $text = $t.txt;
           $text ~~ s/^ \s+ //;
           $t.remove;
@@ -630,8 +640,8 @@ note "E1: $esc";
           $v.append($t);
         }
 
-        elsif $v.nodes[*-1] ~~ SemiXML::Text {
-          my SemiXML::Text $t = $v.nodes[*-1];
+        elsif $v.nodes[*-1] ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t = $v.nodes[*-1];
           my Str $text = $t.txt;
           $text ~~ s/^ \s+ //;
           $t.remove;
@@ -659,8 +669,8 @@ note "E1: $esc";
           $v.before($t);
         }
 
-        elsif $ps ~~ SemiXML::Text {
-          my SemiXML::Text $t := $ps;
+        elsif $ps ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t := $ps;
           my Str $text = $t.txt;
           $text ~= ' ';
           $t.remove;
@@ -687,8 +697,8 @@ note "E1: $esc";
           }
         }
 
-        elsif $ns ~~ SemiXML::Text {
-          my SemiXML::Text $t := $ns;
+        elsif $ns ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t := $ns;
           my Str $text = $t.txt;
           if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
             $t .= new(:text(' '));
