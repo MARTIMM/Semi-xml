@@ -2,11 +2,41 @@ use v6;
 
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
+use SemiXML;
+use Terminal::ANSIColor;
 
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
-  token TOP { [ <body-a> || <document> ]* }
+  #-----------------------------------------------------------------------------
+  sub error ( Match:D $match, Str:D $message is copy ) {
+
+    # number of chars to show before error location
+    my Int $i = min( $match.Str.chars, 50) - 1;
+
+    # linesnumber where error was found
+    temp $/;
+    $match.Str ~~ m:g/\n/;
+    my Int $l = $/[*].elems + 1;
+
+    $message ~= [~]
+          " line $l\n... $match.substr( *-$i, *-1)",  color('red'),
+          "\x[23CF]", $match.substr( *-1, *-0),
+          $match.postmatch.substr( 0, 28), color('reset');
+    my X::SemiXML $x .= new(:$message);
+    die $x;
+  }
+
+  #-----------------------------------------------------------------------------
+  token TOP {
+    [ <body-a> ||
+      <document> ||
+      [ <[\[\]\{\}«»]> {
+          error( $/, "Unexpected content body start/close character");
+        }
+      ]
+    ]*
+  }
 
   token document { <tag-spec> <tag-bodies> }
 
@@ -56,18 +86,31 @@ grammar Grammar {
 
   token tag-bodies { $<pre-body>=\s* [
       # Content body can have child elements.
-      [ $<body-started>=<?> '[' ~ ']' [ <body-a> || <document> ]* ] ||
+      [ $<body-started>=<?> '[' ~ ']' [
+          <body-a> ||
+          <document> ||
+          [ '[' { error( $/, "Cannot start a content body with '['"); } ]
+        ]*
+      ] ||
 
       # Content body can not have child elements. All other characters
       # remain unprocessed
-      [ $<body-started>=<?> '{' ~ '}' <body-b> ] ||
+      [ $<body-started>=<?> '{' ~ '}' [
+          <body-b> ||
+          [ '{' { error( $/, "Cannot start a content body with '\{'"); } ]
+        ]
+      ] ||
 
       # Alternative for '{ ... }'
-      [ $<body-started>=<?> '«' ~ '»' <body-c> ]
+      [ $<body-started>=<?> '«' ~ '»' [
+          <body-c> ||
+          [ '«' { error( $/, "Cannot start a content body with '«'"); } ]
+        ]
+      ]
     ]*
   }
 
-  token body-a { [ <.escaped-char> || <.entity> || <-[\\\$\[\]]>+ ]+ }
+  token body-a { [ <.escaped-char> || <.entity> || <-[\$\[\]]>+ ]+ }
   token body-b { [ <.escaped-char> || <-[\\\{\}]>+ ]+ }
   token body-c { [ <.escaped-char> || <-[\\«»]>+ ]+ }
 
