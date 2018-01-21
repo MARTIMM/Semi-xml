@@ -1,4 +1,3 @@
-$a =sxml:keep b=abc [
-  $b [ B1a $c B1b ]« def »
-  $e1 [ $e2 [] cde ]
-]
+$a [
+  $b w ]
+   abc ]
