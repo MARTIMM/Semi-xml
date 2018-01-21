@@ -6,6 +6,7 @@ unit package SemiXML:auth<github:MARTIMM>;
 use SemiXML;
 use SemiXML::Node;
 use SemiXML::XMLText;
+use SemiXML::Helper;
 use XML;
 
 #-------------------------------------------------------------------------------
@@ -67,10 +68,12 @@ note "Xt: $!node-type, $parent, '$!text'";
     else {
 
       unless $noesc {
-        $text ~~ s:g/^^ \s+ //;     # remove leading spaces
-        $text ~~ s:g/ \s+ $$//;     # remove trailing spaces
+        $text ~~ s:g/^^ \h+ //;     # remove leading spaces
+        $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
         $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
         $text ~~ s:g/ \n+ //;       # remove return characters
+        $text ~~ s/ \n+ $//;
+        $text ~~ s:g/ \n+ / /;
 
 
         # replace & for &amp; except for cases which are entities
@@ -88,6 +91,21 @@ note "E0: $text";
     $text ~~ s:g/ \s* <!after <[\\]>> '#' \N*: $$//
       if $!body-type ~~ SemiXML::BodyA;
 note "E1: $text";
+
+    # remove escape characters
+    $text ~~ s/\\//;
+#`{{
+    # Remove rest of the backslashes unless followed by hex numbers prefixed
+    # by an 'x'
+    #
+    if $esc ~~ m/ '\\x' <xdigit>+ / {
+      my $set-utf8 = sub ( $m1, $m2) {
+        return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
+      };
+
+      $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
+    }
+}}
 
 #note "P: $parent";
     $parent.append(SemiXML::XMLText.new(:$text));
