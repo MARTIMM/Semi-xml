@@ -9,7 +9,7 @@ use SemiXML::Grammar;
 use SemiXML::Actions;
 use SemiXML::Text;
 use Config::DataLang::Refine;
-use Terminal::ANSIColor;
+#use Terminal::ANSIColor;
 
 use XML;
 
@@ -147,14 +147,15 @@ class Sxml {
       note "\nMatch: $m.from(), $m.to(), $last-bracket-index\n$mtrace";
     }
 #    if $m.to != $last-bracket-index {
-#`{{
+
     if $m.to != $content.chars {
+#`{{
       my Str $before = $!actions.prematch();
       my Str $after = $!actions.postmatch();
       my Str $current = $content.substr(
         $!actions.from, $!actions.to - $!actions.from
       );
-
+note "BAC: $before, $after, $current";
       $before ~ $current ~~ m:g/ (\n) /;
       my Int $nth-line = $/.elems + 1;
 
@@ -178,8 +179,10 @@ class Sxml {
             $before ~ $current ~
             color('red') ~ "\x[23CF]$after" ~ color('reset');
       }
-    }
 }}
+      die [~] "Parse failure";
+    }
+
 
     True;
   }
