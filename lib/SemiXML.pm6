@@ -1,32 +1,39 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<github:MARTIMM>;
-
-#-------------------------------------------------------------------------------
-enum NodeType <Fragment Plain NText Method CData PI Comment>;
-enum BodyType <BodyA BodyB BodyC>;
-
-#-------------------------------------------------------------------------------
-class Globals {
-  has Str $.filename is rw;
-  has Array $.refine is rw = [<xml xml>];
-  has Hash $.refined-tables is rw;
-  has Bool $.trace is rw;
-  has Bool $.keep is rw;
-  has Bool $.raw is rw;
-  has Hash $.objects is rw;
-
-  my Globals $instance;
+package SemiXML:auth<github:MARTIMM> {
 
   #-----------------------------------------------------------------------------
-  submethod new ( ) { !!! }
+  enum NodeType <Fragment Plain NText Method CData PI Comment>;
+  enum BodyType <BodyA BodyB BodyC>;
 
   #-----------------------------------------------------------------------------
-  method instance ( --> Globals ) {
+  class Globals {
+    has Str $.filename is rw;
+    has Array $.refine is rw = [<xml xml>];
+    has Hash $.refined-tables is rw;
+    has Bool $.trace is rw;
+    has Bool $.keep is rw;
+    has Bool $.raw is rw;
+    has Hash $.objects is rw;
 
-    $instance = self.bless unless $instance.defined;
+    my Globals $instance;
 
-    $instance
+    #---------------------------------------------------------------------------
+    submethod new ( ) { !!! }
+
+    #---------------------------------------------------------------------------
+    method instance ( --> Globals ) {
+
+      $instance = self.bless unless $instance.defined;
+
+      $instance
+    }
   }
+}
+
+class X::SemiXML is Exception {
+  has Str $.message;
+
+  submethod BUILD ( :$!message ) { }
 }
