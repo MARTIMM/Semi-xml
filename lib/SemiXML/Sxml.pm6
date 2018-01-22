@@ -129,7 +129,18 @@ class Sxml {
     }
 
     # Parse the content. Parse can be recursively called
-    my Match $m = $!grammar.subparse( $content, :actions($!actions));
+    my Match $m;
+    try {
+      $m = $!grammar.subparse( $content, :actions($!actions));
+
+      CATCH {
+        default {
+          note .message;
+        }
+      }
+    }
+
+    my Bool $result-ok = $m.defined;
 
     # reset all flags to its defaults until next parse will set them
     $!drop-cfg-filename = True;
@@ -138,53 +149,7 @@ class Sxml {
     $!globals.raw = False;
     #$!globals.keep = $!keep;
 
-    # Throw an exception when there is a parsing failure
-    my $last-bracket-index = $content.rindex(']') // $content.chars;
-    if $!trace and $!refined-tables<T><parse-result> {
-      my $mtrace = ~$m;
-      $mtrace .= substr( 0, 200);
-      $mtrace ~= " ... \n";
-      note "\nMatch: $m.from(), $m.to(), $last-bracket-index\n$mtrace";
-    }
-#    if $m.to != $last-bracket-index {
-
-    if $m.to != $content.chars {
-#`{{
-      my Str $before = $!actions.prematch();
-      my Str $after = $!actions.postmatch();
-      my Str $current = $content.substr(
-        $!actions.from, $!actions.to - $!actions.from
-      );
-note "BAC: $before, $after, $current";
-      $before ~ $current ~~ m:g/ (\n) /;
-      my Int $nth-line = $/.elems + 1;
-
-      $before ~~ s:g/ <-[\n]>* \n //;
-      $after ~~ s:g/ \n <-[\n]>* //;
-
-      if $!actions.unleveled-brackets.elems {
-        die [~] "Parse failure possible missing bracket at\n",
-        map {"  line $_<line-begin>-$_<line-end>, tag $_<tag-name>, body number $_<body-count>\n"},
-            @($!actions.unleveled-brackets);
-      }
-
-      if $!actions.mismatched-brackets.elems {
-        die [~] "Parse failure possible mismatched bracket types at\n",
-        map {"  line $_<line-begin>-$_<line-end>, tag $_<tag-name>, body number $_<body-count>\n"},
-            @($!actions.mismatched-brackets);
-      }
-
-      if $after.chars {
-        die "Parse failure just after '$!actions.state()' at line $nth-line\n" ~
-            $before ~ $current ~
-            color('red') ~ "\x[23CF]$after" ~ color('reset');
-      }
-}}
-      die [~] "Parse failure";
-    }
-
-
-    True;
+    $result-ok;
   }
 
   #-----------------------------------------------------------------------------
