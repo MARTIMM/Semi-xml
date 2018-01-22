@@ -90,13 +90,14 @@ class Element {
 
 Node <|-- Element
 Node <|-- Text
-
-
 ```
 
 ## Parser and actions.
-* [ ] Error messages when parser fails can still be improved.
-
+* [x] An exception class X::SemiXML is created to throw parsing errors.
+* [x] Throwing happens from within Grammar and Actions instead of Sxml.
+  * [x] **Attributes must be followed by a content body**. Error is thrown when attributes are used but no content body follows. Previously it was possible but it makes the readability worse. E.g What looks better `$a key=value text follows` or `$a key=value [] text follows`. For elements without attributes it is still useful to leave the breakets it there is no content. E.g. `$p [ this is first line $br second line ]`
+  * [x] **Cannot start a content body with '['**.
+  * [x] **Unexpected content body start/close character**.
 
 ## Syntax
 * XML element name can contain any alphanumeric characters. The only punctuation mark allowed in names are the hyphen '-', underscore '\_' and period '.'. Xml namespaces are separated by a colon ':'. These characters can not be used to start an element or to separate a module key from its method.
