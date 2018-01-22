@@ -12,17 +12,28 @@ grammar Grammar {
   sub error ( Match:D $match, Str:D $message is copy ) {
 
     # number of chars to show before error location
-    my Int $i = min( $match.Str.chars, 50) - 1;
+    my Str $t0 = $match.orig.substr( 0, $match.to);
+    my Str $t1 = $match.orig.substr($match.to);
+    my Int $i = min( $t0.chars, 50) - 1;
+note "F/T: $match.from(), $match.to()";
 
-    # linesnumber where error was found
+    # linenumber where error was found
     temp $/;
-    $match.Str ~~ m:g/\n/;
+    $t0 ~~ m:g/\n/;
     my Int $l = $/[*].elems + 1;
 
-    $message ~= [~]
-          " line $l\n... $match.substr( *-$i, *-1)",  color('red'),
-          "\x[23CF]", $match.substr( *-1, *-0),
-          $match.postmatch.substr( 0, 28), color('reset');
+    # below evere \n character is substituted for two, '\' and 'n'.
+    # so correct the $i with line number
+    $i += $l;
+
+    # substitute \n for readability
+    $t0 ~~ s:g/\n/\\n/;
+    $t1 ~~ s:g/\n/\\n/;
+
+    $message = [~] "\n", $message,
+          " line $l\n... $t0.substr( *-$i, *-0)",  color('red'),
+          "\x[23CF]", $t1.substr( 0, 28), color('reset'), "\n\n";
+
     my X::SemiXML $x .= new(:$message);
     die $x;
   }
@@ -60,8 +71,14 @@ grammar Grammar {
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
-  #
-  token attributes     { [ <.ws> <attribute> ]* }
+  # when there are attributes found a content body must follow!
+  token attributes    {
+    [ [ <.ws> <attribute> ]+ <!before \s* <?[\[\{«]> > {
+        error( $/, "Attributes must be followed by a content body");
+      }
+    ] ||
+    [ <.ws> <attribute> ]*
+  }
 
   token attribute     {
     <attr-key> '=' <attr-value-spec> ||
@@ -86,33 +103,46 @@ grammar Grammar {
 
   token tag-bodies { $<pre-body>=\s* [
       # Content body can have child elements.
-      [ $<body-started>=<?> '[' ~ ']' [
-          <body-a> ||
-          <document> ||
-          [ '[' { error( $/, "Cannot start a content body with '['"); } ]
-        ]*
-      ] ||
+      [ $<body-started>=<?> '[' ~ ']' [ <body-a> || <document> ]* ] ||
 
       # Content body can not have child elements. All other characters
       # remain unprocessed
-      [ $<body-started>=<?> '{' ~ '}' [
-          <body-b> ||
-          [ '{' { error( $/, "Cannot start a content body with '\{'"); } ]
-        ]
-      ] ||
+      [ $<body-started>=<?> '{' ~ '}' [ <body-b> ]* ] ||
 
       # Alternative for '{ ... }'
-      [ $<body-started>=<?> '«' ~ '»' [
-          <body-c> ||
-          [ '«' { error( $/, "Cannot start a content body with '«'"); } ]
-        ]
-      ]
+      [ $<body-started>=<?> '«' ~ '»' [ <body-c> ]* ]
     ]*
   }
 
-  token body-a { [ <.escaped-char> || <.entity> || <-[\$\[\]]>+ ]+ }
-  token body-b { [ <.escaped-char> || <-[\\\{\}]>+ ]+ }
-  token body-c { [ <.escaped-char> || <-[\\«»]>+ ]+ }
+  token body-a {
+    [ [ <.escaped-char>+ || <.entity>+ || <-[\\\$\[\]]>+ ]+ ||
+      [ ('[') {
+        error( $/,
+          "Cannot start a content body with '$0', did you mean '\\$0'?"
+        );
+      } ]
+    ]+
+  }
+
+  token body-b {
+    [ [ <.escaped-char>+ || <-[\\\{\}]>+ ]+ ||
+      [ ('{') {
+        error( $/,
+          "Cannot start a content body with '$0', did you mean '\\$0'?"
+        );
+      } ]
+    ]+
+  }
+
+  token body-c {
+    [ [ <.escaped-char>+ || <-[\\«»]>+ ]+ ||
+      [ ('«') {
+        error( $/,
+          "Cannot start a content body with '$0', did you mean '\\$0'?"
+        );
+      } ]
+    ]+
+  }
 
   token escaped-char { '\\' . }
 
