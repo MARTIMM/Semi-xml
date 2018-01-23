@@ -154,6 +154,14 @@ Node <|-- Text
 * [x] **key=<v a l u e>**. Attributes are also given as argument to module methods. In this case the attribute value becomes a list of values ('v','a','l','u',e'). The items are split on spaces and the characters ',', ';', ':'. The value can therefore also be written like **key=<v, a,l,u :;e>**. Of course, choose wisely for readability! Empty items are not possible.
 
 
+## Text handling
+Text must be handled differently depending on F-Table, content delimiters and attributes.
+
+### Content body delimiters.
+* `[ ... ]`. The content can have other elements which is handled automatically by the grammar. The content text can be any range of characters of which the characters `$`, `[`, `]`, `\` must be escaped using a backslash character. E.g. `\[` or `\]`. After parsing all comments are removed. These start with `#` and will end at the end of a line or end of a content body.
+* `{ ... }`.
+
+
 ## Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * [x] Dependencies on other files. This is controlled by the D table in the config.
   * [ ] Store internal representation back into sxml (forgot what I meant by that).
