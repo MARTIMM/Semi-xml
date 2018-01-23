@@ -23,10 +23,14 @@ class XMLText does XML::Node {
   #-----------------------------------------------------------------------------
   submethod BUILD ( Bool :$!strip = False, Str :$!text ) {
 
+  #`{{ Following is taken from the XML module but is not working properly
+       so the :strip attribute is ignored to keep things in my own hands
     if $!strip {
       $!text ~~ s:g/\s+$$//;   ## Chop out trailing spaces from lines.
       $!text ~~ s:g/^^\s+//;   ## Chop out leading spaces from lines.
       $!text .= chomp;         ## Remove a trailing newline if it exists.
     }
+  }}
+
   }
 }
