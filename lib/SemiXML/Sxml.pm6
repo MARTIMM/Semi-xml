@@ -129,17 +129,7 @@ class Sxml {
     }
 
     # Parse the content. Parse can be recursively called
-    my Match $m;
-    try {
-      $m = $!grammar.subparse( $content, :actions($!actions));
-
-      CATCH {
-        default {
-          note .message;
-        }
-      }
-    }
-
+    my Match $m = $!grammar.subparse( $content, :actions($!actions));
     my Bool $result-ok = $m.defined;
 
     # reset all flags to its defaults until next parse will set them
