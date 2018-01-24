@@ -13,8 +13,8 @@ subtest 'variables', {
       $sxml:var-decl name=aCommonText [ $strong [Lorem ipsum dolor simet ...] ]
       $body [
         $h1 id=h1001 [ Introduction ]
-        $p [ $sxml:var-ref name=aCommonText ]
-        $ul [ $li [ $sxml:var-ref name=aCommonText ] ]
+        $p [ $sxml:var-ref name=aCommonText [] ]
+        $ul [ $li [ $sxml:var-ref name=aCommonText [] ] ]
       ]
     ]
     EOTXT
