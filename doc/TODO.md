@@ -158,15 +158,29 @@ Node <|-- Text
 Text must be handled differently depending on F-Table, content delimiters and attributes.
 
 ### Content body delimiters.
-* `[ ... ]`. The content can have other elements which is handled automatically by the grammar. The content text can be any range of characters of which the characters `$`, `[`, `]`, `\` must be escaped using a backslash character. E.g. `\[` or `\]`. After parsing all comments are removed. These start with `#` and will end at the end of a line or end of a content body.
-* `{ ... }`.
+* [x] `[ ... ]`. The content can have other elements which is handled automatically by the grammar. The content text can be any range of characters of which the characters `$`, `[`, `]`, `\` must be escaped using a backslash character. E.g. `\[` or `\]`. After parsing all comments are removed. These start with `#` and will end at the end of a line or end of a content body. To use a `#` in text, it must also be escaped.
+* [x] `{ ... }`. The content cannot have any elements, they will not be interpreted and left as text. Also, comments are not removed. Other characters can be used freely except for the `\`, `{` and `}`.
+* [x] `« ... »`. The interpretation of this content is the same as for `{ ... }` except the characters needed to escape are now `\`, `«` and `»`.
+
+### F Table
+The F table in the configuration is used to control the formatting of the elements and text in the content bodies. There are 4 entries all having an array of element names. The element names are checked against the current element in the translation process. For HTML, most of the elements are defined in the proper categories. Docbook5 is in progress.
+* [x] `inline`. When elements are in this category, the program will check around this element to see if the spacing is done right. It also checks for punctuation characters following the element. Example elements from HTML are `b`, `strong` or `a`.
+* [x] `no-escaping`. This is a category of elements who's content cannot be interpreted and changed. Most content can be controlled like this using one of the last two body types. Examples of this type are `script` or `style`.
+* [x] `space-preserve`. No spaces are removed except to reduce indenting on multi line text. One example is `pre`.
+* [x] `self-closing`. In this category are the elements who do not have content. Examples for this kind are `meta`, `br` and `hr`. If content is supplied, it will be removed.
+
+### Attributes
+Special attributes can be used to modify the behavior of the F-tables. These are boolean typed. An example is `=sxml:inline` to force the element in the inline category and `=!sxml:inline` to force the opposite.
+* [x] `sxml:inline` controls the inline category.
+* [x] `sxml:noesc` controls the no-escaping category.
+* [x] `sxml:keep` controls the space-preserve category.
+* [x] `sxml:close` controls the self-closing category.
 
 
 ## Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * [x] Dependencies on other files. This is controlled by the D table in the config.
-  * [ ] Store internal representation back into sxml (forgot what I meant by that).
-  * [ ] Load any xml based source to convert back to sxml. Can be used as a start for templating things using pages from a nice website.
-  * [x] Add a conveneance method to SxmlHelper.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $node, Hash $attributes ) { }`
+  * [ ] After having translated to, or loaded from XML sources, try to reverse engineer the XML back into sxml. The result can only be a static result but it can be helpful to get Sxml text from XML templates and then modify the code later.
+  * [x] Add a convenience method to SxmlHelper.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $node, Hash $attributes ) { }`
 
 
 ## Tests
