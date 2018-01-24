@@ -32,14 +32,12 @@ $html [
   ]
   $body [
     $h1 [ Introduction ]
-    $p class=green [ Piece of text. See $*|a href=google.com [google].]
+    $p class=green [ Piece of text. See $a href=google.com [google].]
     $p [ The date of today is $!SxmlCore.date ]
   ]
 ]
 ```
-Less characters typed and still indenting. Besides this, the xml generated from the sxml file is smaller than above because it removes as much white space as necessary. Also note the date in the html example is hand-crafted while in the sxml example the current date is generated on each run.
-
-**NOTE** I am still rethinking the use of $, |, !, \*, etc. characters to initiate an element and how to simplify those. Something like $html, $modkey.method etc. Also the start of a body with [! ... !] or [= ... ] could be easier when elements could be labeled as non-nesting, space-preserving, block or inline. When this becomes possible, the example would become even smaller.
+Less characters typed and still indenting. Besides this, the xml generated from the sxml file is smaller than above because it removes as much white space as possible. Also note the date in the html example is hand-crafted while in the sxml example the current date is generated on each run.
 
 ### Advantages of using this language
 
