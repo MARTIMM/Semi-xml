@@ -5,7 +5,7 @@ unit package SxmlLib:auth<github:MARTIMM>;
 
 use XML;
 use SemiXML::Text;
-use SxmlLib::SxmlHelper;
+use SemiXML::Helper;
 
 #-------------------------------------------------------------------------------
 class Docbook5::FixedLayout {

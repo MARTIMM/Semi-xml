@@ -1,6 +1,6 @@
 use v6;
 use Test;
-use SxmlLib::SxmlHelper;
+use SemiXML::Helper;
 use XML;
 use XML::XPath;
 

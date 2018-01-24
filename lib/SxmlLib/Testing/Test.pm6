@@ -5,7 +5,7 @@ unit package SxmlLib::Testing:auth<github:MARTIMM>;
 
 use SemiXML;
 use SemiXML::Sxml;
-use SxmlLib::SxmlHelper;
+use SemiXML::Helper;
 use SxmlLib::File;
 use XML;
 use XML::XPath;

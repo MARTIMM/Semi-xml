@@ -6,7 +6,7 @@ unit package SxmlLib::Svg:auth<github:MARTIMM>;
 use XML;
 use XML::XPath;
 use SemiXML::Sxml;
-use SxmlLib::SxmlHelper;
+use SemiXML::Helper;
 
 #-------------------------------------------------------------------------------
 class PieChart {

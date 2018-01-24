@@ -5,7 +5,7 @@ unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
 use SemiXML::Text;
-use SxmlLib::SxmlHelper;
+use SemiXML::Helper;
 use XML;
 
 #-------------------------------------------------------------------------------

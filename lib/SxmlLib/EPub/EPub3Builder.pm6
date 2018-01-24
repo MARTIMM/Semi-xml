@@ -9,7 +9,7 @@ use SxmlLib::EPub;
 
 use XML;
 #use SemiXML::Sxml;
-use SxmlLib::SxmlHelper;
+use SemiXML::Helper;
 
 #-------------------------------------------------------------------------------
 class EPub::EPub3Builder is SxmlLib::EPub {
