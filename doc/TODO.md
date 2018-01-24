@@ -132,7 +132,7 @@ Node <|-- Text
 
   5) The space reserving '=' character at the start of a block is removed completely. One can specify that some elements are to be space preserving in a local configuration file. Furthermore the :keep option will keep all spacing as was typed in.
 
-  6) Some of the above can be changed by using boolean attributes like `sxml:inline`, `sxml:keep`, `sxml:noesc` and `sxml:close`.
+  6) Some of the above can be changed by using boolean attributes like `sxml:inline`, `sxml:keep`, `sxml:noconv` and `sxml:close`.
 
 ## Addition of several types of comments
   * [x] **# \<text> EOL**. Comments are removed and can only be used at top the level and in **\$x [ ... ]** parts. '#' Characters used within **\$x { ... }** or **\$x « ... »** are unprocessed. Comments are not parsed but removed after the parsing process.
@@ -165,14 +165,19 @@ Text must be handled differently depending on F-Table, content delimiters and at
 ### F Table
 The F table in the configuration is used to control the formatting of the elements and text in the content bodies. There are 4 entries all having an array of element names. The element names are checked against the current element in the translation process. For HTML, most of the elements are defined in the proper categories. Docbook5 is in progress.
 * [x] `inline`. When elements are in this category, the program will check around this element to see if the spacing is done right. It also checks for punctuation characters following the element. Example elements from HTML are `b`, `strong` or `a`.
-* [x] `no-escaping`. This is a category of elements who's content cannot be interpreted and changed. Most content can be controlled like this using one of the last two body types. Examples of this type are `script` or `style`.
+* [x] `no-conversion`. This is a category of elements who's content cannot be interpreted and changed. Most content can be controlled like this using one of the last two body types. Examples of this type are `script` or `style`. The actions understood to be conversions are those which confuses XML and must be 'escaped' into entities. These are;
+  * `&` -> `&amp;`
+  * `<` -> `&lt;`
+  * `>` -> `&gt;`
+  * `\s` -> `&nbsp;` This entity must be defined in the DTD or doctype except for html.
+  * `\<any char>` -> `<any char>`
 * [x] `space-preserve`. No spaces are removed except to reduce indenting on multi line text. One example is `pre`.
 * [x] `self-closing`. In this category are the elements who do not have content. Examples for this kind are `meta`, `br` and `hr`. If content is supplied, it will be removed.
 
 ### Attributes
 Special attributes can be used to modify the behavior of the F-tables. These are boolean typed. An example is `=sxml:inline` to force the element in the inline category and `=!sxml:inline` to force the opposite.
 * [x] `sxml:inline` controls the inline category.
-* [x] `sxml:noesc` controls the no-escaping category.
+* [x] `sxml:noconv` controls the no-convert category.
 * [x] `sxml:keep` controls the space-preserve category.
 * [x] `sxml:close` controls the self-closing category.
 

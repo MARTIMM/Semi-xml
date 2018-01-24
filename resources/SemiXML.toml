@@ -32,7 +32,7 @@
   ]
 
 #  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
-  no-escaping       = [ 'style', 'script']
+  no-conversion     = [ 'style', 'script']
   space-preserve    = [ 'pre' ]
   self-closing      = [
     'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input',
@@ -45,7 +45,7 @@
     'emphasis'
   ]
 
-  no-escaping       = [
+  no-conversion       = [
 
   ]
 

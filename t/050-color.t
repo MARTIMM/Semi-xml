@@ -126,7 +126,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
       C => { xml => { :!xml-show }},
       F => { xml => {
           space-preserve => [<set0 set1 set2>],
-          no-escaping => [<set0 set1 set2 style>],
+          no-conversion => [<set0 set1 set2 style>],
         },
       },
       ML => { :Colors<SxmlLib::Colors>, },

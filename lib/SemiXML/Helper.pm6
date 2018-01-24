@@ -454,8 +454,8 @@ class Helper {
     elsif $node ~~ XML::Element {
       my Array $self-closing :=
          $globals.refined-tables<F><self-closing> // [];
-      my Array $no-escaping :=
-         $globals.refined-tables<F><no-escaping> // [];
+      my Array $no-conversion :=
+         $globals.refined-tables<F><no-conversion> // [];
 
       # space preservation must be kept for all inner elements as well
       $space-preserve or= (
@@ -466,7 +466,7 @@ class Helper {
 
       $comment-preserve = $node.attribs<sxml:content> ~~ any([<B C>]);
 
-#note "Ftab: $node.name(), ", $self-closing, ', ', $no-escaping;
+#note "Ftab: $node.name(), ", $self-closing, ', ', $no-conversion;
       # Check for self closing tag, and if so remove content if any
       if $node.name ~~ any(@$self-closing) {
 #note "$node.name() = self closing";
@@ -492,7 +492,7 @@ class Helper {
       }
 
       # some elements must not be processed to escape characters
-      if $node.name ~~ any(@$no-escaping) {
+      if $node.name ~~ any(@$no-conversion) {
         # no escaping must be performed on its contents
         # for these kinds of nodes
         return;

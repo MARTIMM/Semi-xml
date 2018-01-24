@@ -32,7 +32,7 @@ role Node {
   # flags to process the content. element nodes set them and text nodes
   # inherit them. other types like PI, CData etc, do not need it.
   has Bool $.inline = False;  # inline in FTable
-  has Bool $.noesc = False;   # no-escaping in FTable
+  has Bool $.noconv = False;   # no-conversion in FTable
   has Bool $.keep = False;    # space-preserve in FTable
   has Bool $.close = False;   # self-closing in FTable
 

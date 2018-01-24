@@ -97,7 +97,7 @@ class Element does SemiXML::Node {
     my Str $e;
     my Str $modifiers = '(';
     $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
-    $modifiers ~= $!noesc ?? '¬e ' !! 'e ';  # escape transform or not
+    $modifiers ~= $!noconv ?? '¬e ' !! 'e ';  # escape transform or not
     $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
     $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
 
@@ -130,7 +130,7 @@ class Element does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method xml (
     XML::Node $parent, Bool :$inline is copy = False,
-    Bool :$noesc is copy = False, Bool :$keep is copy = False,
+    Bool :$noconv is copy = False, Bool :$keep is copy = False,
     Bool :$close is copy = False
   ) {
 note "X: $!name, $!node-type, $parent, $keep";
@@ -149,14 +149,14 @@ note "X: $!name, $!node-type, $parent, $keep";
             for @$!nodes -> $node {
               $inline = $node.node-type ~~ SemiXML::Text
                       ?? $inline !! ($inline or $!inline);
-              $noesc = $node.node-type ~~ SemiXML::Text
-                      ?? $noesc !! ($noesc or $!noesc);
+              $noconv = $node.node-type ~~ SemiXML::Text
+                      ?? $noconv !! ($noconv or $!noconv);
               $keep = $node.node-type ~~ SemiXML::Text
                       ?? $keep !! ($keep or $!keep);
               $close = $node.node-type ~~ SemiXML::Text
                       ?? $close !! ($close or $!close);
 
-              $node.xml( $this-node-xml, :$inline, :$noesc, :$keep, :$close);
+              $node.xml( $this-node-xml, :$inline, :$noconv, :$keep, :$close);
             }
           }
 
@@ -173,7 +173,7 @@ note "X: $!name, $!node-type, $parent, $keep";
 
     my Hash $ftable = $!globals.refined-tables<F> // {};
     $!inline = $!name ~~ any(|@($ftable<inline> // []));
-    $!noesc = $!name ~~ any(|@($ftable<no-escaping> // []));
+    $!noconv = $!name ~~ any(|@($ftable<no-conversion> // []));
     $!keep = $!name ~~ any(|@($ftable<space-preserve> // []));
     $!close = $!name ~~ any(|@($ftable<self-closing> // []));
   }
@@ -188,8 +188,8 @@ note "X: $!name, $!node-type, $parent, $keep";
           $!attributes{$key}:delete;
         }
 
-        when /^ sxml ':' noesc / {
-          $!noesc = True;
+        when /^ sxml ':' noconv / {
+          $!noconv = True;
           $!attributes{$key}:delete;
         }
 
