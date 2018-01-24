@@ -19,12 +19,13 @@
     "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
     "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
     "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
+    "SemiXML::Node":                    "lib/SemiXML/Node.pm6",
+    "SemiXML::Element":                 "lib/SemiXML/Element.pm6",
     "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
+    "SemiXML::XMLText":                 "lib/SemiXML/XMLText.pm6",
     "SemiXML::StringList":              "lib/SemiXML/StringList.pm6",
-    "SemiXML::ContentBodies":           "lib/SemiXML/ContentBodies.pm6",
+    "SemiXML::Helper":                  "lib/SemiXML/Helper.pm6",
 
-
-    "SxmlLib::SxmlHelper":              "lib/SxmlLib/SxmlHelper.pm6",
     "SxmlLib::Colors":                  "lib/SxmlLib/Colors.pm6",
     "SxmlLib::Css":                     "lib/SxmlLib/Css.pm6",
 
