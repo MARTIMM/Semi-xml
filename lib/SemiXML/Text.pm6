@@ -24,7 +24,9 @@ class Text does SemiXML::Node {
     XML::Node $parent, Bool :$inline = False, Bool :$noconv = False,
     Bool :$keep = False, Bool :$close = False
   ) {
-note "Xt: $!node-type, $parent, '$!text'";
+note "Xt: $!body-number, $!node-type, $parent, '$!text'";
+
+    state $previous-body-number = -1;
 
     my Str $text = $!text;
     if $keep {
@@ -73,6 +75,11 @@ note "Xt: $!node-type, $parent, '$!text'";
       $text ~~ s:g/ \n+ //;       # remove return characters
       $text ~~ s/ \n+ $//;
       $text ~~ s:g/ \n+ / /;
+
+      if $!body-number != $previous-body-number {
+        $text = " $text" if $!body-number != 1;
+        $previous-body-number = $!body-number;
+      }
     }
 
     # modifications
