@@ -1,6 +1,9 @@
 [ C ]
   tracing       = true
 
+[ C.xml ]
+  xml-show      = false
+
 #-------------------------------------------------------------------------------
 [ ML.html ]
   test          = 'SxmlLib::Testing::Test'

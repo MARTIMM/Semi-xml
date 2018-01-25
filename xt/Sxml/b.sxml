@@ -1,5 +1,3 @@
 $a [
-  $b [ jhg \[ jhg ]
-  $c a=b []
-  abc & &#12345; < >
+  $!SxmlCore.comment { abc $def ghi }
 ]
