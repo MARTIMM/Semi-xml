@@ -337,7 +337,7 @@ class Helper {
 
     elsif $node ~~ SemiXML::XMLText {
 #note "  Node is SemiXML text";
-      $clone = XML::Text.new(:text($node.txt));
+      $clone = XML::Text.new(:text($node.text));
     }
 
     else {
@@ -624,7 +624,7 @@ note "E1: $esc";
 
         elsif $v.nodes[0] ~~ SemiXML::XMLText {
           my SemiXML::XMLText $t = $v.nodes[0];
-          my Str $text = $t.txt;
+          my Str $text = $t.text;
           $text ~~ s/^ \s+ //;
           $t.remove;
           $t .= new(:$text);
@@ -642,7 +642,7 @@ note "E1: $esc";
 
         elsif $v.nodes[*-1] ~~ SemiXML::XMLText {
           my SemiXML::XMLText $t = $v.nodes[*-1];
-          my Str $text = $t.txt;
+          my Str $text = $t.text;
           $text ~~ s/^ \s+ //;
           $t.remove;
           $t .= new(:$text);
@@ -671,7 +671,7 @@ note "E1: $esc";
 
         elsif $ps ~~ SemiXML::XMLText {
           my SemiXML::XMLText $t := $ps;
-          my Str $text = $t.txt;
+          my Str $text = $t.text;
           $text ~= ' ';
           $t.remove;
           $t .= new(:$text);
@@ -699,7 +699,7 @@ note "E1: $esc";
 
         elsif $ns ~~ SemiXML::XMLText {
           my SemiXML::XMLText $t := $ns;
-          my Str $text = $t.txt;
+          my Str $text = $t.text;
           if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
             $t .= new(:text(' '));
             $v.after($t);
@@ -717,9 +717,9 @@ note "E1: $esc";
   sub remove-sxml ( XML::Node $node ) is export {
     my SemiXML::Globals $globals .= instance;
 
-#note "T: $node";
+note "T: $node";
     if $node ~~ XML::Element {
-#note "\nE: ", $node.name;
+note "\nE: ", $node.name;
       if $node.name ~~ m/^ sxml \: / {
         $node.remove;
         return;
@@ -736,17 +736,17 @@ note "E1: $esc";
     }
 
     elsif $node ~~ XML::Comment {
-#note "\nC: ", $node.data[*].join('; ');
+note "\nC: ", $node.data[*].join('; ');
       remove-sxml($_) for $node.data;
     }
 
     elsif $node ~~ XML::PI {
-#note "\nP: ", $node.data;
+note "\nP: ", $node.data;
       remove-sxml($_) for $node.data;
     }
 
     if $node ~~ XML::CDATA {
-#note "\nCD: ", $node.data;
+note "\nCD: ", $node.data;
       remove-sxml($_) for $node.data;
     }
 
