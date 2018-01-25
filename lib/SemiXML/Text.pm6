@@ -24,7 +24,7 @@ class Text does SemiXML::Node {
     XML::Node $parent, Bool :$inline = False, Bool :$noconv = False,
     Bool :$keep = False, Bool :$close = False
   ) {
-note "Xt: $!body-number, $!node-type, $parent, '$!text'";
+note "$!node-type, $!body-number, '$!text'";
 
     state $previous-body-number = -1;
 
