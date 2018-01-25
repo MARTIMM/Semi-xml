@@ -147,14 +147,17 @@ note "X: $!name, $!node-type, $parent, $keep";
         unless $!close {
           if $!nodes.elems {
             for @$!nodes -> $node {
-              $inline = $node.node-type ~~ SemiXML::Text
-                      ?? $inline !! ($inline or $!inline);
-              $noconv = $node.node-type ~~ SemiXML::Text
-                      ?? $noconv !! ($noconv or $!noconv);
-              $keep = $node.node-type ~~ SemiXML::Text
-                      ?? $keep !! ($keep or $!keep);
-              $close = $node.node-type ~~ SemiXML::Text
-                      ?? $close !! ($close or $!close);
+              if $node.node-type ~~ SemiXML::Text {
+                next if $close;
+              }
+
+              else {
+                # inherit from parent nodes
+                $inline = ($inline or $!inline);
+                $noconv = ($noconv or $!noconv);
+                $keep = ($keep or $!keep);
+                $close = ($close or $!close);
+              }
 
               $node.xml( $this-node-xml, :$inline, :$noconv, :$keep, :$close);
             }
@@ -184,17 +187,22 @@ note "X: $!name, $!node-type, $parent, $keep";
     for $!attributes.keys -> $key {
       given $key {
         when /^ sxml ':' inline / {
-          $!inline = True;
+          $!inline = $!attributes{$key}.Int.Bool;
           $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' noconv / {
-          $!noconv = True;
+          $!noconv = $!attributes{$key}.Int.Bool;
           $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' keep / {
-          $!keep = True;
+          $!keep = $!attributes{$key}.Int.Bool;
+          $!attributes{$key}:delete;
+        }
+
+        when /^ sxml ':' close / {
+          $!close = $!attributes{$key}.Int.Bool;
           $!attributes{$key}:delete;
         }
 
