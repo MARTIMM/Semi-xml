@@ -41,10 +41,8 @@ class Actions {
     $!root .= new(:name<root>);
     $!elements = [$!root];
     $!element-idx = 1;
-#note "Idx A: $!element-idx";
 
-
-note "At the end of parsing";
+note "\nAt the end of parsing";
     self!process-ast($match);
 
 
@@ -55,8 +53,6 @@ note "At the end of parsing";
     if $!root.nodes.elems == 0 {
 note "No elements";
       $root-xml .= new(:name<sxml:EmptyDocument>);
-#      $root-xml.setNamespace( 'github.MARTIMM', 'sxml');
-#      $!document .= new($ed);
     }
 
     # normal xml document
@@ -64,11 +60,6 @@ note "No elements";
 note "1 element";
       $root-xml .= new(:name($!root.name));
       $!root.nodes[0].xml($root-xml);
-#      $!document .= new(
-#        $root-xml.nodes[0].defined
-#          ?? $root-xml.nodes[0]
-#          !! XML::Element.new(:name<sxml:noChildDefined>)
-#      );
     }
 
     elsif $!root.nodes.elems > 1 {
@@ -79,9 +70,10 @@ note "More elements";
       for $!root.nodes -> $node {
         $node.xml($root-xml);
       }
-
-#      $!document .= new($root-xml);
     }
+
+    # execute any method bottom up
+    $!root.run-method if $!globals.exec;
 
 #    my XML::Element $root = $!document.root;
     $root-xml.setNamespace( 'github.MARTIMM', 'sxml');

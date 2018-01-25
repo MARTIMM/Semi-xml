@@ -17,6 +17,7 @@ class Element does SemiXML::Node {
 
   has Str $!module;
   has Str $!method;
+  has XML::Element $!content-body;
 
   has Hash $.attributes;
 
@@ -43,6 +44,9 @@ class Element does SemiXML::Node {
     $!node-type = SemiXML::Method;
     $!globals .= instance;
     $!nodes = [];
+
+    # devise a temporary name for the node
+    $!name = "sxml:$!module.$!method";
 
     self!process-attributes;
 
@@ -97,10 +101,11 @@ class Element does SemiXML::Node {
     Bool :$noconv is copy = False, Bool :$keep is copy = False,
     Bool :$close is copy = False
   ) {
-note "X: $!name, $!node-type, $parent, $keep";
 
     given $!node-type {
       when any( SemiXML::Fragment, SemiXML::Plain) {
+
+note "$!node-type, $!body-number, $!name";
         my XML::Element $this-node-xml .= new(:$!name);
         for $!attributes.kv -> $k, $v {
           $this-node-xml.set( $k, ~$v);
@@ -111,11 +116,7 @@ note "X: $!name, $!node-type, $parent, $keep";
         unless $!close {
           if $!nodes.elems {
             for @$!nodes -> $node {
-              if $node.node-type ~~ SemiXML::Text {
-                next if $close;
-              }
-
-              else {
+              if $node.node-type !~~ SemiXML::Text {
                 # inherit from parent nodes
                 $inline = ($inline or $!inline);
                 $noconv = ($noconv or $!noconv);
@@ -132,6 +133,73 @@ note "X: $!name, $!node-type, $parent, $keep";
           }
         }
       }
+
+      when SemiXML::Method {
+note "$!node-type, $!body-number, $!module, $!method";
+        $!content-body .= new(:$!name);
+        for $!attributes.kv -> $k, $v {
+          $!content-body.set( $k, ~$v);
+        }
+
+        $parent.append($!content-body);
+
+        unless $!close {
+          if $!nodes.elems {
+            for @$!nodes -> $node {
+              if $node.node-type !~~ SemiXML::Text {
+                # inherit from parent nodes
+                $inline = ($inline or $!inline);
+                $noconv = ($noconv or $!noconv);
+                $keep = ($keep or $!keep);
+                $close = ($close or $!close);
+              }
+
+              $node.xml( $!content-body, :$inline, :$noconv, :$keep, :$close);
+            }
+          }
+
+          else {
+            $!content-body.append(SemiXML::XMLText.new(:text('')));
+          }
+        }
+      }
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method run-method ( ) {
+
+    # first go to inner elements
+    for @$!nodes -> $node {
+      $node.run-method unless $node ~~ SemiXML::Text;
+    }
+
+    # then check if node is a method node
+    if $!node-type ~~ SemiXML::Method {
+note ">> $!node-type, $!body-number, $!module, $!method";
+
+      # get the object and test for existence of method
+      my $object = $!globals.objects{$!module}
+        if $!globals.objects{$!module}:exists;
+
+      if $object.defined {
+        die X::SemiXML.new(
+          :message(
+            "Method $!method in module $!module ($object.^name()) not defined"
+          )
+        ) unless $object.^can($!method);
+      }
+
+      else {
+        die X::SemiXML.new(:message("Module $!module not defined"));
+      }
+
+      my XML::Element $parent .= new(:name<sxml::parent-element>);
+      my XML::Element $result = $object."$!method"(
+        $parent, $!attributes, :$!content-body
+      );
+      $!content-body.after($_) for $result.nodes.reverse;
+      $!content-body.remove;
     }
   }
 
@@ -141,7 +209,7 @@ note "X: $!name, $!node-type, $parent, $keep";
     my Str $e;
     my Str $modifiers = '(';
     $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
-    $modifiers ~= $!noconv ?? '¬e ' !! 'e ';  # escape transform or not
+    $modifiers ~= $!noconv ?? '¬e ' !! 'e '; # transform or not
     $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
     $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
 
