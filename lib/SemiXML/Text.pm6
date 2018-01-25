@@ -87,11 +87,9 @@ note "Xt: $!node-type, $parent, '$!text'";
     }
 
     # remove comments only when in BodyA. the other content bodies
-    # are left alone.
+    # are left alone. only remove when not escaped or after &
     if $!body-type ~~ SemiXML::BodyA {
-note "E0: $text";
       $text ~~ s:g/ \s* <!after <[\\\&]>> '#' \N*: $$//;
-note "E1: $text";
     }
 
     # remove escape characters
