@@ -92,42 +92,6 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method perl ( --> Str ) {
-
-    my Str $e;
-    my Str $modifiers = '(';
-    $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
-    $modifiers ~= $!noconv ?? '¬e ' !! 'e ';  # escape transform or not
-    $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
-    $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
-
-    $modifiers ~= '| ';
-
-    $modifiers ~= 'F' if $!node-type ~~ SemiXML::Fragment;
-    $modifiers ~= 'E' if $!node-type ~~ SemiXML::Plain;
-    $modifiers ~= 'D' if $!node-type ~~ SemiXML::CData;
-    $modifiers ~= 'P' if $!node-type ~~ SemiXML::PI;
-    $modifiers ~= 'C' if $!node-type ~~ SemiXML::Comment;
-
-    $modifiers ~= ')';
-
-    my Str $attrs = '';
-    for $!attributes.kv -> $k, $v {
-      $attrs ~= "$k=\"$v\" ";
-    }
-
-    if $!node-type ~~ SemiXML::Plain {
-      $e = [~] '$', $!name, " $modifiers", " $attrs", ' ...';
-    }
-
-    else {
-      $e = [~] '$!', $!module, '.', $!method, " $modifiers", " $attrs", ' ...';
-    }
-
-    $e
-  }
-
-  #-----------------------------------------------------------------------------
   method xml (
     XML::Node $parent, Bool :$inline is copy = False,
     Bool :$noconv is copy = False, Bool :$keep is copy = False,
@@ -169,6 +133,42 @@ note "X: $!name, $!node-type, $parent, $keep";
         }
       }
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  method perl ( --> Str ) {
+
+    my Str $e;
+    my Str $modifiers = '(';
+    $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
+    $modifiers ~= $!noconv ?? '¬e ' !! 'e ';  # escape transform or not
+    $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
+    $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
+
+    $modifiers ~= '| ';
+
+    $modifiers ~= 'F' if $!node-type ~~ SemiXML::Fragment;
+    $modifiers ~= 'E' if $!node-type ~~ SemiXML::Plain;
+    $modifiers ~= 'D' if $!node-type ~~ SemiXML::CData;
+    $modifiers ~= 'P' if $!node-type ~~ SemiXML::PI;
+    $modifiers ~= 'C' if $!node-type ~~ SemiXML::Comment;
+
+    $modifiers ~= ')';
+
+    my Str $attrs = '';
+    for $!attributes.kv -> $k, $v {
+      $attrs ~= "$k=\"$v\" ";
+    }
+
+    if $!node-type ~~ SemiXML::Plain {
+      $e = [~] '$', $!name, " $modifiers", " $attrs", ' ...';
+    }
+
+    else {
+      $e = [~] '$!', $!module, '.', $!method, " $modifiers", " $attrs", ' ...';
+    }
+
+    $e
   }
 
   #----[ private stuff ]--------------------------------------------------------
