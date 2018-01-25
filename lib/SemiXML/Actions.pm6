@@ -48,21 +48,59 @@ note "At the end of parsing";
     self!process-ast($match);
 
 
+    my XML::Element $root-xml;
 
     # see how many elements are stored in root
     # return an empty document
     if $!root.nodes.elems == 0 {
 note "No elements";
-      my XML::Element $ed .= new(:name<sxml:EmptyDocument>);
-      $ed.setNamespace( 'github.MARTIMM', 'sxml');
-      $!document .= new($ed);
+      $root-xml .= new(:name<sxml:EmptyDocument>);
+#      $root-xml.setNamespace( 'github.MARTIMM', 'sxml');
+#      $!document .= new($ed);
     }
 
     # normal xml document
     elsif $!root.nodes.elems == 1 {
 note "1 element";
-      my XML::Element $root-xml .= new(:name($!root.name));
+      $root-xml .= new(:name($!root.name));
       $!root.nodes[0].xml($root-xml);
+#      $!document .= new(
+#        $root-xml.nodes[0].defined
+#          ?? $root-xml.nodes[0]
+#          !! XML::Element.new(:name<sxml:noChildDefined>)
+#      );
+    }
+
+    elsif $!root.nodes.elems > 1 {
+note "More elements";
+      $!root.node-type = SemiXML::Fragment;
+
+      $root-xml .= new(:name($!root.name));
+      for $!root.nodes -> $node {
+        $node.xml($root-xml);
+      }
+
+#      $!document .= new($root-xml);
+    }
+
+#    my XML::Element $root = $!document.root;
+    $root-xml.setNamespace( 'github.MARTIMM', 'sxml');
+
+    unless $!globals.raw {
+#      subst-variables($root-xml);
+#      remap-content($root-xml);
+      remove-sxml($root-xml);
+
+      # remove the namespace declaration
+      $root-xml.unset("xmlns:sxml");
+    }
+
+
+    if $!root.nodes.elems == 0 {
+      $!document .= new($root-xml);
+    }
+
+    elsif $!root.nodes.elems == 1 {
       $!document .= new(
         $root-xml.nodes[0].defined
           ?? $root-xml.nodes[0]
@@ -71,27 +109,9 @@ note "1 element";
     }
 
     elsif $!root.nodes.elems > 1 {
-note "More elements";
-      $!root.node-type = SemiXML::Fragment;
-
-      my XML::Element $root-xml .= new(:name($!root.name));
-      for $!root.nodes -> $node {
-        $node.xml($root-xml);
-      }
-
       $!document .= new($root-xml);
     }
-
-    my XML::Element $root = $!document.root;
-    $root.setNamespace( 'github.MARTIMM', 'sxml');
-
-    subst-variables($!document);
-    remap-content($!document);
-    remove-sxml($!document);
-
-    # remove the namespace declaration
-    $root.unset("xmlns:sxml");
-}
+  }
 
   #-----------------------------------------------------------------------------
   # get the result document
