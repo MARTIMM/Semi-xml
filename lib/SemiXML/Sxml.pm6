@@ -62,7 +62,7 @@ class Sxml {
   #-----------------------------------------------------------------------------
   multi method parse (
     Str:D :$!filename!, Hash :$config,
-    Bool :$raw = False, Bool :$force = False,
+    Bool :$raw = False, Bool :$force = False, Bool :$exec = True,
     Bool :$trace = False, Bool :$keep = False
     --> Bool
   ) {
@@ -93,7 +93,7 @@ class Sxml {
   #-----------------------------------------------------------------------------
   multi method parse (
     Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
-    Bool :$raw = False, Bool :$!force = False,
+    Bool :$raw = False, Bool :$!force = False, Bool :$exec = True,
     Bool :$!trace = False, Bool :$!keep = False
     --> Bool
   ) {
@@ -101,6 +101,7 @@ class Sxml {
     $!user-config = $config;
     $!filename = Str if $!drop-cfg-filename;
     $!globals.raw = $raw;
+    $!globals.exec = $exec;
 
     if $!globals.refined-tables.defined
       and $!refine[0] eq $!globals.refine[0]
@@ -137,6 +138,7 @@ class Sxml {
     #$!force = $!trace = $!keep = False;
     #$!globals.trace = $!trace;
     $!globals.raw = False;
+    $!globals.exec = True;
     #$!globals.keep = $!keep;
 
     $result-ok;
