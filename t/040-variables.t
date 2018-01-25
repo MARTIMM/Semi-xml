@@ -44,7 +44,7 @@ subtest 'undeclared variable', {
     $html [
       $body [
         $h1 id=h1001 [ Introduction ]
-        $p [ $sxml:var-use name=someCommonText ]
+        $p [ $sxml:var-use name=someCommonText [] ]
       ]
     ]
     EOTXT
