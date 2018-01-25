@@ -77,7 +77,7 @@ class Sxml {
       my $text = slurp($!filename);
       $pr = self.parse(
         :content($text), :$config, :!drop-cfg-filename,
-        :$raw, :$force, :$trace, :$keep
+        :$raw, :$force, :$trace, :$keep, :$exec
       );
       die "Parse failure" if $pr ~~ Nil;
     }
