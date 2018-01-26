@@ -24,11 +24,12 @@ class Text does SemiXML::Node {
     XML::Node $parent, Bool :$inline = False, Bool :$noconv = False,
     Bool :$keep = False, Bool :$close = False
   ) {
-note "$!node-type, $!body-number, '$!text'";
+note "$!node-type, $!body-number, $!parent.name(), '$!text'";
 
     state $previous-body-number = -1;
 
     my Str $text = $!text;
+#`[[
     if $keep {
 
       # do this only when there are any newlines
@@ -77,8 +78,8 @@ note "$!node-type, $!body-number, '$!text'";
       $text ~~ s:g/ \n+ / /;
 
       if $!body-number != $previous-body-number {
-        $text = " $text" if $!body-number != 1;
         $previous-body-number = $!body-number;
+        $text = " $text" if $!body-number != 1;
       }
     }
 
@@ -114,7 +115,8 @@ note "$!node-type, $!body-number, '$!text'";
     }
 }}
 
-#note "P: $parent";
+]]
+
     $parent.append(SemiXML::XMLText.new(:$text));
   }
 }

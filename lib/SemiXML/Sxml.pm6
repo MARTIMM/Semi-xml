@@ -49,7 +49,7 @@ class Sxml {
     $!globals .= instance;
 
     # initialize the refined config tables
-    $!table-names = [<C D E F H ML R S T U X>];
+    $!table-names = [<C D DN E F H ML R S T U X>];
     $!refined-tables = %(@$!table-names Z=> ( {} xx $!table-names.elems ));
 
     $!refine[IN] = 'xml' unless ?$!refine[IN];
@@ -396,7 +396,7 @@ class Sxml {
     for @$!table-names -> $table {
 
       # document control
-      if $table ~~ any(<D E F ML R>) {
+      if $table ~~ any(<D DN E F ML R>) {
         $!refined-tables{$table} =
           $!configuration.refine( $table, $!refine[IN], $basename);
       }
@@ -432,8 +432,7 @@ class Sxml {
       }
     }
 
-    # Place all the tables in the package
-    #$!actions.refined-tables = $!refined-tables;
+    # Place all the tables in Globals
 #TODO doc
     $!globals.refined-tables = $!refined-tables;
 

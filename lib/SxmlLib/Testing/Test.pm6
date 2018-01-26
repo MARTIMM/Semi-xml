@@ -221,11 +221,15 @@ class Test {
   #===[ private methods ]=======================================================
   method !initialize-report ( Hash $attrs ) {
 
+#`{{
     $!html .= new(
       :name<html>, :attribs(
         xmlns => 'http://www.w3.org/199/xhtml', 'xml:lang' => 'en'
       )
     );
+}}
+
+    $!html .= new( :name<html>, :attribs('xml:lang' => 'en'));
 
     my XML::Element $head = self!head( $!html, $attrs);
 

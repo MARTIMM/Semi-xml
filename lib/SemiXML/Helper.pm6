@@ -428,6 +428,7 @@ class Helper {
     $hook.remove;
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   sub apply-f-table ( XML::Node $node ) is export {
     #clean-text($node);
@@ -711,7 +712,9 @@ note "E1: $esc";
     # remove the namespace
     $parent.attribs{"xmlns:sxml"}:delete;
   }
+}}
 
+#`[[
   #-----------------------------------------------------------------------------
   # remove leftover elements and attributes from SemiXML namespace
   sub remove-sxml ( XML::Node $node ) is export {
@@ -782,4 +785,5 @@ note "\nCD: ", $node.data;
 }}
 
   }
+]]
 }

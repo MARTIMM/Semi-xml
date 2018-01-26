@@ -35,6 +35,9 @@ class Element does SemiXML::Node {
 
     # keep can be overruled by a global keep
     $!keep = $!globals.keep;
+
+    # set sxml attributes. these are removed later
+    self!set-attributes;
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,6 +55,9 @@ class Element does SemiXML::Node {
 
     # keep can be overruled by a global keep
     $!keep = $!globals.keep;
+
+    # set sxml attributes. these are removed later
+    self!set-attributes;
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -256,28 +262,30 @@ note ">> $!node-type, $!body-number, $!module, $!method";
       given $key {
         when /^ sxml ':' inline / {
           $!inline = $!attributes{$key}.Int.Bool;
-          $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' noconv / {
           $!noconv = $!attributes{$key}.Int.Bool;
-          $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' keep / {
           $!keep = $!attributes{$key}.Int.Bool;
-          $!attributes{$key}:delete;
         }
 
         when /^ sxml ':' close / {
           $!close = $!attributes{$key}.Int.Bool;
-          $!attributes{$key}:delete;
-        }
-
-        when /^ sxml ':' / {
-          $!attributes{$key}:delete;
         }
       }
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !set-attributes ( ) {
+
+    $!attributes<sxml:inline> = $!inline ?? 1 !! 0;
+    $!attributes<sxml:noconv> = $!noconv ?? 1 !! 0;
+    $!attributes<sxml:keep> = $!keep ?? 1 !! 0;
+    $!attributes<sxml:close> = $!close ?? 1 !! 0;
+    $!attributes<sxml:body-type> = ~$!body-type;
   }
 }

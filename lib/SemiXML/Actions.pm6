@@ -38,70 +38,66 @@ class Actions {
 
     # initialize root node and place in the array. this node will never be
     # overwritten.
-    $!root .= new(:name<root>);
+    $!root .= new(:name<sxml:fragment>);
     $!elements = [$!root];
     $!element-idx = 1;
 
 note "\nAt the end of parsing";
+    # process the result tree
     self!process-ast($match);
 
-
-    my XML::Element $root-xml;
-
-    # see how many elements are stored in root
-    # return an empty document
-    if $!root.nodes.elems == 0 {
-note "No elements";
-      $root-xml .= new(:name<sxml:EmptyDocument>);
-    }
-
-    # normal xml document
-    elsif $!root.nodes.elems == 1 {
-note "1 element";
-      $root-xml .= new(:name($!root.name));
-      $!root.nodes[0].xml($root-xml);
-    }
-
-    elsif $!root.nodes.elems > 1 {
-note "More elements";
-      $!root.node-type = SemiXML::Fragment;
-
-      $root-xml .= new(:name($!root.name));
-      for $!root.nodes -> $node {
-        $node.xml($root-xml);
-      }
-    }
-
-    # execute any method bottom up
-    $!root.run-method if $!globals.exec;
-
-#    my XML::Element $root = $!document.root;
+    # convert non-method nodes into XML
+    my XML::Element $root-xml .= new(:name($!root.name));
     $root-xml.setNamespace( 'github.MARTIMM', 'sxml');
+    for $!root.nodes -> $node {
+      $node.xml($root-xml);
+    }
+note "NTop 0: $root-xml";
+
+    # execute any method bottom up and generate XML
+    $!root.run-method if $!globals.exec;
+note "NTop 1: $root-xml";
 
     unless $!globals.raw {
-#      subst-variables($root-xml);
-#      remap-content($root-xml);
-      remove-sxml($root-xml);
+#      self!subst-variables($root-xml);
+#      self!remap-content($root-xml);
 
-      # remove the namespace declaration
-      $root-xml.unset("xmlns:sxml");
+      # apply all entries from the F Table
+      self!apply-f-table($root-xml);
+
+
+      # remove all tags from the sxml namespace.
+      self!remove-sxml($root-xml);
+
+      # remove the namespace declaration, but if there are
+      # fragments, we need the namespaces in the document.
+      #$root-xml.unset("xmlns:sxml") unless $!globals.frag;
     }
+note "NTop 2: $root-xml";
 
-
-    if $!root.nodes.elems == 0 {
+    if $root-xml.nodes.elems == 0 {
+note "0 elements";
       $!document .= new($root-xml);
     }
 
-    elsif $!root.nodes.elems == 1 {
-      $!document .= new(
-        $root-xml.nodes[0].defined
-          ?? $root-xml.nodes[0]
-          !! XML::Element.new(:name<sxml:noChildDefined>)
-      );
+    elsif $root-xml.nodes.elems == 1 {
+note "1 element";
+      self!set-namespaces($root-xml.nodes[0]);
+      $!document .= new($root-xml.nodes[0]);
     }
 
-    elsif $!root.nodes.elems > 1 {
-      $!document .= new($root-xml);
+    elsif $root-xml.nodes.elems > 1 {
+note "more than 1 element";
+      if $!globals.frag {
+        self!set-namespaces($root-xml);
+        $!document .= new($root-xml);
+      }
+
+      else {
+        die X::SemiXML.new(
+          :message( "Too many nodes on top level. Maximum allowed nodes is one")
+        )
+      }
     }
   }
 
@@ -344,5 +340,361 @@ note "More elements";
     }
 
     return '';
+  }
+
+  #-----------------------------------------------------------------------------
+  # set namespaces on the element
+  method !set-namespaces ( XML::Element $element ) {
+
+    # add namespaces xmlns
+    my Str $refIn = $!globals.refine[0];
+    if $!globals.refined-tables<FN><$refIn>:exists {
+      for $!globals.refined-tables<FN><$refIn>.keys -> $ns {
+        $element.set(
+          $ns eq 'default' ?? 'xmlns' !! "xmlns:$ns",
+          $!globals.refined-tables<FN><$refIn>{$ns}
+        );
+      }
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !apply-f-table ( XML::Node $node ) {
+    #clean-text($node);
+    self!escape-attr-and-elements($node);
+    self!check-inline($node);
+  }
+
+  #-----------------------------------------------------------------------------
+  method !escape-attr-and-elements ( XML::Node $node ) {
+
+    state $parent-node;
+
+    my SemiXML::Globals $globals .= instance;
+
+    # process body text to escape special chars. we can process this always
+    # because parent elements are already accepted to modify the content.
+    if $node ~~ any( SemiXML::XMLText, XML::Text) {
+      my Str $t = self!cleanup-text( $parent-node, $node);
+      my XML::Node $p = $node.parent;
+      $p.replace( $node, SemiXML::XMLText.new(:text($t)));
+    }
+
+    elsif $node ~~ XML::Element {
+#      $comment-preserve = $node.attribs<sxml:content> ~~ any([<B C>]);
+
+      # Check for self closing tag, and if so remove content if any
+      if $node.attribs<sxml:close>:exists and $node.attribs<sxml:close> eq '1' {
+
+        # make a new empty element with the same tag-name and then remove the
+        # original element.
+        before-element( $node, $node.name, $node.attribs);
+        $node.remove;
+
+        # return because there are no child elements left to call recursively
+        return;
+      }
+
+      else {
+#note "$node.name() = not self closing";
+#note "Nodes: $node.nodes.elems(), ", $node.nodes.join(', ');
+        # ensure that there is at least a text element as its content
+        # otherwise XML will make it self-closing
+        unless $node.nodes.elems {
+          append-element( $node, :text(''));
+        }
+#note "Nodes: $node.nodes.elems(), ", $node.nodes.join(', ');
+      }
+
+      # some elements must not be processed to escape characters
+      if $node.attribs<keep>:exists and $node.attribs<sxml:keep> eq '1'  {
+        # no escaping must be performed on its contents
+        # for these kinds of nodes
+        return;
+      }
+
+      # no processing either for nodes in the SemiXML namespace
+      if $node.name ~~ m/^ 'sxml:' / {
+        return;
+      }
+
+      # recursivly process through child elements
+      $parent-node = $node;
+      self!escape-attr-and-elements($_) for $node.nodes;
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # Substitute some characters by XML entities, remove the remaining
+  # backslashes, remove comments if possible, remove trailing spaces,
+  # substitute multiple spaces by one space if possible.
+  method !cleanup-text ( XML::Element $parent, XML::Node $node --> Str ) {
+
+    my Str $esc = ~$node;
+
+    # entity must be known in the xml result!
+    $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;
+    $esc ~~ s:g/\\\s/\&nbsp;/;
+    $esc ~~ s:g/ '<' /\&lt;/;
+    $esc ~~ s:g/ '>' /\&gt;/;
+
+    # remove comments only if :$comment-preserve = False
+note "E0: $esc";
+    $esc ~~ s:g/ \s* <!after <[\\]>> '#' \N*: $$// if
+      $parent.attribs<sxml:body-type> eq "BodyA";
+note "E1: $esc";
+
+    # remove backslashes
+    $esc ~~ s:g/'\\'//;
+
+    # remove leading spaces for the minimum number of spaces when the content
+    # should be fixed
+#note "Space: '$esc'";
+    if $parent.attribs<sxml:keep>:exists
+       and $parent.attribs<sxml:keep> eq '1' {
+
+      my Int $min-indent = 1_000_000_000;
+      for $esc.lines -> $line {
+        $line ~~ m/^ $<indent>=(\s*) /;
+        my Int $c = $/<indent>.Str.chars;
+
+        # adjust minimum only when there is something non-spacical on the line
+        $min-indent = $c if $line ~~ m/\S/ and $c < $min-indent;
+      }
+
+      my $new-t = '';
+      my Str $indent = ' ' x $min-indent;
+      for $esc.lines {
+        my $l = $^line;
+        $l ~~ s/^ $indent//;
+        $new-t ~= "$l\n";
+      }
+
+      $esc = $new-t;
+    }
+
+    else {
+      # remove leading spaces at begin of text
+      $esc ~~ s:g/^^ \h+ //;
+
+      # remove trailing spaces at every line
+      $esc ~~ s:g/ \h+ $$//;
+
+      # substitute multiple spaces with one space
+      $esc ~~ s:g/ \s\s+ / /;
+
+      # remove return characters if found
+      $esc ~~ s/^ \n+ //;
+      $esc ~~ s/ \n+ $//;
+      $esc ~~ s:g/ \n+ / /;
+    }
+#note "--> '$esc'";
+
+#`{{
+    # Remove rest of the backslashes unless followed by hex numbers prefixed
+    # by an 'x'
+    #
+    if $esc ~~ m/ '\\x' <xdigit>+ / {
+      my $set-utf8 = sub ( $m1, $m2) {
+        return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
+      };
+
+      $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
+    }
+}}
+
+    $esc
+  }
+
+  #-----------------------------------------------------------------------------
+  method !check-inline ( XML::Element $parent ) {
+
+    my SemiXML::Globals $globals .= instance;
+
+    # get xpath object
+    my XML::Document $xml-document .= new($parent);
+    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+    # set namespace first
+    my $x = XML::XPath.new(:document($xml-document));
+    $x.set-namespace: 'sxml' => 'github.MARTIMM';
+
+    # check every element if it is an inline element. If so, check for
+    # surrounding spaces.
+    # first check inner text
+
+    for $x.find( '//*', :to-list) -> $v {
+      if $v.name ~~ any(@($globals.refined-tables<F><inline> // []))
+         and $v.nodes.elems {
+#note "CI: $v.name()";
+
+        if $v.nodes[0] ~~ XML::Text {
+          my XML::Text $t = $v.nodes[0];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.insert($t);
+        }
+
+        elsif $v.nodes[0] ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t = $v.nodes[0];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.insert($t);
+        }
+
+        elsif $v.nodes[*-1] ~~ XML::Text {
+          my XML::Text $t = $v.nodes[*-1];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.append($t);
+        }
+
+        elsif $v.nodes[*-1] ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t = $v.nodes[*-1];
+          my Str $text = $t.text;
+          $text ~~ s/^ \s+ //;
+          $t.remove;
+          $t .= new(:$text);
+          $v.append($t);
+        }
+
+
+        # check outer text
+        my XML::Node $ps = $v.previousSibling;
+        if $ps ~~ XML::Element {
+          my Str $text = ~$ps;
+          if $text ~~ /\S $/ {
+            my XML::Text $t .= new(:text(' '));
+            $v.before($t);
+          }
+        }
+
+        elsif $ps ~~ XML::Text {
+          my XML::Text $t := $ps;
+          my Str $text = $t.text;
+          $text ~= ' ';
+          $t.remove;
+          $t .= new(:$text);
+          $v.before($t);
+        }
+
+        elsif $ps ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t := $ps;
+          my Str $text = $t.text;
+          $text ~= ' ';
+          $t.remove;
+          $t .= new(:$text);
+          $v.before($t);
+        }
+
+
+        my XML::Node $ns = $v.nextSibling;
+        if $ns ~~ XML::Element {
+          my Str $text = ~$ns;
+          if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
+            my XML::Text $t .= new(:text(' '));
+            $v.after($t);
+          }
+        }
+
+        elsif $ns ~~ XML::Text {
+          my XML::Text $t := $ns;
+          my Str $text = $t.text;
+          if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
+            $t .= new(:text(' '));
+            $v.after($t);
+          }
+        }
+
+        elsif $ns ~~ SemiXML::XMLText {
+          my SemiXML::XMLText $t := $ns;
+          my Str $text = $t.text;
+          if $text !~~ /^ <punct>/ and $text ~~ /^ \S/ {
+            $t .= new(:text(' '));
+            $v.after($t);
+          }
+        }
+      }
+    }
+
+    # remove the namespace
+    $parent.attribs{"xmlns:sxml"}:delete;
+  }
+
+  #-----------------------------------------------------------------------------
+  # remove leftover elements and attributes from SemiXML namespace
+  method !remove-sxml ( XML::Node $node ) {
+    my SemiXML::Globals $globals .= instance;
+
+note "T: $node";
+    if $node ~~ XML::Element {
+note "\nE: ", $node.name;
+      if $node.name ~~ m/^ sxml \: / {
+        $node.remove;
+        return;
+      }
+
+      else {
+        for $node.attribs.keys -> $k {
+          $node.unset($k) if $k ~~ m/^ sxml \: /;
+          $node.unset($k) if $k ~~ m/^ xmlns \: sxml /;
+        }
+      }
+
+      self!remove-sxml($_) for $node.nodes;
+    }
+
+    elsif $node ~~ XML::Comment {
+note "\nC: ", $node.data[*].join('; ');
+      self!remove-sxml($_) for $node.data;
+    }
+
+    elsif $node ~~ XML::PI {
+note "\nP: ", $node.data;
+      self!remove-sxml($_) for $node.data;
+    }
+
+    if $node ~~ XML::CDATA {
+note "\nCD: ", $node.data;
+      self!remove-sxml($_) for $node.data;
+    }
+
+
+#`{{
+    # get xpath object
+    my XML::Document $xml-document .= new($parent);
+    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+    # set namespace first
+    my $x = XML::XPath.new(:document($xml-document));
+    $x.set-namespace: 'sxml' => 'github.MARTIMM';
+
+    # drop some leftover sxml namespace elements
+    for $x.find( '//*', :to-list) -> $v {
+      if $v.name() ~~ /^ 'sxml:'/ {
+        note "Leftover in sxml namespace removed: '$v.name()',",
+             " parent is '$v.parent.name()'"
+          if $globals.trace and $globals.refined-tables<T><parse>;
+
+        $v.remove;
+      }
+
+      else {
+        for $v.attribs.keys -> $k {
+          $v.unset($k) if $k ~~ m/^ sxml \: /;
+        }
+      }
+    }
+
+    # remove the namespace declaration
+    $parent.unset("xmlns:sxml");
+}}
+
   }
 }
