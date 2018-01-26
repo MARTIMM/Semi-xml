@@ -17,6 +17,18 @@
 #  pdf = [ 'xml; html; table1.xml', 'xml; html; table2.xml']
 
 #-------------------------------------------------------------------------------
+# Default namespaces table. Refined using IN and basename.
+#  xi      = 'http://www.w3.org/2001/XInclude'
+#  xlink   = 'http://www.w3.org/1999/xlink'
+#  xml     = "http://www.w3.org/XML/1998/namespace"
+
+[ DN.html ]
+  default = "http://www.w3.org/1999/xhtml"
+
+[ DN.db5 ]
+  default = "http://docbook.org/ns/docbook"
+
+#-------------------------------------------------------------------------------
 # Doctype entity tables. Refined using IN and basename.
 #[ E.xml ]
 #  copy              = '&#xa9;'
@@ -40,6 +52,7 @@
   ]
 
 
+# Docbook 5
 [ F.db5 ]
   inline            = [
     'emphasis'
