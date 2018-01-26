@@ -430,10 +430,18 @@ Methods can only generate something in a given parent container. This parent con
   * [ ] Make code coverage reports with `Rakudo::Perl6::Tracer`.
   * [x] Possibility to modify layout with css
 
+* [ ] Make use of javascript
 * [ ] avatar linking
 * [ ] Generating tables
 * [ ] Generating graphics, statistics, svg etc
-* [ ] Scalable Vector Graphics or SVG
+* [ ] Scalable Vector Graphics or SVG, see spec at [w3c][svg].
+* [ ] Make use of XPointer, see spec at [w3c][xpoint].
+* [ ] XLink, see spec at [w3c][xlink].
+* [ ] XInclude, see spec at [w3c][xincl].
+* [ ] XML Binary, see spec at [w3c][xbin].
+* [ ] Fragments. W3C has closed their specification of XML Fragments but is used by this module as a leading specification, see spec at [w3c][frag].
+* [ ] XML Stylesheets (xsl), see spec ate [w3c][xstyle].
+* [ ] XML Schema (xsd), see spec at [w3c][xschema].
 
 ## And …
   * [ ] Documentation in a manual.
@@ -445,3 +453,13 @@ Methods can only generate something in a given parent container. This parent con
 [colors1]: http://paletton.com
 [colorspace]: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 [colors2]: http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
+
+[svg]: https://www.w3.org/TR/SVG11/
+
+[xlink]: https://www.w3.org/TR/xlink11/
+[xinclude]: https://www.w3.org/TR/xinclude/
+[xpoint]: https://www.w3.org/TR/xptr-framework/
+[frag]: https://www.w3.org/TR/xml-fragment.html
+[xbin]: https://www.w3.org/TR/xbc-characterization/
+[xstyle]: https://www.w3.org/TR/xml-stylesheet/
+[xschema]: https://www.w3.org/TR/xmlschema11-1/
