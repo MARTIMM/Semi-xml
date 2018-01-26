@@ -1,4 +1,3 @@
 $a [
-  $abc [] $!SxmlCore.comment { abc $def ghi }
-  $def
+  $abc $!SxmlCore.comment { abc $def ghi }
 ]

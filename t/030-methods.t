@@ -45,13 +45,10 @@ spurt( $mod, q:to/EOMOD/);
       append-element( $parent, 'p');
       my XML::Element $p = append-element( $parent, 'p');
 
-      # Eat from the end of the list and add just after the container element.
-      # Somehow they get lost from the array when done otherwise.
-      #
       my Int $nbr-nodes = $content-body.nodes.elems;
       $p.insert($_) for $content-body.nodes.reverse;
       $p.append(XML::Text.new(:text("Added $nbr-nodes xml nodes")));
-
+    note "P: $parent";
       $parent;
     }
 
@@ -61,9 +58,6 @@ spurt( $mod, q:to/EOMOD/);
     ) {
       my XML::Element $ul = append-element( $parent, 'ul');
       $ul.set( 'class', ~$attrs<a>);
-
-      #note "attributes: ", $attrs;
-      #note "B should be a list or <> does not work: ", ~$attrs<b>;
 
       for @($attrs<b>)[*] -> $li-text {
         append-element( $ul, 'li', :text($li-text));
@@ -77,12 +71,13 @@ spurt( $mod, q:to/EOMOD/);
 
 # setup the configuration
 my Hash $config = {
-  ML => {:mod1<T030::m1;t>}
+  ML => {:mod1<T030::m1;t>},
+  T => {:!parse, :!parse-result},
 }
 
-#TODO spaces around brackets seems needed.
 # setup the contents to be parsed with a substitution item in it
-my Str $content = '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsense [ ] ';
+my Str $content =
+  '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsense [ ]';
 
 # instantiate parser and parse with contents and config
 my SemiXML::Sxml $x .= new( :!trace, :merge);
@@ -94,15 +89,18 @@ my $xml = $x.get-xml-text;
 like $xml, /'<p'/, "generated start of paragraph";
 like $xml, /'class="top-method"'/, "found class attribute in '$xml'";
 
+throws-like {
+  $content = '$!mod1.mth2 [ ]';
+  $r = $x.parse( :$config, :$content);
+}, X::SemiXML, 'Too many nodes on top',
+:message(/:s Too many nodes on top level/);
 
-$content = '$!mod1.mth2 [ ]';
-$r = $x.parse( :$config, :$content);
-ok $r, "match $content";
+lives-ok {
+  $content = '$!mod1.mth2 [ ]';
+  $r = $x.parse( :$config, :$content, :frag);
+}, "Fragment generated";
 
-$xml = $x.get-xml-text;
-like $xml, /'<method-generated-too-many-nodes'/, "generated $xml";
-like $xml, /'module="mod1"'/, "culprit module mod1";
-like $xml, /'method="mth2"'/, "culprit method mth2";
+
 
 
 
@@ -118,13 +116,15 @@ like $xml, /'<x><p></p><p>Added 1 xml nodes</p></x>'/,
 
 
 $content = '$x =a =!b [ $!mod1.mth2 [$h [abc] $h[def]]]';
-$r = $x.parse( :$config, :$content);
+$r = $x.parse( :$config, :$content, :trace);
 ok $r, "match $content";
 
 $xml = $x.get-xml-text;
-like $xml, / '<x a="1" b="0">'
+like $xml, /:s '<x a="1" b="0">'
              '<p></p>'
-             '<p><h>abc</h><h>def</h>Added 2 xml nodes</p>'
+             '<p>' '<h>abc</h>' '<h>def</h>'
+             'Added 3 xml nodes'
+             '</p>'
              '</x>'
            /, "generated: $xml";
 

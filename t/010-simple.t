@@ -58,9 +58,8 @@ subtest 'test multi liners', {
   $xml = parse(Q:q:to/EOXML/);
     $aa [
       $bb [ ][
-        $cc [
+        $cc [ ]
       ]
-       ]
     ]
     EOXML
 
@@ -69,7 +68,6 @@ subtest 'test multi liners', {
   $xml = parse('$aa [ $bb { $x[abc] } ]');
 
   is $xml, '<aa><bb>$x[abc]</bb></aa>', "2 tags and preserving content: $xml";
-
 }
 
 #-------------------------------------------------------------------------------
