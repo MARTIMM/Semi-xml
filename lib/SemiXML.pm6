@@ -16,6 +16,7 @@ package SemiXML:auth<github:MARTIMM> {
     has Bool $.keep is rw;
     has Bool $.raw is rw;
     has Bool $.exec is rw;
+    has Bool $.frag is rw;
     has Hash $.objects is rw;
 
     my Globals $instance;

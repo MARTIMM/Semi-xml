@@ -63,7 +63,7 @@ class Sxml {
   multi method parse (
     Str:D :$!filename!, Hash :$config,
     Bool :$raw = False, Bool :$force = False, Bool :$exec = True,
-    Bool :$trace = False, Bool :$keep = False
+    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False
     --> Bool
   ) {
 
@@ -77,7 +77,7 @@ class Sxml {
       my $text = slurp($!filename);
       $pr = self.parse(
         :content($text), :$config, :!drop-cfg-filename,
-        :$raw, :$force, :$trace, :$keep, :$exec
+        :$raw, :$force, :$trace, :$keep, :$exec, :$frag
       );
       die "Parse failure" if $pr ~~ Nil;
     }
@@ -94,7 +94,7 @@ class Sxml {
   multi method parse (
     Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
     Bool :$raw = False, Bool :$!force = False, Bool :$exec = True,
-    Bool :$!trace = False, Bool :$!keep = False
+    Bool :$!trace = False, Bool :$!keep = False, Bool :$frag = False
     --> Bool
   ) {
 
@@ -102,6 +102,7 @@ class Sxml {
     $!filename = Str if $!drop-cfg-filename;
     $!globals.raw = $raw;
     $!globals.exec = $exec;
+    $!globals.frag = $frag;
 
     if $!globals.refined-tables.defined
       and $!refine[0] eq $!globals.refine[0]
