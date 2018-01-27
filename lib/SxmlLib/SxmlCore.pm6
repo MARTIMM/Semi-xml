@@ -65,6 +65,7 @@ class SxmlCore {
     $parent
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   # $!SxmlCore.comment []
   method comment (
@@ -73,7 +74,7 @@ class SxmlCore {
   ) {
 
     # cleanup parent-containers
-    #drop-parent-container($content-body);
+    drop-parent-container($content-body);
     $parent.append(XML::Comment.new(:data($content-body.nodes)));
     $parent
   }
@@ -111,6 +112,7 @@ class SxmlCore {
 
     $parent
   }
+}}
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.var-decl name=xyz [<data>] generates

@@ -46,16 +46,16 @@ note "\nAt the end of parsing";
     # process the result tree
     self!process-ast($match);
 
+    # execute any method bottom up and generate XML
+    #$!root.run-method if $!globals.exec;
+#note "NTop 0: $root-xml";
+
     # convert non-method nodes into XML
     my XML::Element $root-xml .= new(:name($!root.name));
     $root-xml.setNamespace( 'github.MARTIMM', 'sxml');
     for $!root.nodes -> $node {
       $node.xml($root-xml);
     }
-note "NTop 0: $root-xml";
-
-    # execute any method bottom up and generate XML
-    $!root.run-method if $!globals.exec;
 note "NTop 1: $root-xml";
 
     unless $!globals.raw {

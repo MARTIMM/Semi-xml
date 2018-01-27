@@ -1,3 +1,12 @@
 $a [
-  $abc $!SxmlCore.comment { abc $def ghi }
+  $abc $sxml:comment { abc $def ghi }
+  $sxml:pi target=perl6 «
+    my $t = 100;
+    note $t * 1.5;
+  »
+  $sxml:cdata [
+   jhgasd
+   asjhdg
+   asdjhga sddjhgasdd
+ ]
 ]

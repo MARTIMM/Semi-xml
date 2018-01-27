@@ -17,13 +17,20 @@ class Element does SemiXML::Node {
 
   has Str $!module;
   has Str $!method;
-  has XML::Element $!content-body;
+#  has XML::Element $!content-body;
 
   has Hash $.attributes;
 
   #-----------------------------------------------------------------------------
   multi submethod BUILD ( Str:D :$!name!, Hash :$!attributes = {} ) {
-    $!node-type = SemiXML::Plain;
+
+    given $!name {
+      when 'sxml:cdata'   { $!node-type = SemiXML::CData; }
+      when 'sxml:pi'      { $!node-type = SemiXML::PI; }
+      when 'sxml:comment' { $!node-type = SemiXML::Comment; }
+      default             { $!node-type = SemiXML::Plain; }
+    }
+
     $!globals .= instance;
     $!nodes = [];
 
@@ -37,7 +44,7 @@ class Element does SemiXML::Node {
     $!keep = $!globals.keep;
 
     # set sxml attributes. these are removed later
-    self!set-attributes;
+    #self!set-attributes;
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -57,9 +64,10 @@ class Element does SemiXML::Node {
     $!keep = $!globals.keep;
 
     # set sxml attributes. these are removed later
-    self!set-attributes;
+    #self!set-attributes;
   }
 
+#`{{
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # can only be called from other code and cannot be used directly from
   # sxml text
@@ -76,24 +84,45 @@ class Element does SemiXML::Node {
   multi submethod BUILD ( Bool:D :$comment! ) {
     $!node-type = SemiXML::Comment;
   }
+}}
 
   #-----------------------------------------------------------------------------
+  # append a node to the end of the nodes array if the node is not
+  # already in that array.
   method append ( SemiXML::Node:D $node ) {
 
-    # search for the node first in the array
-    my Bool $parent-has-node = False;
+    # add the node when not found and set the parent in the node
+    if self!not-in-nodes($node) {
+      $!nodes.push($node);
+      $node.parent(self);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # insert a node to the start of the nodes array if the node is not
+  # already in that array.
+  method insert ( SemiXML::Node:D $node ) {
+
+    # add the node when not found and set the parent in the node
+    if self!not-in-nodes($node) {
+      $!nodes.unshift($node);
+      $node.parent(self);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # search for the node in nodes array.
+  method !not-in-nodes ( SemiXML::Node:D $node --> Bool ) {
+
+    my Bool $not-in-nodes = True;
     for @($!nodes) -> $n {
       if $n === self {
-        $parent-has-node = True;
+        $not-in-nodes = False;
         last;
       }
     }
 
-    # add the node when not found and set the parent in the node
-    unless $parent-has-node {
-      $!nodes.push($node);
-      $node.parent(self);
-    }
+    $not-in-nodes
   }
 
   #-----------------------------------------------------------------------------
@@ -107,7 +136,24 @@ class Element does SemiXML::Node {
     Bool :$noconv is copy = False, Bool :$keep is copy = False,
     Bool :$close is copy = False
   ) {
+    given $!node-type {
+      when any( SemiXML::Fragment, SemiXML::Plain) {
+        self!plain-xml( $parent, :$inline, :$noconv, :$keep, :$close);
+      }
 
+      when SemiXML::CData {
+        self!cdata-xml($parent);
+      }
+
+      when SemiXML::PI {
+        self!pi-xml($parent);
+      }
+
+      when SemiXML::Comment {
+        self!comment-xml($parent);
+      }
+    }
+#`{{
     given $!node-type {
       when any( SemiXML::Fragment, SemiXML::Plain) {
 
@@ -169,12 +215,25 @@ note "$!node-type, $!body-number, $!module, $!method";
           }
         }
       }
+
+      when SemiXML::CData {
+
+      }
+
+      when SemiXML::PI {
+
+      }
+
+      when SemiXML::Comment {
+#        $parent.append(XML::Comment.new(:data($content-body.nodes)));
+      }
     }
+}}
   }
 
   #-----------------------------------------------------------------------------
   method run-method ( ) {
-
+#`{{
     # first go to inner elements
     for @$!nodes -> $node {
       $node.run-method unless $node ~~ SemiXML::Text;
@@ -207,6 +266,7 @@ note ">> $!node-type, $!body-number, $!module, $!method";
       $!content-body.after($_) for $result.nodes.reverse;
       $!content-body.remove;
     }
+}}
   }
 
   #-----------------------------------------------------------------------------
@@ -234,7 +294,9 @@ note ">> $!node-type, $!body-number, $!module, $!method";
       $attrs ~= "$k=\"$v\" ";
     }
 
-    if $!node-type ~~ SemiXML::Plain {
+    if $!node-type ~~ any(
+       SemiXML::Plain, SemiXML::CData, SemiXML::PI, SemiXML::Comment
+    ) {
       $e = [~] '$', $!name, " $modifiers", " $attrs", ' ...';
     }
 
@@ -286,6 +348,104 @@ note ">> $!node-type, $!body-number, $!module, $!method";
     $!attributes<sxml:noconv> = $!noconv ?? 1 !! 0;
     $!attributes<sxml:keep> = $!keep ?? 1 !! 0;
     $!attributes<sxml:close> = $!close ?? 1 !! 0;
-    $!attributes<sxml:body-type> = ~$!body-type;
+  }
+
+  #-----------------------------------------------------------------------------
+  # normal node
+  method !plain-xml (
+    $parent, Bool :$inline = False, Bool :$noconv = False,
+    Bool :$keep = False, Bool :$close = False
+  ) {
+
+note "$!node-type, $!body-number, $!name";
+    # new xml element
+    my XML::Element $xml-node .= new(:$!name);
+    self!copy-attributes($parent);
+
+    # append node to the parent node
+    $parent.append($xml-node);
+
+    # when the node is self closing we do not need to process
+    # the content of the body
+    self!copy-nodes( $xml-node, :$inline, :$noconv, :$keep, :$close)
+      unless $!close;
+  }
+
+  #-----------------------------------------------------------------------------
+  # comment node
+  method !comment-xml ( $parent ) {
+
+note "$!node-type, $!body-number, $!name, $parent.name()";
+
+    my XML::Element $x .= new(:name<x>);
+    self!copy-nodes( $x, :keep);
+    my XML::Comment $c .= new(:data($x.nodes));
+
+    $parent.append($c);
+  }
+
+  #-----------------------------------------------------------------------------
+  # CData node
+  method !cdata-xml ( $parent ) {
+
+note "$!node-type, $!body-number, $!name, $parent.name()";
+
+    my XML::Element $x .= new(:name<x>);
+    self!copy-nodes( $x, :keep);
+    my XML::CDATA $c .= new(:data($x.nodes));
+
+    $parent.append($c);
+  }
+
+  #-----------------------------------------------------------------------------
+  # PI node
+  method !pi-xml ( $parent ) {
+
+note "$!node-type, $!body-number, $!name, $parent.name()";
+
+    my XML::Element $x .= new(:name<x>);
+    self!copy-nodes( $x, :keep);
+    my Str $target = ($!attributes<target> // 'no-target').Str;
+    my XML::PI $c .= new(
+      :data( SemiXML::XMLText.new(:text($target)), |$x.nodes)
+    );
+
+    $parent.append($c);
+  }
+
+  #-----------------------------------------------------------------------------
+  # set attributes
+  method !copy-attributes ( $xml-node ) {
+
+    for $!attributes.kv -> $k, $v {
+      $xml-node.set( $k, ~$v);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !copy-nodes ( $parent, Bool :$inline is copy = False,
+    Bool :$noconv is copy = False, Bool :$keep is copy = False,
+    Bool :$close is copy = False
+  ) {
+
+    if $!nodes.elems {
+      for @$!nodes -> $node {
+        if $node.node-type !~~ SemiXML::Text {
+
+#TODO what to do if an attribute turns off an option?
+          # inherit from parent nodes
+          $inline = ($inline or $!inline);
+          $noconv = ($noconv or $!noconv);
+          $keep = ($keep or $!keep);
+          $close = ($close or $!close);
+        }
+
+        $node.xml( $parent, :$inline, :$noconv, :$keep, :$close);
+      }
+    }
+
+    else {
+      $parent.append(SemiXML::XMLText.new(:text('')));
+    }
   }
 }
