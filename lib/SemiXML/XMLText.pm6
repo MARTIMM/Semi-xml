@@ -12,7 +12,7 @@ use XML;
 # can be controlled better.
 class XMLText does XML::Node {
 
-  has Bool $.strip;
+  #has Bool $.strip;
   has Str $.text;
 
   #-----------------------------------------------------------------------------
@@ -21,7 +21,8 @@ class XMLText does XML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( Bool :$!strip = False, Str :$!text ) {
+  submethod BUILD ( Str :$!text ) {
+  #submethod BUILD ( Bool :$!strip = False, Str :$!text ) {
 
   #`{{ Following is taken from the XML module but is not working properly
        so the :strip attribute is ignored to keep things in my own hands
