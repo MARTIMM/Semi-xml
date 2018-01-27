@@ -5,6 +5,7 @@ unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
 use SemiXML::Helper;
+use SemiXML::SxmlHelper;
 use XML;
 
 #-------------------------------------------------------------------------------
@@ -14,6 +15,26 @@ class SxmlCore {
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
   method date (
+    SemiXML::Element $parent, Hash $attrs, Array[SemiXML::Node] :$content-body
+#    --> XML::Node
+  ) {
+
+    $parent.append(SemiXML::Text.new(:text(' ')));
+
+    my Date $today = Date.today;
+
+    my Int $year = ($attrs<year> // $today.year.Str).Int;
+    my Int $month = ($attrs<month> // $today.month.Str).Int;
+    my Int $day = ($attrs<day> // $today.day.Str).Int;
+
+    append-element( $parent, :text(Date.new( $year, $month, $day).Str));
+
+#    $parent
+  }
+
+  #-----------------------------------------------------------------------------
+  # $!SxmlCore.date year=nn month=nn day=nn []
+  method xml-date (
     XML::Element $parent, Hash $attrs, XML::Node :$content-body
     --> XML::Node
   ) {
@@ -26,7 +47,7 @@ class SxmlCore {
     my Int $month = ($attrs<month> // $today.month.Str).Int;
     my Int $day = ($attrs<day> // $today.day.Str).Int;
 
-    append-element( $parent, :text(Date.new( $year, $month, $day).Str));
+    append-xml-element( $parent, :text(Date.new( $year, $month, $day).Str));
 
     $parent
   }

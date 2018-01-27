@@ -47,7 +47,7 @@ note "\nAt the end of parsing";
     self!process-ast($match);
 
     # execute any method bottom up and generate XML
-    #$!root.run-method if $!globals.exec;
+    $!root.run-method if $!globals.exec;
 #note "NTop 0: $root-xml";
 
     # convert non-method nodes into XML

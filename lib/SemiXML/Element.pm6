@@ -64,7 +64,7 @@ class Element does SemiXML::Node {
     $!keep = $!globals.keep;
 
     # set sxml attributes. these are removed later
-    #self!set-attributes;
+    self!set-attributes;
   }
 
 #`{{
@@ -233,7 +233,7 @@ note "$!node-type, $!body-number, $!module, $!method";
 
   #-----------------------------------------------------------------------------
   method run-method ( ) {
-#`{{
+
     # first go to inner elements
     for @$!nodes -> $node {
       $node.run-method unless $node ~~ SemiXML::Text;
@@ -259,14 +259,10 @@ note ">> $!node-type, $!body-number, $!module, $!method";
         die X::SemiXML.new(:message("Module $!module not defined"));
       }
 
-      my XML::Element $parent .= new(:name<sxml::parent-element>);
-      my XML::Element $result = $object."$!method"(
-        $parent, $!attributes, :$!content-body
-      );
-      $!content-body.after($_) for $result.nodes.reverse;
-      $!content-body.remove;
+      $object."$!method"( $!parent, $!attributes, $!nodes);
+#      $!content-body.after($_) for $result.nodes.reverse;
+#      $!content-body.remove;
     }
-}}
   }
 
   #-----------------------------------------------------------------------------
