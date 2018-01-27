@@ -185,14 +185,21 @@ Special attributes can be used to modify the behavior of the F-tables. These are
 ## Items needed in program sxml2xml or SemiXML/Sxml.pm6
   * [x] Dependencies on other files. This is controlled by the D table in the config.
   * [ ] After having translated to, or loaded from XML sources, try to reverse engineer the XML back into sxml. The result can only be a static result but it can be helpful to get Sxml text from XML templates and then modify the code later.
-  * [x] Add a convenience method to SxmlHelper.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $node, Hash $attributes ) { }`
+  * [ ] Add a convenience method to Helper.pm6 to process %attrs for class, id, style etc. and add those to the provided element node. Then remove them from %attrs. `method std-attrs ( XML::Element $node, Hash $attributes ) { }`
 
+## A few of the core methods are transformed to simple tags.
+* [x] `$!SxmlCore.comment` is now `$sxml:comment`
+* [x] `$!SxmlCore.cdata` is now `$sxml:cdata`
+* [x] `$!SxmlCore.pi target=x` is now `$sxml:pi target=x`
 
 ## Tests
   * [ ] tags without body but with attributes
   * [ ] comments in sxml
   * [ ] lineup of brackets of body to find errors
 
+## Namespace
+  * [x] name: sxml
+  * [x] url: https://github.com/MARTIMM/Semi-xml
 
 ## Configuration
 The configuration is maintained in a `toml` type of config file. The user must edit this file to control the transformation process. There can be many files which are merged together using the Config::DataLang::Refined module. There are several steps to find and merge these config files;

@@ -52,7 +52,7 @@ note "\nAt the end of parsing";
 
     # convert non-method nodes into XML
     my XML::Element $root-xml .= new(:name($!root.name));
-    $root-xml.setNamespace( 'github.MARTIMM', 'sxml');
+    $root-xml.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
     for $!root.nodes -> $node {
       $node.xml($root-xml);
     }
@@ -513,7 +513,7 @@ note "E1: $esc";
 
     # get xpath object
     my XML::Document $xml-document .= new($parent);
-    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+    $parent.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
 
     # set namespace first
     my $x = XML::XPath.new(:document($xml-document));
@@ -669,7 +669,7 @@ note "\nCD: ", $node.data;
 #`{{
     # get xpath object
     my XML::Document $xml-document .= new($parent);
-    $parent.setNamespace( 'github.MARTIMM', 'sxml');
+    $parent.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
 
     # set namespace first
     my $x = XML::XPath.new(:document($xml-document));
