@@ -22,7 +22,7 @@ class SxmlHelper {
 
     # create an element only when the name is defined and not empty
     my SemiXML::Node $element =
-       SemiXML::Element.new( :$name, :%$attributes) if ? $name;
+       SemiXML::Element.new( :$name, :$attributes) if ? $name;
 
     # if both are created than add text to the element
     if ? $element and ? $text-element {

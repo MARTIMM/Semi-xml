@@ -38,4 +38,38 @@ role Node {
 
   #-----------------------------------------------------------------------------
   method parent ( SemiXML::Node:D $!parent ) { }
+
+  #-----------------------------------------------------------------------------
+  # find location of node in nodes array. return Int type if not found.
+  method index-of ( SemiXML::Node $find --> Int ) {
+
+    loop ( my Int $i = 0; $i < $!nodes.elems; $i++ ) {
+      return $i if $!nodes[$i] ~~ $find;
+    }
+
+    Int
+  }
+
+  #-----------------------------------------------------------------------------
+  method remove ( --> SemiXML::Node ) {
+
+    $!parent.removeChild(self);
+    return self
+  }
+
+  #-----------------------------------------------------------------------------
+  method reparent ( SemiXML::Node $parent --> SemiXML::Node ) {
+
+    #self.remove;
+    $!parent.removeChild(self);
+    $!parent = $parent;
+    return self
+  }
+
+  #-----------------------------------------------------------------------------
+  method removeChild ( SemiXML::Node $node ) {
+
+    my $pos = self.index-of($node);
+    $!nodes.splice( $pos, 1) if ?$pos;
+  }
 }

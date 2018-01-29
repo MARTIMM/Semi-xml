@@ -4,8 +4,9 @@ use v6;
 unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
-use SemiXML::Helper;
-use SemiXML::SxmlHelper;
+#use SemiXML::Helper;
+#use SemiXML::SxmlHelper;
+use SemiXML::Element;
 use XML;
 
 #-------------------------------------------------------------------------------
@@ -15,11 +16,10 @@ class SxmlCore {
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
   method date (
-    SemiXML::Element $parent, Hash $attrs, Array[SemiXML::Node] :$content-body
-#    --> XML::Node
+    SemiXML::Element $parent, Hash $attrs, Array $content-body
   ) {
 
-    $parent.append(SemiXML::Text.new(:text(' ')));
+    #$parent.append(SemiXML::Text.new(:text(' ')));
 
     my Date $today = Date.today;
 
@@ -27,14 +27,23 @@ class SxmlCore {
     my Int $month = ($attrs<month> // $today.month.Str).Int;
     my Int $day = ($attrs<day> // $today.day.Str).Int;
 
-    append-element( $parent, :text(Date.new( $year, $month, $day).Str));
-
-#    $parent
+    $parent.append(:text(Date.new( $year, $month, $day).Str));
   }
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
-  method xml-date (
+  method t0 (
+    SemiXML::Element $parent, Hash $attrs, Array $content-body
+  ) {
+    $parent.append(:text<pqr>);
+    $parent.append($_) for @$content-body;
+    $parent.append(:text<stu>);
+  }
+
+#`{{
+  #-----------------------------------------------------------------------------
+  # $!SxmlCore.date year=nn month=nn day=nn []
+  method date (
     XML::Element $parent, Hash $attrs, XML::Node :$content-body
     --> XML::Node
   ) {
@@ -85,7 +94,7 @@ class SxmlCore {
     append-element( $parent, :text($dtstr));
     $parent
   }
-
+}}
 #`{{
   #-----------------------------------------------------------------------------
   # $!SxmlCore.comment []
@@ -134,7 +143,7 @@ class SxmlCore {
     $parent
   }
 }}
-
+#`{{
   #-----------------------------------------------------------------------------
   # $!SxmlCore.var-decl name=xyz [<data>] generates
   # <sxml:var-decl name=xyz name="aCommonText">...</sxml:var-decl>
@@ -160,4 +169,5 @@ class SxmlCore {
   ) {
     $parent
   }
+}}
 }

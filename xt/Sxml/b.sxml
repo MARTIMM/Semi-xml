@@ -1,1 +1,3 @@
-$a [ abc $!SxmlCore.date [] def ]
+$a [ abc $!SxmlCore.date [] def
+   $!SxmlCore.t0 [ $a [jhg]  ]
+]

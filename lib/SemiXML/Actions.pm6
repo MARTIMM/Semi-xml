@@ -46,7 +46,7 @@ note "\nAt the end of parsing";
     # process the result tree
     self!process-ast($match);
 
-    # execute any method bottom up and generate XML
+    # execute any method bottom up and generate sxml structures
     $!root.run-method if $!globals.exec;
 #note "NTop 0: $root-xml";
 
