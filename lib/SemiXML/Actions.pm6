@@ -63,8 +63,8 @@ note "NTop 1: $root-xml";
 #      self!remap-content($root-xml);
 
       # apply all entries from the F Table
-      self!apply-f-table($root-xml);
-
+      #self!apply-f-table($root-xml);
+      self!check-inline($root-xml);
 
       # remove all tags from the sxml namespace.
       self!remove-sxml($root-xml);
@@ -147,9 +147,11 @@ note "more than 1 element";
 
       given $k {
         when 'tag' {
-          my SemiXML::Element $element = self!create-element($v);
+          my SemiXML::Element $element = self!create-element(
+            $v, $!elements[$!element-idx - 1]
+          );
           $!elements[$!element-idx] = $element;
-          $!elements[$!element-idx - 1].append($element);
+          #$!elements[$!element-idx - 1].append($element);
 
           note ("--> Append element: $element.name() to " ~
                 "$!elements[$!element-idx - 1].name()").indent($l)
@@ -207,18 +209,21 @@ note "more than 1 element";
   }
 
   #-----------------------------------------------------------------------------
-  method !create-element ( $tag --> SemiXML::Element ) {
+  method !create-element (
+    Match $tag, SemiXML::Node $parent
+    --> SemiXML::Element
+  ) {
 
     my SemiXML::Element $element;
 
     my Str $symbol = $tag<sym>.Str;
     if $symbol eq '$' {
-      $element .= new( :name($tag<tag-name>.Str));
+      $element .= new( :name($tag<tag-name>.Str), :$parent);
     }
 
     elsif $symbol eq '$!' {
       $element .= new(
-        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str)
+        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str), :$parent
       );
     }
 
@@ -361,10 +366,11 @@ note "more than 1 element";
   #-----------------------------------------------------------------------------
   method !apply-f-table ( XML::Node $node ) {
     #clean-text($node);
-    self!escape-attr-and-elements($node);
+    #self!escape-attr-and-elements($node);
     self!check-inline($node);
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   method !escape-attr-and-elements ( XML::Node $node ) {
 
@@ -505,6 +511,7 @@ note "E1: $esc";
 
     $esc
   }
+}}
 
   #-----------------------------------------------------------------------------
   method !check-inline ( XML::Element $parent ) {
@@ -524,9 +531,10 @@ note "E1: $esc";
     # first check inner text
 
     for $x.find( '//*', :to-list) -> $v {
+note "CI: $v.name()";
       if $v.name ~~ any(@($globals.refined-tables<F><inline> // []))
          and $v.nodes.elems {
-#note "CI: $v.name()";
+note "CI: $v.name()";
 
         if $v.nodes[0] ~~ XML::Text {
           my XML::Text $t = $v.nodes[0];

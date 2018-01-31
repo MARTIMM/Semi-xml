@@ -15,29 +15,45 @@ class SxmlCore {
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
-  method date (
-    SemiXML::Element $parent, Hash $attrs, Array $content-body
-  ) {
-
-    #$parent.append(SemiXML::Text.new(:text(' ')));
+  method date ( SemiXML::Element $method-node --> Array ) {
 
     my Date $today = Date.today;
 
-    my Int $year = ($attrs<year> // $today.year.Str).Int;
-    my Int $month = ($attrs<month> // $today.month.Str).Int;
-    my Int $day = ($attrs<day> // $today.day.Str).Int;
+    my Int $year = ($method-node.attributes<year> // $today.year.Str).Int;
+    my Int $month = ($method-node.attributes<month> // $today.month.Str).Int;
+    my Int $day = ($method-node.attributes<day> // $today.day.Str).Int;
 
-    $parent.append(:text(Date.new( $year, $month, $day).Str));
+    [SemiXML::Text.new(:text(Date.new( $year, $month, $day).Str))]
   }
 
   #-----------------------------------------------------------------------------
-  # $!SxmlCore.date year=nn month=nn day=nn []
-  method t0 (
-    SemiXML::Element $parent, Hash $attrs, Array $content-body
-  ) {
-    $parent.append(:text<pqr>);
-    $parent.append($_) for @$content-body;
-    $parent.append(:text<stu>);
+  # $!SxmlCore.date-time timezone=tz iso=n []
+  method date-time ( SemiXML::Element $method-node --> Array ) {
+
+    my Bool $iso = ($method-node.attributes<iso> // 1).Int.Bool;
+    my Bool $utc = ($method-node.attributes<utc> // 0).Int.Bool;
+    my Int $tz = ($method-node.attributes<timezone> // 0).Int;
+
+    my DateTime $date-time;
+
+    if $tz {
+      $date-time = DateTime.now(:timezone($tz));
+    }
+
+    else {
+      $date-time = DateTime.now;
+    }
+
+    $date-time .= utc if ?$utc;
+    my Str $dtstr = $date-time.Str;
+
+    unless $iso {
+      $dtstr ~~ s/'T'/ /;
+      $dtstr ~~ s/'+'/ +/;
+      $dtstr ~~  s/\.\d+//;
+    }
+
+    [SemiXML::Text.new(:text($dtstr))]
   }
 
 #`{{

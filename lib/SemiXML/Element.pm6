@@ -12,6 +12,7 @@ use XML;
 #-------------------------------------------------------------------------------
 class Element does SemiXML::Node {
 
+#`{{
   has Str $.name;
   has Str $.namespace;
 
@@ -20,10 +21,14 @@ class Element does SemiXML::Node {
 #  has XML::Element $!content-body;
 
   has Hash $.attributes;
+}}
 
   #-----------------------------------------------------------------------------
-  multi submethod BUILD ( Str:D :$!name!, Hash :$!attributes = {} ) {
+  multi submethod BUILD (
+    Str:D :$!name!, SemiXML::Node :$parent, Hash :$!attributes = {}
+  ) {
 
+    # set node type
     given $!name {
       when 'sxml:cdata'   { $!node-type = SemiXML::CData; }
       when 'sxml:pi'      { $!node-type = SemiXML::PI; }
@@ -31,40 +36,38 @@ class Element does SemiXML::Node {
       default             { $!node-type = SemiXML::Plain; }
     }
 
+    # init the rest
     $!globals .= instance;
     $!nodes = [];
 
-    # a normal element(Plain) might have entries in the FTable configuration
-    self!process-FTable;
+    # connect to parent, root doesn't have a parent
+    $parent.append(self) if ?$parent;
 
-    # it can be overidden by attributes
+    # process attributes
     self!process-attributes;
-
-    # keep can be overruled by a global keep
-    $!keep = $!globals.keep;
-
-    # set sxml attributes. these are removed later
-    #self!set-attributes;
   }
 
-  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi submethod BUILD (
-    Str:D :$!module!, Str:D :$!method!, Hash :$!attributes = {}
+    Str:D :$!module!, Str:D :$!method!,
+    SemiXML::Node :$parent, Hash :$!attributes = {}
   ) {
+
+    # set node type
     $!node-type = SemiXML::Method;
+
+    # init the rest
     $!globals .= instance;
     $!nodes = [];
 
     # devise a temporary name for the node
     $!name = "sxml:$!module.$!method";
 
+    # connect to parent, root doesn't have a parent
+    $parent.append(self) if ?$parent;
+
+    # process attributes
     self!process-attributes;
-
-    # keep can be overruled by a global keep
-    $!keep = $!globals.keep;
-
-    # set sxml attributes. these are removed later
-    self!set-attributes;
   }
 
   #-----------------------------------------------------------------------------
@@ -79,7 +82,7 @@ class Element does SemiXML::Node {
     }
   }
 
-  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method append ( Str $name?, Hash $attributes = {}, Str :$text ) {
 
     # create a text element, even when it is an empty string.
@@ -131,24 +134,16 @@ note "Before: $!node-type, $node.node-type(), $new.node-type()";
   multi method before ( SemiXML::Node $node ) {
 
     if $!parent ~~ SemiXML::Element {
+      $node.parent(self) unless $node.parent;
       $!parent.before( self, $node);
     }
   }
 
   #-----------------------------------------------------------------------------
-  method attributes ( Hash $!attributes ) {
-    self!process-attributes;
-  }
-
-  #-----------------------------------------------------------------------------
-  method xml (
-    XML::Node $parent, Bool :$inline is copy = False,
-    Bool :$noconv is copy = False, Bool :$keep is copy = False,
-    Bool :$close is copy = False
-  ) {
+  method xml ( XML::Node $parent ) {
     given $!node-type {
       when any( SemiXML::Fragment, SemiXML::Plain) {
-        self!plain-xml( $parent, :$inline, :$noconv, :$keep, :$close);
+        self!plain-xml($parent);
       }
 
       when SemiXML::CData {
@@ -193,17 +188,18 @@ note ">> $!node-type, $!body-number, $!module, $!method";
         die X::SemiXML.new(:message("Module $!module not defined"));
       }
 
-      my SemiXML::Element $e .= new(:name<sxml:parent-container>);
-      self.append($e);
 note "MN 0: $!name, ", $!parent.name;
-      $object."$!method"( $e, $!attributes, $!nodes);
-my $x = XML::Element.new(:name<X>);
-$e.xml($x);
-note "X: $x";
-#exit(0);
-      #self.before($e);
-      $!parent.before( self, $_) for @($e.nodes);
-      undefine $e;
+      my Array $result = $object."$!method"(self);
+      for @$result -> $node {
+note "append before $!name: $node.name()";
+        # set this nodes attributes on every generated node
+        $node.attributes($!attributes//{});
+        self.before($node);
+      }
+
+      #for @($!nodes) -> $node {
+      #  $!parent.before( self, $node);
+      #}
       self.remove;
 
 #      $!content-body.after($_) for $result.nodes.reverse;
@@ -250,54 +246,8 @@ note "X: $x";
   }
 
   #----[ private stuff ]--------------------------------------------------------
-  method !process-FTable ( ) {
-
-    my Hash $ftable = $!globals.refined-tables<F> // {};
-    $!inline = $!name ~~ any(|@($ftable<inline> // []));
-    $!noconv = $!name ~~ any(|@($ftable<no-conversion> // []));
-    $!keep = $!name ~~ any(|@($ftable<space-preserve> // []));
-    $!close = $!name ~~ any(|@($ftable<self-closing> // []));
-  }
-
-  #-----------------------------------------------------------------------------
-  method !process-attributes ( ) {
-
-    for $!attributes.keys -> $key {
-      given $key {
-        when /^ sxml ':' inline / {
-          $!inline = $!attributes{$key}.Int.Bool;
-        }
-
-        when /^ sxml ':' noconv / {
-          $!noconv = $!attributes{$key}.Int.Bool;
-        }
-
-        when /^ sxml ':' keep / {
-          $!keep = $!attributes{$key}.Int.Bool;
-        }
-
-        when /^ sxml ':' close / {
-          $!close = $!attributes{$key}.Int.Bool;
-        }
-      }
-    }
-  }
-
-  #-----------------------------------------------------------------------------
-  method !set-attributes ( ) {
-
-    $!attributes<sxml:inline> = $!inline ?? 1 !! 0;
-    $!attributes<sxml:noconv> = $!noconv ?? 1 !! 0;
-    $!attributes<sxml:keep> = $!keep ?? 1 !! 0;
-    $!attributes<sxml:close> = $!close ?? 1 !! 0;
-  }
-
-  #-----------------------------------------------------------------------------
   # normal node
-  method !plain-xml (
-    $parent, Bool :$inline = False, Bool :$noconv = False,
-    Bool :$keep = False, Bool :$close = False
-  ) {
+  method !plain-xml ( XML::Node $parent ) {
 
 note "$!node-type, $!body-number, $!name";
     # new xml element
@@ -309,13 +259,12 @@ note "$!node-type, $!body-number, $!name";
 
     # when the node is self closing we do not need to process
     # the content of the body
-    self!copy-nodes( $xml-node, :$inline, :$noconv, :$keep, :$close)
-      unless $!close;
+    self!copy-nodes( $xml-node ) unless $!close;
   }
 
   #-----------------------------------------------------------------------------
   # comment node
-  method !comment-xml ( $parent ) {
+  method !comment-xml ( XML::Node $parent ) {
 
 note "$!node-type, $!body-number, $!name, $parent.name()";
 
@@ -328,7 +277,7 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
 
   #-----------------------------------------------------------------------------
   # CData node
-  method !cdata-xml ( $parent ) {
+  method !cdata-xml ( XML::Node $parent ) {
 
 note "$!node-type, $!body-number, $!name, $parent.name()";
 
@@ -341,7 +290,7 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
 
   #-----------------------------------------------------------------------------
   # PI node
-  method !pi-xml ( $parent ) {
+  method !pi-xml ( XML::Node $parent ) {
 
 note "$!node-type, $!body-number, $!name, $parent.name()";
 
@@ -356,8 +305,8 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
   }
 
   #-----------------------------------------------------------------------------
-  # set attributes
-  method !copy-attributes ( $xml-node ) {
+  # set attributes on an XML node
+  method !copy-attributes ( XML::Node $xml-node ) {
 
     for $!attributes.kv -> $k, $v {
       $xml-node.set( $k, ~$v);
@@ -365,24 +314,11 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
   }
 
   #-----------------------------------------------------------------------------
-  method !copy-nodes ( $parent, Bool :$inline is copy = False,
-    Bool :$noconv is copy = False, Bool :$keep is copy = False,
-    Bool :$close is copy = False
-  ) {
+  method !copy-nodes ( $parent ) {
 
     if $!nodes.elems {
       for @$!nodes -> $node {
-        if $node.node-type !~~ SemiXML::Text {
-
-#TODO what to do if an attribute turns off an option?
-          # inherit from parent nodes
-          $inline = ($inline or $!inline);
-          $noconv = ($noconv or $!noconv);
-          $keep = ($keep or $!keep);
-          $close = ($close or $!close);
-        }
-
-        $node.xml( $parent, :$inline, :$noconv, :$keep, :$close);
+        $node.xml($parent);
       }
     }
 

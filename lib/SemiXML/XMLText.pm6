@@ -22,6 +22,7 @@ class XMLText does XML::Node {
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( Str :$!text ) {
+
   #submethod BUILD ( Bool :$!strip = False, Str :$!text ) {
 
   #`{{ Following is taken from the XML module but is not working properly

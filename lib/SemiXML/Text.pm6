@@ -16,14 +16,26 @@ class Text does SemiXML::Node {
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( Str :$!text ) {
+
+    # set node type
     $!node-type = SemiXML::NText;
+
+    # init rest
+    $!globals .= instance;
+
+    # create a fake name for text
+    $!name = $!text;
+    $!name ~~ s:g/<punct>//;
+    $!name ~~ s:g/\s+//;
+    $!name = 'empty' unless ?$!name;
+    $!name = 'sxml:TN' ~ $!name.substr( 0, 40);
+
+    # set sxml attributes. these are removed later
+    self!process-attributes;
   }
 
   #-----------------------------------------------------------------------------
-  method xml (
-    XML::Node $parent, Bool :$inline = False, Bool :$noconv = False,
-    Bool :$keep = False, Bool :$close = False
-  ) {
+  method xml ( XML::Node $parent ) {
 my Str $t = $!text;
 $t ~~ s:g/\n/\\n/;
 note "$!node-type, $!body-number, $!parent.name(), '$t'";
@@ -31,7 +43,7 @@ note "$!node-type, $!body-number, $!parent.name(), '$t'";
     state $previous-body-number = -1;
 
     my Str $text = $!text;
-    if $keep {
+    if $!keep {
 
       # do this only when there are any newlines
       if $text ~~ m/ \n / {
@@ -57,9 +69,9 @@ note "$!node-type, $!body-number, $!parent.name(), '$t'";
           my $new-text = '';
           for $text.lines -> $line {
 
-            my $l = $line;            # get line
-            $l ~~ s/^ $indent//;      # remove the spaces
-            $new-text ~= "$l\n";      # add a newline because .lines() removes it
+            my $l = $line;        # get line
+            $l ~~ s/^ $indent//;  # remove the spaces
+            $new-text ~= "$l\n";  # add a newline because .lines() removes it
           }
 
           # except for the last line if there wasn't one in the original
@@ -85,7 +97,8 @@ note "$!node-type, $!body-number, $!parent.name(), '$t'";
     }
 
     # modifications
-    unless $noconv {
+    unless $!noconv {
+
       # replace & for &amp; except for cases which are already entities
       # like '&#123;' or '&copy;'
       $text ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/;

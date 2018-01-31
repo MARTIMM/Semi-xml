@@ -35,6 +35,13 @@
 
 #-------------------------------------------------------------------------------
 # Element handling tables. Refined using IN and basename.
+[ F ]
+  # modules and methods
+  inline            = [
+    'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time'
+  ]
+
+
 [ F.html ]
   inline            = [
     'a', 'b', 'big', 'i', 'strong', 'small', 'tt', 'abbr', 'acronym', 'cite',
