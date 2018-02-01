@@ -4,8 +4,6 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
-#use SemiXML::StringList;
-#use SemiXML::Body;
 use XML;
 
 #-------------------------------------------------------------------------------
@@ -39,10 +37,10 @@ role Node {
 
   # flags to process the content. element nodes set them and text nodes
   # inherit them. other types like PI, CData etc, do not need it.
-  has Bool $.inline = False;  # inline in FTable
-  has Bool $.noconv = False;  # no-conversion in FTable
-  has Bool $.keep = False;    # space-preserve in FTable
-  has Bool $.close = False;   # self-closing in FTable
+  has Bool $.inline;      # inline in FTable
+  has Bool $.noconv;      # no-conversion in FTable
+  has Bool $.keep;        # space-preserve in FTable
+  has Bool $.close;       # self-closing in FTable
 
   #-----------------------------------------------------------------------------
   multi method parent ( SemiXML::Node:D $!parent ) { }
@@ -71,6 +69,7 @@ role Node {
   #-----------------------------------------------------------------------------
   method reparent ( SemiXML::Node $parent --> SemiXML::Node ) {
 
+note "Repar: $parent.name(), {self.name}";
     #self.remove;
     $!parent.removeChild(self);
 
@@ -87,6 +86,113 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
   }
 
   #-----------------------------------------------------------------------------
+  # append a node to the end of the nodes array if the node is not
+  # already in that array.
+  multi method append ( SemiXML::Node:D $node! ) {
+
+    # add the node when not found and set the parent in the node
+    my $pos = self.index-of($node);
+    unless ?$pos {
+      $!nodes.push($node);
+      $node.parent(self);
+    }
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method append ( Str $name?, Hash $attributes = {}, Str :$text ) {
+
+    # create a text element, even when it is an empty string.
+    my SemiXML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
+
+    # create an element only when the name is defined and not empty
+    my SemiXML::Node $node =
+       SemiXML::Element.new( :$name, :$attributes) if ? $name;
+
+    # if both are created than add text to the element
+    if ? $node and ? $text-element {
+      $node.append($text-element);
+    }
+
+    # if only text, then the element becomes the text element
+    elsif ? $text-element {
+      $node = $text-element;
+    }
+
+    # else $name -> no change to $element. No name and no text is an error.
+#    die "No element nor text defined" unless ? $element;
+
+    # add the node when not found and set the parent in the node
+    $!nodes.push($node);
+    $node.parent(self);
+  }
+
+  #-----------------------------------------------------------------------------
+  # insert a node to the start of the nodes array if the node is not
+  # already in that array.
+  method insert ( SemiXML::Node:D $node ) {
+
+    # add the node when not found and set the parent in the node
+    if self!not-in-nodes($node) {
+      $!nodes.unshift($node);
+      $node.parent(self);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method before ( SemiXML::Node $node, SemiXML::Node $new, :$offset=0 ) {
+note "Before: $!node-type, $node.node-type(), $new.node-type()";
+
+    my Int $pos = self.index-of($node);
+    $!nodes.splice( $pos + $offset, 0, $new.reparent(self))
+      if ?$pos and $pos >= 0 and ($pos + $offset) < $!nodes.elems;
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method before ( SemiXML::Node $node ) {
+
+    if $!parent.defined {
+      $node.parent(self) unless $node.parent;
+      $!parent.before( self, $node);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method after ( SemiXML::Node $node, SemiXML::Node $new, :$offset=1 ) {
+
+    self.before( $node, $new, :$offset);
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method after ( SemiXML::Node $node ) {
+
+    if $!parent.defined {
+      $!parent.after( self, $node);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method previousSibling ( --> SemiXML::Node ) {
+
+    if $!parent.defined {
+      my $pos = $!parent.index-of(self);
+      return $!parent.nodes[$pos-1] if $pos > 0;
+    }
+
+    return SemiXML::Node;
+  }
+
+  #-----------------------------------------------------------------------------
+  method nextSibling ( --> SemiXML::Node ) {
+
+    if $!parent.defined {
+      my $pos = $.parent.index-of(self);
+      return $.parent.nodes[$pos+1] if $pos < $.parent.nodes.end;
+    }
+
+    return SemiXML::Node;
+  }
+
+  #-----------------------------------------------------------------------------
   # return current attributes
   multi method attributes ( --> Hash ) is rw {
     $!attributes
@@ -94,10 +200,8 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # set attributes
-  multi method attributes ( Hash:D $attributes ) {
-    my Hash $a = $!attributes;
-    my Hash $b = hash( |$a, |$attributes );
-    $!attributes = $b;
+  multi method attributes ( Hash:D $!attributes ) {
+
     self!process-attributes;
   }
 
@@ -106,6 +210,7 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
   # of the node. This is done for elements as well as text nodes.
   method !process-attributes ( ) {
 
+#note "PA 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
     # a normal element(Plain) might have entries in the FTable configuration.
     # when entries aren't found, results are False.
     my Hash $ftable = $!globals.refined-tables<F> // {};
@@ -114,6 +219,7 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
     $!keep = $!name ~~ any(|@($ftable<space-preserve> // []));
     $!close = $!name ~~ any(|@($ftable<self-closing> // []));
 
+#note "PA 1: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
     # then inherit the data from the parent. root doesn't have a parent as well
     # as method generated nodes
     if ?$!parent {
@@ -123,9 +229,11 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
       $!close = ($!parent.close or $!close);
     }
 
+#note "PA 2: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
     # keep can be overruled by a global keep
     $!keep = $!globals.keep;
 
+#note "PA 3: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
     # then the sxml attributes on the node overrule all
     for $!attributes.keys -> $key {
       given $key {
@@ -146,6 +254,7 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
         }
       }
     }
+note "PA 4: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
   }
 
   #-----------------------------------------------------------------------------
@@ -157,5 +266,20 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
     $n.attributes<sxml:noconv> = $n.noconv ?? 1 !! 0;
     $n.attributes<sxml:keep> = $n.keep ?? 1 !! 0;
     $n.attributes<sxml:close> = $n.close ?? 1 !! 0;
+  }
+
+  #-----------------------------------------------------------------------------
+  # search for the node in nodes array.
+  method !not-in-nodes ( SemiXML::Node:D $node --> Bool ) {
+
+    my Bool $not-in-nodes = True;
+    for @($!nodes) -> $n {
+      if $n === self {
+        $not-in-nodes = False;
+        last;
+      }
+    }
+
+    $not-in-nodes
   }
 }

@@ -39,6 +39,10 @@ class Element does SemiXML::Node {
     # init the rest
     $!globals .= instance;
     $!nodes = [];
+    $!inline = False;
+    $!noconv = False;
+    $!keep = False;
+    $!close = False;
 
     # connect to parent, root doesn't have a parent
     $parent.append(self) if ?$parent;
@@ -59,6 +63,10 @@ class Element does SemiXML::Node {
     # init the rest
     $!globals .= instance;
     $!nodes = [];
+    $!inline = False;
+    $!noconv = False;
+    $!keep = False;
+    $!close = False;
 
     # devise a temporary name for the node
     $!name = "sxml:$!module.$!method";
@@ -68,75 +76,6 @@ class Element does SemiXML::Node {
 
     # process attributes
     self!process-attributes;
-  }
-
-  #-----------------------------------------------------------------------------
-  # append a node to the end of the nodes array if the node is not
-  # already in that array.
-  multi method append ( SemiXML::Node:D $node! ) {
-
-    # add the node when not found and set the parent in the node
-    if self!not-in-nodes($node) {
-      $!nodes.push($node);
-      $node.parent(self);
-    }
-  }
-
-  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi method append ( Str $name?, Hash $attributes = {}, Str :$text ) {
-
-    # create a text element, even when it is an empty string.
-    my SemiXML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
-
-    # create an element only when the name is defined and not empty
-    my SemiXML::Node $node =
-       SemiXML::Element.new( :$name, :$attributes) if ? $name;
-
-    # if both are created than add text to the element
-    if ? $node and ? $text-element {
-      $node.append($text-element);
-    }
-
-    # if only text, then the element becomes the text element
-    elsif ? $text-element {
-      $node = $text-element;
-    }
-
-    # else $name -> no change to $element. No name and no text is an error.
-#    die "No element nor text defined" unless ? $element;
-
-    # add the node when not found and set the parent in the node
-    $!nodes.push($node);
-    $node.parent(self);
-  }
-
-  #-----------------------------------------------------------------------------
-  # insert a node to the start of the nodes array if the node is not
-  # already in that array.
-  method insert ( SemiXML::Node:D $node ) {
-
-    # add the node when not found and set the parent in the node
-    if self!not-in-nodes($node) {
-      $!nodes.unshift($node);
-      $node.parent(self);
-    }
-  }
-
-  #-----------------------------------------------------------------------------
-  multi method before ( SemiXML::Node $node, SemiXML::Node $new, :$offset=0 ) {
-note "Before: $!node-type, $node.node-type(), $new.node-type()";
-
-    my Int $pos = self.index-of($node) + $offset;
-    $!nodes.splice( $pos, 0, $new.reparent(self)) if ?$pos;
-  }
-
-  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi method before ( SemiXML::Node $node ) {
-
-    if $!parent ~~ SemiXML::Element {
-      $node.parent(self) unless $node.parent;
-      $!parent.before( self, $node);
-    }
   }
 
   #-----------------------------------------------------------------------------
@@ -188,12 +127,17 @@ note ">> $!node-type, $!body-number, $!module, $!method";
         die X::SemiXML.new(:message("Module $!module not defined"));
       }
 
-note "MN 0: $!name, ", $!parent.name;
+note "MN 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ", $!parent.name;
+      my Hash $node-attributes = {
+        "sxml:inline" => $!inline, "sxml:noconv" => $!noconv,
+        "sxml:keep" => $!keep, "sxml:close" => $!close
+      };
+
       my Array $result = $object."$!method"(self);
       for @$result -> $node {
 note "append before $!name: $node.name()";
         # set this nodes attributes on every generated node
-        $node.attributes($!attributes//{});
+        $node.attributes($node-attributes);
         self.before($node);
       }
 
@@ -205,6 +149,22 @@ note "append before $!name: $node.name()";
 #      $!content-body.after($_) for $result.nodes.reverse;
 #      $!content-body.remove;
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  method Str ( Str :$text is copy = '' --> Str ) {
+
+    for @$!nodes -> $node {
+      if $node ~~ SemiXML::Text {
+        $text ~= $node.text;
+      }
+
+      else {
+        $text ~= $node.Str($text);
+      }
+    }
+
+    $text
   }
 
   #-----------------------------------------------------------------------------
@@ -325,20 +285,5 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
     else {
       $parent.append(SemiXML::XMLText.new(:text('')));
     }
-  }
-
-  #-----------------------------------------------------------------------------
-  # search for the node in nodes array.
-  method !not-in-nodes ( SemiXML::Node:D $node --> Bool ) {
-
-    my Bool $not-in-nodes = True;
-    for @($!nodes) -> $n {
-      if $n === self {
-        $not-in-nodes = False;
-        last;
-      }
-    }
-
-    $not-in-nodes
   }
 }

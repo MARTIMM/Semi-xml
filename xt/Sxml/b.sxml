@@ -1,3 +1,3 @@
-$a [ abc $!SxmlCore.date-time timezone=-3600 =!utc =!iso =sxml:inline [] def
-   $!SxmlCore.date year=1957 month=06 day=26 =sxml:inline [ $a [jhg] pqr ] 
+$a [ abc $!SxmlCore.date-time timezone=-3600 =!utc =!iso []def
+   $!SxmlCore.date year=1957 month=06 day=26 [ $a [jhg] pqr ]
 ]

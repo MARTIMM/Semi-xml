@@ -15,13 +15,17 @@ class Text does SemiXML::Node {
   has Str $.text;
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( Str :$!text ) {
+  submethod BUILD ( Str :$!text, SemiXML::Node :$parent ) {
 
     # set node type
     $!node-type = SemiXML::NText;
 
     # init rest
     $!globals .= instance;
+    $!inline = False;
+    $!noconv = False;
+    $!keep = False;
+    $!close = False;
 
     # create a fake name for text
     $!name = $!text;
@@ -29,6 +33,9 @@ class Text does SemiXML::Node {
     $!name ~~ s:g/\s+//;
     $!name = 'empty' unless ?$!name;
     $!name = 'sxml:TN' ~ $!name.substr( 0, 40);
+
+    # connect to parent, root doesn't have a parent
+    $parent.append(self) if ?$parent;
 
     # set sxml attributes. these are removed later
     self!process-attributes;
@@ -38,7 +45,7 @@ class Text does SemiXML::Node {
   method xml ( XML::Node $parent ) {
 my Str $t = $!text;
 $t ~~ s:g/\n/\\n/;
-note "$!node-type, $!body-number, $!parent.name(), '$t'";
+note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $!parent.name(), '$t'";
 
     state $previous-body-number = -1;
 
@@ -46,7 +53,8 @@ note "$!node-type, $!body-number, $!parent.name(), '$t'";
     if $!keep {
 
       # do this only when there are any newlines
-      if $text ~~ m/ \n / {
+      $text ~~ m:g/ (\n) /;
+      if $/.elems > 1 {
         # remove leading spaces for the minimum number of spaces when the
         # content should be kept as it is typed in. this is done to prevent
         # that the indent in the text is too much it is compared to the element
@@ -62,6 +70,7 @@ note "$!node-type, $!body-number, $!parent.name(), '$t'";
           # to prevent that an empty line will minimize to the minimum possible
           $min-indent = $c if $line ~~ m/\S/ and $c < $min-indent;
         }
+#TODO make an indent of at least 1 character?
 
         # create a spaces string which is 'substracted' from each line
         if $min-indent > 0 {
@@ -83,16 +92,47 @@ note "$!node-type, $!body-number, $!parent.name(), '$t'";
 
     else {
 
-      $text ~~ s:g/^^ \h+ //;     # remove leading spaces
-      $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
+#      $text ~~ s:g/^^ \h+ //;     # remove leading spaces
+#      $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
+      $text ~~ s:g/ \n+ / /;      # remove return characters
       $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
-      $text ~~ s:g/ \n+ //;       # remove return characters
-      $text ~~ s/ \n+ $//;
-      $text ~~ s:g/ \n+ / /;
+#      $text ~~ s/ \n+ $//;
+#      $text ~~ s:g/ \n+ / /;
 
       if $!body-number != $previous-body-number {
         $previous-body-number = $!body-number;
         $text = " $text" if $!body-number != 1;
+      }
+    }
+
+    if $!inline {
+
+      my SemiXML::Node $ps = self.previousSibling;
+      if $ps.defined {
+        if $ps.node-type !~~ SemiXML::NText {
+          my Str $text = ~$ps;
+          self.before(SemiXML::Text.new(:text(' '))) if $text ~~ m/ \S $/;
+        }
+
+        else {
+          my Str $text = $ps.text;
+          $text ~= ' ' if $text ~~ m/ \S $/;
+        }
+      }
+
+      my SemiXML::Node $ns = self.nextSibling;
+      if $ns.defined {
+        if $ns.node-type !~~ SemiXML::NText {
+          my Str $text = ~$ns;
+          self.after(SemiXML::Text.new(:text(' ')))
+            if $text !~~ m/^ <punct>/ and $text ~~ m/^ \S /;
+        }
+
+        else {
+          my Str $text = $ns.text;
+          self.after(SemiXML::Text.new(:text(' ')))
+            if $text !~~ m/^ <punct>/ and $text ~~ m/^ \S /;
+        }
       }
     }
 
@@ -129,6 +169,10 @@ note "$!node-type, $!body-number, $!parent.name(), '$t'";
     }
 }}
 
+
+$t = $text;
+$t ~~ s:g/\n/\\n/;
+note "$!node-type ==>> '$t'";
 
 
     $parent.append(SemiXML::XMLText.new(:$text));
