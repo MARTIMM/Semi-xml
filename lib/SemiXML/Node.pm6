@@ -87,6 +87,7 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
+#TODO move into separate module and use with 'handles'
   # append a node to the end of the nodes array if the node is not
   # already in that array.
   multi method append ( SemiXML::Node:D $node! ) {
@@ -97,34 +98,6 @@ role Node {
       $!nodes.push($node);
       $node.parent(self);
     }
-  }
-
-  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi method append ( Str $name?, Hash $attributes = {}, Str :$text ) {
-
-    # create a text element, even when it is an empty string.
-    my SemiXML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
-
-    # create an element only when the name is defined and not empty
-    my SemiXML::Node $node =
-       SemiXML::Element.new( :$name, :$attributes) if ? $name;
-
-    # if both are created than add text to the element
-    if ? $node and ? $text-element {
-      $node.append($text-element);
-    }
-
-    # if only text, then the element becomes the text element
-    elsif ? $text-element {
-      $node = $text-element;
-    }
-
-    # else $name -> no change to $element. No name and no text is an error.
-#    die "No element nor text defined" unless ? $element;
-
-    # add the node when not found and set the parent in the node
-    $!nodes.push($node);
-    $node.parent(self);
   }
 
   #-----------------------------------------------------------------------------
@@ -192,6 +165,19 @@ role Node {
     }
 
     return SemiXML::Node;
+  }
+
+  #-----------------------------------------------------------------------------
+  # copy a few html global attributes; class, data-*, id, style and title.
+  method cp-std-attrs ( Hash $attributes ) {
+
+    return unless ?$attributes;
+
+    for $attributes.keys {
+      when /^ [ class || data\- \S+ || id || style || title ] $/ {
+        $!attributes{$_} = ~$attributes{$_};
+      }
+    }
   }
 
   #-----------------------------------------------------------------------------

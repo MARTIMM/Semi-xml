@@ -103,6 +103,37 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
+#TODO move into separate module and use with 'handles'
+  # a more simple append is in the Node module. this method can not be defined
+  # there because of the need of Text module.
+  multi method append ( Str $name?, Hash $attributes = {}, Str :$text ) {
+
+    # create a text element, even when it is an empty string.
+    my SemiXML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
+
+    # create an element only when the name is defined and not empty
+    my SemiXML::Node $node =
+       SemiXML::Element.new( :$name, :$attributes) if ? $name;
+
+    # if both are created than add text to the element
+    if ? $node and ? $text-element {
+      $node.append($text-element);
+    }
+
+    # if only text, then the element becomes the text element
+    elsif ? $text-element {
+      $node = $text-element;
+    }
+
+    # else $name -> no change to $element. No name and no text is an error.
+#    die "No element nor text defined" unless ? $element;
+
+    # add the node when not found and set the parent in the node
+    $!nodes.push($node);
+    $node.parent(self);
+  }
+
+  #-----------------------------------------------------------------------------
   method xml ( XML::Node $parent ) {
     given $!node-type {
       when any( SemiXML::Fragment, SemiXML::Plain) {
