@@ -10,6 +10,7 @@ use SemiXML::Text;
 use SemiXML::StringList;
 use SemiXML::Helper;
 use XML;
+use XML::XPath;
 
 #-------------------------------------------------------------------------------
 class Actions {
@@ -59,7 +60,7 @@ class Actions {
 #note "NTop 1: $root-xml, $!globals.raw()";
 
     unless $!globals.raw {
-#      self!subst-variables($root-xml);
+      self!subst-variables($root-xml);
 #      self!remap-content($root-xml);
 
       # remove all tags from the sxml namespace.
@@ -337,6 +338,88 @@ class Actions {
     }
 
     return '';
+  }
+
+  #-----------------------------------------------------------------------------
+  # search for variables and substitute them
+  method !subst-variables ( XML::Node $parent ) {
+
+    my XML::XPath $x;
+
+    if $parent ~~ XML::Element {
+      my XML::Document $xml-document .= new($parent);
+      $parent.setNamespace( 'github.MARTIMM', 'sxml');
+
+      # set namespace first
+      $x .= new(:document($xml-document));
+      $x.set-namespace: 'sxml' => 'github.MARTIMM';
+    }
+
+    # else it should be a document
+    elsif $parent ~~ XML::Document {
+      $x .= new(:document($parent));
+      $x.set-namespace: 'sxml' => 'github.MARTIMM';
+    }
+
+    else {
+      die "Wrong argument type, must be Element or Document";
+    }
+
+    # look for variable declarations
+    for $x.find( '//sxml:var-decl', :to-list) -> $vdecl {
+#note "\nDeclaration: $vdecl";
+
+      # get the name of the variable
+      my Str $var-name = ~$vdecl.attribs<name>;
+#note "Name: $var-name";
+
+#      # and the content of this declaration
+#      my Array $var-value = $vdecl.nodes;
+
+      # see if it is a global declaration
+      my Bool $var-global = $vdecl.attribs<global>:exists;
+#note "Global: $var-global";
+
+      # now look for the variable to substitute
+      my Array $var-use;
+      if $var-global {
+        $var-use = [ $x.find(
+            '//sxml:var-ref[@name="' ~ $var-name ~ '"]', :to-list
+          );
+        ]
+      }
+
+      else {
+        $var-use = [ $x.find(
+            './/sxml:var-ref[@name="' ~ $var-name ~ '"]',
+            :start($vdecl.parent), :to-list
+          );
+        ]
+      }
+#note "Search for 'sxml:var-ref[\@name=\"$var-name\"]";
+
+      for @$var-use -> $vuse {
+#note "RN P0: $vuse.parent()";
+        for $vdecl.nodes -> $vdn {
+          # insert cloned node just before the variable ref
+          $vuse.before(clone-node( $vuse.parent, $vdn));
+        }
+#note "RN P1: $vuse.parent()";
+
+        # the variable declaration is substituted in all references,
+        # remove the element
+        $vuse.remove;
+      }
+
+      # all variables are substituted, remove declaration too, unless it is
+      # defined global. Other parts may have been untouched.
+      $vdecl.remove unless $var-global;
+    }
+
+    if $parent ~~ XML::Element {
+      # remove the namespace
+      $parent.attribs{"xmlns:sxml"}:delete;
+    }
   }
 
   #-----------------------------------------------------------------------------
