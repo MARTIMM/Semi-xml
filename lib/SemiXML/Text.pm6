@@ -43,7 +43,9 @@ class Text does SemiXML::Node {
 
   #-----------------------------------------------------------------------------
   method xml ( XML::Node $parent ) {
-my Str $t = $!text;
+
+    my Str $t;
+$t = $!text;
 $t ~~ s:g/\n/\\n/;
 note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $!parent.name(), '$t'";
 
@@ -92,46 +94,53 @@ note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $
 
     else {
 
-#      $text ~~ s:g/^^ \h+ //;     # remove leading spaces
-#      $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
       $text ~~ s:g/ \n+ / /;      # remove return characters
+      $text ~~ s/ \n+ $//;
       $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
-#      $text ~~ s/ \n+ $//;
-#      $text ~~ s:g/ \n+ / /;
+      $text ~~ s:g/^^ \h+ //;     # remove leading spaces
+      $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
 
+#`{{
       if $!body-number != $previous-body-number {
         $previous-body-number = $!body-number;
-        $text = " $text" if $!body-number != 1;
+        $text = " $text" if $!body-number > 1;
       }
-    }
+}}
 
-    if $!inline {
+      if $!inline {
 
-      my SemiXML::Node $ps = self.previousSibling;
-      if $ps.defined {
-        if $ps.node-type !~~ SemiXML::NText {
-          my Str $text = ~$ps;
-          self.before(SemiXML::Text.new(:text(' '))) if $text ~~ m/ \S $/;
+        my SemiXML::Node $ps = self.previousSibling;
+        if $ps.defined {
+          if $ps.node-type !~~ SemiXML::NText {
+            $t = ~$ps;
+            $text = ' ' ~ $text if $t ~~ m/ \S $/;
+          }
+
+          else {
+            my Str $t = $ps.text;
+            $text = ' ' ~ $text if $t ~~ m/ \S $/;
+          }
         }
 
-        else {
-          my Str $text = $ps.text;
-          $text ~= ' ' if $text ~~ m/ \S $/;
-        }
-      }
+        my SemiXML::Node $ns = self.nextSibling;
+        if $ns.defined {
+          if $ns.node-type !~~ SemiXML::NText {
+            $t = ~$ns;
 
-      my SemiXML::Node $ns = self.nextSibling;
-      if $ns.defined {
-        if $ns.node-type !~~ SemiXML::NText {
-          my Str $text = ~$ns;
-          self.after(SemiXML::Text.new(:text(' ')))
-            if $text !~~ m/^ <punct>/ and $text ~~ m/^ \S /;
-        }
+            # if the next sibling is inline or keep, spaces will be inserted
+            # or kept as it was. In the case both are off, the spaces are
+            # removed and only a space is needed when no punctuation exists.
+            if !$ns.inline and !$ns.keep {
+              $text ~= ' ' if $t !~~ m/^ \s* <punct> /
+            }
+          }
 
-        else {
-          my Str $text = $ns.text;
-          self.after(SemiXML::Text.new(:text(' ')))
-            if $text !~~ m/^ <punct>/ and $text ~~ m/^ \S /;
+          else {
+            $t = $ns.text;
+              if !$ns.inline and !$ns.keep {
+              $text ~= ' ' if $t !~~ m/^ \s* <punct> /
+            }
+          }
         }
       }
     }
@@ -174,7 +183,7 @@ $t = $text;
 $t ~~ s:g/\n/\\n/;
 note "$!node-type ==>> '$t'";
 
-
+    $!text = $text;
     $parent.append(SemiXML::XMLText.new(:$text));
   }
 }
