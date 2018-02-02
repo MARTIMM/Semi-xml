@@ -82,7 +82,7 @@ my SemiXML::Sxml $x .= new(
 $x.parse( :filename($f1), :$config, :!raw);
 
 my Str $xml-text = ~$x;
-#note $xml-text;
+diag $xml-text;
 
 
 like $xml-text, /:s '<?' xml version '="1.1"' encoding '="UTF-8"' '?>' /,
@@ -96,7 +96,7 @@ ok $xml-text ~~ m/
 }'
 /, 'Check for literal text in css';
 
-ok $xml-text ~~ ms/var a_tags '=' "\$('a');" var b '=' a_tags/,
+like $xml-text, /:s var a_tags '=' "\$('a');" var b '=' a_tags/,
    'Check for literal text in javascript';
 
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, "'Th' after 'tr' found";

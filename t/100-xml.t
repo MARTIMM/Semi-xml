@@ -25,8 +25,8 @@ $html [
     $x class='green blue' [ empty but not ]
     $y data_1='quoted"test"' [ empty but not ]
     $z data_2="double 'quoted' attrs" [ empty but not ]
-    $eq1 empty-single=''
-    $eq2 empty-double=""
+    $eq1 empty-single='' []
+    $eq2 empty-double="" []
     $br
   ]
 ]
