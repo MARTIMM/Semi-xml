@@ -63,7 +63,7 @@ subtest 'test multi liners', {
     ]
     EOXML
 
-  is $xml, '<aa><bb> <cc></cc> </bb></aa>', "3 tags: $xml";
+  is $xml, '<aa><bb><cc></cc></bb></aa>', "3 tags: $xml";
 
   $xml = parse('$aa [ $bb { $x[abc] } ]');
 
