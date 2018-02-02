@@ -362,16 +362,18 @@ note "more than 1 element";
 
 note "T: $node";
     if $node ~~ XML::Element {
+      if $node.name ne 'sxml:fragment' {
 note "\nE: ", $node.name;
-      if $node.name ~~ m/^ sxml \: / {
-        $node.remove;
-        return;
-      }
+        if $node.name ~~ m/^ sxml \: / {
+          $node.remove;
+          return;
+        }
 
-      else {
-        for $node.attribs.keys -> $k {
-          $node.unset($k) if $k ~~ m/^ sxml \: /;
-          $node.unset($k) if $k ~~ m/^ xmlns \: sxml /;
+        else {
+          for $node.attribs.keys -> $k {
+            $node.unset($k) if $k ~~ m/^ sxml \: /;
+            $node.unset($k) if $k ~~ m/^ xmlns \: sxml /;
+          }
         }
       }
 
