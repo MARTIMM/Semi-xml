@@ -12,17 +12,6 @@ use XML;
 #-------------------------------------------------------------------------------
 class Element does SemiXML::Node {
 
-#`{{
-  has Str $.name;
-  has Str $.namespace;
-
-  has Str $!module;
-  has Str $!method;
-#  has XML::Element $!content-body;
-
-  has Hash $.attributes;
-}}
-
   #-----------------------------------------------------------------------------
   multi submethod BUILD (
     Str:D :$!name!, SemiXML::Node :$parent, Hash :$!attributes = {}
@@ -79,6 +68,41 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
+  method run-method ( ) {
+
+    # first go to inner elements
+    for @$!nodes -> $node {
+      $node.run-method unless $node ~~ SemiXML::Text;
+    }
+
+    # then check if node is a method node
+    if $!node-type ~~ SemiXML::Method {
+#note ">> $!node-type, $!body-number, $!module, $!method";
+
+      # get the object
+      my $object = self!get-object;
+
+#note "MN 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ", $!parent.name;
+
+      my Array $result = $object."$!method"(self);
+      for @$result -> $node {
+#note "append before $!name: $node.name()";
+        # set this node's attributes on every generated node
+        $node.inline = $!inline;
+        $node.noconv = $!noconv;
+        $node.keep = $!keep;
+        $node.close = $!close;
+
+        # and place them just before the method node
+        self.before($node);
+      }
+
+      # when finished remove the method node
+      self.remove;
+    }
+  }
+
+  #-----------------------------------------------------------------------------
   method xml ( XML::Node $parent ) {
     given $!node-type {
       when any( SemiXML::Fragment, SemiXML::Plain) {
@@ -100,58 +124,6 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method run-method ( ) {
-
-    # first go to inner elements
-    for @$!nodes -> $node {
-      $node.run-method unless $node ~~ SemiXML::Text;
-    }
-
-    # then check if node is a method node
-    if $!node-type ~~ SemiXML::Method {
-note ">> $!node-type, $!body-number, $!module, $!method";
-
-      # get the object and test for existence of method
-      my $object = $!globals.objects{$!module}
-        if $!globals.objects{$!module}:exists;
-
-      if $object.defined {
-        die X::SemiXML.new(
-          :message(
-            "Method $!method in module $!module ($object.^name()) not defined"
-          )
-        ) unless $object.^can($!method);
-      }
-
-      else {
-        die X::SemiXML.new(:message("Module $!module not defined"));
-      }
-
-note "MN 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ", $!parent.name;
-      my Hash $node-attributes = {
-        "sxml:inline" => $!inline, "sxml:noconv" => $!noconv,
-        "sxml:keep" => $!keep, "sxml:close" => $!close
-      };
-
-      my Array $result = $object."$!method"(self);
-      for @$result -> $node {
-note "append before $!name: $node.name()";
-        # set this nodes attributes on every generated node
-        $node.attributes($node-attributes);
-        self.before($node);
-      }
-
-      #for @($!nodes) -> $node {
-      #  $!parent.before( self, $node);
-      #}
-      self.remove;
-
-#      $!content-body.after($_) for $result.nodes.reverse;
-#      $!content-body.remove;
-    }
-  }
-
-  #-----------------------------------------------------------------------------
   method Str ( Str :$text is copy = '' --> Str ) {
 
     for @$!nodes -> $node {
@@ -160,7 +132,7 @@ note "append before $!name: $node.name()";
       }
 
       else {
-        $text ~= $node.Str($text);
+        $text ~= $node.Str(:$text);
       }
     }
 
@@ -209,10 +181,13 @@ note "append before $!name: $node.name()";
   # normal node
   method !plain-xml ( XML::Node $parent ) {
 
-note "$!node-type, $!body-number, $!name";
+#note "$!node-type, $!body-number, $!name";
     # new xml element
     my XML::Element $xml-node .= new(:$!name);
-    self!copy-attributes($parent);
+#    self!copy-attributes($parent);
+    for $!attributes.kv -> $k, $v {
+      $xml-node.set( $k, ~$v);
+    }
 
     # append node to the parent node
     $parent.append($xml-node);
@@ -226,7 +201,7 @@ note "$!node-type, $!body-number, $!name";
   # comment node
   method !comment-xml ( XML::Node $parent ) {
 
-note "$!node-type, $!body-number, $!name, $parent.name()";
+#note "$!node-type, $!body-number, $!name, $parent.name()";
 
     my XML::Element $x .= new(:name<x>);
     self!copy-nodes( $x, :keep);
@@ -239,7 +214,7 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
   # CData node
   method !cdata-xml ( XML::Node $parent ) {
 
-note "$!node-type, $!body-number, $!name, $parent.name()";
+#note "$!node-type, $!body-number, $!name, $parent.name()";
 
     my XML::Element $x .= new(:name<x>);
     self!copy-nodes( $x, :keep);
@@ -252,7 +227,7 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
   # PI node
   method !pi-xml ( XML::Node $parent ) {
 
-note "$!node-type, $!body-number, $!name, $parent.name()";
+#note "$!node-type, $!body-number, $!name, $parent.name()";
 
     my XML::Element $x .= new(:name<x>);
     self!copy-nodes( $x, :keep);
@@ -262,15 +237,6 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
     );
 
     $parent.append($c);
-  }
-
-  #-----------------------------------------------------------------------------
-  # set attributes on an XML node
-  method !copy-attributes ( XML::Node $xml-node ) {
-
-    for $!attributes.kv -> $k, $v {
-      $xml-node.set( $k, ~$v);
-    }
   }
 
   #-----------------------------------------------------------------------------
@@ -285,5 +251,28 @@ note "$!node-type, $!body-number, $!name, $parent.name()";
     else {
       $parent.append(SemiXML::XMLText.new(:text('')));
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  # get the object and test for existence of method
+  method !get-object ( --> Any ) {
+
+    # get the object and test for existence of method
+    my $object = $!globals.objects{$!module}
+      if $!globals.objects{$!module}:exists;
+
+    if $object.defined {
+      die X::SemiXML.new(
+        :message(
+          "Method $!method in module $!module ($object.^name()) not defined"
+        )
+      ) unless $object.^can($!method);
+    }
+
+    else {
+      die X::SemiXML.new(:message("Module $!module not defined"));
+    }
+
+    $object
   }
 }
