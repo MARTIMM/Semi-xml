@@ -37,10 +37,10 @@ role Node {
 
   # flags to process the content. element nodes set them and text nodes
   # inherit them. other types like PI, CData etc, do not need it.
-  has Bool $.inline;      # inline in FTable
-  has Bool $.noconv;      # no-conversion in FTable
-  has Bool $.keep;        # space-preserve in FTable
-  has Bool $.close;       # self-closing in FTable
+  has Bool $.inline is rw;      # inline in FTable
+  has Bool $.noconv is rw;      # no-conversion in FTable
+  has Bool $.keep is rw;        # space-preserve in FTable
+  has Bool $.close is rw;       # self-closing in FTable
 
   #-----------------------------------------------------------------------------
   multi method parent ( SemiXML::Node:D $!parent ) { }
@@ -69,7 +69,8 @@ role Node {
   #-----------------------------------------------------------------------------
   method reparent ( SemiXML::Node $parent --> SemiXML::Node ) {
 
-note "Repar: $parent.name(), {self.name}";
+#note "Repar 0: $parent.name(), $!name";
+#note "Repar 1: $!parent";
     #self.remove;
     $!parent.removeChild(self);
 
@@ -81,8 +82,8 @@ note "Repar: $parent.name(), {self.name}";
   method removeChild ( SemiXML::Node $node ) {
 
     my $pos = self.index-of($node);
-note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
-    $!nodes.splice( $pos, 1) if ?$pos;
+#note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
+    $!nodes.splice( $pos, 1) if $pos.defined;
   }
 
   #-----------------------------------------------------------------------------
@@ -92,7 +93,7 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
 
     # add the node when not found and set the parent in the node
     my $pos = self.index-of($node);
-    unless ?$pos {
+    unless $pos.defined {
       $!nodes.push($node);
       $node.parent(self);
     }
@@ -132,7 +133,8 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
   method insert ( SemiXML::Node:D $node ) {
 
     # add the node when not found and set the parent in the node
-    if self!not-in-nodes($node) {
+    my $pos = self.index-of($node);
+    unless $pos.defined {
       $!nodes.unshift($node);
       $node.parent(self);
     }
@@ -140,11 +142,11 @@ note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
 
   #-----------------------------------------------------------------------------
   multi method before ( SemiXML::Node $node, SemiXML::Node $new, :$offset=0 ) {
-note "Before: $!node-type, $node.node-type(), $new.node-type()";
+#note "Before: $!name, $node.name(), $new.name()";
 
     my Int $pos = self.index-of($node);
     $!nodes.splice( $pos + $offset, 0, $new.reparent(self))
-      if ?$pos and $pos >= 0 and ($pos + $offset) < $!nodes.elems;
+      if $pos.defined and $pos >= 0 and ($pos + $offset) < $!nodes.elems;
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -254,32 +256,6 @@ note "Before: $!node-type, $node.node-type(), $new.node-type()";
         }
       }
     }
-note "PA 4: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
-  }
-
-  #-----------------------------------------------------------------------------
-  # set sxml attributes from values in self or $node when provided
-  method !set-attributes ( SemiXML::Node $node? ) {
-
-    my SemiXML::Node $n = $node // self;
-    $n.attributes<sxml:inline> = $n.inline ?? 1 !! 0;
-    $n.attributes<sxml:noconv> = $n.noconv ?? 1 !! 0;
-    $n.attributes<sxml:keep> = $n.keep ?? 1 !! 0;
-    $n.attributes<sxml:close> = $n.close ?? 1 !! 0;
-  }
-
-  #-----------------------------------------------------------------------------
-  # search for the node in nodes array.
-  method !not-in-nodes ( SemiXML::Node:D $node --> Bool ) {
-
-    my Bool $not-in-nodes = True;
-    for @($!nodes) -> $n {
-      if $n === self {
-        $not-in-nodes = False;
-        last;
-      }
-    }
-
-    $not-in-nodes
+#note "PA 4: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
   }
 }
