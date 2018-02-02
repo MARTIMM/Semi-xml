@@ -1,3 +1,9 @@
-$a [ abc $!SxmlCore.date-time timezone=-3600 =!utc =!iso []def
-   $!SxmlCore.date year=1957 month=06 day=26 [ $a [jhg] pqr ]
+$a x=10 [ abc $!SxmlCore.date-time timezone=-3600 =!utc =!iso [] def
+   $!SxmlCore.date year=1957 month=06 day=26 [] .
+   Time is now $!SxmlCore.date year=1957 []. So it is done.
+   $!SxmlCore.var-decl name=my-var [ content of var ]
+
+   $q [
+     $!SxmlCore.drop [ hj<sdfk kadjsf $a jhzdfgkhd $b [ ksjdhf ] ]
+   ]
 ]
