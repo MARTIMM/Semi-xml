@@ -20,7 +20,12 @@ subtest 'variables', {
     EOTXT
 
   my SemiXML::Sxml $x .= new;
-  $x.parse(content => $text);
+  $x.parse( :content($text), :!trace, :!raw,
+    config => {
+      C => { :trace },
+      T => { :parse }
+    }
+  );
 
   # See the result
   my Str $xml-text = ~$x;
@@ -36,6 +41,9 @@ subtest 'variables', {
      'Lorem ipsum dolor simet ...',
      'Found 2nd substitution';
 }
+
+done-testing;
+exit(0);
 
 #-------------------------------------------------------------------------------
 subtest 'undeclared variable', {
