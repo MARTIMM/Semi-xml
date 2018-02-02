@@ -45,9 +45,9 @@ class Text does SemiXML::Node {
   method xml ( XML::Node $parent ) {
 
     my Str $t;
-$t = $!text;
-$t ~~ s:g/\n/\\n/;
-note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $!parent.name(), '$t'";
+#$t = $!text;
+#$t ~~ s:g/\n/\\n/;
+#note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $!parent.name(), '$t'";
 
     state $previous-body-number = -1;
 
@@ -179,9 +179,9 @@ note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $
 }}
 
 
-$t = $text;
-$t ~~ s:g/\n/\\n/;
-note "$!node-type ==>> '$t'";
+#$t = $text;
+#$t ~~ s:g/\n/\\n/;
+#note "$!node-type ==>> '$t'";
 
     $!text = $text;
     $parent.append(SemiXML::XMLText.new(:$text));

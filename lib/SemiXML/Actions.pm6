@@ -42,7 +42,7 @@ class Actions {
     $!elements = [$!root];
     $!element-idx = 1;
 
-note "\nAt the end of parsing";
+#note "\nAt the end of parsing";
     # process the result tree
     self!process-ast($match);
 
@@ -56,7 +56,7 @@ note "\nAt the end of parsing";
     for $!root.nodes -> $node {
       $node.xml($root-xml);
     }
-note "NTop 1: $root-xml, $!globals.raw()";
+#note "NTop 1: $root-xml, $!globals.raw()";
 
     unless $!globals.raw {
 #      self!subst-variables($root-xml);
@@ -65,21 +65,21 @@ note "NTop 1: $root-xml, $!globals.raw()";
       # remove all tags from the sxml namespace.
       self!remove-sxml-namespace($root-xml);
     }
-note "NTop 2: $root-xml";
+#note "NTop 2: $root-xml";
 
     if $root-xml.nodes.elems == 0 {
-note "0 elements";
+#note "0 elements";
       $!document .= new($root-xml);
     }
 
     elsif $root-xml.nodes.elems == 1 {
-note "1 element";
+#note "1 element";
       self!set-namespaces($root-xml.nodes[0]);
       $!document .= new($root-xml.nodes[0]);
     }
 
     elsif $root-xml.nodes.elems > 1 {
-note "more than 1 element";
+#note "more than 1 element";
       if $!globals.frag {
         self!set-namespaces($root-xml);
         $!document .= new($root-xml);
@@ -360,10 +360,8 @@ note "more than 1 element";
   method !remove-sxml-namespace ( XML::Node $node ) {
     my SemiXML::Globals $globals .= instance;
 
-note "T: $node";
     if $node ~~ XML::Element {
       if $node.name ne 'sxml:fragment' {
-note "\nE: ", $node.name;
         if $node.name ~~ m/^ sxml \: / {
           $node.remove;
           return;
