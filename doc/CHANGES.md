@@ -1,8 +1,16 @@
 # Changes in SemiXML:: * and sxml2xml
 
+* 0.47.0
+  Major rewrite of everything;
+  * Added config table DN to specify Default Namespaces.
+  * Actions module is rewritten and the Grammar module is modified here and there to cope with better error messages.
+  * Added X::SemiXML exception class.
+  * All external modules must be rewritten because of this.
+  * SxmlCore::Comment, ::PI and ::CData are removed and are replaced by special element names in the sxml namespace. Now we can write sxml:comment, sxml:pi and sxml:cdata.
+  * **date**, **date-time**, **var-decl** and **drop** are left and converted in SxmlCore.
 * 0.46.0
   * Comments in text are now processed at the end of the parse process. Because of this, the texts in each content block is processed separately. So, the following snippet `$x [ text # comment ] $y # easy as but what` is translated into `<x>text</x><y/>`. When a **#** character is needed in the text, it can be escaped like so **\#**.
-  * All elements are processed according to table F from the configuration. This means that '=' just inside the '[', '{' and '«' are not processed anymore to let the content as it is typed (`space-preserve`). Also $\*\*, $|\* and $\*| are now obsolete (`inline`). 
+  * All elements are processed according to table F from the configuration. This means that '=' just inside the '[', '{' and '«' are not processed anymore to let the content as it is typed (`space-preserve`). Also $\*\*, $|\* and $\*| are now obsolete (`inline`).
 * 0.45.0
   * Added a U-table for module developers.
   * Tests are made to call a module from another one.
