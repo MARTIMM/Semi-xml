@@ -1,6 +1,6 @@
 use v6;
 
-use XML;
+#use XML;
 use Test;
 use SemiXML::Sxml;
 
@@ -13,57 +13,45 @@ mkdir($dir) unless $dir.IO ~~ :e;
 
 spurt( $mod, q:to/EOMOD/);
   use v6;
-  use Test;
-  use SemiXML::Helper;
-  use SemiXML::Text;
-  use XML;
+  use SemiXML::Element;
 
   class T030::m1 {
 
     # method 1 can be used at top of document
-    method mth1 (
-      XML::Element $parent, Hash $attrs, XML::Element :$content-body
-      --> XML::Element
-    ) {
+    method mth1 ( SemiXML::Element $m ) {
 
-      my XML::Element $p = append-element( $parent, 'p');
-      std-attrs( $p, $attrs);
-      ok $attrs<class>:!exists, 'class attribute removed';
-      ok $attrs<id>:!exists, 'id attribute removed';
-      ok $attrs<extra-attr>:exists, 'extra-attr attribute not removed';
+      my SemiXML::Element $p .= new(:name<p>);
+      $p.cp-std-attrs($m.attributes);
 
-      $parent;
+      [ $p ]
     }
 
     # method 2 can not be used at top of document because it generates
     # more than one top level elements
-    method mth2 (
-      XML::Element $parent, Hash $attrs, XML::Element :$content-body
-      --> XML::Element
-    ) {
+    method mth2 ( SemiXML::Element $m ) {
 
-      append-element( $parent, 'p');
-      my XML::Element $p = append-element( $parent, 'p');
+      my Array $element-array = [];
+      my SemiXML::Element $p .= new(:name<p>);
+      $element-array.push($p);
+      $p .= new(:name<p>);
+      $element-array.push($p);
 
-      my Int $nbr-nodes = $content-body.nodes.elems;
-      $p.insert($_) for $content-body.nodes.reverse;
-      $p.append(XML::Text.new(:text("Added $nbr-nodes xml nodes")));
-    note "P: $parent";
-      $parent;
+      my Int $nbr-nodes = $m.nodes.elems;
+      $p.insert($_) for $m.nodes.reverse;
+      $p.append(:text("Added $nbr-nodes xml nodes"));
+
+      $element-array
     }
 
-    method mth3 (
-      XML::Element $parent, Hash $attrs, XML::Element :$content-body
-      --> XML::Element
-    ) {
-      my XML::Element $ul = append-element( $parent, 'ul');
-      $ul.set( 'class', ~$attrs<a>);
+    method mth3 ( SemiXML::Element $m ) {
+      my SemiXML::Element $ul .= new(:name<ul>);
+      $ul.attributes<class> = ~$m.attributes<a>;
 
-      for @($attrs<b>)[*] -> $li-text {
-        append-element( $ul, 'li', :text($li-text));
+      for @($m.attributes<b>)[*] -> $li-text {
+        $ul.append( 'li', :text($li-text));
       }
 
-      $parent;
+      [ $ul ]
     }
   }
 
@@ -81,43 +69,37 @@ my Str $content =
 
 # instantiate parser and parse with contents and config
 my SemiXML::Sxml $x .= new( :!trace, :merge);
-my Bool $r = $x.parse( :$config, :$content);
-ok $r, "match $content";
+$x.parse( :$config, :$content);
 
 my $xml = $x.get-xml-text;
-#note "Xml: $xml";
+#diag "Xml: $xml";
+
 like $xml, /'<p'/, "generated start of paragraph";
 like $xml, /'class="top-method"'/, "found class attribute in '$xml'";
 
 throws-like {
   $content = '$!mod1.mth2 [ ]';
-  $r = $x.parse( :$config, :$content);
+  $x.parse( :$config, :$content);
 }, X::SemiXML, 'Too many nodes on top',
 :message(/:s Too many nodes on top level/);
 
 lives-ok {
   $content = '$!mod1.mth2 [ ]';
-  $r = $x.parse( :$config, :$content, :frag);
+  $x.parse( :$config, :$content, :frag);
 }, "Fragment generated";
 
 
-
-
-
 $content = '$x [ $!mod1.mth2 [ ] ]';
-$r = $x.parse( :$config, :$content);
-ok $r, "match $content";
+$x.parse( :$config, :$content);
 
 $xml = $x.get-xml-text;
-#diag "XML: \n$xml";
+#diag "XML: $xml";
 like $xml, /'<?xml version="1.0" encoding="UTF-8"?>'/, 'found prelude';
 like $xml, /'<x><p></p><p>Added 1 xml nodes</p></x>'/,
      "mth2 sees at least 1 space in its content";
 
-
 $content = '$x =a =!b [ $!mod1.mth2 [$h [abc] $h[def]]]';
-$r = $x.parse( :$config, :$content, :trace);
-ok $r, "match $content";
+$x.parse( :$config, :$content, :trace);
 
 $xml = $x.get-xml-text;
 like $xml, /:s '<x a="1" b="0">'
@@ -129,11 +111,10 @@ like $xml, /:s '<x a="1" b="0">'
            /, "generated: $xml";
 
 
-$content = '$!mod1.mth3 a="v1 v2" b=<head1 head2>';
-$r = $x.parse( :$config, :$content);
-ok $r, "match $content";
+$content = '$!mod1.mth3 a="v1 v2" b=<head1 head2> []';
+$x.parse( :$config, :$content);
 $xml = $x.get-xml-text;
-#note $xml;
+#diag $xml;
 like $xml, /'<ul class="v1 v2"><li>head1</li><li>head2</li></ul>'/,
            "generated content from mth3";
 
