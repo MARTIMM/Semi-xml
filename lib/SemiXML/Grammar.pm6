@@ -115,7 +115,7 @@ note "F/T: $match.from(), $match.to()";
   }
 
   token body-a {
-    [ [ <.escaped-char>+ || <.entity>+ || <-[\\\$\[\]]>+ ]+ ||
+    [ [ <.escaped-char>+ || <.entity>+ || <.comment> || <-[\\\$\[\]]>+ ]+ ||
       [ ('[') {
         error( $/,
           "Cannot start a content body with '$0', did you mean '\\$0'?"
@@ -150,6 +150,9 @@ note "F/T: $match.from(), $match.to()";
   # use a '#' which interferes with the comment start. This is
   # only necessary in the normal block 'body-a'
   token entity          { '&' <-[;]>+ ';' }
+
+  # comment text after '#'
+  token comment { \s* <!after <[\\\&]>> '#' \N* \n }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.
