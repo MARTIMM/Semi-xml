@@ -19,7 +19,7 @@ my $f2 = 't/D103/f1.html';
 spurt( $f1, q:to/EOSX/);
 $html [
   $head [
-    $style type=text/css =!map «
+    $style type=text/css «
       green {
         color: #0f0;
         background-color: #f0f;
@@ -67,6 +67,10 @@ my Hash $config = {
     }
   },
 
+  T => {
+    :tables, :parse, :file-handling
+  },
+
   X => {
     out-fmt => {
       xml-version => 1.1,
@@ -76,13 +80,11 @@ my Hash $config = {
 }
 
 # Parse
-my SemiXML::Sxml $x .= new(
-  :!trace, :merge, :refine([<in-fmt out-fmt>]), :!keep
-);
-$x.parse( :filename($f1), :$config, :!raw);
+my SemiXML::Sxml $x .= new(:refine([<in-fmt out-fmt>]));
+$x.parse( :filename($f1), :$config, :!trace, :!raw, :!keep);
 
 my Str $xml-text = ~$x;
-diag $xml-text;
+#diag $xml-text;
 
 
 like $xml-text, /:s '<?' xml version '="1.1"' encoding '="UTF-8"' '?>' /,
