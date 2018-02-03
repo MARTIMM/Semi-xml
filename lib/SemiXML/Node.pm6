@@ -218,8 +218,8 @@ role Node {
     }
 
 #note "PA 2: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
-    # keep can be overruled by a global keep
-    $!keep = $!globals.keep;
+    # keep can be overruled by a global keep when True
+    $!keep or= $!globals.keep;
 
 #note "PA 3: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
     # then the sxml attributes on the node overrule all

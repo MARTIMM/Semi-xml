@@ -183,10 +183,12 @@ class Actions {
             # to insert the space we must select the element just one lower on
             # the stack of elements
             my SemiXML::Element $element = $!elements[$!element-idx - 1];
-            my SemiXML::Text $t .= new(:text($pre-body.Str));
+            my SemiXML::Text $t .= new(
+              :text($pre-body.Str), :parent($element)
+            );
             $t.body-type = SemiXML::BodyC;  # dont care really, only spaces
             $t.body-number = $element.body-count;
-            $element.append($t);
+            #$element.append($t);
 
             my $v1 = $v;
             $v1 ~~ s:g/ \n /\\n/;
@@ -295,10 +297,10 @@ class Actions {
         }
 
         when 'body-a' {
-          my SemiXML::Text $t .= new(:text($v.Str));
+          my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
           $t.body-type = SemiXML::BodyA;
           $t.body-number = $element.body-count;
-          $element.append($t);
+          #$element.append($t);
 
           my $v1 = $v;
           $v1 ~~ s:g/ \n /\\n/;
@@ -307,10 +309,10 @@ class Actions {
         }
 
         when 'body-b' {
-          my SemiXML::Text $t .= new(:text($v.Str));
+          my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
           $t.body-type = SemiXML::BodyB;
           $t.body-number = $element.body-count;
-          $!elements[$!element-idx - 1].append($t);
+          #$!elements[$!element-idx - 1].append($t);
 
           my $v1 = $v;
           $v1 ~~ s:g/ \n /\\n/;
@@ -319,10 +321,10 @@ class Actions {
         }
 
         when 'body-c' {
-          my SemiXML::Text $t .= new(:text($v.Str));
+          my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
           $t.body-type = SemiXML::BodyC;
           $t.body-number = $element.body-count;
-          $!elements[$!element-idx - 1].append($t);
+          #$!elements[$!element-idx - 1].append($t);
 
           my $v1 = $v;
           $v1 ~~ s:g/ \n /\\n/;
