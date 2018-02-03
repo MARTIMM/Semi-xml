@@ -183,6 +183,7 @@ class Helper {
     $element;
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   sub std-attrs ( XML::Element $node, Hash $attributes ) is export {
 
@@ -197,6 +198,7 @@ class Helper {
       }
     }
   }
+}}
 
   #-----------------------------------------------------------------------------
   # Cleanup residue tags left from processing methods. The childnodes in
@@ -224,6 +226,7 @@ class Helper {
     }
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   # search for variables and substitute them
   sub subst-variables ( XML::Node $parent ) is export {
@@ -305,6 +308,7 @@ class Helper {
       $parent.attribs{"xmlns:sxml"}:delete;
     }
   }
+}}
 
   #-----------------------------------------------------------------------------
   # clone given node
