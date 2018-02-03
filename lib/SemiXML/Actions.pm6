@@ -51,45 +51,51 @@ class Actions {
     $!root.run-method if $!globals.exec;
 #note "NTop 0: $root-xml";
 
-    # convert non-method nodes into XML
-    my XML::Element $root-xml .= new(:name($!root.name));
-    $root-xml.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
-    for $!root.nodes -> $node {
-      $node.xml($root-xml);
-    }
-#note "NTop 1: $root-xml, $!globals.raw()";
+    # Don't generate the xml stuff when only the tree is requested later
+    unless $!globals.tree {
+      # convert non-method nodes into XML
+      my XML::Element $root-xml .= new(:name($!root.name));
+      $root-xml.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
+      for $!root.nodes -> $node {
+        $node.xml($root-xml);
+      }
+  #note "NTop 1: $root-xml, $!globals.raw()";
 
-    unless $!globals.raw {
-      self!subst-variables($root-xml);
-#      self!remap-content($root-xml);
 
-      # remove all tags from the sxml namespace.
-      self!remove-sxml-namespace($root-xml);
-    }
-#note "NTop 2: $root-xml";
+      unless $!globals.raw {
+        self!subst-variables($root-xml);
+  #      self!remap-content($root-xml);
 
-    if $root-xml.nodes.elems == 0 {
-#note "0 elements";
-      $!document .= new($root-xml);
-    }
+        # remove all tags from the sxml namespace.
+        self!remove-sxml-namespace($root-xml);
+      }
+  #note "NTop 2: $root-xml";
 
-    elsif $root-xml.nodes.elems == 1 {
-#note "1 element";
-      self!set-namespaces($root-xml.nodes[0]);
-      $!document .= new($root-xml.nodes[0]);
-    }
-
-    elsif $root-xml.nodes.elems > 1 {
-#note "more than 1 element";
-      if $!globals.frag {
-        self!set-namespaces($root-xml);
+      if $root-xml.nodes.elems == 0 {
+  #note "0 elements";
         $!document .= new($root-xml);
       }
 
-      else {
-        die X::SemiXML.new(
-          :message( "Too many nodes on top level. Maximum allowed nodes is one")
-        )
+      elsif $root-xml.nodes.elems == 1 {
+  #note "1 element";
+        self!set-namespaces($root-xml.nodes[0]);
+        $!document .= new($root-xml.nodes[0]);
+      }
+
+      elsif $root-xml.nodes.elems > 1 {
+  #note "more than 1 element";
+        if $!globals.frag {
+          self!set-namespaces($root-xml);
+          $!document .= new($root-xml);
+        }
+
+        else {
+          die X::SemiXML.new(
+            :message(
+              "Too many nodes on top level. Maximum allowed nodes is one"
+            )
+          )
+        }
       }
     }
   }
@@ -100,6 +106,39 @@ class Actions {
 
     #$!document.new(XML::Element.new(:name<root>));
     $!document
+  }
+
+  #-----------------------------------------------------------------------------
+  # get the result sxml
+  method get-sxml-tree ( --> SemiXML::Node ) {
+
+    my SemiXML::Node $sxml-tree;
+    if $!root.nodes.elems == 0 {
+note "0 elements";
+      $sxml-tree = $!root;
+    }
+
+    elsif $!root.nodes.elems == 1 {
+note "1 element";
+      $sxml-tree = $!root.nodes[0];
+      $sxml-tree.parent(SemiXML::Element.new(:name<X>));
+    }
+
+    elsif $!root.nodes.elems > 1 {
+note "more than 1 element";
+      if $!globals.frag {
+        $sxml-tree = $!root;
+      }
+
+      else {
+        die X::SemiXML.new(
+          :message( "Too many nodes on top level. Maximum allowed nodes is one")
+        )
+      }
+    }
+
+note "GST Root: ", $sxml-tree.perl(:simple);
+    $sxml-tree
   }
 
 #`{{

@@ -27,11 +27,12 @@ for grep( /^ '--'/, @*ARGS) -> $a {
 sub MAIN (
   Str $filename, Str :$in = 'xml', Str :$out = 'xml',
   Bool :$force = False, Bool :$trace = False, Bool :$keep = False,
-  Bool :$raw = False, Bool :$exec = True, Bool :$frag = False
+  Bool :$raw = False, Bool :$exec = True, Bool :$frag = False,
+  Bool :$tree = False
 ) {
 
   my SemiXML::Sxml $x .= new(:refine([ $in, $out]));
   $x.save if $x.parse(
-    :$filename, :$raw, :$force, :$trace, :$keep, :$exec, :$frag
+    :$filename, :$raw, :$force, :$trace, :$keep, :$exec, :$frag, :$tree
   );
 }
