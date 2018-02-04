@@ -38,6 +38,10 @@ class Sxml {
   has Bool $!trace = False;
   has Bool $!force;
   has Bool $!keep;
+  has Bool $!raw;
+  has Bool $!frag;
+  has Bool $!exec;
+  has Bool $!tree;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
@@ -95,18 +99,18 @@ class Sxml {
   #-----------------------------------------------------------------------------
   multi method parse (
     Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
-    Bool :$raw = False, Bool :$!force = False, Bool :$exec = True,
-    Bool :$!trace = False, Bool :$!keep = False, Bool :$frag = False,
-    Bool :$tree = False
+    Bool :$!force = False, Bool :$!exec = True, Bool :$!raw = False,
+    Bool :$!trace = False, Bool :$!keep = False, Bool :$!frag = False,
+    Bool :$!tree = False
     --> Bool
   ) {
 
     $!user-config = $config;
     $!filename = Str if $!drop-cfg-filename;
-    $!globals.raw = $raw;
-    $!globals.exec = $exec;
-    $!globals.frag = $frag;
-    $!globals.tree = $tree;
+    $!globals.raw = $!raw;
+    $!globals.exec = $!exec;
+    $!globals.frag = $!frag;
+    $!globals.tree = $!tree;
 
     if $!globals.refined-tables.defined
       and $!refine[0] eq $!globals.refine[0]
@@ -138,13 +142,15 @@ class Sxml {
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
     my Bool $result-ok = $m.defined;
 
-    # reset all flags to its defaults until next parse will set them
+    # reset some flags to its defaults until next parse will set them
     $!drop-cfg-filename = True;
     #$!force = $!trace = $!keep = False;
     #$!globals.trace = $!trace;
-    $!globals.raw = False;
-    $!globals.exec = True;
     #$!globals.keep = $!keep;
+    $!globals.raw = $!raw;
+    $!globals.exec = $!exec;
+    $!globals.frag = $!frag;
+    $!globals.tree = $!tree;
 
     $result-ok;
   }
