@@ -49,12 +49,13 @@ class Actions {
 
     # execute any method bottom up and generate sxml structures
     $!root.run-method if $!globals.exec;
-#note "NTop 0: $root-xml";
+note "NTop Tree;\n$!root.Str()";
 
     # Don't generate the xml stuff when only the tree is requested later
     unless $!globals.tree {
       # convert non-method nodes into XML
       my XML::Element $root-xml .= new(:name($!root.name));
+note "NTop 0: $root-xml";
       $root-xml.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
       for $!root.nodes -> $node {
         $node.xml($root-xml);
@@ -110,7 +111,43 @@ class Actions {
 
   #-----------------------------------------------------------------------------
   # get the result sxml
-  method get-sxml-tree ( --> SemiXML::Node ) {
+  multi method sxml-tree ( SemiXML::Node:D :$sxml-tree! ) {
+
+    $!root .= new(:name<sxml:fragment>);
+    $!root.append($sxml-tree);
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # reverse engineer from xml to sxml tree
+  multi method sxml-tree ( XML::Node:D :$xml! ) {
+
+    sub cnvnodes ( XML::Node $parent ) {
+      for $parent.nodes -> $node {
+        when XML::Element {
+        }
+
+        when XML::Text {
+        }
+
+        default {
+        }
+      }
+    }
+
+    $!root .= new(:name<sxml:fragment>);
+
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # reverse engineer from xml to sxml tree
+  multi method sxml-tree ( Str:D :$xml-text! ) {
+    my XML::Document $xml = from-xml-file($xml-text);
+    self.sxml-tree(:xml($xml.root));
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # get the result sxml
+  multi method sxml-tree ( --> SemiXML::Node ) {
 
     my SemiXML::Node $sxml-tree;
     if $!root.nodes.elems == 0 {
