@@ -186,4 +186,19 @@ class Text does SemiXML::Node {
     $!text = $text;
     $parent.append(SemiXML::XMLText.new(:$text));
   }
+
+  #-----------------------------------------------------------------------------
+  method Str ( --> Str ) {
+
+    $!text
+  }
+
+  #-----------------------------------------------------------------------------
+  method perl ( --> Str ) {
+
+    my Str $text = $!text;
+    $text ~~ s:g/ \n /\\n/;
+
+    $!name ~ ' ' ~ $text
+  }
 }

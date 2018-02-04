@@ -86,7 +86,7 @@ class Element does SemiXML::Node {
 
       my Array $result = $object."$!method"(self);
       for @$result -> $node {
-#note "append before $!name: $node.name()";
+note "append before $!name: $node.name()";
         # set this node's attributes on every generated node
         $node.inline = $!inline;
         $node.noconv = $!noconv;
@@ -97,7 +97,18 @@ class Element does SemiXML::Node {
         self.before($node);
       }
 
-      # when finished remove the method node
+      # when finished remove the method node and children
+      sub rm-node ( $n ) {
+        for $n.nodes -> $node {
+          # first go deep
+          rm-node($node);
+
+          # then undefine node
+          undefine $node;
+        }
+      }
+
+      rm-node(self);
       self.remove;
     }
   }
@@ -155,42 +166,62 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method Str ( Str :$text is copy = '' --> Str ) {
+  my Str $t = '';
+  method Str ( Int :$l is copy --> Str ) {
+
+    unless $l {
+      $t = '';
+      $l = 0;
+    }
+
+    $t = $t ~ (self.perl(:simple) ~ " [\n").indent($l);
 
     for @$!nodes -> $node {
-      if $node ~~ SemiXML::Text {
-        $text ~= $node.text;
-      }
+      given $node {
+        when SemiXML::Text {
+          $t = $t ~ ($node.Str ~ "\n").indent($l);
+        }
 
-      else {
-        $text ~= $node.Str(:$text);
+        default {
+          $node.Str(:l($l + 2));
+        }
       }
     }
 
-    $text
+    $t = $t ~ "\n]\n".indent($l);
+
+    $t
   }
 
   #-----------------------------------------------------------------------------
-  method perl ( --> Str ) {
+  method perl ( Bool :$simple = False --> Str ) {
 
     my Str $e;
-    my Str $modifiers = '(';
-    $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
-    $modifiers ~= $!noconv ?? '¬e ' !! 'e '; # transform or not
-    $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
-    $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
+    my Str $modifiers;
 
-    $modifiers ~= '| ';
+    if $simple {
+      $modifiers = '';
+    }
 
-    $modifiers ~= 'F' if $!node-type ~~ SemiXML::Fragment;
-    $modifiers ~= 'E' if $!node-type ~~ SemiXML::Plain;
-    $modifiers ~= 'D' if $!node-type ~~ SemiXML::CData;
-    $modifiers ~= 'P' if $!node-type ~~ SemiXML::PI;
-    $modifiers ~= 'C' if $!node-type ~~ SemiXML::Comment;
+    else {
+      $modifiers = ' (';
+      $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
+      $modifiers ~= $!noconv ?? '¬t ' !! 't '; # transform or not
+      $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
+      $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
 
-    $modifiers ~= ')';
+      $modifiers ~= '| ';
 
-    my Str $attrs = '';
+      $modifiers ~= 'F' if $!node-type ~~ SemiXML::Fragment;
+      $modifiers ~= 'E' if $!node-type ~~ SemiXML::Plain;
+      $modifiers ~= 'D' if $!node-type ~~ SemiXML::CData;
+      $modifiers ~= 'P' if $!node-type ~~ SemiXML::PI;
+      $modifiers ~= 'C' if $!node-type ~~ SemiXML::Comment;
+
+      $modifiers ~= ')';
+    }
+
+    my Str $attrs = ' ';
     for $!attributes.kv -> $k, $v {
       $attrs ~= "$k=\"$v\" ";
     }
@@ -198,12 +229,14 @@ class Element does SemiXML::Node {
     if $!node-type ~~ any(
        SemiXML::Plain, SemiXML::CData, SemiXML::PI, SemiXML::Comment
     ) {
-      $e = [~] '$', $!name, " $modifiers", " $attrs", ' ...';
+      $e = [~] '$', $!name, $modifiers, $attrs;
     }
 
     else {
-      $e = [~] '$!', $!module, '.', $!method, " $modifiers", " $attrs", ' ...';
+      $e = [~] '$!', $!module, '.', $!method, $modifiers, $attrs;
     }
+
+    $e ~= ' ... ' unless $simple;
 
     $e
   }
