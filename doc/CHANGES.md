@@ -1,5 +1,9 @@
 # Changes in SemiXML:: * and sxml2xml
 
+* 0.47.1
+  * Variable declarations and substitutions fixed
+  * Some of the tests fixed
+  
 * 0.47.0
   Major rewrite of everything;
   * Added config table DN to specify Default Namespaces.
