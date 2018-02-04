@@ -7,6 +7,7 @@ use SemiXML;
 
 use SemiXML::Grammar;
 use SemiXML::Actions;
+use SemiXML::Node;
 use SemiXML::Text;
 use Config::DataLang::Refine;
 #use Terminal::ANSIColor;
@@ -63,7 +64,8 @@ class Sxml {
   multi method parse (
     Str:D :$!filename!, Hash :$config,
     Bool :$raw = False, Bool :$force = False, Bool :$exec = True,
-    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False
+    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False,
+    Bool :$tree = False
     --> Bool
   ) {
 
@@ -77,7 +79,7 @@ class Sxml {
       my $text = slurp($!filename);
       $pr = self.parse(
         :content($text), :$config, :!drop-cfg-filename,
-        :$raw, :$force, :$trace, :$keep, :$exec, :$frag
+        :$raw, :$force, :$trace, :$keep, :$exec, :$frag, :$tree
       );
       die "Parse failure" if $pr ~~ Nil;
     }
@@ -94,7 +96,8 @@ class Sxml {
   multi method parse (
     Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
     Bool :$raw = False, Bool :$!force = False, Bool :$exec = True,
-    Bool :$!trace = False, Bool :$!keep = False, Bool :$frag = False
+    Bool :$!trace = False, Bool :$!keep = False, Bool :$frag = False,
+    Bool :$tree = False
     --> Bool
   ) {
 
@@ -103,6 +106,7 @@ class Sxml {
     $!globals.raw = $raw;
     $!globals.exec = $exec;
     $!globals.frag = $frag;
+    $!globals.tree = $tree;
 
     if $!globals.refined-tables.defined
       and $!refine[0] eq $!globals.refine[0]
@@ -185,6 +189,21 @@ class Sxml {
       note "Saved file in $filename"
         if $!globals.trace and $!globals.refined-tables<T><file-handling>;
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method sxml-tree ( SemiXML::Node:D :$sxml-tree! ) {
+    $!actions.sxml-tree(:$sxml-tree);
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method sxml-tree( XML::Node:D :$xml! ) {
+    $!actions.sxml-tree(:$xml);
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method sxml-tree ( --> SemiXML::Node ) {
+    $!actions.sxml-tree
   }
 
   #-----------------------------------------------------------------------------
