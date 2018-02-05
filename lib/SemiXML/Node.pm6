@@ -46,7 +46,13 @@ role Node {
   multi method parent ( SemiXML::Node:D $!parent ) { }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method parent ( Bool:D :$undef!) { $!parent = SemiXML::Node if $undef; }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method parent ( --> SemiXML::Node ) { $!parent }
+
+  #-----------------------------------------------------------------------------
+  method undef-nodes ( ) { $!nodes = [] }
 
   #-----------------------------------------------------------------------------
   # find location of node in nodes array. return Int type if not found.
