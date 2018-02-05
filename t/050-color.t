@@ -1,8 +1,10 @@
 use v6;
-use lib 'lib';
+#use lib 'lib';
 
 use Test;
 use SemiXML::Sxml;
+#use SemiXML::Element;
+#use SemiXML::Node;
 use XML::XPath;
 
 #-------------------------------------------------------------------------------
@@ -11,14 +13,14 @@ subtest 'generated blended color variables 1', {
   my $text = q:to/EOTXT/;
     $x [
       $!Colors.palette outspec=rgbhex base-rgb='#1200ff'
-                       type=blended mode=averaged
-      $set0 [ $sxml:var-ref name=base-color ]
+                       type=blended mode=averaged []
+      $set0 [ $sxml:var-ref name=base-color [] ]
       $set1 [
-        $sxml:var-ref name=blend-color1 $sxml:var-ref name=blend-color2
-        $sxml:var-ref name=blend-color3 $sxml:var-ref name=blend-color4
-        $sxml:var-ref name=blend-color5
+        $sxml:var-ref name=blend-color1 [] $sxml:var-ref name=blend-color2 []
+        $sxml:var-ref name=blend-color3 [] $sxml:var-ref name=blend-color4 []
+        $sxml:var-ref name=blend-color5 []
       ]
-      $set2 [ $sxml:var-ref name=blend-color6 ]
+      $set2 [ $sxml:var-ref name=blend-color6 [] ]
     ]
     EOTXT
 
@@ -120,7 +122,7 @@ subtest 'generate monochromatic color variables', {
 #-------------------------------------------------------------------------------
 sub get-xpath ( Str $content --> XML::XPath ) {
 
-  my SemiXML::Sxml $x .= new( :!trace, :keep);
+  my SemiXML::Sxml $x .= new;
   $x.parse(
     config => {
       C => { xml => { :!xml-show }},
@@ -132,12 +134,12 @@ sub get-xpath ( Str $content --> XML::XPath ) {
       ML => { :Colors<SxmlLib::Colors>, },
       T => { :config, :tables, :modules, :parse, },
     },
-    :$content, :!raw
+    :$content, :raw, :!trace, :keep
   );
 
   # See the result
   my Str $xml-text = ~$x;
-  #diag $xml-text;
+  diag $xml-text;
 
   XML::XPath.new(:xml($xml-text))
 }

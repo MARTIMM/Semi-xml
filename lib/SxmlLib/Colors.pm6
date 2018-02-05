@@ -8,8 +8,8 @@ use v6;
 unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
-use SemiXML::Helper;
-use XML;
+use SemiXML::Element;
+#use XML;
 use Color;
 use Color::Operators;
 
@@ -25,10 +25,7 @@ class Colors {
   # The namespace xmlns:sxml="github:MARTIMM" is placed on top level element
   # and removed later when document is ready.
 
-  method palette (
-    XML::Element $parent, Hash $attrs, XML::Node :$content-body
-    --> XML::Node
-  ) {
+  method palette ( SemiXML::Element $m --> Array ) {
 
     my List $xc;
     my Color $base-color;
@@ -36,10 +33,10 @@ class Colors {
 
     # find out what color scheme is used
     # base color given in rgb
-    if $attrs<base-rgb>:exists {
+    if $m.attributes<base-rgb>:exists {
 
       # if base-rgb it can be defined in 4 different ways
-      $xc = ($attrs<base-rgb>:delete).List;
+      $xc = ($m.attributes<base-rgb>:delete).List;
 #note "RGB: $xc.perl()";
       # as '#xxx', '#xxxxxx', '('#xxx d', '#xxxxxx d'
       if $xc[0] ~~ /^ '#' [<xdigit>**3 || <xdigit>**6] $/ {
@@ -72,10 +69,10 @@ class Colors {
     }
 
     # base color given in hsl
-    elsif $attrs<base-hsl>:exists {
+    elsif $m.attributes<base-hsl>:exists {
 
       # if base-hsl it can be defined in 2 different ways
-      $xc = ($attrs<base-hsl>:delete).List;
+      $xc = ($m.attributes<base-hsl>:delete).List;
 #note "HSL: $xc.perl()";
       # as 'd d d' or 'd d d d'
       $base-color .= new(:hsl([|$xc[0..2]>>.Real]));
@@ -86,8 +83,8 @@ class Colors {
     }
 
     else {
-note "X: $attrs.perl()";
-      die "Not a defined color type, attributes found are: $attrs.keys().join(', ')";
+note "X: $m.attributes.perl()";
+      die "Not a defined color type, attributes found are: $m.attributes.keys().join(', ')";
     }
 
     # hash to set the colors in
@@ -96,10 +93,10 @@ note "X: $attrs.perl()";
     my Seq $color-set;
 
     # get number of colors to generate
-    my UInt $ncolors = ($attrs<ncolors>//5).Str.UInt;
+    my UInt $ncolors = ($m.attributes<ncolors>//5).Str.UInt;
 
     # the default type is color-scheme.
-    my Str $type = ($attrs<type>//'color-scheme').Str;
+    my Str $type = ($m.attributes<type>//'color-scheme').Str;
 
     my Str $oper-name = '';
 
@@ -108,35 +105,44 @@ note "X: $attrs.perl()";
 
       when 'blended' {
         $oper-name = 'blend';
-        $color-set = self!blended-colors( $base-color, $ncolors, $attrs);
+        $color-set = self!blended-colors( $base-color, $ncolors, $m.attributes);
       }
 
       when 'color-scheme' {
         $oper-name = 'scheme';
-        $color-set = self!color-scheme( $base-color, $ncolors, $attrs);
+        $color-set = self!color-scheme( $base-color, $ncolors, $m.attributes);
       }
     }
 
     # get the set name and color name for the variables
-    my Str $set-name = ($attrs<set-name>//'').Str;
-    my Str $color-name = ($attrs<color-name>//'color').Str;
+    my Str $set-name = ($m.attributes<set-name>//'').Str;
+    my Str $color-name = ($m.attributes<color-name>//'color').Str;
 
-    my Str $output-spec = ($attrs<outspec>//'rgbhex').Str;
+    my Str $output-spec = ($m.attributes<outspec>//'rgbhex').Str;
 
     # create a variable for the base color
-    my $bce = append-element( $parent, 'sxml:var-decl', %(:name<base-color>));
-    append-element( $bce, :text(self!output-spec( $base-color, $output-spec)));
+    my Array $element-array = [];
+
+    my SemiXML::Element $bce .= new(
+      :name<sxml:var-decl>, :attributes({:name<base-color>})
+    );
+    $bce.append(:text(self!output-spec( $base-color, $output-spec)));
+    $element-array.push: $bce;
 
     # create a variable for each color
     my Int $color-count = 1;
     for @$color-set -> $color {
       my Str $name = [~] (?$set-name ?? "$set-name-" !! ''),
                      $oper-name, '-', $color-name, $color-count++;
-      my XML::Element $e = append-element( $parent, 'sxml:var-decl', %(:$name));
-      append-element( $e, :text(self!output-spec( $color, $output-spec)));
+      my SemiXML::Element $e .= new(
+        :name<sxml:var-decl>, :attributes({:$name})
+      );
+      $e.append(:text(self!output-spec( $color, $output-spec)));
+      $element-array.push: $e;
     }
 
-    $parent;
+note "EA: ", $element-array[*]>>.Str.join("\n\n");
+    $element-array
   }
 
   #-----------------------------------------------------------------------------

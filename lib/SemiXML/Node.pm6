@@ -127,6 +127,8 @@ role Node {
   multi method before ( SemiXML::Node $node, SemiXML::Node $new, :$offset=0 ) {
 #note "Before: $!name, $node.name(), $new.name()";
 
+    $node.remove;
+
     my Int $pos = self.index-of($node);
     $!nodes.splice( $pos + $offset, 0, $new.reparent(self))
       if $pos.defined and $pos >= 0 and ($pos + $offset) < $!nodes.elems;
