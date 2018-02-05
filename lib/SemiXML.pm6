@@ -9,21 +9,26 @@ package SemiXML:auth<github:MARTIMM> {
 
   #-----------------------------------------------------------------------------
   class Globals {
-    has Str $.filename is rw;
-    has Array $.refine is rw = [<xml xml>];
-    has Hash $.refined-tables is rw;
-    has Bool $.trace is rw;
-    has Bool $.keep is rw;
-    has Bool $.raw is rw;
-    has Bool $.exec is rw;
-    has Bool $.frag is rw;
-    has Bool $.tree is rw;
-    has Hash $.objects is rw;
 
+    has Str $.filename is rw;
+    has Array $!per-call-options;
     my Globals $instance;
 
     #---------------------------------------------------------------------------
     submethod new ( ) { !!! }
+
+    #---------------------------------------------------------------------------
+    submethod BUILD ( ) {
+
+      # initialize and set defaults. this entry will never be popped
+      $!per-call-options = [];
+      self.set-options( hash(
+          :!trace, :!keep, :!raw, :exec, :!frag, :!tree,
+          :objects({}), :filename<unknown.sxml>,
+          :refine([<xml xml>]), :refined-tables({}),
+        )
+      );
+    }
 
     #---------------------------------------------------------------------------
     method instance ( --> Globals ) {
@@ -32,6 +37,45 @@ package SemiXML:auth<github:MARTIMM> {
 
       $instance
     }
+
+    #---------------------------------------------------------------------------
+    method set-options ( Hash:D $options ) {
+
+      my Hash $h = hash(
+        :trace($options<trace>), :keep($options<keep>),
+        :raw($options<raw>), :exec($options<exec>),
+        :frag($options<frag>), :tree($options<tree>),
+
+        #:filename($options<filename>),
+        :refine($options<refine>),
+        :refined-tables($options<refined-tables>),
+        :objects($options<objects>),
+      );
+
+      $!per-call-options.push: $h;
+    }
+
+    #---------------------------------------------------------------------------
+    # pop options but keep first always on stack
+    method pop-options ( ) {
+      $!per-call-options.pop if $!per-call-options.elems > 1;
+    }
+
+    #---------------------------------------------------------------------------
+    # getters
+    method trace ( --> Bool ) { $!per-call-options[*-1]<trace>; }
+    method keep ( --> Bool ) { $!per-call-options[*-1]<keep>; }
+    method raw ( --> Bool ) { $!per-call-options[*-1]<raw>; }
+    method exec ( --> Bool ) { $!per-call-options[*-1]<exec>; }
+    method frag ( --> Bool ) { $!per-call-options[*-1]<frag>; }
+    method tree ( --> Bool ) { $!per-call-options[*-1]<tree>; }
+
+    #method filename ( --> Str ) { $!per-call-options[*-1]<filename>; }
+    method refine ( --> Array ) { $!per-call-options[*-1]<refine>; }
+    method refined-tables ( --> Hash ) {
+      $!per-call-options[*-1]<refined-tables>;
+    }
+    method objects ( --> Hash ) { $!per-call-options[*-1]<objects>; }
   }
 }
 

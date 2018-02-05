@@ -65,6 +65,8 @@ class File {
           $element-array.unshift: $node;
         }
 
+        $x.done;
+
         # move nodes to the array
 
         #$x.root-element.nodes.reverse;

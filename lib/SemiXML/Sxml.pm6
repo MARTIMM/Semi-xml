@@ -10,7 +10,6 @@ use SemiXML::Actions;
 use SemiXML::Node;
 use SemiXML::Text;
 use Config::DataLang::Refine;
-#use Terminal::ANSIColor;
 
 use XML;
 
@@ -26,6 +25,7 @@ class Sxml {
   has Array $!refine;
   has Array $!table-names;
   has Hash $!refined-tables;
+  has Hash $!objects;
 
 #  has Hash $!objects = {};
 
@@ -34,14 +34,6 @@ class Sxml {
 
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
-#TODO doc and specificity of T-Table tracing
-  has Bool $!trace = False;
-  has Bool $!force;
-  has Bool $!keep;
-  has Bool $!raw;
-  has Bool $!frag;
-  has Bool $!exec;
-  has Bool $!tree;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
@@ -76,15 +68,12 @@ class Sxml {
     my Bool $pr;
 
     if $!filename.IO ~~ :r {
-      # save the filename globally but only once
-#TODO doc
-      $!globals.filename //= $!filename;
-
       my $text = slurp($!filename);
       $pr = self.parse(
         :content($text), :$config, :!drop-cfg-filename,
         :$raw, :$force, :$trace, :$keep, :$exec, :$frag, :$tree
       );
+
       die "Parse failure" if $pr ~~ Nil;
     }
 
@@ -93,64 +82,39 @@ class Sxml {
       exit(1);
     }
 
-    $pr;
+    $pr
   }
 
   #-----------------------------------------------------------------------------
   multi method parse (
     Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
-    Bool :$!force = False, Bool :$!exec = True, Bool :$!raw = False,
-    Bool :$!trace = False, Bool :$!keep = False, Bool :$!frag = False,
-    Bool :$!tree = False
+    Bool :$force = False, Bool :$exec = True, Bool :$raw = False,
+    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False,
+    Bool :$tree = False
     --> Bool
   ) {
 
     $!user-config = $config;
     $!filename = Str if $!drop-cfg-filename;
-    $!globals.raw = $!raw;
-    $!globals.exec = $!exec;
-    $!globals.frag = $!frag;
-    $!globals.tree = $!tree;
 
-    if $!globals.refined-tables.defined
-      and $!refine[0] eq $!globals.refine[0]
-      and $!refine[1] eq $!globals.refine[1]
-      and ! $!user-config and ! $!drop-cfg-filename
-    {
-      $!refined-tables = $!globals.refined-tables;
-      $!refine = $!globals.refine;
-      #self!process-modules;
-    }
+    # prepare config and process dependencies. if result is newer than source
+    # prepare returns False to note that further work is not needed.
+    return False unless self!prepare-config( :$trace, :$force);
 
-    else {
-      # If there were tables, clean them up
-      #$!globals.refined-tables = Nil;
+    # set options. when user is done() with this session they will be removed
+    $!globals.set-options( hash(
+        :$trace, :$keep, :$raw, :$exec, :$frag, :$tree,
+        :$!objects, :$!refine, :$!refined-tables,
+#        :$!filename,
+      )
+    );
 
-      # start filling items in
-      $!globals.trace = $!trace;
-      $!globals.keep = $!keep;
-
-      # make sure that in and out keys are defined with defaults
-      $!globals.refine = $!refine;
-
-      # Prepare config and process dependencies. If result is newer than source
-      # prepare returns False to note that further work is not needed.
-      return False unless self!prepare-config;
-    }
+    # save the filename globally but only once
+    $!globals.filename //= $!filename if ?$!filename;
 
     # Parse the content. Parse can be recursively called
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
     my Bool $result-ok = $m.defined;
-
-    # reset some flags to its defaults until next parse will set them
-    $!drop-cfg-filename = True;
-    #$!force = $!trace = $!keep = False;
-    #$!globals.trace = $!trace;
-    #$!globals.keep = $!keep;
-    $!globals.raw = $!raw;
-    $!globals.exec = $!exec;
-    $!globals.frag = $!frag;
-    $!globals.tree = $!tree;
 
     $result-ok;
   }
@@ -181,7 +145,7 @@ class Sxml {
       $cmd = self!process-cmd-str($cmd);
 
       note "Send file to program: $cmd"
-        if $!trace and $!refined-tables<T><file-handling>;
+        if $!globals.trace and $!globals.refined-tables<T><file-handling>;
 
       my Proc $p = shell "$cmd", :in;
       $p.in.print($document);
@@ -210,6 +174,12 @@ class Sxml {
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method sxml-tree ( --> SemiXML::Node ) {
     $!actions.sxml-tree
+  }
+
+  #-----------------------------------------------------------------------------
+  method done ( ) {
+#TODO cleanup things here and in actions?
+    $!globals.pop-options;
   }
 
   #-----------------------------------------------------------------------------
@@ -331,14 +301,16 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  method !prepare-config ( --> Bool ) {
+  method !prepare-config ( Bool:D :$trace, Bool:D :$force --> Bool ) {
 
     # 1) Cleanup old configs
     $!configuration = Config::DataLang::Refine;
 
     # 2) load the SemiXML.toml from resources directory
     # first is resource and there is no merge from other configs
-    self!load-config( :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge);
+    self!load-config(
+      :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge, :$trace
+    );
 
     # 3) if filename is given, use its path also
     my Array $locations;
@@ -358,12 +330,16 @@ class Sxml {
 
       # 3a) to load SemiXML.TOML from the files location, current dir
       #     (also hidden), and in $HOME.
-      self!load-config( :config-name<SemiXML.toml>, :$locations, :merge);
+      self!load-config(
+        :config-name<SemiXML.toml>, :$locations, :merge, :$trace
+      );
 
       # 3b) same as in 3a but use the filename now.
       $fext = $!filename.IO.extension;
       $basename ~~ s/ $fext $/toml/;
-      self!load-config( :config-name($basename), :$locations, :merge);
+      self!load-config(
+        :config-name($basename), :$locations, :merge, :$trace
+      );
     }
 
     # 4) if filename is not given, the configuration is searched using the
@@ -373,7 +349,7 @@ class Sxml {
       # in case it was set by previous parse actions but not found or readable
       $!filename = Str;
 
-      self!load-config(:merge);
+      self!load-config( :merge, :$trace);
     }
 
     # 5) merge any user configuration in it
@@ -446,9 +422,9 @@ class Sxml {
 
     note "\nComplete configuration: ", $!configuration.perl,
          "\nRefined configuration tables"
-         if $!trace and $!refined-tables<T><config>;
+         if $!globals.trace and $!globals.refined-tables<T><config>;
 
-    if $!trace and $!refined-tables<T><tables> {
+    if $!globals.trace and $!globals.refined-tables<T><tables> {
       note "Refine keys: $!refine[IN], $!refine[OUT]";
       note "File: $basename";
       for @$!table-names -> $table {
@@ -457,15 +433,11 @@ class Sxml {
       }
     }
 
-    # Place all the tables in Globals
-#TODO doc
-    $!globals.refined-tables = $!refined-tables;
-
     #TODO Check exitence and modification time of result to see
     # if we need to continue parsing
     my Bool $continue = True;
 
-    if ! $!force {
+    if ! $force {
 
       # Use the R-table if the entry is an Array. If R-table entry is an Array,
       # take the second element. It is a result filename to check for modification
@@ -499,8 +471,9 @@ class Sxml {
     }
 
     else {
-      note "No need to parse and save data, $!target-fn is in its latest version"
-           if $!trace and $!refined-tables<T><parse>;
+      note "No need to parse and save data,",
+           " $!target-fn is in its latest version"
+        if $!globals.trace and $!globals.refined-tables<T><file-handlin>;
     }
 
     $found-dependency or $continue
@@ -555,15 +528,17 @@ class Sxml {
         else {
 
           my Array $refine = [@d[ IN, OUT]];
-          my SemiXML::Sxml $x .= new( :$!trace, :$refine);
+          my SemiXML::Sxml $x .= new( :$!globals.trace, :$refine);
 
           note "Process dependency: --in=@d[IN] --out=@d[OUT] $filename"
-            if $!trace and $!refined-tables<T><file-handling>;
+            if $!globals.trace and $!globals.refined-tables<T><file-handling>;
 
           if $x.parse(:$filename) {
             $x.save;
             $dependency-found = True;
           }
+
+          $x.done;
         }
       }
     }
@@ -579,7 +554,7 @@ class Sxml {
     # no entries, no work
     return unless ? $!refined-tables<ML>;
 
-    $!globals.objects //= {};
+    $!objects //= {};
     my Hash $lib = {};
     my Hash $mod = {};
     for $!refined-tables<ML>.keys -> $modkey {
@@ -600,9 +575,9 @@ class Sxml {
 }}
 
     # load and instantiate
-    note " " if $!trace and $!refined-tables<T><modules>;
+    note " " if $!globals.trace and $!globals.refined-tables<T><modules>;
     for $mod.kv -> $key, $value {
-      if $!globals.objects{$key}:!exists {
+      if $!objects{$key}:!exists {
         if $lib{$key}:exists {
 
 #TODO test for duplicate paths
@@ -614,20 +589,17 @@ class Sxml {
 
         (try require ::($value)) === Nil and say "Failed to load $value\n$!";
         my $obj = ::($value).new;
-        $!globals.objects{$key} = $obj if $obj.defined;
+        $!objects{$key} = $obj if $obj.defined;
 
         note "Object for key '$key' installed from class $value"
-             if $!trace and $!refined-tables<T><modules>;
+             if $!globals.trace and $!globals.refined-tables<T><modules>;
       }
 
       else {
         note "Object for '$key' already installed from class $value"
-             if $!trace and $!refined-tables<T><modules>;
+             if $!globals.trace and $!globals.refined-tables<T><modules>;
       }
     }
-
-    # Place in actions object.
-    #$!globals.objects = $objects;
   }
 
 #`{{
@@ -648,7 +620,7 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   method !load-config (
-    Str :$config-name, Array :$locations = [], Bool :$merge
+    Str :$config-name, Array :$locations = [], Bool :$merge, :$trace
   ) {
 
     try {
@@ -657,12 +629,12 @@ class Sxml {
       if $!configuration.defined {
         $!configuration .= new(
           :$config-name, :$locations, :other-config($!configuration.config),
-          :$merge, :$!trace
+          :$merge, :$trace
         );
       }
 
       else {
-        $!configuration .= new( :$config-name, :$locations, :$merge, :$!trace);
+        $!configuration .= new( :$config-name, :$locations, :$merge, :$trace);
       }
 
       CATCH {
