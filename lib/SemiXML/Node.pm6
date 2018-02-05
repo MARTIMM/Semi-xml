@@ -68,7 +68,7 @@ role Node {
   #-----------------------------------------------------------------------------
   method remove ( --> SemiXML::Node ) {
 
-    $!parent.removeChild(self);
+    $!parent.removeChild(self) if $!parent;
     return self
   }
 
@@ -98,6 +98,9 @@ role Node {
   # already in that array.
   multi method append ( SemiXML::Node:D $node! ) {
 
+    # if node has a parent, remove the node from the parent first
+    $node.remove;
+
     # add the node when not found and set the parent in the node
     my $pos = self.index-of($node);
     unless $pos.defined {
@@ -111,7 +114,8 @@ role Node {
   # already in that array.
   method insert ( SemiXML::Node:D $node ) {
 
-    # add the node when not found and set the parent in the node
+    $node.remove;
+
     my $pos = self.index-of($node);
     unless $pos.defined {
       $!nodes.unshift($node);
