@@ -86,7 +86,7 @@ class Element does SemiXML::Node {
 
       my Array $result = $object."$!method"(self);
       for @$result -> $node {
-note "append before $!name: $node.name()";
+#note "append before $!name: $node.name()";
         # set this node's attributes on every generated node
         $node.inline = $!inline;
         $node.noconv = $!noconv;
@@ -103,7 +103,7 @@ note "append before $!name: $node.name()";
 
       # define a sub to do job recursively
       sub rm-node ( $n ) {
-note "rm $n.name()";
+#note "rm $n.name()";
         unless $n ~~ SemiXML::Text {
           for $n.nodes -> $node is rw {
             # first go deep
@@ -191,7 +191,8 @@ note "rm $n.name()";
     for @$!nodes -> $node {
       given $node {
         when SemiXML::Text {
-          $t = $t ~ ($node.Str ~ "\n").indent($l);
+          my $tnode = ($node.Str ~ "\n").indent($l);
+          $t ~= $tnode if $tnode ~~ m/ \S /;
         }
 
         default {
@@ -200,7 +201,7 @@ note "rm $n.name()";
       }
     }
 
-    $t = $t ~ "\n]\n".indent($l);
+    $t ~= "]\n".indent($l);
 
     $t
   }
