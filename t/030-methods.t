@@ -108,7 +108,7 @@ like $xml, /:s '<x a="1" b="0">'
              'Added 3 xml nodes'
              '</p>'
              '</x>'
-           /, "generated: $xml";
+           /, "generated 3 nodes";
 
 
 $content = '$!mod1.mth3 a="v1 v2" b=<head1 head2> []';
