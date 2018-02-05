@@ -98,18 +98,30 @@ note "append before $!name: $node.name()";
       }
 
       # when finished remove the method node and children
-      sub rm-node ( $n ) {
-        for $n.nodes -> $node {
-          # first go deep
-          rm-node($node);
+      # keep the parent object
+      my SemiXML::Node $parent = $!parent;
 
-          # then undefine node
-          undefine $node;
+      # define a sub to do job recursively
+      sub rm-node ( $n ) {
+note "rm $n.name()";
+        unless $n ~~ SemiXML::Text {
+          for $n.nodes -> $node is rw {
+            # first go deep
+            rm-node($node);
+            $node.parent(:undef);
+          }
+
+          $n.undef-nodes;
         }
+
+        $n.parent(:undef);
       }
 
+      # call sub
       rm-node(self);
-      self.remove;
+
+      # remove this method object from parent
+      $parent.removeChild(self);
     }
   }
 
