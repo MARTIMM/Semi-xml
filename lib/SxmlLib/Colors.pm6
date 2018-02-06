@@ -126,6 +126,7 @@ note "X: $m.attributes.perl()";
     my SemiXML::Element $bce .= new(
       :name<sxml:var-decl>, :attributes({:name<base-color>})
     );
+    $bce.body-type = SemiXML::BodyC;
     $bce.append(:text(self!output-spec( $base-color, $output-spec)));
     $element-array.push: $bce;
 
@@ -135,13 +136,13 @@ note "X: $m.attributes.perl()";
       my Str $name = [~] (?$set-name ?? "$set-name-" !! ''),
                      $oper-name, '-', $color-name, $color-count++;
       my SemiXML::Element $e .= new(
-        :name<sxml:var-decl>, :attributes({:$name})
+        :name<sxml:var-decl>, :attributes({:$name,:noconv})
       );
+      $e.body-type = SemiXML::BodyC;
       $e.append(:text(self!output-spec( $color, $output-spec)));
       $element-array.push: $e;
     }
 
-note "EA: ", $element-array[*]>>.Str.join("\n\n");
     $element-array
   }
 

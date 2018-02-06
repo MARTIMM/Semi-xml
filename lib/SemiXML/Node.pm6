@@ -59,7 +59,7 @@ role Node {
   method index-of ( SemiXML::Node $find --> Int ) {
 
     loop ( my Int $i = 0; $i < $!nodes.elems; $i++ ) {
-      return $i if $!nodes[$i] ~~ $find;
+      return $i if $!nodes[$i] === $find;
     }
 
     Int
@@ -68,7 +68,7 @@ role Node {
   #-----------------------------------------------------------------------------
   method remove ( --> SemiXML::Node ) {
 
-    $!parent.removeChild(self) if $!parent;
+    $!parent.remove-child(self) if $!parent;
     return self
   }
 
@@ -78,17 +78,17 @@ role Node {
 #note "Repar 0: $parent.name(), $!name";
 #note "Repar 1: $!parent";
     #self.remove;
-    $!parent.removeChild(self);
+    $!parent.remove-child(self);
 
     $!parent = $parent;
     return self
   }
 
   #-----------------------------------------------------------------------------
-  method removeChild ( SemiXML::Node $node ) {
+  method remove-child ( SemiXML::Node $node ) {
 
     my $pos = self.index-of($node);
-#note "rmChild: $!name, $node.name(), pos = {$pos//'-'}";
+#note "rm child: $!name, $node.name(), pos = {$pos//'-'}";
     $!nodes.splice( $pos, 1) if $pos.defined;
   }
 
@@ -125,11 +125,10 @@ role Node {
 
   #-----------------------------------------------------------------------------
   multi method before ( SemiXML::Node $node, SemiXML::Node $new, :$offset=0 ) {
-#note "Before: $!name, $node.name(), $new.name()";
-
-    $node.remove;
+#note "Before: $!name, $node.name(), $new.name()\n$new";
 
     my Int $pos = self.index-of($node);
+#note "Before pos of node: $pos";
     $!nodes.splice( $pos + $offset, 0, $new.reparent(self))
       if $pos.defined and $pos >= 0 and ($pos + $offset) < $!nodes.elems;
   }
@@ -138,8 +137,9 @@ role Node {
   multi method before ( SemiXML::Node $node ) {
 
     if $!parent.defined {
-      $node.parent(self) unless $node.parent;
+#      $node.parent(self) unless $node.parent;
       $!parent.before( self, $node);
+#note "after before:\n$!parent";
     }
   }
 

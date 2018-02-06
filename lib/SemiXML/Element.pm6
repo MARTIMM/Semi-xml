@@ -84,9 +84,14 @@ class Element does SemiXML::Node {
 
 #note "MN 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ", $!parent.name;
 
-      my Array $result = $object."$!method"(self);
-      for @$result -> $node {
-#note "append before $!name: $node.name()";
+      $!nodes = $object."$!method"(self) // [];
+      for @$!nodes.reverse -> $node {
+
+        # assume that the top level nodes do not have a parent
+        # with this the nodes become the methods children
+        $node.parent(self);
+
+#note "\nappend before $!name: $node.name()\n$node";
         # set this node's attributes on every generated node
         $node.inline = $!inline;
         $node.noconv = $!noconv;
@@ -94,13 +99,13 @@ class Element does SemiXML::Node {
         $node.close = $!close;
 
         # and place them just before the method node
-        self.before($node);
+        self.after($node);
       }
 
       # when finished remove the method node and children
       # keep the parent object
       my SemiXML::Node $parent = $!parent;
-
+#`{{
       # define a sub to do job recursively
       sub rm-node ( $n ) {
 #note "rm $n.name()";
@@ -119,9 +124,10 @@ class Element does SemiXML::Node {
 
       # call sub
       rm-node(self);
-
+}}
       # remove this method object from parent
-      $parent.removeChild(self);
+      $parent.remove-child(self);
+#note "after inserting before:\n", $parent.Str;
     }
   }
 

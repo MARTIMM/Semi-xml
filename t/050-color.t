@@ -13,7 +13,7 @@ subtest 'generated blended color variables 1', {
   my $text = q:to/EOTXT/;
     $x [
       $!Colors.palette outspec=rgbhex base-rgb='#1200ff'
-                       type=blended mode=averaged []
+                       type=blended mode=averaged « »
       $set0 [ $sxml:var-ref name=base-color [] ]
       $set1 [
         $sxml:var-ref name=blend-color1 [] $sxml:var-ref name=blend-color2 []
@@ -134,7 +134,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
       ML => { :Colors<SxmlLib::Colors>, },
       T => { :config, :tables, :modules, :parse, },
     },
-    :$content, :raw, :!trace, :keep
+    :$content, :!raw, :!trace, :keep
   );
 
   # See the result
