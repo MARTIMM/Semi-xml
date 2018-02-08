@@ -376,12 +376,22 @@ note "GST Root: ", $sxml-tree.perl(:simple);
         }
 
         when 'body-a' {
-          my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
+          my Str $text = $v.Str;
+
+          # Remove all comment
+          for $v.caps -> Pair $p ( :key($ba-k), :value($ba-v)) {
+            if $ba-k eq 'comment' {
+              my $vtxt = $ba-v.Str;
+              $text ~~ s/ $vtxt //;
+            }
+          }
+
+          my SemiXML::Text $t .= new( :text($text), :parent($element));
           $t.body-type = SemiXML::BodyA;
           $t.body-number = $element.body-count;
           #$element.append($t);
 
-          my $v1 = $v;
+          my $v1 = $text;
           $v1 ~~ s:g/ \n /\\n/;
           note "--> append '$v1' to $element.name()".indent($l+4)
             if $!globals.trace and $!globals.refined-tables<T><parse>;

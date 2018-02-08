@@ -159,9 +159,9 @@ class Text does SemiXML::Node {
 
     # remove comments only when in BodyA. the other content bodies
     # are left alone. only remove when not escaped or after &
-    if $!body-type ~~ SemiXML::BodyA {
-      $text ~~ s:g/ \s* <!after <[\\\&]>> '#' \N*: $$//;
-    }
+#    if $!body-type ~~ SemiXML::BodyA {
+#      $text ~~ s:g/ \s* <!after <[\\\&]>> '#' \N*: $$//;
+#    }
 
     # remove escape characters
     $text ~~ s/\\//;

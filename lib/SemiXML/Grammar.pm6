@@ -115,7 +115,7 @@ note "F/T: $match.from(), $match.to()";
   }
 
   token body-a {
-    [ [ <.escaped-char>+ || <.entity>+ || <.comment> || <-[\\\$\[\]]>+ ]+ ||
+    [ [ <.escaped-char>+ || <.entity>+ || <comment> || <-[\\\$\[\]\#]>+ ]+ ||
       [ ('[') {
         error( $/,
           "Cannot start a content body with '$0', did you mean '\\$0'?"

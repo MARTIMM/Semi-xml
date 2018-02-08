@@ -146,7 +146,7 @@ note "X: $m.attributes.perl()";
         :text(self!output-spec( $color, $output-spec))
       );
 
-      $t.body-type = SemiXML::BodyC;
+#      $t.body-type = SemiXML::BodyC;
       $e.append($t);
       $element-array.push: $e;
     }
