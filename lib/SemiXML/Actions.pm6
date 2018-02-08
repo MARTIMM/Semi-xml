@@ -49,7 +49,7 @@ class Actions {
 
     # execute any method bottom up and generate sxml structures
     $!root.run-method if $!globals.exec;
-note "NTop Tree F=$!globals.frag(), T=$!globals.tree();\n$!root.Str()";
+#note "NTop Tree F=$!globals.frag(), T=$!globals.tree();\n$!root.Str()";
 
     # Don't generate the xml stuff when only the tree is requested later
     unless $!globals.tree {
@@ -64,9 +64,9 @@ note "NTop Tree F=$!globals.frag(), T=$!globals.tree();\n$!root.Str()";
 
 
       unless $!globals.raw {
-note "NTop 2a: $root-xml";
+#note "NTop 2a: $root-xml";
         self!subst-variables($root-xml);
-note "NTop 2b: $root-xml";
+#note "NTop 2b: $root-xml";
   #      self!remap-content($root-xml);
 #note "NTop 2c: $root-xml";
 

@@ -41,14 +41,16 @@ subtest 'generated blended color variables 1', {
     $x [
       $!Colors.palette
         base-rgb='#1200ff' type=blended mode=hard opacity=0.8
-        ncolors=10
-      $set0 [ $sxml:var-ref name=base-color ]
+        ncolors=10 []
+      $set0 [ $sxml:var-ref name=base-color [] ]
       $set1 [
-        $sxml:var-ref name=blend-color1 $sxml:var-ref name=blend-color2
-        $sxml:var-ref name=blend-color3 $sxml:var-ref name=blend-color4
-        $sxml:var-ref name=blend-color5
+        $sxml:var-ref name=blend-color1 [] $sxml:var-ref name=blend-color2 []
+        $sxml:var-ref name=blend-color3 [] $sxml:var-ref name=blend-color4 []
+        $sxml:var-ref name=blend-color5 []
       ]
-      $set2 [ $sxml:var-ref name=blend-color6 $sxml:var-ref name=blend-color9 ]
+      $set2 [
+        $sxml:var-ref name=blend-color6 [] $sxml:var-ref name=blend-color9 []
+      ]
     ]
     EOTXT
 
@@ -63,7 +65,7 @@ subtest 'generated blended color variables 2', {
   my $text = q:to/EOTXT/;
     $html [
       $!Colors.palette outspec=rgbhex base-rgb='#1200ffff'
-                       type=blended mode=hard
+                       type=blended mode=hard []
       $head [
         $style [
           color: $sxml:var-ref name=base-color [];
@@ -74,7 +76,7 @@ subtest 'generated blended color variables 2', {
       $body [
         $h1 id=h1001 [ Introduction ]
         $p [ $strong [some text]
-          color is thus $set0 [$sxml:var-ref name=blend-color5 []].
+          color is thus $set0 [$sxml:var-ref name=blend-color5 [] ].
         ]
       ]
     ]
@@ -100,14 +102,14 @@ subtest 'generate monochromatic color variables', {
   my $text = q:to/EOTXT/;
     $x [
       $!Colors.palette base-hsl=<0 100 50> type=color-scheme mode=monochromatic
-                       lighten=20 ncolors=6 outspec=hsl set-name=mono
+                       lighten=20 ncolors=6 outspec=hsl set-name=mono []
       $set1 [
-        $sxml:var-ref name=mono-scheme-color1
-        $sxml:var-ref name=mono-scheme-color2
-        $sxml:var-ref name=mono-scheme-color3
-        $sxml:var-ref name=mono-scheme-color4
-        $sxml:var-ref name=mono-scheme-color5
-        $sxml:var-ref name=mono-scheme-color6
+        $sxml:var-ref name=mono-scheme-color1 []
+        $sxml:var-ref name=mono-scheme-color2 []
+        $sxml:var-ref name=mono-scheme-color3 []
+        $sxml:var-ref name=mono-scheme-color4 []
+        $sxml:var-ref name=mono-scheme-color5 []
+        $sxml:var-ref name=mono-scheme-color6 []
       ]
     ]
     EOTXT
@@ -139,7 +141,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 
   # See the result
   my Str $xml-text = ~$x;
-  diag $xml-text;
+  #diag $xml-text;
 
   XML::XPath.new(:xml($xml-text))
 }
