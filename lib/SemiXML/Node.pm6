@@ -66,25 +66,25 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
-  method remove ( --> SemiXML::Node ) {
-
-    $!parent.remove-child(self) if $!parent;
-    return self
-  }
-
-  #-----------------------------------------------------------------------------
+  # set the parent of this element
   method reparent ( SemiXML::Node $parent --> SemiXML::Node ) {
 
-#note "Repar 0: $parent.name(), $!name";
-#note "Repar 1: $!parent";
-    #self.remove;
-    $!parent.remove-child(self);
-
+    self.remove;
     $!parent = $parent;
     return self
   }
 
   #-----------------------------------------------------------------------------
+  # remove a child element from the node list
+  method remove ( --> SemiXML::Node ) {
+
+    # remove if it has a parent
+    $!parent.remove-child(self) if $!parent;
+    return self
+  }
+
+  #-----------------------------------------------------------------------------
+  # remove a node from node list
   method remove-child ( SemiXML::Node $node ) {
 
     my $pos = self.index-of($node);
@@ -125,22 +125,16 @@ role Node {
 
   #-----------------------------------------------------------------------------
   multi method before ( SemiXML::Node $node, SemiXML::Node $new, :$offset=0 ) {
-#note "Before: $!name, $node.name(), $new.name()\n$new";
 
     my Int $pos = self.index-of($node);
-#note "Before pos of node: $pos";
     $!nodes.splice( $pos + $offset, 0, $new.reparent(self))
-      if $pos.defined and $pos >= 0 and ($pos + $offset) < $!nodes.elems;
+      if $pos.defined and $pos >= 0 and ($pos + $offset) <= $!nodes.elems;
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method before ( SemiXML::Node $node ) {
 
-    if $!parent.defined {
-#      $node.parent(self) unless $node.parent;
-      $!parent.before( self, $node);
-#note "after before:\n$!parent";
-    }
+    $!parent.before( self, $node) if $!parent.defined
   }
 
   #-----------------------------------------------------------------------------
@@ -152,9 +146,7 @@ role Node {
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method after ( SemiXML::Node $node ) {
 
-    if $!parent.defined {
-      $!parent.after( self, $node);
-    }
+    $!parent.after( self, $node) if $!parent.defined;
   }
 
   #-----------------------------------------------------------------------------
