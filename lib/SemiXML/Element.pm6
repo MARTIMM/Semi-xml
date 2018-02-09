@@ -135,7 +135,10 @@ class Element does SemiXML::Node {
 #TODO move into separate module and use with 'handles'
   # a more simple append is in the Node module. this method can not be defined
   # there because of the need of Text module.
-  multi method append ( Str $name?, Hash $attributes = {}, Str :$text ) {
+  multi method append (
+    Str $name?, Hash $attributes = {}, Str :$text
+    --> SemiXML::Node
+  ) {
 
     # create a text element, even when it is an empty string.
     my SemiXML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
@@ -160,6 +163,8 @@ class Element does SemiXML::Node {
     # add the node when not found and set the parent in the node
     $!nodes.push($node);
     $node.parent(self);
+
+    $node
   }
 
   #-----------------------------------------------------------------------------
@@ -358,4 +363,18 @@ class Element does SemiXML::Node {
 
     $object
   }
+
+#`{{
+  #-----------------------------------------------------------------------------
+  # $element<<text>> is like $element.append(SemiXML::Text.new('text'))
+  multi sub postcircumfix:<( )>(
+  SemiXML::Element:D $element, Str:D $text
+  #  --> SemiXML::Text
+  ) {
+
+    note "« »: $element.name(), $text";
+    #  $element.append(SemiXML::Text.new(:$text));
+    #  $element.nodes[*-1];
+  }
+}}
 }
