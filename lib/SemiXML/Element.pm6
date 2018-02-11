@@ -17,21 +17,35 @@ class Element does SemiXML::Node {
     Str:D :$!name!, SemiXML::Node :$parent, Hash :$!attributes = {}
   ) {
 
-    # set node type
-    given $!name {
-      when 'sxml:cdata'   { $!node-type = SemiXML::CData; }
-      when 'sxml:pi'      { $!node-type = SemiXML::PI; }
-      when 'sxml:comment' { $!node-type = SemiXML::Comment; }
-      default             { $!node-type = SemiXML::Plain; }
-    }
-
-    # init the rest
+    # init
     $!globals .= instance;
     $!nodes = [];
     $!inline = False;
     $!noconv = False;
     $!keep = False;
     $!close = False;
+
+    # set node type and modify for special nodes
+    given $!name {
+      when 'sxml:cdata' {
+        $!node-type = SemiXML::CData;
+        $!keep = $!noconv = True;
+      }
+
+      when 'sxml:pi' {
+        $!node-type = SemiXML::PI;
+        $!keep = $!noconv = True;
+      }
+
+      when 'sxml:comment' {
+        $!node-type = SemiXML::Comment;
+        $!keep = True;
+      }
+
+      default {
+        $!node-type = SemiXML::Plain;
+      }
+    }
 
     # connect to parent, root doesn't have a parent
     $parent.append(self) if ?$parent;
@@ -168,24 +182,33 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method xml ( XML::Node $parent ) {
+  #method xml ( XML::Node $parent ) {
+  method xml ( --> Str ) {
+
+    my Str $xml-text = '';
     given $!node-type {
       when any( SemiXML::Fragment, SemiXML::Plain) {
-        self!plain-xml($parent);
+#        self!plain-xml($parent);
+        $xml-text ~= self!plain-xml;
       }
 
       when SemiXML::CData {
-        self!cdata-xml($parent);
+#        self!cdata-xml($parent);
+        $xml-text ~= self!cdata-xml;
       }
 
       when SemiXML::PI {
-        self!pi-xml($parent);
+#        self!pi-xml($parent);
+        $xml-text ~= self!pi-xml;
       }
 
       when SemiXML::Comment {
-        self!comment-xml($parent);
+#        self!comment-xml($parent);
+        $xml-text ~= self!comment-xml;
       }
     }
+
+    $xml-text
   }
 
   #-----------------------------------------------------------------------------
@@ -267,6 +290,100 @@ class Element does SemiXML::Node {
 
   #----[ private stuff ]--------------------------------------------------------
   # normal node
+  method !plain-xml ( --> Str ) {
+
+    # return when we encounter an sxml namespace node. these are not translated
+    # except for the top fragment node
+    return '' if $!name ~~ m/^ sxml ':' /
+              and $!name ne 'sxml:fragment'
+              and !$!globals.raw;
+
+    # xml name and attributes
+    my Str $xml-text = "<$!name";
+    for $!attributes.keys.sort -> $key {
+
+      # filter out sxml namespace attributes
+      next if $key ~~ m/^ sxml ':' / and !$!globals.raw;
+
+      # get value and convert doube quotes
+      my Str $value = $!attributes{$key}.Str;
+      $value ~~ s:g/ '"' /\&quot/;
+      $xml-text ~= Q:qq| $key="$value"|;
+    }
+
+#note "Close: $!name, $!close";
+    # check if self closing
+    if $!close {
+      $xml-text ~= '/>';
+    }
+
+    else {
+      $xml-text ~= '>';
+
+      for @$!nodes -> $node {
+        $xml-text ~= $node.xml;
+      }
+
+      $xml-text ~= "</$!name>";
+    }
+
+    $xml-text
+  }
+
+  #-----------------------------------------------------------------------------
+  # comment node
+#TODO things go wrong when comments are nested
+  method !comment-xml ( --> Str ) {
+
+    my Str $xml-text = '<!--';
+    for @$!nodes -> $node {
+      $xml-text ~= $node.xml;
+    }
+
+    $xml-text ~= '-->'
+  }
+
+  #-----------------------------------------------------------------------------
+  # CData node
+  method !cdata-xml ( --> Str ) {
+
+    my Str $xml-text = '<![CDATA[';
+    for @$!nodes -> $node {
+      $xml-text ~= $node.xml;
+    }
+
+    $xml-text ~= ']]>'
+  }
+
+  #-----------------------------------------------------------------------------
+  # PI node
+  method !pi-xml ( --> Str ) {
+
+    my Str $target = ($!attributes<target> // 'no-target').Str;
+    my Str $xml-text = "<?$target";
+    for $!attributes.keys.sort -> $key {
+      # filter out sxml namespace attributes
+      next if $key ~~ m/^ sxml ':' / and !$!globals.raw;
+
+      my Str $value = $!attributes{$key}.Str;
+      $value ~~ s:g/ '"' /\&quot/;
+      $xml-text ~= Q:qq| $key="$value"|;
+    }
+
+    if $!nodes.elems {
+      $xml-text ~= "\n";
+      for @$!nodes -> $node {
+        $xml-text ~= $node.xml;
+      }
+      $xml-text ~= "\n";
+    }
+
+    $xml-text ~= '?>'
+  }
+
+#`{{
+  #-----------------------------------------------------------------------------
+  # normal node
   method !plain-xml ( XML::Node $parent ) {
 
 #note "$!node-type, $!body-number, $!name";
@@ -326,6 +443,7 @@ class Element does SemiXML::Node {
 
     $parent.append($c);
   }
+}}
 
   #-----------------------------------------------------------------------------
   method !copy-nodes ( $parent ) {

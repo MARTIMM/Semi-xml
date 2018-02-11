@@ -194,8 +194,13 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-  method get-xml-text ( :$other-document --> Str ) {
+  #method get-xml-text ( :$other-document --> Str ) {
+  method get-xml-text ( --> Str ) {
 
+    my Str $xml-text = $!actions.xml-text;
+    my Str $root-element = $!actions.root.name;
+
+#`{{
     # Get the top element name
     my $root-element;
     if ?$other-document {
@@ -210,6 +215,8 @@ class Sxml {
 
     # remove namespace part from root element
     $root-element ~~ s/^(<-[:]>+\:)//;
+}}
+
 
     my Str $document = '';
 
@@ -217,6 +224,7 @@ class Sxml {
     if ?$root-element {
 
       # Check if a http header must be shown
+      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
       if $!refined-tables<C><header-show> and ? $!refined-tables<H> {
         for $!refined-tables<H>.kv -> $k, $v {
           $document ~= "$k: $v\n";
@@ -247,13 +255,15 @@ class Sxml {
         }
         $document ~= "$end\n";
       }
-
+#`{{
       $document ~= ?$other-document
                       ?? $other-document.root
                       !! $!actions.get-document.root;
+}}
+      $document ~= $xml-text;
     }
 
-    return $document;
+    $document
   }
 
   #-----------------------------------------------------------------------------

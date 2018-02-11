@@ -19,14 +19,16 @@ class Actions {
 
   # the root should only have one element. when there are more, convert
   # the result into a fragment.
-  has SemiXML::Element $!root;
+  has SemiXML::Element $.root;
 
   # array of element showing the path to the currently parsed element. therefore
   # an element in the array will always be the parent of the one next to it.
   has Array $!elements;
   has Int $!element-idx;
 
-  has XML::Document $!document;
+#  has XML::Document $!document;
+
+  has Str $.xml-text;
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( ) {
@@ -39,9 +41,13 @@ class Actions {
 
     # initialize root node and place in the array. this node will never be
     # overwritten.
-    $!root .= new(:name<sxml:fragment>);
+    $!root .= new(
+      :name<sxml:fragment>,
+      :attributes({'xmlns:sxml' => 'https://github.com/MARTIMM/Semi-xml'})
+    );
     $!elements = [$!root];
     $!element-idx = 1;
+    $!xml-text = '';
 
 #note "\nAt the end of parsing";
     # process the result tree
@@ -54,43 +60,43 @@ class Actions {
     # Don't generate the xml stuff when only the tree is requested later
     unless $!globals.tree {
       # convert non-method nodes into XML
-      my XML::Element $root-xml .= new(:name($!root.name));
+      #my XML::Element $root-xml .= new(:name($!root.name));
 #note "NTop 0: $root-xml";
-      $root-xml.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
-      for $!root.nodes -> $node {
-        $node.xml($root-xml);
-      }
+      #$root-xml.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
+      #for $!root.nodes -> $node {
+      #  $node.xml($root-xml);
+      #}
 #note "NTop 1: $root-xml, $!globals.raw()";
+
+#      $!document = from-xml($!xml-text);
+#      my XML::Element $root-xml = $!document.root;
 
 
       unless $!globals.raw {
-#note "NTop 2a: $root-xml";
-        self!subst-variables($root-xml);
-#note "NTop 2b: $root-xml";
-  #      self!remap-content($root-xml);
-#note "NTop 2c: $root-xml";
+#        self!subst-variables($root-xml);
+#        self!remap-content($root-xml);
 
         # remove all tags from the sxml namespace.
-        self!remove-sxml-namespace($root-xml);
+        #self!remove-sxml-namespace($!root);
 #note "NTop 2d: $root-xml";
       }
 
-      if $root-xml.nodes.elems == 0 {
-#note "0 elements";
-        $!document .= new($root-xml);
+      if $!root.nodes.elems == 0 {
+note "0 elements";
+        $!xml-text = $!root.xml;
       }
 
-      elsif $root-xml.nodes.elems == 1 {
-#note "1 element";
-        self!set-namespaces($root-xml.nodes[0]);
-        $!document .= new($root-xml.nodes[0]);
+      elsif $!root.nodes.elems == 1 {
+note "1 element";
+        self!set-namespaces($!root.nodes[0]);
+        $!xml-text = $!root.nodes[0].xml;
       }
 
-      elsif $root-xml.nodes.elems > 1 {
-#note "more than 1 element";
+      elsif $!root.nodes.elems > 1 {
+note "more than 1 element";
         if $!globals.frag {
-          self!set-namespaces($root-xml);
-          $!document .= new($root-xml);
+          self!set-namespaces($!root.nodes[0]);
+          $!xml-text = $!root.xml;
         }
 
         else {
@@ -102,15 +108,19 @@ class Actions {
         }
       }
     }
+
+note "NTop 3: $!xml-text";
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   # get the result document
   method get-document ( --> XML::Document ) {
 
     #$!document.new(XML::Element.new(:name<root>));
-    $!document
+    #$!document
   }
+}}
 
   #-----------------------------------------------------------------------------
   # get the result sxml
@@ -515,36 +525,41 @@ note "GST Root: ", $sxml-tree.perl(:simple);
 
   #-----------------------------------------------------------------------------
   # set namespaces on the element
-  method !set-namespaces ( XML::Element $element ) {
+  method !set-namespaces ( SemiXML::Element $element ) {
 
     # add namespaces xmlns
-    my Str $refIn = $!globals.refine[0];
-    if $!globals.refined-tables<FN><$refIn>:exists {
-      for $!globals.refined-tables<FN><$refIn>.keys -> $ns {
-        $element.set(
-          $ns eq 'default' ?? 'xmlns' !! "xmlns:$ns",
-          $!globals.refined-tables<FN><$refIn>{$ns}
-        );
+    my Hash $refIn = $!globals.refined-tables<DN> // {};
+
+    for $refIn.keys -> $ns {
+      if $ns eq 'default' {
+        $element.attributes<xmlns> = $refIn{$ns};
+      }
+
+      else {
+        $element.attributes<xmlns:$ns> = $refIn{$ns};
       }
     }
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   # remove leftover elements and attributes from SemiXML namespace
-  method !remove-sxml-namespace ( XML::Node $node ) {
-    my SemiXML::Globals $globals .= instance;
+  method !remove-sxml-namespace ( SemiXML::Node $node ) {
 
-    if $node ~~ XML::Element {
-      if $node.name ne 'sxml:fragment' {
+    unless $node ~~ SemiXML::Text {
+
+      # remove nodes from the sxml namespace except for the fragment node
+      unless $node.name ~~ any(<sxml:fragment sxml:comment sxml:cdata {
         if $node.name ~~ m/^ sxml \: / {
           $node.remove;
           return;
         }
 
         else {
-          for $node.attribs.keys -> $k {
-            $node.unset($k) if $k ~~ m/^ sxml \: /;
-            $node.unset($k) if $k ~~ m/^ xmlns \: sxml /;
+          # check the node for any sxml namespace attributes and reove them
+          for $node.attributes.keys -> $k {
+            $node.attributes{$k}:delete if $k ~~ m/^ sxml \: /;
+            $node.attributes{$k}:delete if $k ~~ m/^ xmlns \: sxml /;
           }
         }
       }
@@ -552,6 +567,7 @@ note "GST Root: ", $sxml-tree.perl(:simple);
       self!remove-sxml-namespace($_) for $node.nodes;
     }
 
-    # else is text node without any attribute which gets displayed
+    # else is text node of which no attributes gets displayed
   }
+}}
 }

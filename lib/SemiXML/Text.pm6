@@ -42,7 +42,8 @@ class Text does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method xml ( XML::Node $parent ) {
+  #method xml ( XML::Node $parent ) {
+  method xml ( --> Str ) {
 
     my Str $t;
 #$t = $!text;
@@ -183,8 +184,10 @@ class Text does SemiXML::Node {
 #$t ~~ s:g/\n/\\n/;
 #note "$!node-type ==>> '$t'";
 
-    $!text = $text;
-    $parent.append(SemiXML::XMLText.new(:$text));
+#  $!text = $text;
+#$parent.append(SemiXML::XMLText.new(:$text));
+
+    $text
   }
 
   #-----------------------------------------------------------------------------
