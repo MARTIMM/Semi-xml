@@ -5,4 +5,14 @@ $a [ abc # def
     # jhgjhg jghsdjhf
     675
   ]
+
+  $!SxmlCore.var-decl name='abc' [$h1 [test 1]]
+  $c =sxml:keep [
+    $!SxmlCore.date year=1957 []
+    $sxml:var-ref name='abc' []
+  ]
+]
+
+$b [
+  bdf fgd $a x=1 =!t []
 ]
