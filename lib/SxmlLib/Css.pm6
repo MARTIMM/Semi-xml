@@ -5,18 +5,15 @@ unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
 use SemiXML::Text;
-use SemiXML::Helper;
-use XML;
+#use SemiXML::Helper;
+#use XML;
 
 #-------------------------------------------------------------------------------
 # Core module with common used methods
 class Css {
 
   #-----------------------------------------------------------------------------
-  method style (
-    XML::Element $parent, Hash $attrs, XML::Node :$content-body
-    --> XML::Node
-  ) {
+  method style ( SemiXML::Element $m --> Array ) {
 
     # put everything into a style variable to prevent any escape substitutions
 #`{{
@@ -29,25 +26,21 @@ class Css {
 
     # because of this a style can be placed anywhere in the document and then
     # it will be remapped to the end of the head.
-    my XML::Element $remap-style;
+    my SemiXML::Element $remap-style;
     my Bool $map = ($attrs<map>//1).Int.Bool;
     if $map {
-      $remap-style = append-element(
-        $parent, 'sxml:remap', { map-to => "/html/head",}
-      );
+      $remap-style .= new( :name<sxml:remap>, { map-to => "/html/head",});
     }
 
     else {
-      $remap-style := $parent;
+      $remap-style := $m;
     }
 
-    my XML::Element $style = append-element(
-      $remap-style, 'style', :text("\n")
-    );
+    my XML::Element $style .= new( 'style', :text("\n"), :parent($remap-style));
 
-    drop-parent-container($content-body);
+#    drop-parent-container($content-body);
 #note "\nContent0 $content-body";
-    subst-variables($content-body);
+#    subst-variables($content-body);
 #note "\nContent1 $content-body";
 
     self!css-blocks( $style, $content-body, '', ? ($attrs<compress>//0).Int);
