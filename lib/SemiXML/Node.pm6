@@ -197,6 +197,11 @@ role Node {
     self!process-attributes;
   }
 
+  #-----------------------------------------------------------------------------
+  method search ( Str:D $find-node, Hash :$option --> SemiXML::Node ) {
+
+  }
+
   #----[ private stuff ]--------------------------------------------------------
   # process the text processing control parameters and set sxml attributes
   # of the node. This is done for elements as well as text nodes.
