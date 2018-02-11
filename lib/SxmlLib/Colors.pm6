@@ -136,8 +136,6 @@ note "X: $m.attributes.perl()";
       my Str $name = [~] (?$set-name ?? "$set-name-" !! ''),
                      $oper-name, '-', $color-name, $color-count++;
 
-#TODO is $e[text], $e{text} or $e«text» possible?
-#     or $e« A, text»
       my SemiXML::Element $e .= new(
         :name<sxml:var-decl>, :attributes({:$name,:noconv})
       );
@@ -146,7 +144,6 @@ note "X: $m.attributes.perl()";
         :text(self!output-spec( $color, $output-spec))
       );
 
-#      $t.body-type = SemiXML::BodyC;
       $e.append($t);
       $element-array.push: $e;
     }
