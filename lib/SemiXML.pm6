@@ -7,6 +7,22 @@ package SemiXML:auth<github:MARTIMM> {
   enum NodeType <Fragment Plain NText Method CData PI Comment>;
   enum BodyType <BodyA BodyB BodyC>;
 
+  # Root      /x        only at start
+  # RootDesc  //x       idem
+  # Desc      x//y      relative to current node
+  # Child     x         idem
+  # Parent    ..
+  # Current   .
+  # Attr      x[@a=v]   use pair
+  #           x/@a      use pair, true/false value for key test only
+  # Text      x/text()
+  # Item      x[1]      first item of list of nodes
+  enum SCode <
+    SCRoot SCChild SCDesc SCRootDesc SCParent
+    SCAttr SCText
+    SCItem
+  >;
+
   #-----------------------------------------------------------------------------
   class Globals {
 

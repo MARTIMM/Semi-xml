@@ -1,6 +1,7 @@
 use v6;
 use Test;
 
+use SemiXML;
 use SemiXML::Node;
 use SemiXML::Element;
 
@@ -94,6 +95,160 @@ subtest 'text, perl, str, append text', {
 #  is $ep.nodes[*-1], $t, 'returned text node found in nodes list';
 #  is $ep.nodes[*-1].name, 'sxml:TNdefghi',
 #     "text node $ep.nodes[*-1].name() appended";
+}
+
+#--------------------------------------------------------------------------
+subtest 'search simple', {
+
+  =begin comment
+  structure created
+  +-sxml:fragment
+    +-ep
+      +-e1
+      +-e2
+      | +-e4
+      | | +-e1
+      | +-e4
+      +-e3
+  =end comment
+
+  my SemiXML::Element $root .= new(
+      :name<sxml:fragment>,
+      :attributes({'xmlns:sxml' => 'https://github.com/MARTIMM/Semi-xml'})
+    );
+
+  my SemiXML::Element $ep = $root.append('ep');
+  my SemiXML::Element $e1 = $ep.append('e1');
+  my SemiXML::Element $e2 = $ep.append('e2');
+  my $e4 = $e2.append('e4');
+  $e4.append('e1');
+  $e2.append('e4');
+  $ep.append('e3');
+
+  my Array $r = $e2.search( SemiXML::SCChild, 'e4');
+  is $r.elems, 2, 'two e4 elements found on e2';
+
+  $r = $ep.search( SemiXML::SCChild, '*');
+  is $r.elems, 3, 'three elements found with * on ep';
+
+  $r = $e2.search( SemiXML::SCChild, 'e2');
+  is $r.elems, 0, 'no e2 element on e2';
+
+  $r = $e2.search( SemiXML::SCParent, 'e2');
+  is $r.elems, 1, 'one e2 element on parent of e2';
+
+  $r = $e2.search( SemiXML::SCChild, 'ep');
+  is $r.elems, 0, 'ep element not found';
+
+  $r = $e2.search( SemiXML::SCRoot, 'ep');
+  is $r.elems, 1, 'one ep element found from root';
+}
+
+#--------------------------------------------------------------------------
+subtest 'search complex 1', {
+
+  =begin comment
+  structure created
+  +-sxml:fragment
+    +-ep
+      +-e1
+      | +-e5
+      | +-e2
+      +-e2
+      | +-e4
+      | | +-e1
+      | +-e4
+      | +-e4
+      +-e3
+  =end comment
+
+  my SemiXML::Element $root .= new(
+      :name<sxml:fragment>,
+      :attributes({'xmlns:sxml' => 'https://github.com/MARTIMM/Semi-xml'})
+    );
+
+  my SemiXML::Element $ep = $root.append('ep');
+  my SemiXML::Element $e1 = $ep.append('e1');
+  $e1.append('e5');
+  $e1.append('e2');
+  my SemiXML::Element $e2 = $ep.append('e2');
+  my $e4 = $e2.append('e4');
+  $e4.append('e1');
+  $e2.append('e4');
+  $e2.append('e4');
+  $ep.append('e3');
+
+  my Array $r = $e2.search( [ SemiXML::SCChild, 'e4']);
+  is $r.elems, 3, 'three e4 elements found on e2';
+
+  $r = $e2.search( [ SemiXML::SCRoot, 'e5']);
+  is $r.elems, 0, 'no e5 elements found on root';
+
+  $r = $e2.search( [ SemiXML::SCRootDesc, 'e5']);
+  is $r.elems, 1, 'one e5 element found below root';
+
+  $r = $ep.search( [ SemiXML::SCDesc, 'e2']);
+  is $r.elems, 2, 'two e2 elements found below ep';
+
+  # .//e2/*
+  $r = $ep.search( [
+      SemiXML::SCDesc,      'e2',
+      SemiXML::SCChild,     '*'
+    ]
+  );
+  is $r.elems, 3, '3 elements .//e2/* on ep';
+
+  $r = $e4.search( [
+      SemiXML::SCRootDesc,  'e2',
+      SemiXML::SCChild,     '*'
+    ]
+  );
+  is $r.elems, 3, '3 elements //e2/* on e4';
+
+  $r = $e4.search( [
+      SemiXML::SCRoot,      'ep',
+      SemiXML::SCChild,     'e1',
+      SemiXML::SCChild,     'e5'
+    ]
+  );
+  is $r.elems, 1, '1 element /ep/e1/e5 on e4';
+  is $r[0].name, 'e5', 'name of node is e5';
+
+  $r = $e4.search( [
+      SemiXML::SCRoot,      '*',
+      SemiXML::SCChild,     'e2',
+    ]
+  );
+  is $r.elems, 1, '1 element /*/e2 on e4';
+}
+
+#--------------------------------------------------------------------------
+subtest 'search complex 2', {
+
+  =begin comment
+  structure created
+  +-sxml:fragment
+    +-ep
+      +-e1
+      | +-t1
+      +-e2
+      | +-t2
+      +-e3
+  =end comment
+
+  my SemiXML::Element $root .= new(
+      :name<sxml:fragment>,
+      :attributes({'xmlns:sxml' => 'https://github.com/MARTIMM/Semi-xml'})
+    );
+
+  my SemiXML::Element $ep = $root.append('ep');
+  my SemiXML::Element $e1 = $ep.append( 'e1', :text('text 1'));
+  my SemiXML::Element $e2 = $ep.append( 'e2', :text('text 2'));
+  $ep.append('e3');
+
+#  my Array $r = $e2.search( [ SemiXML::SCText, '']);
+#  is $r.elems, 1, '1 text element found on e2';
+#  is $r[0], 'text 1', 'text is correct';
 }
 
 #--------------------------------------------------------------------------

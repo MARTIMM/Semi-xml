@@ -4,7 +4,6 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
-use XML;
 
 #-------------------------------------------------------------------------------
 role Node {
@@ -198,8 +197,93 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
-  method search ( Str:D $find-node, Hash :$option --> SemiXML::Node ) {
+  multi method search (
+    SemiXML::SCode $oper, Str:D $find-node
+    --> Array
+  ) {
 
+    my Array $search-results = [];
+
+    # find out if search relative to node or from top
+    my SemiXML::Node $start-node;
+
+    if $oper ~~ any( SemiXML::SCRoot, SemiXML::SCRootDesc) {
+      my SemiXML::Node $parent;
+      my $node = self;
+      while ($parent = $node.parent).defined {
+        $node = $parent;
+      }
+
+      $start-node = $node;
+    }
+
+    elsif $oper ~~ SemiXML::SCChild {
+      $start-node = self;
+    }
+
+    elsif $oper ~~ SemiXML::SCParent {
+      $start-node = $!parent // self;
+    }
+
+    elsif $oper ~~ SemiXML::SCDesc {
+      $start-node = self;
+    }
+
+    # define handler
+    my $handler = sub ( SemiXML::Node $node ) {
+
+      my Bool $continue = True;
+      if $node.node-type ~~ SemiXML::Plain {
+        if $find-node eq '*' {
+          $search-results.push($node);
+        }
+
+        elsif $node.name eq $find-node {
+#note "SN: $node.name(), ", $node.parent.name;
+          $search-results.push($node);
+        }
+      }
+    }
+
+    # loop through the nodes and select what is needed
+    my Bool $recurse = $oper ~~ any( SemiXML::SCRootDesc, SemiXML::SCDesc);
+    self.process-nodes( $start-node, $handler, :$recurse);
+
+    $search-results
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method search ( Array:D $search --> Array ) {
+
+    my Array $search-results = [];
+    my Array $srlts = [self];
+
+    for @$search -> SemiXML::SCode $oper, Str $find-node {
+      my Array $ss = $srlts;
+      $srlts = [];
+      for @$ss -> $s {
+        $srlts.push($_) for @($s.search( $oper, $find-node));
+      }
+    }
+
+    $search-results = $srlts
+  }
+
+  #-----------------------------------------------------------------------------
+  method process-nodes (
+    SemiXML::Node $node, Code $handler, Bool :$recurse = False
+  ) {
+
+    # breath first
+    for $node.nodes -> $n {
+      $handler($n);
+    }
+
+    if $recurse {
+      for $node.nodes -> $n {
+        self.process-nodes( $n, $handler, :$recurse);
+      }
+    }
   }
 
   #----[ private stuff ]--------------------------------------------------------
