@@ -12,6 +12,10 @@ use XML;
 #-------------------------------------------------------------------------------
 class Text does SemiXML::Node {
 
+  # name counter is used to generate the name for the text node. this
+  # must be global to the objects of this class
+  my Int $name-counter;
+
   has Str $.text;
 
   #-----------------------------------------------------------------------------
@@ -19,26 +23,36 @@ class Text does SemiXML::Node {
 
     # set node type
     $!node-type = SemiXML::NText;
-    $!nodes = [];
 
     # init rest
     $!globals .= instance;
+
+    # default settings
     $!inline = False;
     $!noconv = False;
     $!keep = False;
     $!close = False;
 
-    # create a fake name for text
+    # there is no node name for text but here we create a fake name
+    # for at most 22 characters starting with 'sxml:TN-' and ending in a
+    # hex number. E.g. a node with text "that's me here" and a counter of
+    # 200, the name becomes 'sxml:TN-thatsmeher-0C8'
+    $name-counter //= 1;
     $!name = $!text;
     $!name ~~ s:g/<punct>//;
     $!name ~~ s:g/\s+//;
     $!name = 'empty' unless ?$!name;
-    $!name = 'sxml:TN' ~ $!name.substr( 0, 40);
+    $!name = [~] 'sxml:TN-', $!name.substr( 0, 10), '-',
+                 $name-counter.fmt('%03X');
+    $name-counter++;
 
-    # connect to parent, root doesn't have a parent
+    # text does not have children but nodes must be initialized
+    $!nodes = [];
+
+    # connect to parent. text should always have a parent!
     $parent.append(self) if ?$parent;
 
-    # set sxml attributes. these are removed later
+    # set sxml attributes
     self!process-attributes;
   }
 
@@ -203,6 +217,6 @@ class Text does SemiXML::Node {
     my Str $text = $!text;
     $text ~~ s:g/ \n /\\n/;
 
-    $!name ~ ' ' ~ $text
+    "$!name '{$text.substr(0.54)} ...'"
   }
 }
