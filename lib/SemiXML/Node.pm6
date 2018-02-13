@@ -197,6 +197,7 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
+  # search xpath like https://www.w3.org/TR/xpath-3/
   multi method search (
     SemiXML::SCode $oper, Str:D $find-node
     --> Array
@@ -217,37 +218,64 @@ role Node {
       $start-node = $node;
     }
 
-    elsif $oper ~~ SemiXML::SCChild {
+    elsif $oper ~~ any( SemiXML::SCChild, SemiXML::SCDesc,
+                        SemiXML::SCAttr, SemiXML::SCItem) {
       $start-node = self;
     }
 
-    elsif $oper ~~ SemiXML::SCParent {
+    elsif $oper ~~ any( SemiXML::SCParent, SemiXML::SCParentDesc) {
       $start-node = $!parent // self;
-    }
-
-    elsif $oper ~~ SemiXML::SCDesc {
-      $start-node = self;
     }
 
     # define handler
     my $handler = sub ( SemiXML::Node $node ) {
+note "FN: $find-node";
+      given $find-node {
+        when '*' {
+          $search-results.push($node) if $node.node-type ~~ SemiXML::Plain;
+        }
 
-      my Bool $continue = True;
-      if $node.node-type ~~ SemiXML::Plain {
-        if $find-node eq '*' {
+        when 'node()' {
           $search-results.push($node);
         }
 
-        elsif $node.name eq $find-node {
-#note "SN: $node.name(), ", $node.parent.name;
-          $search-results.push($node);
+        when 'text()' {
+          $search-results.push($node) if $node.node-type ~~ SemiXML::NText;
+        }
+
+        when '@*' {
+          # item is now a hash of attributes
+note "\@*: $node.name(), {$node.parent.name}, $node.attributes()";
+          $search-results.push($node.attributes);
+        }
+
+        when /^ '@' $<key>=[\w+] / {
+          my Str $k = $/<key>;
+          my Hash $h = {};
+          for $node.attributes.keys -> $key {
+            $h{$key} = $!attributes{$key} if $key eq $k;
+          }
+          $search-results.push($h);
+        }
+
+        default {
+          $search-results.push($node) if $node.name eq $find-node;
         }
       }
+
+note "SR: ", $search-results;
     }
 
+    # check if we have to go down recursively
+    my Bool $recurse = $oper ~~ any(
+       SemiXML::SCDesc, SemiXML::SCRootDesc, SemiXML::SCParentDesc
+    );
+
+    # check current node for attributes
+    my Bool $attribute = $oper ~~ SemiXML::SCAttr;
+
     # loop through the nodes and select what is needed
-    my Bool $recurse = $oper ~~ any( SemiXML::SCRootDesc, SemiXML::SCDesc);
-    self.process-nodes( $start-node, $handler, :$recurse);
+    self.process-nodes( $start-node, $handler, :$recurse, :$attribute);
 
     $search-results
   }
@@ -255,33 +283,41 @@ role Node {
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method search ( Array:D $search --> Array ) {
 
-    my Array $search-results = [];
-    my Array $srlts = [self];
+    my Array $search-results = [self];
 
     for @$search -> SemiXML::SCode $oper, Str $find-node {
-      my Array $ss = $srlts;
-      $srlts = [];
-      for @$ss -> $s {
-        $srlts.push($_) for @($s.search( $oper, $find-node));
+      my Array $srs = $search-results;
+      $search-results = [];
+      for @$srs -> $sr {
+        $search-results.push($_) for @($sr.search( $oper, $find-node));
       }
     }
 
-    $search-results = $srlts
+    $search-results
   }
 
   #-----------------------------------------------------------------------------
   method process-nodes (
-    SemiXML::Node $node, Code $handler, Bool :$recurse = False
+    SemiXML::Node $node, Code $handler, Bool :$recurse = False,
+    Bool :$attribute = False
   ) {
 
-    # breath first
-    for $node.nodes -> $n {
-      $handler($n);
+    # test attributes on node
+    if $attribute {
+      $handler($node);
     }
 
-    if $recurse {
+    # test nodes on children
+    else {
+      # breath first
       for $node.nodes -> $n {
-        self.process-nodes( $n, $handler, :$recurse);
+        $handler($n);
+      }
+
+      if $recurse {
+        for $node.nodes -> $n {
+          self.process-nodes( $n, $handler, :$recurse);
+        }
       }
     }
   }

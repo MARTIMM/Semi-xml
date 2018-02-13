@@ -14,12 +14,11 @@ package SemiXML:auth<github:MARTIMM> {
   # Parent    ..
   # Current   .
   # Attr      x[@a=v]   use pair
-  #           x/@a      use pair, true/false value for key test only
-  # Text      x/text()
+  #           x/@a      use str
   # Item      x[1]      first item of list of nodes
   enum SCode <
-    SCRoot SCChild SCDesc SCRootDesc SCParent
-    SCAttr SCText
+    SCRoot SCChild SCDesc SCRootDesc SCParent SCParentDesc
+    SCAttr
     SCItem
   >;
 

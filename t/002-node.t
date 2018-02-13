@@ -78,8 +78,9 @@ subtest 'text, perl, str, append text', {
   );
 
   is ~$ect1, "hoeperde poep\nzat op de stoep", 'text is the same as input';
-  is $ect1.name, 'sxml:TNhoeperdepoepzatopdestoep', 'text node name';
-  is $ect1.perl, 'sxml:TNhoeperdepoepzatopdestoep hoeperde poep\nzat op de stoep', 'perl output';
+  is $ect1.name, 'sxml:TN-hoeperdepo-001', 'text node name';
+  is $ect1.perl, "sxml:TN-hoeperdepo-001 'hoeperde poep\\nzat op de stoep ...'",
+                 'perl output';
 
   is $ep.nodes[0], $ect1, "text child found";
 
@@ -88,7 +89,7 @@ subtest 'text, perl, str, append text', {
 
   my SemiXML::Node $txt = $ep.append(:text<abc>);
   is $ep.nodes[2], $txt, 'txt is 3rd child, append';
-  is $ep.nodes[2].name, 'sxml:TNabc', 'name is TNabc';
+  is $ep.nodes[2].name, 'sxml:TN-abc-002', "name is '{$ep.nodes[2].name}'";
 
 #  my SemiXML::Text $t = $ep«def ghi»;
 #  $ep('def ghi');
@@ -230,6 +231,7 @@ subtest 'search complex 2', {
   +-sxml:fragment
     +-ep
       +-e1
+      | +-e10
       | +-t1
       +-e2
       | +-t2
@@ -243,12 +245,66 @@ subtest 'search complex 2', {
 
   my SemiXML::Element $ep = $root.append('ep');
   my SemiXML::Element $e1 = $ep.append( 'e1', :text('text 1'));
+  $e1.append('e10');
   my SemiXML::Element $e2 = $ep.append( 'e2', :text('text 2'));
   $ep.append('e3');
 
-#  my Array $r = $e2.search( [ SemiXML::SCText, '']);
-#  is $r.elems, 1, '1 text element found on e2';
-#  is $r[0], 'text 1', 'text is correct';
+  my Array $r = $e2.search( [ SemiXML::SCChild, 'text()']);
+  is $r.elems, 1, '1 text element ./text() on e2';
+  is $r[0].text, 'text 2', 'text is correct';
+  is $r[0].name, 'sxml:TN-text2-004', "name is '$r[0].name()'";
+
+  $r = $e2.search( [ SemiXML::SCRootDesc, 'text()']);
+  is $r.elems, 2, '2 text elements //text() on e2';
+
+  $r = $e2.search( [ SemiXML::SCParentDesc, 'text()']);
+  is $r.elems, 2, '2 text elements ..//text() on e2';
+}
+
+#--------------------------------------------------------------------------
+subtest 'search complex 3', {
+
+  =begin comment
+  structure created
+  +-sxml:fragment
+    +-ep
+      +-e1 a=v1
+      | +-e10 a=v2
+      | +-t1
+      +-e2 a=v1 b=v4
+      | +-t2
+      +-e3
+  =end comment
+
+  my SemiXML::Element $root .= new(
+      :name<sxml:fragment>,
+      :attributes({'xmlns:sxml' => 'https://github.com/MARTIMM/Semi-xml'})
+    );
+
+  my SemiXML::Element $ep = $root.append('ep');
+  my SemiXML::Element $e1 = $ep.append(
+    'e1', :text('text 1'), :attributes({:a<v1>})
+  );
+  $e1.append( 'e10', :attributes({:a<v2>}));
+  my SemiXML::Element $e2 = $ep.append(
+    'e2', :text('text 2'), :attributes({ :a<v1>, :b<v4>})
+  );
+  $ep.append('e3');
+
+  my Array $r = $e1.search( [ SemiXML::SCChild, '*']);
+  is $r.elems, 1, '1 element ./* on e1';
+
+  $r = $e1.search( [ SemiXML::SCChild, 'node()']);
+  is $r.elems, 2, '2 elements ./node() on e1';
+
+  $r = $e2.search( [ SemiXML::SCAttr, '@*']);
+  is $r[0].elems, 2, '2 attributes ./@* on e2';
+  is $r[0]<a>, 'v1', 'attribute a = v1';
+  is $r[0]<b>, 'v4', 'attribute b = v4';
+
+  $r = $e1.search( [ SemiXML::SCAttr, '@a']);
+  is $r.elems, 1, '1 attribute ./@a on e1';
+  is $r[0]<a>, 'v1', 'attribute a = v1';
 }
 
 #--------------------------------------------------------------------------

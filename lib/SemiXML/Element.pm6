@@ -150,7 +150,7 @@ class Element does SemiXML::Node {
   # a more simple append is in the Node module. this method can not be defined
   # there because of the need of Text module.
   multi method append (
-    Str $name?, Hash $attributes = {}, Str :$text
+    Str $name?, Hash :$attributes = {}, Str :$text
     --> SemiXML::Node
   ) {
 
