@@ -19,6 +19,7 @@ class Text does SemiXML::Node {
 
     # set node type
     $!node-type = SemiXML::NText;
+    $!nodes = [];
 
     # init rest
     $!globals .= instance;
