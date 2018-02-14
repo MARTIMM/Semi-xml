@@ -4,8 +4,8 @@ use v6;
 package SemiXML:auth<github:MARTIMM> {
 
   #-----------------------------------------------------------------------------
-  enum NodeType <Fragment Plain NText Method CData PI Comment>;
-  enum BodyType <BodyA BodyB BodyC>;
+  enum NodeType <NTFragment NTElement NTText NTMethod NTCData NTPI NTComment>;
+  enum BodyType <BTBodyA BTBodyB BTBodyC>;
 
   # Root      /x        only at start
   # RootDesc  //x       idem

@@ -22,7 +22,7 @@ class Text does SemiXML::Node {
   submethod BUILD ( Str :$!text, SemiXML::Node :$parent ) {
 
     # set node type
-    $!node-type = SemiXML::NText;
+    $!node-type = SemiXML::NTText;
 
     # init rest
     $!globals .= instance;
@@ -127,7 +127,7 @@ class Text does SemiXML::Node {
 
         my SemiXML::Node $ps = self.previousSibling;
         if $ps.defined {
-          if $ps.node-type !~~ SemiXML::NText {
+          if $ps.node-type !~~ SemiXML::NTText {
             $t = ~$ps;
             $text = ' ' ~ $text if $t ~~ m/ \S $/;
           }
@@ -140,7 +140,7 @@ class Text does SemiXML::Node {
 
         my SemiXML::Node $ns = self.nextSibling;
         if $ns.defined {
-          if $ns.node-type !~~ SemiXML::NText {
+          if $ns.node-type !~~ SemiXML::NTText {
             $t = ~$ns;
 
             # if the next sibling is inline or keep, spaces will be inserted
@@ -173,9 +173,9 @@ class Text does SemiXML::Node {
       $text ~~ s:g/ '>' /\&gt;/;
     }
 
-    # remove comments only when in BodyA. the other content bodies
+    # remove comments only when in BTBodyA. the other content bodies
     # are left alone. only remove when not escaped or after &
-#    if $!body-type ~~ SemiXML::BodyA {
+#    if $!body-type ~~ SemiXML::BTBodyA {
 #      $text ~~ s:g/ \s* <!after <[\\\&]>> '#' \N*: $$//;
 #    }
 

@@ -126,7 +126,7 @@ note "X: $m.attributes.perl()";
     my SemiXML::Element $bce .= new(
       :name<sxml:var-decl>, :attributes({:name<base-color>})
     );
-    $bce.body-type = SemiXML::BodyC;
+    $bce.body-type = SemiXML::BTBodyC;
     $bce.append(:text(self!output-spec( $base-color, $output-spec)));
     $element-array.push: $bce;
 

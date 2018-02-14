@@ -28,22 +28,22 @@ class Element does SemiXML::Node {
     # set node type and modify for special nodes
     given $!name {
       when 'sxml:cdata' {
-        $!node-type = SemiXML::CData;
+        $!node-type = SemiXML::NTCData;
         $!keep = $!noconv = True;
       }
 
       when 'sxml:pi' {
-        $!node-type = SemiXML::PI;
+        $!node-type = SemiXML::NTPI;
         $!keep = $!noconv = True;
       }
 
       when 'sxml:comment' {
-        $!node-type = SemiXML::Comment;
+        $!node-type = SemiXML::NTPI;
         $!keep = True;
       }
 
       default {
-        $!node-type = SemiXML::Plain;
+        $!node-type = SemiXML::NTElement;
       }
     }
 
@@ -61,7 +61,7 @@ class Element does SemiXML::Node {
   ) {
 
     # set node type
-    $!node-type = SemiXML::Method;
+    $!node-type = SemiXML::NTMethod;
 
     # init the rest
     $!globals .= instance;
@@ -90,7 +90,7 @@ class Element does SemiXML::Node {
     }
 
     # then check if node is a method node
-    if $!node-type ~~ SemiXML::Method {
+    if $!node-type ~~ SemiXML::NTMethod {
 #note ">> $!node-type, $!body-number, $!module, $!method";
 
       # get the object
@@ -187,22 +187,22 @@ class Element does SemiXML::Node {
 
     my Str $xml-text = '';
     given $!node-type {
-      when any( SemiXML::Fragment, SemiXML::Plain) {
+      when any( SemiXML::NTFragment, SemiXML::NTElement) {
 #        self!plain-xml($parent);
         $xml-text ~= self!plain-xml;
       }
 
-      when SemiXML::CData {
+      when SemiXML::NTCData {
 #        self!cdata-xml($parent);
         $xml-text ~= self!cdata-xml;
       }
 
-      when SemiXML::PI {
+      when SemiXML::NTPI {
 #        self!pi-xml($parent);
         $xml-text ~= self!pi-xml;
       }
 
-      when SemiXML::Comment {
+      when SemiXML::NTPI {
 #        self!comment-xml($parent);
         $xml-text ~= self!comment-xml;
       }
@@ -259,11 +259,11 @@ class Element does SemiXML::Node {
 
       $modifiers ~= '| ';
 
-      $modifiers ~= 'F' if $!node-type ~~ SemiXML::Fragment;
-      $modifiers ~= 'E' if $!node-type ~~ SemiXML::Plain;
-      $modifiers ~= 'D' if $!node-type ~~ SemiXML::CData;
-      $modifiers ~= 'P' if $!node-type ~~ SemiXML::PI;
-      $modifiers ~= 'C' if $!node-type ~~ SemiXML::Comment;
+      $modifiers ~= 'F' if $!node-type ~~ SemiXML::NTFragment;
+      $modifiers ~= 'E' if $!node-type ~~ SemiXML::NTElement;
+      $modifiers ~= 'D' if $!node-type ~~ SemiXML::NTCData;
+      $modifiers ~= 'P' if $!node-type ~~ SemiXML::NTPI;
+      $modifiers ~= 'C' if $!node-type ~~ SemiXML::NTPI;
 
       $modifiers ~= ')';
     }
@@ -274,7 +274,7 @@ class Element does SemiXML::Node {
     }
 
     if $!node-type ~~ any(
-       SemiXML::Plain, SemiXML::CData, SemiXML::PI, SemiXML::Comment
+       SemiXML::NTElement, SemiXML::NTCData, SemiXML::NTPI, SemiXML::NTPI
     ) {
       $e = [~] '$', $!name, $modifiers, $attrs;
     }
