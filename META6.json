@@ -3,14 +3,13 @@
     "Marcel Timmerman"
   ],
   "depends": [
-    "XML", "XML::XPath",
     "Config::TOML",
     "Config::DataLang::Refine",
     "Terminal::ANSIColor",
     "Color"
   ],
   "license": "Artistic-2.0",
-  "description": "Semi xml parser",
+  "description": "Semi XML parser and XML generator",
   "name": "SemiXML",
   "perl": "6",
   "tags": [ "xml"],
@@ -62,5 +61,5 @@
     "google-code-prettify/run_prettify.js"
   ],
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.47.0"
+  "version": "v0.47.2"
 }
