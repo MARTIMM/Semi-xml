@@ -229,7 +229,7 @@ role Node {
 
     # define handler
     my $handler = sub ( SemiXML::Node $node ) {
-note "FN: $find-node";
+#note "FN: $find-node";
       given $find-node {
         when '*' {
           $search-results.push($node) if $node.node-type ~~ SemiXML::Plain;
@@ -245,16 +245,21 @@ note "FN: $find-node";
 
         when '@*' {
           # item is now a hash of attributes
-note "\@*: $node.name(), {$node.parent.name}, $node.attributes()";
-          $search-results.push($node.attributes);
-        }
-
-        when /^ '@' $<key>=[\w+] / {
-          my Str $k = $/<key>;
           my Hash $h = {};
           for $node.attributes.keys -> $key {
-            $h{$key} = $!attributes{$key} if $key eq $k;
+            $h{$key} = $node.attributes{$key};
           }
+          $h{'sxml:node'} = $node;
+          $search-results.push($h);
+        }
+
+        when /^ '@' $<key>=(\w+) / {
+          my Str $k = ~($/.hash<key>);
+          my Hash $h = {};
+          for $node.attributes.keys -> $key {
+            $h{$key} = $node.attributes{$key} if $key eq $k;
+          }
+          $h{'sxml:node'} = $node;
           $search-results.push($h);
         }
 
@@ -263,7 +268,7 @@ note "\@*: $node.name(), {$node.parent.name}, $node.attributes()";
         }
       }
 
-note "SR: ", $search-results;
+#note "SR: ", $search-results;
     }
 
     # check if we have to go down recursively

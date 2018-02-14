@@ -298,13 +298,15 @@ subtest 'search complex 3', {
   is $r.elems, 2, '2 elements ./node() on e1';
 
   $r = $e2.search( [ SemiXML::SCAttr, '@*']);
-  is $r[0].elems, 2, '2 attributes ./@* on e2';
+  is $r[0].elems, 3, '2 + 1 attributes ./@* on e2';
   is $r[0]<a>, 'v1', 'attribute a = v1';
   is $r[0]<b>, 'v4', 'attribute b = v4';
+  is $r[0]<sxml:node>.name, 'e2', 'Name of attributes node is e2';
 
   $r = $e1.search( [ SemiXML::SCAttr, '@a']);
-  is $r.elems, 1, '1 attribute ./@a on e1';
+  is $r[0].elems, 2, '1 + 1 attributes ./@a on e1';
   is $r[0]<a>, 'v1', 'attribute a = v1';
+  is $r[0]<sxml:node>.name, 'e1', 'Name of attributes node is e1';
 }
 
 #--------------------------------------------------------------------------
