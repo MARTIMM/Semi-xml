@@ -9,7 +9,6 @@ subtest 'variables', {
 
   my $text = q:to/EOTXT/;
     $html [
-      #$!SxmlCore.var name=aCommonText [ $strong [Lorem ipsum dolor simet ...] ]
       $sxml:var-decl name=aCommonText [ $strong [Lorem ipsum dolor simet ...] ]
       $body [
         $h1 id=h1001 [ Introduction ]

@@ -1,10 +1,7 @@
 use v6;
-#use lib 'lib';
 
 use Test;
 use SemiXML::Sxml;
-#use SemiXML::Element;
-#use SemiXML::Node;
 use XML::XPath;
 
 #-------------------------------------------------------------------------------
