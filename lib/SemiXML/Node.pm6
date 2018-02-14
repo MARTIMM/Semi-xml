@@ -229,10 +229,10 @@ role Node {
 
     # define handler
     my $handler = sub ( SemiXML::Node $node ) {
-#note "FN: $find-node";
+note "FN: $find-node on $node.name()";
       given $find-node {
         when '*' {
-          $search-results.push($node) if $node.node-type ~~ SemiXML::Plain;
+          $search-results.push($node) if $node.node-type ~~ SemiXML::NTElement;
         }
 
         when 'node()' {
@@ -240,27 +240,23 @@ role Node {
         }
 
         when 'text()' {
-          $search-results.push($node) if $node.node-type ~~ SemiXML::NText;
+          $search-results.push($node) if $node.node-type ~~ SemiXML::NTText;
         }
 
         when '@*' {
-          # item is now a hash of attributes
-          my Hash $h = {};
-          for $node.attributes.keys -> $key {
-            $h{$key} = $node.attributes{$key};
-          }
-          $h{'sxml:node'} = $node;
-          $search-results.push($h);
+          $search-results.push($node) if $node.attributes.elems;
         }
 
-        when /^ '@' $<key>=(\w+) / {
+        when /^ '@' $<key>=(\w+) $/ {
           my Str $k = ~($/.hash<key>);
-          my Hash $h = {};
-          for $node.attributes.keys -> $key {
-            $h{$key} = $node.attributes{$key} if $key eq $k;
-          }
-          $h{'sxml:node'} = $node;
-          $search-results.push($h);
+          $search-results.push($node) if $node.attributes{$k}:exists;
+        }
+
+        when /^ '@' $<key>=(\w+) '=' $<value>=(.*) $/ {
+          my Str $k = ~($/.hash<key>);
+          my Str $v = ~($/.hash<value>);
+          $search-results.push($node)
+            if $node.attributes{$k}:exists and $node.attributes{$k} ~~ $v;
         }
 
         default {
@@ -268,7 +264,7 @@ role Node {
         }
       }
 
-#note "SR: ", $search-results;
+note "SR: ", $search-results;
     }
 
     # check if we have to go down recursively
@@ -333,7 +329,7 @@ role Node {
   method !process-attributes ( ) {
 
 #note "PA 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ";
-    # a normal element(Plain) might have entries in the FTable configuration.
+    # a normal element might have entries in the FTable configuration.
     # when entries aren't found, results are False.
     my Hash $ftable = $!globals.refined-tables<F> // {};
     $!inline = $!name ~~ any(|@($ftable<inline> // []));
