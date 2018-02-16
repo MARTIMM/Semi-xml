@@ -137,7 +137,7 @@ note "X: $m.attributes.perl()";
                      $oper-name, '-', $color-name, $color-count++;
 
       my SemiXML::Element $e .= new(
-        :name<sxml:var-decl>, :attributes({:$name,:noconv})
+        :name<sxml:var-decl>, :attributes({ :$name, :noconv})
       );
 
       my SemiXML::Text $t .= new(
