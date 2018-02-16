@@ -308,7 +308,6 @@ class Helper {
       $parent.attribs{"xmlns:sxml"}:delete;
     }
   }
-}}
 
   #-----------------------------------------------------------------------------
   # clone given node
@@ -431,6 +430,7 @@ class Helper {
     $hook.after($_) for $from.nodes.reverse;
     $hook.remove;
   }
+}}
 
 #`{{
   #-----------------------------------------------------------------------------
