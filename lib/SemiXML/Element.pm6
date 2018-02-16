@@ -98,7 +98,7 @@ class Element does SemiXML::Node {
 
 #note "MN 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ", $!parent.name;
 
-      $!nodes = $object."$!method"(self) // [];
+      $!nodes = [ |@$!nodes, |@($object."$!method"(self) // [])];
       for @$!nodes.reverse -> $node {
 
         # assume that the top level nodes do not have a parent
@@ -160,6 +160,8 @@ class Element does SemiXML::Node {
     # create an element only when the name is defined and not empty
     my SemiXML::Node $node =
        SemiXML::Element.new( :$name, :$attributes) if ? $name;
+
+#note "H: {$node//'-'}, T: $text-element";
 
     # if both are created than add text to the element
     if ? $node and ? $text-element {
