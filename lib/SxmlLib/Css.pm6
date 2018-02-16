@@ -4,6 +4,8 @@ use v6;
 unit package SxmlLib:auth<github:MARTIMM>;
 
 use SemiXML::StringList;
+use SemiXML::Node;
+use SemiXML::Element;
 use SemiXML::Text;
 #use SemiXML::Helper;
 #use XML;
@@ -23,7 +25,7 @@ class Css {
     my XML::Element $style = append-element( $var, 'style', :text("\n"));
     append-element( $parent, 'sxml:style');
 }}
-
+#`{{
     # because of this a style can be placed anywhere in the document and then
     # it will be remapped to the end of the head.
     my SemiXML::Element $remap-style;
@@ -35,31 +37,84 @@ class Css {
     else {
       $remap-style := $m;
     }
+}}
 
-    my XML::Element $style .= new( 'style', :text("\n"), :parent($remap-style));
+    my SemiXML::Element $style .= new( :name<style>, :text("\n"));
+    my Array $r = $m.search( [
+        SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head',
+        SemiXML::SCChild, 'style'
+      ]
+    );
+    if $r.elems {
+      # place style after the last one
+      $r[*-1].after($style);
+    }
+
+    else {
+      $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head']);
+      if $r.elems {
+        # place style at the end of the head
+        $r[0].append($style);
+      }
+
+      else {
+        die 'Css must be placed in /html/head but head is not found';
+      }
+    }
+
+    # copy what is left
+    #$style.insert($_) for $m.nodes.reverse;
+
+    # remove all nodes from $m
+    #for $m.nodes -> $node {
+    #  $node.remove;
+    #}
 
 #    drop-parent-container($content-body);
 #note "\nContent0 $content-body";
 #    subst-variables($content-body);
 #note "\nContent1 $content-body";
 
-    self!css-blocks( $style, $content-body, '', ? ($attrs<compress>//0).Int);
+#    self!css-blocks( $style, $content-body, '', ? ($attrs<compress>//0).Int);
+    self!css-blocks( $style, $m, '');
 
 #note "Result css\n", '-' x 80, "\n$style\n", '-' x 80;
 
-    $parent
+    [ ]
   }
 
   #-----------------------------------------------------------------------------
   #https://perishablepress.com/a-killer-collection-of-global-css-reset-styles/
-  method reset (
-    XML::Element $parent, Hash $attrs, XML::Node :$content-body
-    --> XML::Node
-  ) {
-    my Str $type = ($attrs<type>//'minimalistic').Str;
+  method reset ( SemiXML::Element $m --> Array ) {
+
+    my SemiXML::Element $reset-style .= new( :name<style>, :text("\n"));
+    my Array $r = $m.search( [
+        SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head',
+        SemiXML::SCChild, 'style'
+      ]
+    );
+    if $r.elems {
+      # place style after the last one
+      $r[*-1].after($reset-style);
+note "RS: $reset-style.name()";
+    }
+
+    else {
+      $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head']);
+      if $r.elems {
+        # place style at the end of the head
+        $r[0].append($reset-style);
+      }
+
+      else {
+        die 'Css must be placed in /html/head but head is not found';
+      }
+    }
+
+    my Str $type = ($m.attributes<type>//'minimalistic').Str;
     given $type {
       when 'minimalistic' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             * {
             	outline: 0;
             	padding: 0;
@@ -70,7 +125,7 @@ class Css {
       }
 
       when 'condensed-universal' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             * {
             	vertical-align: baseline;
             	font-weight: inherit;
@@ -86,7 +141,7 @@ class Css {
       }
 
       when 'poor-man' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)))
             html, body {
             	padding: 0;
             	margin: 0;
@@ -104,7 +159,7 @@ class Css {
       }
 
       when 'siolon-global' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             * {
             	vertical-align: baseline;
             	font-family: inherit;
@@ -131,7 +186,7 @@ class Css {
       }
 
       when 'shaun-inman' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre,
             form, fieldset, input, p, blockquote, table, th, td, embed, object {
             	padding: 0;
@@ -168,7 +223,7 @@ class Css {
       }
 
       when 'yahoo' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td {
             	padding: 0;
             	margin: 0;
@@ -204,7 +259,7 @@ class Css {
       }
 
       when 'eric-meyer' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             html, body, div, span, applet, object, iframe, table, caption, tbody, tfoot, thead, tr, th, td,
             del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var,
             h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code,
@@ -251,7 +306,7 @@ class Css {
       }
 
       when 'eric-meyer-condensed' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6,
             pre, form, fieldset, input, textarea, p, blockquote, th, td {
             	padding: 0;
@@ -288,7 +343,7 @@ class Css {
       }
 
       when 'tantek' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             /* undohtml.css */
             /* (CC) 2004 Tantek Celik. Some Rights Reserved.                  */
             /* http://creativecommons.org/licenses/by/2.0                     */
@@ -318,7 +373,7 @@ class Css {
       }
 
       when 'tripoli' {
-        append-element( $parent, :text(q:to/EOCSS/));
+        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             /*
                 Tripoli is a generic CSS standard for HTML rendering.
                 Copyright (C) 2007  David Hellsing
@@ -398,37 +453,104 @@ class Css {
             }
             EOCSS
       }
-
-#`{{
-      when '' {
-        append-element( $parent, :text(q:to/EOCSS/));
-
-            EOCSS
-      }
-}}
     }
 
-    $parent;
+    [ ]
   }
 
   #-----------------------------------------------------------------------------
-  method b (
-    XML::Element $parent, Hash $attrs, XML::Node :$content-body
-    --> XML::Node
-  ) {
+  method b ( SemiXML::Element $m --> Array ) {
 
-    my Str $selector = ~($attrs<s>//'*');
-    my XML::Element $css-block = append-element(
-      $parent, 'sxml:css-block', {s => $selector}, :text("\n")
+    my Str $selector = ($m.attributes<s>//'*').Str;
+    my SemiXML::Element $css-block .= new(
+      :name<sxml:css-block>,
+      :attributes({ s => $selector, 'sxml:noconv' => '1'})
     );
-    $css-block.append($content-body);
-    append-element( $css-block, :text("\n\n"));
+#    $css-block.append(:text("\n"));
+#    $css-block.append($content-body);
+#    append-element( $css-block, :text("\n\n"));
 
-    $parent
+    [ $css-block ]
   }
 
   #-----------------------------------------------------------------------------
   #---[ private ]---------------------------------------------------------------
+  method !css-blocks (
+    SemiXML::Node $style, SemiXML::Node $css-block, Str $parent-select
+  ) {
+note "call with $css-block.name(), '$parent-select'";
+
+    my Str $css-body = '';
+
+    # build current selector
+    my Str $select = '';
+
+    # check if it is a sxml:css-block and has an 's' attribute.
+    my Bool $is-block =
+          ( ($css-block.name eq 'sxml:css-block')
+             and ($css-block.attributes<s>:exists)
+          );
+
+    # insert a separator blank if parent css block selector is defined
+    if $is-block {
+      $select = [~] $parent-select,
+                    (?$parent-select ?? ' ' !! ''),
+                    $css-block.attributes<s>;
+note "CB 0: '$select'";
+    }
+
+note "N: $css-block.nodes.elems()";
+    # do the textual parts first, then process rest
+    for $css-block.nodes -> $node {
+note "CB 1: $node.name(), $is-block, '$select'";
+      if $node.name ne 'sxml:css-block' {
+        $style.append(:text("$select \{\n  ")) if $is-block;
+        $is-block = False;
+        $style.append($node);
+      }
+    }
+
+#`{{
+    # if the css body is not a string of only spaces, add it to the style
+    if $is-block and $css-body !~~ m/^ \s* $/ {
+note "CB 1";
+
+      $css-body ~~ s:g/ \s\s+ / /;
+      $css-body ~~ s:g/ \n / /;
+
+      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
+      $css-body ~~ s:g/ \s+ $//;
+      $css-body = "$select \{\n  $css-body\n}\n\n";
+
+      $style.append(SemiXML::Text.new(:text($css-body)));
+    }
+
+    # not within a selector. can be user input or from other methods
+    elsif $css-body !~~ m/^ \s* $/ {
+note "CB 2";
+      $css-body ~~ s:g/ \s\s+ / /;
+      $css-body ~~ s:g/ \n / /;
+      $css-body ~~ s:g/ \s+ '}' /}/;
+
+      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
+      $css-body ~~ s:g/ \s+ $//;
+
+      $css-body = "$css-body\n";
+      $style.append(SemiXML::Text.new(:text($css-body)));
+    }
+}}
+
+    # process the rest of the blocks
+    for $css-block.nodes -> $node {
+      if $node ~~ SemiXML::Element and $node.name eq 'sxml:css-block' {
+note "CB 2, $node.name(), '$select'";
+        self!css-blocks( $style, $node, $select);
+      }
+    }
+  }
+
+
+#`{{
   method !css-blocks (
     XML::Element $style, XML::Element $css-block, Str $parent-select,
     Bool $compress
@@ -497,4 +619,5 @@ class Css {
       }
     }
   }
+}}
 }
