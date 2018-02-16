@@ -26,10 +26,6 @@ class Actions {
   has Array $!elements;
   has Int $!element-idx;
 
-#  has XML::Document $!document;
-
-  has Str $.xml-text;
-
   #-----------------------------------------------------------------------------
   submethod BUILD ( ) {
 
@@ -47,7 +43,6 @@ class Actions {
     );
     $!elements = [$!root];
     $!element-idx = 1;
-    $!xml-text = '';
 
 #note "\nAt the end of parsing";
     # process the result tree
@@ -55,75 +50,83 @@ class Actions {
 
     # execute any method bottom up and generate sxml structures
     $!root.run-method if $!globals.exec;
-#note "NTop Tree F=$!globals.frag(), T=$!globals.tree();\n$!root.Str()";
+#note "NTop Tree F=$!globals.frag(), \n$!root.Str()";
 
-    # Don't generate the xml stuff when only the tree is requested later
-    unless $!globals.tree {
-      # convert non-method nodes into XML
-      #my XML::Element $root-xml .= new(:name($!root.name));
-#note "NTop 0: $root-xml";
-      #$root-xml.setNamespace( 'https://github.com/MARTIMM/Semi-xml', 'sxml');
-      #for $!root.nodes -> $node {
-      #  $node.xml($root-xml);
-      #}
-#note "NTop 1: $root-xml, $!globals.raw()";
-
-#      $!document = from-xml($!xml-text);
-#      my XML::Element $root-xml = $!document.root;
-
-
-      unless $!globals.raw {
-        self!subst-variables($!root);
+    unless $!globals.raw {
+      self!subst-variables($!root);
 #        self!remap-content($root-xml);
 
-        # remove all tags from the sxml namespace.
-        #self!remove-sxml-namespace($!root);
+      # remove all tags from the sxml namespace.
+      #self!remove-sxml-namespace($!root);
 #note "NTop 2d: $root-xml";
-      }
+    }
+  }
 
-      if $!root.nodes.elems == 0 {
+  #-----------------------------------------------------------------------------
+  # always perform xml transforms when asked for xml-text
+  method xml-text ( ) {
+
+    my Str $xml-text = '';
+    if $!root.nodes.elems == 0 {
 note "0 elements";
-        $!xml-text = $!root.xml;
-      }
+      $xml-text = $!root.xml;
+    }
 
-      elsif $!root.nodes.elems == 1 {
+    elsif $!root.nodes.elems == 1 {
 note "1 element";
+      self!set-namespaces($!root.nodes[0]);
+      $xml-text = $!root.nodes[0].xml;
+    }
+
+    elsif $!root.nodes.elems > 1 {
+note "more than 1 element";
+      if $!globals.frag {
         self!set-namespaces($!root.nodes[0]);
-        $!xml-text = $!root.nodes[0].xml;
+        $xml-text = $!root.xml;
       }
 
-      elsif $!root.nodes.elems > 1 {
-note "more than 1 element";
-        if $!globals.frag {
-          self!set-namespaces($!root.nodes[0]);
-          $!xml-text = $!root.xml;
-        }
-
-        else {
-          die X::SemiXML.new(
-            :message(
-              "Too many nodes on top level. Maximum allowed nodes is one"
-            )
+      else {
+        die X::SemiXML.new(
+          :message(
+            "Too many nodes on top level. Maximum allowed nodes is one"
           )
-        }
+        )
+      }
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # always perform xml transforms when asked for xml-text
+  method root-name ( --> Str ) {
+
+    my $root-name = '';
+    if $!root.nodes.elems == 0 {
+      $root-name = $!root.name;
+    }
+
+    elsif $!root.nodes.elems == 1 {
+      $root-name = $!root.nodes[0].name;
+    }
+
+    elsif $!root.nodes.elems > 1 {
+      if $!globals.frag {
+        $root-name = $!root.name;
+      }
+
+      else {
+        die X::SemiXML.new(
+          :message(
+            "Too many nodes on top level. Maximum allowed nodes is one"
+          )
+        )
       }
     }
 
-note "NTop 3: $!xml-text";
+    $root-name
   }
 
-#`{{
   #-----------------------------------------------------------------------------
-  # get the result document
-  method get-document ( --> XML::Document ) {
-
-    #$!document.new(XML::Element.new(:name<root>));
-    #$!document
-  }
-}}
-
-  #-----------------------------------------------------------------------------
-  # get the result sxml
+  # set the result sxml
   multi method sxml-tree ( SemiXML::Node:D :$sxml-tree! ) {
 
     $!root .= new(:name<sxml:fragment>);
@@ -492,7 +495,7 @@ note "GST Root: ", $sxml-tree.perl(:simple);
   #-----------------------------------------------------------------------------
   # clone given node
   method !clone-node (
-    SemiXML::Element $new-parent, SemiXML::Node $node --> SemiXML::Node
+    SemiXML::Node $new-parent, SemiXML::Node $node --> SemiXML::Node
   ) {
 
     my SemiXML::Node $clone;
