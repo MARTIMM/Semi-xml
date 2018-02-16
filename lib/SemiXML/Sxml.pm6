@@ -60,8 +60,7 @@ class Sxml {
   multi method parse (
     Str:D :$!filename!, Hash :$config,
     Bool :$raw = False, Bool :$force = False, Bool :$exec = True,
-    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False,
-    Bool :$tree = False
+    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False
     --> Bool
   ) {
 
@@ -71,7 +70,7 @@ class Sxml {
       my $text = slurp($!filename);
       $pr = self.parse(
         :content($text), :$config, :!drop-cfg-filename,
-        :$raw, :$force, :$trace, :$keep, :$exec, :$frag, :$tree
+        :$raw, :$force, :$trace, :$keep, :$exec, :$frag
       );
 
       die "Parse failure" if $pr ~~ Nil;
@@ -89,8 +88,7 @@ class Sxml {
   multi method parse (
     Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
     Bool :$force = False, Bool :$exec = True, Bool :$raw = False,
-    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False,
-    Bool :$tree = False
+    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False
     --> Bool
   ) {
 
@@ -103,7 +101,7 @@ class Sxml {
 
     # set options. when user is done() with this session they will be removed
     $!globals.set-options( hash(
-        :$trace, :$keep, :$raw, :$exec, :$frag, :$tree,
+        :$trace, :$keep, :$raw, :$exec, :$frag,
         :$!objects, :$!refine, :$!refined-tables,
 #        :$!filename,
       )
@@ -186,37 +184,19 @@ class Sxml {
   method Str ( --> Str ) {
     my Str $text = self.get-xml-text;
 
+#Not needed anymore, XML will be kicked out
     # substitute back all single quotes. it is never a problem that it needs
     # to be escaped
-    $text ~~ s:g/'&#39;'/'/;
+    #$text ~~ s:g/'&#39;'/'/;
 
     $text
   }
 
   #-----------------------------------------------------------------------------
-  #method get-xml-text ( :$other-document --> Str ) {
   method get-xml-text ( --> Str ) {
 
     my Str $xml-text = $!actions.xml-text;
-    my Str $root-element = $!actions.root.name;
-
-#`{{
-    # Get the top element name
-    my $root-element;
-    if ?$other-document {
-      $root-element = $other-document.root.name;
-    }
-
-    else {
-      my $doc = $!actions.get-document;
-      $root-element = ?$doc ?? $doc.root.name !! Any;
-    }
-    return '' unless $root-element.defined;
-
-    # remove namespace part from root element
-    $root-element ~~ s/^(<-[:]>+\:)//;
-}}
-
+    my Str $root-element = $!actions.root-name;
 
     my Str $document = '';
 
@@ -255,11 +235,7 @@ class Sxml {
         }
         $document ~= "$end\n";
       }
-#`{{
-      $document ~= ?$other-document
-                      ?? $other-document.root
-                      !! $!actions.get-document.root;
-}}
+
       $document ~= $xml-text;
     }
 
