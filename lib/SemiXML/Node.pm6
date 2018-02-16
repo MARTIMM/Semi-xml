@@ -54,6 +54,11 @@ role Node {
   method undef-nodes ( ) { $!nodes = [] }
 
   #-----------------------------------------------------------------------------
+  method rename ( Str:D $name ) {
+    $!name = $name if $name ~~ m/ <alpha><alnum>* (':' <alpha><alnum>*)? /;
+  }
+
+  #-----------------------------------------------------------------------------
   # find location of node in nodes array. return Int type if not found.
   method index-of ( SemiXML::Node $find --> Int ) {
 
@@ -229,7 +234,7 @@ role Node {
 
     # define handler
     my $handler = sub ( SemiXML::Node $node ) {
-note "FN: $find-node on $node.name()";
+#note "FN: $find-node on $node.name()";
       given $find-node {
         when '*' {
           $search-results.push($node) if $node.node-type ~~ SemiXML::NTElement;
@@ -264,7 +269,7 @@ note "FN: $find-node on $node.name()";
         }
       }
 
-note "SR: ", $search-results;
+#note "SR: ", $search-results;
     }
 
     # check if we have to go down recursively
