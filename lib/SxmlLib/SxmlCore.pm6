@@ -11,7 +11,7 @@ class SxmlCore {
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
-  method date ( SemiXML::Element $method --> Array ) {
+  method date ( SemiXML::Element $method ) {
 
     my Date $today = Date.today;
 
@@ -19,12 +19,14 @@ class SxmlCore {
     my Int $month = ($method.attributes<month> // $today.month.Str).Int;
     my Int $day = ($method.attributes<day> // $today.day.Str).Int;
 
-    [ SemiXML::Text.new(:text(Date.new( $year, $month, $day).Str)), ]
+    $method.before(
+      SemiXML::Text.new(:text(Date.new( $year, $month, $day).Str))
+    );
   }
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date-time timezone=tz iso=n []
-  method date-time ( SemiXML::Element $method --> Array ) {
+  method date-time ( SemiXML::Element $method ) {
 
     my Bool $iso = ($method.attributes<iso> // 1).Int.Bool;
     my Bool $utc = ($method.attributes<utc> // 0).Int.Bool;
@@ -49,7 +51,7 @@ class SxmlCore {
       $dtstr ~~  s/\.\d+//;
     }
 
-    [ SemiXML::Text.new( :text($dtstr)),]
+    $method.before(SemiXML::Text.new( :text($dtstr)));
   }
 
   #-----------------------------------------------------------------------------
@@ -57,23 +59,30 @@ class SxmlCore {
   # <sxml:var-decl name=xyz>...</sxml:var-decl>
   # namespace xmlns:sxml="github:MARTIMM" is placed on top level element
   # and removed later when document is ready.
-  method var-decl ( SemiXML::Element $method --> Array ) {
+  method var-decl ( SemiXML::Element $method ) {
 
     my $var = SemiXML::Element.new(
       :name<sxml:var-decl>, :attributes($method.attributes)
     );
 
-    for $method.nodes -> $node {
-      $var.append($node);
+    for $method.nodes.reverse -> $node {
+      $var.insert($node);
     }
 
-    [ $var ]
+    # If global attribute is 1, place the declaration at the top as
+    # its first element
+    if $method.attributes<global> // False {
+      my Array $r = $method.search([ SemiXML::SCRoot, '*']);
+      $r[0].insert($var);
+    }
+
+    else {
+      $method.before($var);
+    }
   }
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.drop []
-  # Remove all that is enclosed
-  method drop ( SemiXML::Element $parent --> Array ) {
-    []
-  }
+  # Remove all that is enclosed by not processing them
+  method drop ( SemiXML::Element $parent ) {  }
 }
