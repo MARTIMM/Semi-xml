@@ -25,7 +25,7 @@ class Colors {
   # The namespace xmlns:sxml="github:MARTIMM" is placed on top level element
   # and removed later when document is ready.
 
-  method palette ( SemiXML::Element $m --> Array ) {
+  method palette ( SemiXML::Element $m ) {
 
     my List $xc;
     my Color $base-color;
@@ -120,15 +120,12 @@ note "X: $m.attributes.perl()";
 
     my Str $output-spec = ($m.attributes<outspec>//'rgbhex').Str;
 
-    # create a variable for the base color
-    my Array $element-array = [];
-
     my SemiXML::Element $bce .= new(
       :name<sxml:var-decl>, :attributes({:name<base-color>})
     );
     $bce.body-type = SemiXML::BTBodyC;
     $bce.append(:text(self!output-spec( $base-color, $output-spec)));
-    $element-array.push: $bce;
+    $m.before($bce);
 
     # create a variable for each color
     my Int $color-count = 1;
@@ -145,10 +142,8 @@ note "X: $m.attributes.perl()";
       );
 
       $e.append($t);
-      $element-array.push: $e;
+      $m.before($e);
     }
-
-    $element-array
   }
 
   #-----------------------------------------------------------------------------
