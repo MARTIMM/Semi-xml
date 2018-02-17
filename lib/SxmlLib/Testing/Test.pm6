@@ -5,18 +5,16 @@ unit package SxmlLib::Testing:auth<github:MARTIMM>;
 
 use SemiXML;
 use SemiXML::Sxml;
-use SemiXML::Helper;
+use SemiXML::Element;
 use SxmlLib::File;
-use XML;
-use XML::XPath;
 
 #-------------------------------------------------------------------------------
 class Test {
 
   has SemiXML::Globals $!globals .= instance;
 
-  has XML::Element $!html;
-  has XML::Element $!body;
+  has SemiXML::Element $!html;
+  has SemiXML::Element $!body;
 
   # the program code to be run with prove
   has Str $!program-text;
@@ -50,16 +48,103 @@ class Test {
 #  package version from META6.json when package attribute is used
 
   #-----------------------------------------------------------------------------
-  method initialize ( Hash $attrs ) {
+  method run ( SemiXML::Element $m ) {
+
+    # setup the html and head
+    self!initialize($m);
+
+    # throw the whole shebang into the body
+    $!body.after($_) for $m.nodes.reverse;
+
+    # add the html to the parent
+    $m.before($!html);
+
+    self!modify-purpose;
+
+    self!run-tests;
+    self!save-metric-data;
+
+    self!footer;
+  }
+
+  #-----------------------------------------------------------------------------
+  method purpose ( SemiXML::Element $m ) {
+
+    # save the title. purpose content is saved later
+    $!purpose-title = ($m.attributes<title>//$!purpose-title).Str;
+
+    my SemiXML::Element $div .= new(
+      :name<div>, :attributes({:class<repsection>})
+    );
+    $m.before($div);
+    $div.append(
+      'h2', :attributes({:class<repheader>}), :text($!purpose-title)
+    );
+
+    my XML::Element $p = $div.append( 'p', :attributes({:title<purpose>}));
+    $p.insert($_) for $m.nodes.reverse;
+  }
+
+  #-----------------------------------------------------------------------------
+  method chapter ( SemiXML::Element $m ) {
+
+    $!chapter-test-title = ($m.attributes<title>//'No test title').Str;
+    $!chapters.push($!chapter-test-title);
+
+    # search for the aside check panels, xpath '//pre'
+    my Array $r $m.search([SCRootDesc, 'pre']);
+    for @$r -> $acheck {
+
+      # skip if <pre> is not an aside check
+      if $acheck.attributes<class>:exists
+         and $acheck.attributes<class> ~~ m/ 'aside-check' / {
+        $acheck.set( 'title', $!chapter-test-title);
+      }
+
+      # or a diagnostic panel
+      elsif $acheck.attributes<name>:exists
+        and $acheck.attributes<name> eq 'diagnostic' {
+        $acheck.set( 'title', $!chapter-test-title);
+      }
+    }
+
+    my SemiXML::Element $div .= new(
+      :name<div>, :attributes({:class<repsection>})
+    );
+    $m.before($div);
+
+    $div.insert($_) for $m.nodes.reverse;
+    $div.insert(
+      'h2', :attributes({:class<repheader>}), :text($!chapter-test-title)
+    );
+  }
+
+  #-----------------------------------------------------------------------------
+  method code ( SemiXML::Element $m ) {
+    self!wrap-code( $m, :type<code>);
+  }
+
+  #-----------------------------------------------------------------------------
+  method skip ( SemiXML::Element $m ) {
+    self!wrap-code( $m, :type<skip>);
+  }
+
+  #-----------------------------------------------------------------------------
+  method todo ( SemiXML::Element $m ) {
+    self!wrap-code( $m, :type<todo>);
+  }
+
+  #===[ private methods ]=======================================================
+  method !initialize ( SemiXML::Element $m ) {
 
     return if $!initialized;
 
     # things to highlight code using google prettify
-    $!highlight-code = ($attrs<lang> // '').Str.Bool;
-    $!language = $!highlight-language = ($attrs<lang> // 'perl6').Str;
-    $!highlight-skin = lc(($attrs<highlight-skin> // 'prettify').Str);
+    $!highlight-code = ($m.attributes<lang> // '').Str.Bool;
+    $!language = $!highlight-language = ($m.attributes<lang> // 'perl6').Str;
+    $!highlight-skin = lc(($m.attributes<highlight-skin> // 'prettify').Str);
     $!highlight-skin = 'prettify' if $!highlight-skin eq 'default';
-    $!linenumbers = ($attrs<linenumbers> // '').Str.Bool;
+    $!linenumbers = ($m.attributes<linenumbers> // '').Str.Bool;
 
     # start of perl6 test code data. starting linenumeber is set to 4
     $!program-text = Q:to/EOINIT/;
@@ -77,9 +162,9 @@ class Test {
 # attribute test command to support other languages
 # attribute location of generated test file
 
-#    $!run-data<test-location> = ($attrs<test-location>//'.').Str;
-#    $!run-data<test-program> = ($attrs<test-program>//'prove').Str;
-#    $!run-data<test-options> = ($attrs<test-options>//(
+#    $!run-data<test-location> = ($m.attributes<test-location>//'.').Str;
+#    $!run-data<test-program> = ($m.attributes<test-program>//'prove').Str;
+#    $!run-data<test-options> = ($m.attributes<test-options>//(
 #        '--exec', 'perl6', '--verbose',
 #        '--ignore-exit', '--failures', "--rules='seq=**'",
 #        '--nocolor', '--norc',
@@ -89,136 +174,21 @@ class Test {
 #TODO add type of test; Smoke tests, System integration tests, Regression tests
 
     # title of test report
-    $!run-data<title> = ($attrs<title>//'-').Str;
+    $!run-data<title> = ($m.attributes<title>//'-').Str;
 
     # extra information for metric file
-    $!run-data<package> = ($attrs<package>//'-').Str;
-    $!run-data<class> = ($attrs<class>//'-').Str;
-    $!run-data<module> = ($attrs<module>//'-').Str;
-    $!run-data<distribution> = ($attrs<distribution>//'-').Str;
-    $!run-data<label> = ($attrs<label>//'-').Str;
+    $!run-data<package> = ($m.attributes<package>//'-').Str;
+    $!run-data<class> = ($m.attributes<class>//'-').Str;
+    $!run-data<module> = ($m.attributes<module>//'-').Str;
+    $!run-data<distribution> = ($m.attributes<distribution>//'-').Str;
+    $!run-data<label> = ($m.attributes<label>//'-').Str;
 
 
-    self!initialize-report($attrs);
+    self!initialize-report($m.attributes);
     $!initialized = True;
   }
 
   #-----------------------------------------------------------------------------
-  method run (
-    XML::Element $parent, Hash $attrs,
-    XML::Element :$content-body, Array :$tag-list
-
-    --> XML::Node
-  ) {
-
-    # throw the whole shebang into the body
-    $!body.append($content-body);
-
-    # add the html to the parent
-    $parent.append($!html);
-
-    self!modify-purpose;
-
-    self!run-tests;
-    self!save-metric-data;
-
-    self!footer;
-
-    $parent
-  }
-
-  #-----------------------------------------------------------------------------
-  method purpose (
-    XML::Element $parent, Hash $attrs,
-    XML::Element :$content-body, Array :$tag-list
-
-    --> XML::Node
-  ) {
-
-    # save the title. purpose content is saved later
-    $!purpose-title = ($attrs<title>//$!purpose-title).Str;
-
-    my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
-    append-element( $div, 'h2', {:class<repheader>}, :text($!purpose-title));
-
-    my XML::Element $p = append-element( $div, 'p', {:title<purpose>});
-    $p.append($content-body);
-
-    $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  method chapter (
-    XML::Element $parent, Hash $attrs,
-    XML::Element :$content-body, Array :$tag-list
-
-    --> XML::Node
-  ) {
-
-    $!chapter-test-title = ($attrs<title>//'No test title').Str;
-    $!chapters.push($!chapter-test-title);
-
-    drop-parent-container($content-body);
-
-    # search for the aside check panels
-    my XML::Document $document .= new($content-body);
-    my $x = XML::XPath.new(:$document);
-    for $x.find( '//pre', :to-list) -> $acheck {
-
-      # skip if <pre> is not an aside check
-      if $acheck.attribs<class>:exists
-         and $acheck.attribs<class> ~~ m/ 'aside-check' / {
-        $acheck.set( 'title', $!chapter-test-title);
-      }
-
-      # or a diagnostic panel
-      elsif $acheck.attribs<name>:exists
-        and $acheck.attribs<name> eq 'diagnostic' {
-        $acheck.set( 'title', $!chapter-test-title);
-      }
-    }
-
-    my XML::Element $div = append-element( $parent, 'div', {:class<repsection>});
-    append-element( $div, 'h2', {:class<repheader>}, :text($!chapter-test-title));
-    $div.append($content-body);
-
-    $parent
-  }
-
-  #-----------------------------------------------------------------------------
-  method code (
-    XML::Element $parent, Hash $attrs,
-    XML::Element :$content-body, Array :$tag-list
-
-    --> XML::Node
-  ) {
-    self!wrap-code( $parent, $content-body, $attrs, :type<code>);
-    $parent
-  }
-
-  #-----------------------------------------------------------------------------
-  method skip (
-    XML::Element $parent, Hash $attrs,
-    XML::Element :$content-body, Array :$tag-list
-
-    --> XML::Node
-  ) {
-    self!wrap-code( $parent, $content-body, $attrs, :type<skip>);
-    $parent
-  }
-
-  #-----------------------------------------------------------------------------
-  method todo (
-    XML::Element $parent, Hash $attrs,
-    XML::Element :$content-body, Array :$tag-list
-
-    --> XML::Node
-  ) {
-    self!wrap-code( $parent, $content-body, $attrs, :type<todo>);
-    $parent
-  }
-
-  #===[ private methods ]=======================================================
   method !initialize-report ( Hash $attrs ) {
 
 #`{{
@@ -230,16 +200,15 @@ class Test {
 }}
 
     $!html .= new( :name<html>, :attribs('xml:lang' => 'en'));
-
-    my XML::Element $head = self!head( $!html, $attrs);
-
+    #my SemiXML::Element $head = self!head( $!html, $attrs);
+    self!head($attrs);
     self!body( $!html, $attrs);
   }
 
   #-----------------------------------------------------------------------------
-  method !head ( XML::Element $html, Hash $attrs --> XML::Element ) {
+  method !head ( Hash $attrs --> SemiXML::Element ) {
 
-    my XML::Element $head = append-element( $html, 'head');
+    my SemiXML::Element $head = $html.append-element( $!html, 'head');
     append-element( $head, 'title', :text(~$attrs<title>)) if ? $attrs<title>;
     append-element( $head, 'meta', {charset => 'UTF-8'});
     append-element(
@@ -337,8 +306,6 @@ note $code-text;
     my XML::Element $purpose = $x.find( '//p[@title="purpose"]', :to-list)[0];
     return unless $purpose.defined;
 
-    drop-parent-container($purpose);
-
     # add a paragraph below the users text and add the chapters to a list
     append-element(
       $purpose, 'p',
@@ -364,36 +331,38 @@ note $code-text;
   }
 
   #-----------------------------------------------------------------------------
-  method !wrap-code (
-    XML::Element $parent, XML::Element $code, Hash $attrs, :$type
-  ) {
+  method !wrap-code ( SemiXML::Element $m, :$type ) {
 
     # get code text from code element
-    my Str $code-text = self!get-code-text($code);
+    my Str $code-text = self!get-code-text($m);
 
     # wrap in a subtest if a title attribute is found
-    $code-text = self!wrap-subtest( $code-text, $attrs);
+    $code-text = self!wrap-subtest( $code-text, $m.attributes);
 
     # add some code depending on code type
-    $code-text = self!wrap-type( $type, $code-text, $attrs);
+    $code-text = self!wrap-type( $type, $code-text, $m.attributes);
 
     # gather the line numbers where the tests are written
     self!save-testlines($code-text);
 
     # insert place to display the code
-    self!create-code-element( $parent, $code-text);
+    $m.before(self!create-code-element($code-text));
 
     # insert place to display the test results
-    self!create-test-result( $parent, $code-text);
+    $m.before(self!create-test-result($code-text));
+
+    # insert a cleaner div below to prevent any disturbences of the two <pre>
+    $m.before( SemiXML::Element.new(
+        :name<pre>, :attributes({ :class<cleaner>, :name<diagnostic>})
+      )
+    );
 
     # add to total code text to be run later
     $!program-text ~= $code-text;
   }
 
   #-----------------------------------------------------------------------------
-  method !get-code-text ( XML::Element $code --> Str ) {
-
-    drop-parent-container($code);
+  method !get-code-text ( SemiXML::Element $code --> Str ) {
 
     # remove starting new-line if there is one
     my Str $code-text = '';
@@ -493,7 +462,7 @@ note $code-text;
 
   #-----------------------------------------------------------------------------
   # create a <pre> element where code is displayed
-  method !create-code-element( XML::Element $parent, $code-text) {
+  method !create-code-element( $code-text --> SemiXML::Element ) {
 
     # setup class
     my Str $class = 'test-block-code';
@@ -503,29 +472,32 @@ note $code-text;
     }
 
     # add the code text to the report document
-    append-element( $parent, 'pre', {:$class}, :text($code-text));
+    SemiXML::Element.new(
+      :name<pre>, :attributes({:$class}), :text($code-text)
+    )
   }
 
   #-----------------------------------------------------------------------------
   # create <pre> element to show diagnostic info
-  method !create-test-result( XML::Element $parent, $code-text ) {
+  method !create-test-result( $code-text --> SemiXML::Element ) {
 
     my Int $nlines = $code-text.lines.elems;
     my $aside-check = " \n" x $nlines;
-    append-element(
-      $parent, 'pre', {
-        :class("aside-check"),
-        :name("aside{$!line-number}nl{$nlines}"),
-        :title('No test title')
-      },
+    my SemiXML::Element $pre .= new(
+      :name<pre>,
+      :attributes( {
+          :class("aside-check"),
+          :name("aside{$!line-number}nl{$nlines}"),
+          :title('No test title')
+        }
+      ),
       :text($aside-check)
     );
 
     # update the line number count for the next code block
     $!line-number += $nlines;
 
-    # insert a cleaner div below to prevent any disturbences of the two <pre>
-    append-element( $parent, 'pre', { :class<cleaner>, :name<diagnostic>});
+    $pre
   }
 
   #-----------------------------------------------------------------------------
