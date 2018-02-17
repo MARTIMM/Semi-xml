@@ -81,7 +81,7 @@ class Test {
       'h2', :attributes({:class<repheader>}), :text($!purpose-title)
     );
 
-    my XML::Element $p = $div.append( 'p', :attributes({:title<purpose>}));
+    my SemiXML::Element $p = $div.append( 'p', :attributes({:title<purpose>}));
     $p.insert($_) for $m.nodes.reverse;
   }
 
@@ -92,7 +92,7 @@ class Test {
     $!chapters.push($!chapter-test-title);
 
     # search for the aside check panels, xpath '//pre'
-    my Array $r $m.search([SCRootDesc, 'pre']);
+    my Array $r = $m.search([SCRootDesc, 'pre']);
     for @$r -> $acheck {
 
       # skip if <pre> is not an aside check
@@ -208,7 +208,8 @@ class Test {
   #-----------------------------------------------------------------------------
   method !head ( Hash $attrs --> SemiXML::Element ) {
 
-    my SemiXML::Element $head = $html.append-element( $!html, 'head');
+    my SemiXML::Element $head = $!html.append('head');
+!!!!!!!!!!
     append-element( $head, 'title', :text(~$attrs<title>)) if ? $attrs<title>;
     append-element( $head, 'meta', {charset => 'UTF-8'});
     append-element(
