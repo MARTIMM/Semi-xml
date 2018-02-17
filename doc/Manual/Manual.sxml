@@ -380,23 +380,23 @@ $!SxmlCore.drop «
 
       $sect3 [
         $title [Comment]
-        $para [
+        $para «
           Comments are possible on several places and starts with '\#'. To be
           more exact, all space before '\#', the character '\#' and characters
           after it up to the end of line including the end of line characters
           are removed.
-        ]
+        »
       ]
 
       $sect3 [
         $title [Escaping characters]
-        $para {
-          When you want to use a character which is used as a delimiter ('[')
+        $para «
+          When you want to use a character which is used as a delimiter ('\[')
           or start of an element ('$') you must escape that character to prevent
           the action that takes place when encountering that character. Writing
           '\\' before that character escapes them from that interpretation.
-          Examples are '\\[' or '\\\$'.
-        }
+          Examples are '\\\[' or '\\\$'.
+        »
       ]
 
       $sect3 [

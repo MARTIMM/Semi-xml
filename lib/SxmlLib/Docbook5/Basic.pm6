@@ -3,54 +3,47 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<github:MARTIMM>;
 
-use XML;
-use SemiXML::Helper;
+use SemiXML::Element;
 
 #-------------------------------------------------------------------------------
-class Docbook5::Basic:ver<0.3.1> {
+class Docbook5::Basic:ver<0.3.2> {
 
   #-----------------------------------------------------------------------------
-  method book (
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Node :$content-body
-    --> XML::Node
-  ) {
+  method book ( SemiXML::Element $m ) {
 
-    my XML::Element $art = append-element(
-      $parent, 'book', {
-        'xmlns' => 'http://docbook.org/ns/docbook',
-        'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
-        'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
-        'version' => '5.0',
-        'xml:lang' => 'en'
-      }
+    my SemiXML::Element $art .= new(
+      :name<book>,
+      :attributes( {
+          'xmlns' => 'http://docbook.org/ns/docbook',
+          'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
+          'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
+          'version' => '5.0',
+          'xml:lang' => 'en'
+        }
+      )
     );
 
-    $art.append($content-body);
-    $parent;
+    $m.before($art);
+    $art.insert($_) for $m.nodes.reverse;
   }
 
   #-----------------------------------------------------------------------------
-  method article (
-    XML::Element $parent,
-    Hash $attrs,
-    XML::Node :$content-body
-    --> XML::Node
-  ) {
+  method article ( SemiXML::Element $m ) {
 
-    my XML::Element $art = append-element(
-      $parent, 'article', {
-        'xmlns' => 'http://docbook.org/ns/docbook',
-        'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
-        'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
-        'version' => '5.0',
-        'xml:lang' => 'en'
-      }
+    my SemiXML::Element $art .= new(
+      :name<article>,
+      :attributes( {
+          'xmlns' => 'http://docbook.org/ns/docbook',
+          'xmlns:xi' => 'http://www.w3.org/2001/XInclude',
+          'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
+          'version' => '5.0',
+          'xml:lang' => 'en'
+        }
+      )
     );
 
-    $art.append($content-body);
-    $parent;
+    $m.before($art);
+    $art.insert($_) for $m.nodes.reverse;
   }
 
   #-----------------------------------------------------------------------------
@@ -62,80 +55,49 @@ class Docbook5::Basic:ver<0.3.1> {
   # Content
   #   $para [] blocks used to describe abstract
   #
-  method info (
-    XML::Element $parent,
-    Hash $attrs is copy,
-    XML::Element :$content-body
-  ) {
+  method info ( SemiXML::Element $m ) {
 
-    my $firstname = ~$attrs<firstname>;
-    my $surname = ~$attrs<surname>;
-    my $email = ~$attrs<email>;
+    my $firstname = $m.attributes<firstname>.Str;
+    my $surname = $m.attributes<surname>.Str;
+    my $email = $m.attributes<email>.Str;
 
-    my XML::Element $info = append-element( $parent, 'info');
+    my SemiXML::Element $info .= new(:name<info>);
+    $m.before($info);
 
     if ?$firstname or ?$surname or ?$email {
-      my XML::Element $author = append-element( $info, 'author');
+      my SemiXML::Element $author = $info.append('author');
 
       if ?$firstname or ?$surname {
-        my XML::Element $personname = append-element( $author, 'personname');
-
-        if ?$firstname {
-          my XML::Element $f = append-element( $personname, 'firstname');
-          append-element( $f, :text($firstname));
-        }
-
-        if ?$surname {
-          my XML::Element $s = append-element( $personname, 'surname');
-          append-element( $s, :text($surname));
-        }
+        my SemiXML::Element $personname = $author.append('personname');
+        $personname.append( 'firstname', :text($firstname)) if ?$firstname;
+        $personname.append( 'surname', :text($surname)) if ?$surname;
       }
 
       if ?$email {
-        my XML::Element $e = append-element( $author, 'email');
-        append-element( $e, :text($email));
+        $author.append( 'email', :text($email));
       }
     }
 
-    my $city = ~$attrs<city>;
-    my $country = ~$attrs<country>;
-#    my $ = ~$attrs<>;
+    my $city = $m.attributes<city>.Str;
+    my $country = $m.attributes<country>.Str;
+#    my $ = $m.attributes<>.Str;
     if $city.defined or $country.defined {
-
-      my XML::Element $address = append-element( $info, 'address');
-      if $city.defined {
-        my XML::Element $c = append-element( $address, 'city');
-        append-element( $c, :text($city));
-      }
-
-      if $country.defined {
-        my XML::Element $c = append-element( $address, 'country');
-        append-element( $c, :text($country));
-      }
+      my SemiXML::Element $address = $info.append('address');
+      $address.append( 'city', :text($city)) if $city.defined;
+      $address.append( 'country', :text($country)) if $country.defined;
     }
 
-    my $copy-year = ~$attrs<copy-year>;
-    my $copy-holder = ~$attrs<copy-holder>;
+    my $copy-year = $m.attributes<copy-year>.Str;
+    my $copy-holder = $m.attributes<copy-holder>.Str;
     if $copy-year.defined or $copy-holder.defined {
-      my XML::Element $copyright = append-element( $info, 'copyright');
-
-      if $copy-year.defined {
-        my XML::Element $c = append-element( $copyright, 'year');
-        append-element( $c, :text($copy-year));
-      }
-
-      if $copy-holder.defined {
-        my XML::Element $c = append-element( $copyright, 'holder');
-        append-element( $c, :text($copy-holder));
-      }
+      my SemiXML::Element $copyright = $info.append('copyright');
+      $copyright.append( 'year', :text($copy-year)) if $copy-year.defined;
+      $copyright.append( 'holder', :text($copy-holder)) if $copy-holder.defined;
     }
 
-    my XML::Element $date = append-element( $info, 'date');
-    append-element( $date, :text(Date.today().Str));
+    $info.append( 'date', :text(Date.today().Str));
 
-    my XML::Element $abstract = append-element( $info, 'abstract');
-    $abstract.insert($_) for $content-body.nodes.reverse;
-
-    $parent;
+    my SemiXML::Element $abstract = $info.append('abstract');
+    $abstract.insert($_) for $m.nodes.reverse;
   }
 }
