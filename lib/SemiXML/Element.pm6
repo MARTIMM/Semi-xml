@@ -98,6 +98,9 @@ class Element does SemiXML::Node {
 
 #note "MN 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ", $!parent.name;
 
+      # call the objects method. the method must insert its data into the tree
+      $object."$!method"(self);
+#`{{
       $!nodes = [ |@$!nodes, |@($object."$!method"(self) // [])];
       for @$!nodes.reverse -> $node {
 
@@ -115,6 +118,7 @@ class Element does SemiXML::Node {
         # and place them just before the method node
         self.after($node);
       }
+}}
 
       # when finished remove the method node and children
       # keep the parent object
@@ -189,23 +193,19 @@ class Element does SemiXML::Node {
 
     my Str $xml-text = '';
     given $!node-type {
-      when any( SemiXML::NTFragment, SemiXML::NTElement) {
-#        self!plain-xml($parent);
+      when any( SemiXML::NTFragment, SemiXML::NTElement, SemiXML::NTMethod) {
         $xml-text ~= self!plain-xml;
       }
 
       when SemiXML::NTCData {
-#        self!cdata-xml($parent);
         $xml-text ~= self!cdata-xml;
       }
 
       when SemiXML::NTPI {
-#        self!pi-xml($parent);
         $xml-text ~= self!pi-xml;
       }
 
       when SemiXML::NTPI {
-#        self!comment-xml($parent);
         $xml-text ~= self!comment-xml;
       }
     }
@@ -295,7 +295,7 @@ class Element does SemiXML::Node {
   method !plain-xml ( --> Str ) {
 
     # return when we encounter an sxml namespace node. these are not translated
-    # except for the top fragment node
+    # except for the top fragment node or when option raw is true
     return '' if $!name ~~ m/^ sxml ':' /
               and $!name ne 'sxml:fragment'
               and !$!globals.raw;
@@ -313,7 +313,9 @@ class Element does SemiXML::Node {
       $xml-text ~= Q:qq| $key="$value"|;
     }
 
-#note "Close: $!name, $!close";
+    # show option when raw and close to show that children are removed
+    $xml-text ~= ' sxml:close="1"' if $!close and $!globals.raw;
+
     # check if self closing
     if $!close {
       $xml-text ~= '/>';
