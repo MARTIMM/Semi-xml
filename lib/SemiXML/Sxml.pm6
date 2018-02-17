@@ -514,7 +514,7 @@ class Sxml {
         else {
 
           my Array $refine = [@d[ IN, OUT]];
-          my SemiXML::Sxml $x .= new( :$!globals.trace, :$refine);
+          my SemiXML::Sxml $x .= new( :trace($!globals.trace), :$refine);
 
           note "Process dependency: --in=@d[IN] --out=@d[OUT] $filename"
             if $!globals.trace and $!globals.refined-tables<T><file-handling>;
