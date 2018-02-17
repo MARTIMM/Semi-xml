@@ -14,7 +14,7 @@ subtest 'generated blended color variables', {
 
         $!colors.palette base-rgb='#1200ff' type=blended mode=averaged []
 
-        $!css.style compress=0 [
+        $!css.style [
 
           $!css.b s='.infobox >' [
             $!css.b s=.message [
@@ -39,9 +39,9 @@ subtest 'generated blended color variables', {
     EOTXT
 
   my XML::XPath $p = get-xpath($text);
-  my Array $style-text = $p.find('//style/text()');
+  my Array $style-text = [$p.find( '//style/text()', :to-list)];
   like $style-text[0].text, /'font-weight: inherit;'/,
-       'Found some of the reset';
+       'found some of the reset';
   like $style-text[1].text, /'.infobox > .message > .title'/,
        'found a selector line';
 }
@@ -59,13 +59,13 @@ sub get-xpath ( Str $content --> XML::XPath ) {
       T => {:!parse}
     },
     :$content,
-    :!trace, :!raw, :keep
+    :!trace, :!raw, :!keep, :exec
   );
 
   # See the result
   my Str $xml-text = ~$x;
-  diag $xml-text;
-
+  #diag $xml-text;
+  $x.done;
 
   XML::XPath.new(:xml($xml-text))
 }
