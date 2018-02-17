@@ -3,12 +3,9 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<github:MARTIMM>;
 
-use SemiXML::StringList;
 use SemiXML::Node;
 use SemiXML::Element;
 use SemiXML::Text;
-#use SemiXML::Helper;
-#use XML;
 
 #-------------------------------------------------------------------------------
 # Core module with common used methods
@@ -16,28 +13,6 @@ class Css {
 
   #-----------------------------------------------------------------------------
   method style ( SemiXML::Element $m ) {
-
-    # put everything into a style variable to prevent any escape substitutions
-#`{{
-    my XML::Element $var = append-element(
-      $parent, 'sxml:var-decl', {name => 'style'}
-    );
-    my XML::Element $style = append-element( $var, 'style', :text("\n"));
-    append-element( $parent, 'sxml:style');
-}}
-#`{{
-    # because of this a style can be placed anywhere in the document and then
-    # it will be remapped to the end of the head.
-    my SemiXML::Element $remap-style;
-    my Bool $map = ($attrs<map>//1).Int.Bool;
-    if $map {
-      $remap-style .= new( :name<sxml:remap>, { map-to => "/html/head",});
-    }
-
-    else {
-      $remap-style := $m;
-    }
-}}
 
     my SemiXML::Element $style .= new(
       :name<style>, :attributes({'sxml:noconv' => '1'}),
@@ -68,23 +43,7 @@ class Css {
       }
     }
 
-    # copy what is left
-    #$style.insert($_) for $m.nodes.reverse;
-
-    # remove all nodes from $m
-    #for $m.nodes -> $node {
-    #  $node.remove;
-    #}
-
-#    drop-parent-container($content-body);
-#note "\nContent0 $content-body";
-#    subst-variables($content-body);
-#note "\nContent1 $content-body";
-
-#    self!css-blocks( $style, $content-body, '', ? ($attrs<compress>//0).Int);
     self!css-blocks( $style, $m, '');
-
-#note "Result css\n", '-' x 80, "\n$style\n", '-' x 80;
   }
 
   #-----------------------------------------------------------------------------
@@ -468,17 +427,13 @@ class Css {
     my Str $selector = ($m.attributes<s>//'*').Str;
     my SemiXML::Element $css-block .= new(
       :name<sxml:css-block>,
-      :attributes({ s => $selector, 'sxml:noconv' => '1'})
+      :attributes({ s => $selector})
     );
-#    $css-block.noconv = True;
 
     for $m.nodes.reverse -> $node {
-#      $node.noconv = True;
       $css-block.insert($node);
     }
-#    $css-block.append(:text("\n"));
-#    $css-block.append($content-body);
-#    append-element( $css-block, :text("\n\n"));
+
     $m.before($css-block);
   }
 
@@ -509,8 +464,6 @@ class Css {
     # do the textual parts first, then process rest
     for $css-block.nodes -> $node {
       if $node.name ne 'sxml:css-block' {
-#        $style.append(:text("$select \{\n  ")) if $is-block;
-#        $is-block = False;
         $css-body ~= $node.Str;
       }
     }
@@ -526,9 +479,7 @@ class Css {
       $css-body ~~ s:g/ \s+ $//;
       $css-body = "$select \{\n  $css-body\n}\n\n";
 
-      my SemiXML::Text $t .= new(:text($css-body));
-      #$t.noconv = True;
-      $style.append($t);
+      $style.append(SemiXML::Text.new(:text($css-body)));
     }
 
     # not within a selector. can be user input or from other methods
@@ -542,9 +493,7 @@ class Css {
       $css-body ~~ s:g/ \s+ $//;
 
       $css-body = "$css-body\n";
-      my SemiXML::Text $t .= new(:text($css-body));
-      #$t.noconv = True;
-      $style.append($t);
+      $style.append(SemiXML::Text.new(:text($css-body)));
     }
 
 
@@ -555,76 +504,4 @@ class Css {
       }
     }
   }
-
-
-#`{{
-  method !css-blocks (
-    XML::Element $style, XML::Element $css-block, Str $parent-select,
-    Bool $compress
-  ) {
-
-    my Bool $is-block =
-            (($css-block ~~ XML::Element) and ($css-block.attribs<s>:exists));
-    my Str $css-body = '';
-
-    # build current selector
-    my Str $select = '';
-
-    if $is-block {
-      $select = [~] $parent-select,
-                    (?$parent-select ?? ' ' !! ''),
-                    $css-block.attribs<s>;
-    }
-
-    # do the textual parts first, then process rest
-    for $css-block.nodes -> $node {
-      if $node ~~ any(XML::Text, SemiXML::Text) {
-        $css-body ~= $node.Str;
-      }
-    }
-
-    # if the css body is not a string of only spaces, add it to the style
-    if $is-block and $css-body !~~ m/^ \s* $/ {
-#note "Body: $css-body";
-
-      $css-body ~~ s:g/ \s\s+ / /;
-      $css-body ~~ s:g/ \n / /;
-      if $compress {
-        $css-body = "$select \{$css-body}\n";
-      }
-
-      else {
-        $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
-        $css-body ~~ s:g/ \s+ $//;
-        $css-body = "$select \{\n  $css-body\n}\n\n";
-      }
-
-      $style.append(SemiXML::Text.new(:text($css-body)));
-    }
-
-    # not within a selector. can be user input or from other methods
-    elsif $css-body !~~ m/^ \s* $/ {
-#note "CB 0: $css-body";
-      $css-body ~~ s:g/ \s\s+ / /;
-      $css-body ~~ s:g/ \n / /;
-      $css-body ~~ s:g/ \s+ '}' /}/;
-      if !$compress {
-        $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
-        $css-body ~~ s:g/ \s+ $//;
-      }
-
-      $css-body = "$css-body\n";
-      $style.append(SemiXML::Text.new(:text($css-body)));
-    }
-
-
-
-    # process the rest of the blocks
-    for $css-block.nodes -> $node {
-      if $node ~~ XML::Element and $node.name eq 'sxml:css-block' {
-        self!css-blocks( $style, $node, $select, $compress);
-      }
-    }
-  }
-}}
 }
