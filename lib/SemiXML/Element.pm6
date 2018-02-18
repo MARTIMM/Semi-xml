@@ -84,14 +84,22 @@ class Element does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method run-method ( ) {
 
-    # first go to inner elements
+    # finitialize object top down
+    if $!node-type ~~ SemiXML::NTMethod {
+      # get the object
+      my $object = self!get-object;
+      $object.initialize(self) if $object.^can('initialize');
+    }
+
+    # go to inner elements until we reach a leaf
     for @$!nodes -> $node {
       $node.run-method unless $node ~~ SemiXML::Text;
     }
 
-    # then check if node is a method node
+note "rm 0 $!name, $!node-type, $!body-number";
+    # then from leaf back to top, check if node is a method node
     if $!node-type ~~ SemiXML::NTMethod {
-#note ">> $!node-type, $!body-number, $!module, $!method";
+note "rm 1 $!module, $!method";
 
       # get the object
       my $object = self!get-object;
