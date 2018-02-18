@@ -13,8 +13,10 @@ class File {
   has Hash $.symbols = {};
   has SemiXML::Globals $!globals .= instance;
 
+#TODO add a method to load parts like xpointer looking for fragments
+#TODO add a method to select lines like in FixedLayout module for docbook
   #-----------------------------------------------------------------------------
-  method include ( SemiXML::Element $m --> Array ) {
+  method include ( SemiXML::Element $m ) {
 
     my SemiXML::Globals $globals .= instance;
 
@@ -33,43 +35,34 @@ class File {
       die "Reference '$reference' not found";
     }
 
-    my Array $element-array = [];
-    given $type {
+    # read the content and parse
+    my $sxml-text = slurp($reference);
+    my SemiXML::Sxml $x .= new;
+    $x.parse( :content($sxml-text), :!trace, :frag,
+      config => {
+        T => { :parse }
+      }
+    );
 
+    # get the node tree and insert tree after this one
+    my SemiXML::Node $tree = $x.sxml-tree;
+
+
+    given $type {
 #TODO get data using url reference
       when 'reference' {
 
       }
 
       # include sub document from file
-      when 'include' {
-
-        # read the content
-        my $sxml-text = slurp($reference);
-
-        # new parser object
-        my SemiXML::Sxml $x .= new;
-
-        # the top level node xx-xx-xx is used to be sure there is only one
-        # element at the top when parsing starts.
-        $x.parse( :content($sxml-text), :tree, :trace, :frag,
-          config => {
-            T => { :parse }
-          }
-        );
-
-        my SemiXML::Node $tree = $x.sxml-tree;
-#note "Tree: $tree";
-        for $tree.nodes.reverse -> $node {
-#note "Node: $node";
-          $element-array.unshift: $node;
-        }
-
+      when 'include-all' {
+        $m.after($tree);
         $x.done;
+      }
 
-        # move nodes to the array
-
-        #$x.root-element.nodes.reverse;
+      when 'include' {
+        $m.after($_) for $tree.nodes.reverse;
+        $x.done;
       }
 #`{{
       # include sub document from file
@@ -87,10 +80,8 @@ class File {
 }}
 
       default {
-        die "Type $type not recognized with \$!include";
+        die "Type $type not recognized with include";
       }
     }
-
-    $element-array
   }
 }
