@@ -217,6 +217,6 @@ class Text does SemiXML::Node {
     my Str $text = $!text;
     $text ~~ s:g/ \n /\\n/;
 
-    "$!name '{$text.substr(0.54)} ...'"
+    "$!name '{$text.substr(0,54)} ...'"
   }
 }
