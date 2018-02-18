@@ -48,7 +48,7 @@
   },
   "resources": [
     "SemiXML.toml",
-    "test-report-style.xml",
+    "test-report-style.sxml",
 
     "google-code-prettify/desert.css",
     "google-code-prettify/doxy.css",
