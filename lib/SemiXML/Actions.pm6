@@ -402,10 +402,8 @@ note "GST Root: ", $sxml-tree.perl(:simple);
           my SemiXML::Text $t .= new( :text($text), :parent($element));
           $t.body-type = SemiXML::BTBodyA;
           $t.body-number = $element.body-count;
-          #$element.append($t);
 
-          my $v1 = $text;
-          $v1 ~~ s:g/ \n /\\n/;
+          my Str $v1 = $t.perl;
           note "--> append '$v1' to $element.name()".indent($l+4)
             if $!globals.trace and $!globals.refined-tables<T><parse>;
         }
@@ -414,10 +412,8 @@ note "GST Root: ", $sxml-tree.perl(:simple);
           my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
           $t.body-type = SemiXML::BTBodyB;
           $t.body-number = $element.body-count;
-          #$!elements[$!element-idx - 1].append($t);
 
-          my $v1 = $v;
-          $v1 ~~ s:g/ \n /\\n/;
+          my Str $v1 = $t.perl;
           note "--> append '$v1' to $element.name()".indent($l+4)
             if $!globals.trace and $!globals.refined-tables<T><parse>;
         }
@@ -426,15 +422,12 @@ note "GST Root: ", $sxml-tree.perl(:simple);
           my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
           $t.body-type = SemiXML::BTBodyC;
           $t.body-number = $element.body-count;
-          #$!elements[$!element-idx - 1].append($t);
 
-          my $v1 = $v;
-          $v1 ~~ s:g/ \n /\\n/;
+          my Str $v1 = $t.perl;
           note "--> append '$v1' to $element.name()".indent($l+4)
             if $!globals.trace and $!globals.refined-tables<T><parse>;
         }
 
-        #when 'topdocument' { proceed; }
         when 'document' {
           self!process-ast( $v, $l+4);
         }
