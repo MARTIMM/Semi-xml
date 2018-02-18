@@ -8,7 +8,6 @@ $!test.run title='Basic SemiXML tests'
     of the several parts of the language. Here only the simple structures are
     tested and not the methods to generate new content.
   ]
-
   $!test.chapter title='Generate a simple element' [
     $p [
       The code below will test a simple top level structure. A one liner $strong { $some-element [ ] } should translate into $strong { <some-element></some-element> }. Because there is no added configuration, it defaults to XML as its input as well as output so it will have an XML prelude. Also, because of the lack of this configuration, the element is interpreted as not self closing.
@@ -24,6 +23,8 @@ $!test.run title='Basic SemiXML tests'
       "The generated xml is conforming the standard";
     }
   ]
+$!SxmlCore.drop «
+
 
   $!test.chapter title='Add attributes.' [
     $p [
@@ -34,40 +35,40 @@ $!test.run title='Basic SemiXML tests'
       more and play with quotes and type.
     ]
 
-$!SxmlCore.drop «
+$!SxmlCore.drop \«
   # following code has problems, the <> mess up the output when
   # placed within the the test code
   $!test.code {
       # bracketed value
-      $sxml.parse(:content('$some-element attribute=<v a l u e>'));
+      $sxml.parse(:content('$some-element attribute=<v a l u e> []'));
       like ~$sxml, / 'attribute="v a l u e"' /,
                    'attribute with bracketed <> value';
   }
-»
+\»
 
     $!test.code {
       # unquoted value
-      $sxml.parse(:content('$some-element attribute=value'));
+      $sxml.parse(:content('$some-element attribute=value []'));
       like ~$sxml, / 'attribute="value"' /,
                    'attribute without spaces in value';
 
       # double quoted value
-      $sxml.parse(:content('$some-element attribute="v a l u e"'));
+      $sxml.parse(:content('$some-element attribute="v a l u e" []'));
       like ~$sxml, / 'attribute="v a l u e"' /,
                    'attribute with double quoted value';
 
       # single quoted value
-      $sxml.parse(:content("\$some-element attribute='v a l u e'"));
+      $sxml.parse(:content("\$some-element attribute='v a l u e' []"));
       like ~$sxml, / 'attribute="v a l u e"' /,
                    'attribute with single quoted value';
 
       # more than one attribute
-      $sxml.parse(:content('$some-element a1=v1 a2=v2'));
+      $sxml.parse(:content('$some-element a1=v1 a2=v2' []));
       like ~$sxml, / 'a1="v1"' /, 'attribute a1 found';
       like ~$sxml, / 'a2="v2"' /, 'attribute a2 found';
 
       # boolean attributes
-      $sxml.parse(:content('$some-element =a1 =!a2'));
+      $sxml.parse(:content('$some-element =a1 =!a2' []));
       like ~$sxml, / 'a1="1"' /, 'true boolean attribute a1 found';
       like ~$sxml, / 'a2="0"' /, 'false boolean attribute a2 found';
     }
@@ -104,10 +105,10 @@ $!SxmlCore.drop «
     }
 
     $p {
-      Other types beside '[' are '\{' and '«'. The body '[ ... ]' is used to
+      Other types beside '[' are '\{' and '\«'. The body '[ ... ]' is used to
       have a normal block with possible nested elements. It is also possible to
       add comments starting with a '#' character. The use of '\{ ... \}'
-      however, will inhibit the nesting of elements. The body '« ... »' works in
+      however, will inhibit the nesting of elements. The body '\« ... \»' works in
       the same way as '\{ ... \}' and is added as a convenience to enclose code
       more easily. If you want to use those markers of the body in text, the
       characters must be escaped with a '\\' character. For example '\\\{'.
@@ -115,9 +116,10 @@ $!SxmlCore.drop «
       must also be escaped if you want the character in the text.
     }
 
-    $!test.code «
+    $!test.code \«
       $sxml.parse(:content('$a1 { $a2 [ ] }'));
       like ~$sxml, / '<a1>$a2 [ ]</a1>' /, 'Inner element is not translated';
-    »
+    \»
   ]
+»
 ]

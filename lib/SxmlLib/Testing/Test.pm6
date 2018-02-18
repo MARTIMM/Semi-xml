@@ -48,15 +48,19 @@ class Test {
 #  package version from META6.json when package attribute is used
 
   #-----------------------------------------------------------------------------
-  method run ( SemiXML::Element $m ) {
+  method initialize ($m) {
 
     # setup the html and head
     self!initialize($m);
+  }
+
+  #-----------------------------------------------------------------------------
+  method run ( SemiXML::Element $m ) {
 
     # throw the whole shebang into the body
     $!body.after($_) for $m.nodes.reverse;
 
-    # add the html to the parent
+    # add the html to the parent just before $!test.run []
     $m.before($!html);
 
     self!modify-purpose;
@@ -71,18 +75,19 @@ class Test {
   method purpose ( SemiXML::Element $m ) {
 
     # save the title. purpose content is saved later
-    $!purpose-title = ($m.attributes<title>//$!purpose-title).Str;
+    $!purpose-title = ($m.attributes<title> // $!purpose-title).Str;
 
     my SemiXML::Element $div .= new(
       :name<div>, :attributes({:class<repsection>})
     );
-    $m.before($div);
+    $!body.append($div);
     $div.append(
       'h2', :attributes({:class<repheader>}), :text($!purpose-title)
     );
 
     my SemiXML::Element $p = $div.append( 'p', :attributes({:title<purpose>}));
     $p.insert($_) for $m.nodes.reverse;
+note "Pur: $div.name(), $div.parent.name()";
   }
 
   #-----------------------------------------------------------------------------
@@ -92,19 +97,19 @@ class Test {
     $!chapters.push($!chapter-test-title);
 
     # search for the aside check panels, xpath '//pre'
-    my Array $r = $m.search([SCRootDesc, 'pre']);
+    my Array $r = $m.search([SemiXML::SCRootDesc, 'pre']);
     for @$r -> $acheck {
 
       # skip if <pre> is not an aside check
       if $acheck.attributes<class>:exists
          and $acheck.attributes<class> ~~ m/ 'aside-check' / {
-        $acheck.set( 'title', $!chapter-test-title);
+        $acheck.attributes<title> = $!chapter-test-title;
       }
 
       # or a diagnostic panel
       elsif $acheck.attributes<name>:exists
         and $acheck.attributes<name> eq 'diagnostic' {
-        $acheck.set( 'title', $!chapter-test-title);
+        $acheck.attributes<title> = $!chapter-test-title;
       }
     }
 
@@ -114,9 +119,12 @@ class Test {
     $m.before($div);
 
     $div.insert($_) for $m.nodes.reverse;
-    $div.insert(
-      'h2', :attributes({:class<repheader>}), :text($!chapter-test-title)
+    my SemiXML::Element $h2 .= new(
+      :name<h2>,
+      :attributes({:class<repheader>}),
     );
+
+    $h2.append(:text($!chapter-test-title));
   }
 
   #-----------------------------------------------------------------------------
@@ -202,41 +210,40 @@ class Test {
     $!html .= new( :name<html>, :attribs('xml:lang' => 'en'));
     #my SemiXML::Element $head = self!head( $!html, $attrs);
     self!head($attrs);
-    self!body( $!html, $attrs);
+    self!body($attrs);
   }
 
   #-----------------------------------------------------------------------------
-  method !head ( Hash $attrs --> SemiXML::Element ) {
+  method !head ( Hash $attrs ) {
 
     my SemiXML::Element $head = $!html.append('head');
-!!!!!!!!!!
-    append-element( $head, 'title', :text(~$attrs<title>)) if ? $attrs<title>;
-    append-element( $head, 'meta', {charset => 'UTF-8'});
-    append-element(
-      $head, 'meta', { :name<description>, content => 'Test report'}
+
+    $head.append( 'title', :text(~$attrs<title>)) if ? $attrs<title>;
+    $head.append( 'meta', :attributes({charset => 'UTF-8'}));
+    $head.append(
+      'meta', :attributes({ :name<description>, content => 'Test report'})
     );
-    append-element(
-      $head, 'meta', { :name<keywords>, content => 'sxml report test'}
+    $head.append(
+      'meta', :attributes({ :name<keywords>, content => 'sxml report test'})
     );
-    append-element(
-      $head, 'meta', { 'http-equiv' => "language", :content<EN>}
+    $head.append(
+      'meta', :attributes({ 'http-equiv' => "language", :content<EN>})
     );
 
     if $!highlight-code {
       # temporary check of RESOURCES path when using uninstalled version
       my $css = %?RESOURCES{"google-code-prettify/$!highlight-skin.css"}.Str;
-      append-element(
-        $head, 'link', {
-          :href("file://$css"),
-          :type<text/css>, :rel<stylesheet>
-        }
+      $head.append(
+        'link',
+        :attributes({ :href("file://$css"), :type<text/css>, :rel<stylesheet>})
       );
 
       my Str $js = %?RESOURCES<google-code-prettify/prettify.js>.Str;
-      my XML::Element $jse = append-element(
-        $head, 'script', { :src("file://$js"), :type<text/javascript>}
+      $head.append(
+        'script',
+        :attributes({ :src("file://$js"), :type<text/javascript>})
       );
-      append-element( $jse, :text(' '));
+      #append-element( $jse, :text(' '));
     }
 
 #`{{
@@ -248,21 +255,25 @@ class Test {
       }
     );
 }}
-    my SxmlLib::File $sf .= new;
-    $sf.include(
-      $head, {
-        :type<include-xml>,
-        :reference(%?RESOURCES<test-report-style.xml>.Str)
-      }
+    my SemiXML::Element $hook = $head.append(
+      'test:hook',
+      :attributes( {
+          'xmlns:test' => 'https://github.com/MARTIMM/Semi-xml/lib/SxmlLib/Test',
+          :type<include-all>,
+          :reference(%?RESOURCES<test-report-style.sxml>.Str)
+        }
+      )
     );
-
-    $head
+    my SxmlLib::File $sf .= new;
+    $sf.include($hook);
+    $hook.remove;
   }
 
   #-----------------------------------------------------------------------------
-  method !body ( XML::Element $html, Hash $attrs ) {
-    $!body = append-element( $html, 'body');
-    $!body.set( 'onload', 'prettyPrint()') if $!highlight-code;
+  method !body ( Hash $attrs ) {
+
+    $!body = $!html.append('body');
+    $!body.attributes<onload> = 'prettyPrint()' if $!highlight-code;
 
 #`{{
     # if there is a title attribute, make a h1 title
@@ -273,19 +284,17 @@ class Test {
 }}
 
     if ? $attrs<title> {
-      my XML::Element $t = append-element(
-        $!body, 'div', {class => 'title'}
+      my SemiXML::Element $t = $!body.append(
+        'div', :attributes({class => 'title'})
       );
 
-      append-element(
-        $t, 'h1', {class => 'title-text'},
+      $t.append(
+        'h1',
+        :attributes({class => 'title-text'}),
         :text(~$attrs<title>)
       );
     }
-
   }
-
-
 
 #`{{
     # Experiment to wrap all in EVALs
@@ -296,37 +305,36 @@ note $code-text;
 }}
 
   #-----------------------------------------------------------------------------
-  # modify the purpose to show what is tested and what is not
+  # modify the purpose to show what is tested and what is not. this can only
+  # be done after creating the <p title="purpose">...</p> and when all
+  # chapters are created and saved in @!chapters.
   method !modify-purpose ( ) {
 
-    # search for the aside check panels
-    my XML::Document $document .= new($!body);
-    my $x = XML::XPath.new(:$document);
-
-    # should only be one purpose
-    my XML::Element $purpose = $x.find( '//p[@title="purpose"]', :to-list)[0];
-    return unless $purpose.defined;
+    # xpath '//p[@title="purpose"]' like search. there can only be one <p>
+    my Array $r = $!body.search(
+      [ SemiXML::SCDesc, 'p', SemiXML::SCAttr, '@title=purpose']
+    );
+note "Body: $!body";
+note "R0: ", $r;
+return unless $r.elems;
 
     # add a paragraph below the users text and add the chapters to a list
-    append-element(
-      $purpose, 'p',
-      :text('The tests comprises the following chapters')
-    );
-    my XML::Element $ul = append-element( $purpose, 'ul');
-    append-element( $ul, 'li', :text($_)) for @$!chapters;
+    $r[0].append( 'p', :text('The tests comprises the following chapters'));
+    my SemiXML::Element $ul = $r[0].append('ul');
+    $ul.append( 'li', :text($_)) for @$!chapters;
 
-    $!purpose = ~$purpose;
+    $!purpose = ~$r[0];
   }
 
   #-----------------------------------------------------------------------------
   # Add footer to the end of the report
   method !footer ( ) {
 
-    my XML::Element $div = append-element( $!body, 'div', {class => 'footer'});
-    append-element(
-      $div,
+    $!body.append(
+      'div',
+      :attributes({class => 'footer'}),
       :text( "Generated using SemiXML, SxmlLib::Testing::*," ~
-             " XML, XML::XPath, &copy;Google prettify"
+             " &copy;Google prettify"
       )
     );
   }
@@ -733,13 +741,14 @@ note $code-text;
     state Int $counter = 1;
     my Int $test-lines-idx = 0;
 
-    # search for the aside check panels
-    my XML::Document $document .= new($!html);
-    my $x = XML::XPath.new(:$document);
-    for $x.find( '//pre[@class="aside-check"]', :to-list) -> $acheck {
+    # xpath like '//pre[@class="aside-check"]'
+    my Array $r = $!body.search(
+      [ SemiXML::SCDesc, 'pre', SemiXML::SCAttr, '@class=aside-check']
+    );
+    for @$r -> $acheck {
 
       # get start line number and the number of line in the aside
-      my $start-line = $acheck<name>;
+      my $start-line = $acheck.attributes<name>;
       $start-line ~~ s/^ 'aside' //;
       my $nlines = $start-line;
       $start-line ~~ s/ 'nl' \d+ $//;
@@ -748,7 +757,7 @@ note $code-text;
       $nlines .= Int;
 
       # get chapter title
-      my $chapter = $acheck<title>;
+      my $chapter = $acheck.attributes<title>;
 
       # empty the aside <pre> element
       for $acheck.nodes -> $n {
@@ -787,9 +796,9 @@ note $code-text;
               $mark-symbol = "\x[2713]";
             }
 
-            append-element(
-              #$acheck, 'span', {:$class}, :text($mark-symbol ~ "\n")
-              $acheck, 'div', {:$class}, :text($mark-symbol ~ "\n")
+            #$acheck, 'span', {:$class}, :text($mark-symbol ~ "\n")
+            $acheck.append(
+              'div', :attributes({:$class}), :text($mark-symbol ~ "\n")
             );
 
             # add chapter to the test lines
@@ -801,14 +810,14 @@ note $code-text;
 
           else {
             #append-element( $acheck, 'span', :text("\n"));
-            append-element( $acheck, 'div', :text("\n"));
+            $acheck.append( 'div', :text("\n"));
           }
         }
 
         # fill last lines up
         else {
           #append-element( $acheck, 'span', :text("\n"));
-          append-element( $acheck, 'div', :text("\n"));
+          $acheck.append( 'div', :text("\n"));
         }
       }
     }
@@ -823,24 +832,22 @@ note $code-text;
     my Int $test-lines-idx = 0;
     my Str $diag-title = $!test-lines[$test-lines-idx][CHAPTER] // '-';
 
-    # search for the aside check panels
-    my XML::Document $document .= new($!html);
-    my $x = XML::XPath.new(:$document);
-
-    my @diag-panels = $x.find( '//pre[@name="diagnostic"]', :to-list);
-    loop ( my $i = 0; $i < @diag-panels.elems; $i++) {
-      my XML::Element $diag-panel = @diag-panels[$i];
+    # xpath like '//pre[@name="diagnostic"]'
+    my Array $r = $!body.search(
+      [ SemiXML::SCDesc, 'pre', SemiXML::SCAttr, '@name=diagnostic']
+    );
+    loop ( my $i = 0; $i < $r.elems; $i++) {
+      my SemiXML::Element $diag-panel = $r[$i];
 
       # skip if <pre> is not a diagnostic
-      if $diag-panel.attribs<name>:exists
-         and $diag-panel.attribs<name> eq 'diagnostic' {
+      if $diag-panel.attributes<name>:exists
+         and $diag-panel.attributes<name> eq 'diagnostic' {
 
         # move to the next panel if the next still has the same title
-        next if @diag-panels[$i+1].defined
-                and $diag-title eq @diag-panels[$i+1].attribs<title>;
+        next if $r[$i + 1].defined and $diag-title eq $r[$i+1].attribs<title>;
 
         # test the title of the panel against that of the test-lines
-        while $diag-title eq $diag-panel.attribs<title> {
+        while $diag-title eq $diag-panel.attributes<title> {
 
           if $!test-lines[$test-lines-idx][TESTRESULT] ~~ /:s not ok/ {
 
@@ -883,8 +890,8 @@ note $code-text;
     my @lines = $s.lines;
     $s = @lines.shift ~ "\n";
     $s ~~ s:g/\s\s+/ /;
-    append-element( $diag-panel, 'strong', :text($s));
-    append-element( $diag-panel, :text(.indent(2) ~ "\n")) for @lines;
+    $diag-panel.append( 'strong', :text($s));
+    $diag-panel.append( :text(.indent(2) ~ "\n")) for @lines;
   }
 
   #-----------------------------------------------------------------------------
