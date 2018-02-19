@@ -56,7 +56,6 @@ class Text does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method xml ( --> Str ) {
 
-    my Str $t;
 #$t = $!text;
 #$t ~~ s:g/\n/\\n/;
 #note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $!parent.name(), '$t'";
@@ -126,22 +125,30 @@ class Text does SemiXML::Node {
 note "xml: {self.perl}";
       if $!inline {
         my SemiXML::Node $ps = self.previousSibling;
+note "il 0: {$ps ?? $ps.name !! 'no prev sibling'}";
         if $ps.defined {
           if $ps.node-type !~~ SemiXML::NTText {
-            $t = ~$ps;
+note "il 1: ps text $ps";
+            my Str $t = ~$ps;
             $text = ' ' ~ $text if $t ~~ m/ \S $/;
           }
 
           else {
-            my Str $t = $ps.text;
+note "il 2: ps text $ps";
+            my Str $t = ~$ps;
             $text = ' ' ~ $text if $t ~~ m/ \S $/;
           }
+        }
+
+        # must look at parents previous sibling (recurse)
+        else {
+
         }
 
         my SemiXML::Node $ns = self.nextSibling;
         if $ns.defined {
           if $ns.node-type !~~ SemiXML::NTText {
-            $t = ~$ns;
+            my Str $t = ~$ns;
 
             # if the next sibling is inline or keep, spaces will be inserted
             # or kept as it was. In the case both are off, the spaces are
@@ -152,7 +159,7 @@ note "xml: {self.perl}";
           }
 
           else {
-            $t = $ns.text;
+            my Str $t = ~$ns;
             if !$ns.inline and !$ns.keep {
               $text ~= ' ' if $t !~~ m/^ \s* <punct> /
             }
