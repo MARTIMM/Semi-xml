@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2018-02-18T20:17:13.707930Z'
+  date         = '2018-02-19T17:36:23.101310Z'
   oskernel     = 'linux:4.14.18.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -28,26 +28,129 @@ $p title="purpose"  [
     $li  [
     Generate a simple element
     ]
+    $li  [
+    Add attributes.
+    ]
+    $li  [
+    Nested elements.
+    ]
+    $li  [
+    Element blocks and their different types.
+    ]
   ]
 ]
 
 '''
 
 [ chapters ]
-  list         = [ 'Generate a simple element' ]
+  list         = [ 'Generate a simple element', 'Add attributes.', 'Nested elements.', 'Element blocks and their different types.' ]
+
+[ chapter.'Generate a simple element' ]
   success      = 2
   fail         = 0
   todo         = 0
   skipped      = 0
 
+[ chapter.'Add attributes.' ]
+  success      = 8
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Nested elements.' ]
+  success      = 1
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Element blocks and their different types.' ]
+  success      = 1
+  fail         = 1
+  todo         = 0
+  skipped      = 0
+
 [ summary.line-7 ]
-  chapter      = ''
+  chapter      = 'Generate a simple element'
   diagnostic   = """
     ok 1 - The object is-a 'SemiXML::Sxml'
 """
 
 [ summary.line-10 ]
-  chapter      = ''
+  chapter      = 'Generate a simple element'
   diagnostic   = """
-    ok
+    ok 2 - The generated xml is conforming the standard
+"""
+
+[ summary.line-15 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 3 - attribute with bracketed <> value
+"""
+
+[ summary.line-20 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 4 - attribute without spaces in value
+"""
+
+[ summary.line-25 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 5 - attribute with double quoted value
+"""
+
+[ summary.line-30 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 6 - attribute with single quoted value
+"""
+
+[ summary.line-35 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 7 - attribute a1 found
+"""
+
+[ summary.line-36 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 8 - attribute a2 found
+"""
+
+[ summary.line-40 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 9 - true boolean attribute a1 found
+"""
+
+[ summary.line-41 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 10 - false boolean attribute a2 found
+"""
+
+[ summary.line-44 ]
+  chapter      = 'Nested elements.'
+  diagnostic   = """
+    ok 11 - An element within another
+"""
+
+[ summary.line-50 ]
+  chapter      = 'Element blocks and their different types.'
+  diagnostic   = """
+    not ok 12 - two blocks on an element
+    xml: sxml:TN-empty-001  (¬i t ¬k ¬s | ) '  ...'
+    txt: sxml:TN-empty-001 -> ''
+    xml: sxml:TN-empty-002  (¬i t ¬k ¬s | ) '  ...'
+    txt: sxml:TN-empty-002 -> ''
+    xml: sxml:TN-block1-003  (¬i t ¬k ¬s | ) ' block 1  ...'
+    txt: sxml:TN-block1-003 -> 'block 1'
+    xml: sxml:TN-block2-004  (¬i t ¬k ¬s | ) ' block 2  ...'
+    txt: sxml:TN-block2-004 -> 'block 2'
+"""
+
+[ summary.line-56 ]
+  chapter      = 'Element blocks and their different types.'
+  diagnostic   = """
+    ok 13 - Inner element is not translated
 """

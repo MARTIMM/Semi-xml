@@ -1,18 +1,8 @@
-$a [ abc # def
-  $b [ abc def
-    # kjhfkjh sdf
-    lkjsdf
-    # jhgjhg jghsdjhf
-    675
+$html [
+  $body [
+    $p [
+      paragraph text $strong [ strong text ].
+      rest of paragraph $a href=link [ link text ] after link.
+    ]
   ]
-
-  $!SxmlCore.var-decl name='abc' [$h1 [test 1]]
-  $c =sxml:keep [
-    $!SxmlCore.date year=1957 []
-    $sxml:var-ref name='abc' []
-  ]
-]
-
-$b [
-  bdf fgd $a x=1 =!t []
 ]
