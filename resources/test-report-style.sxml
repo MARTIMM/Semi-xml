@@ -24,7 +24,7 @@ $style =sxml:noconv =sxml:keep «
      float: left;
      margin-left: 5px;
      width: 92%;
-     background-color: #244;
+     background-color: #22a;
   }
 
   pre.aside-check {
