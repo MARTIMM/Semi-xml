@@ -509,6 +509,8 @@ note "CCE: ", $m.parent.Str;
       :text($aside-check)
     );
 
+    $pre.keep = True;
+
     # update the line number count for the next code block
     $!line-number += $nlines;
 
@@ -803,9 +805,12 @@ note "CCE: ", $m.parent.Str;
             }
 
             #$acheck, 'span', {:$class}, :text($mark-symbol ~ "\n")
-            $acheck.append(
-              'div', :attributes({:$class}), :text($mark-symbol ~ "\n")
+            my SemiXML::Element $div .= new(
+              :name<div>, :attributes({:$class})
             );
+            $div.keep = True;
+            $acheck.append($div);
+            $div.append(:text($mark-symbol ~ "\n"));
 
             # add chapter to the test lines
             $!test-lines[$test-lines-idx][CHAPTER] = $chapter;
@@ -816,14 +821,20 @@ note "CCE: ", $m.parent.Str;
 
           else {
             #append-element( $acheck, 'span', :text("\n"));
-            $acheck.append( 'div', :text("\n"));
+            my SemiXML::Element $div .= new(:name<div>);
+            $div.keep = True;
+            $acheck.append($div);
+            $div.append(:text("\n"));
           }
         }
 
         # fill last lines up
         else {
           #append-element( $acheck, 'span', :text("\n"));
-          $acheck.append( 'div', :text("\n"));
+          my SemiXML::Element $div .= new(:name<div>);
+          $div.keep = True;
+          $acheck.append($div);
+          $div.append(:text("\n"));
         }
       }
     }
@@ -871,7 +882,7 @@ note "CCE: ", $m.parent.Str;
               self!add-to-diag-panel( $diag-panel, @diag, $mark, $test-lines-idx);
             }
 
-            $diag-panel.set( 'style', 'border-width:2px;');
+            $diag-panel.attributes<style> = 'border-width:2px;';
             $counter++;
           }
 
