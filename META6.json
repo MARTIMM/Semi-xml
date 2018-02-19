@@ -22,7 +22,6 @@
     "SemiXML::Element":                 "lib/SemiXML/Element.pm6",
     "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
     "SemiXML::StringList":              "lib/SemiXML/StringList.pm6",
-    "SemiXML::Helper":                  "lib/SemiXML/Helper.pm6",
 
     "SxmlLib::Colors":                  "lib/SxmlLib/Colors.pm6",
     "SxmlLib::Css":                     "lib/SxmlLib/Css.pm6",
