@@ -116,7 +116,7 @@ note "Pur: $div.name(), $div.parent.name()";
     my SemiXML::Element $div .= new(
       :name<div>, :attributes({:class<repsection>})
     );
-    $m.before($div);
+    $!body.append($div);
 
     $div.insert($_) for $m.nodes.reverse;
     my SemiXML::Element $h2 .= new(
