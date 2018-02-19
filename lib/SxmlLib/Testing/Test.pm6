@@ -113,17 +113,18 @@ note "Pur: $div.name(), $div.parent.name()";
       }
     }
 
+    # prepare div for its content and add to body
     my SemiXML::Element $div .= new(
       :name<div>, :attributes({:class<repsection>})
     );
     $!body.append($div);
 
+    # insert methods content and insert the chapters header
     $div.insert($_) for $m.nodes.reverse;
     my SemiXML::Element $h2 .= new(
-      :name<h2>,
-      :attributes({:class<repheader>}),
+      :name<h2>, :attributes({:class<repheader>}),
     );
-
+    $div.insert($h2);
     $h2.append(:text($!chapter-test-title));
   }
 
@@ -207,7 +208,7 @@ note "Pur: $div.name(), $div.parent.name()";
     );
 }}
 
-    $!html .= new( :name<html>, :attribs('xml:lang' => 'en'));
+    $!html .= new( :name<html>, :attributes({'xml:lang' => 'en'}));
     #my SemiXML::Element $head = self!head( $!html, $attrs);
     self!head($attrs);
     self!body($attrs);
@@ -314,7 +315,7 @@ note $code-text;
     my Array $r = $!body.search(
       [ SemiXML::SCDesc, 'p', SemiXML::SCAttr, '@title=purpose']
     );
-note "Body: $!body";
+#note "Body: $!body";
 note "R0: ", $r;
 return unless $r.elems;
 
@@ -340,23 +341,27 @@ return unless $r.elems;
   }
 
   #-----------------------------------------------------------------------------
+  # get code and save to test file. wrap code in a div for display.
   method !wrap-code ( SemiXML::Element $m, :$type ) {
 
     # get code text from code element
     my Str $code-text = self!get-code-text($m);
+#note "CT 0: $code-text";
 
     # wrap in a subtest if a title attribute is found
     $code-text = self!wrap-subtest( $code-text, $m.attributes);
+#note "CT 1: $code-text";
 
     # add some code depending on code type
     $code-text = self!wrap-type( $type, $code-text, $m.attributes);
+#note "CT 2: $code-text";
 
     # gather the line numbers where the tests are written
     self!save-testlines($code-text);
 
     # insert place to display the code
     $m.before(self!create-code-element($code-text));
-
+note "CCE: ", $m.parent.Str;
     # insert place to display the test results
     $m.before(self!create-test-result($code-text));
 
@@ -481,9 +486,10 @@ return unless $r.elems;
     }
 
     # add the code text to the report document
-    SemiXML::Element.new(
-      :name<pre>, :attributes({:$class}), :text($code-text)
-    )
+    my SemiXML::Element $pre .= new( :name<pre>, :attributes({:$class}));
+    $pre.append(:text($code-text));
+
+    $pre
   }
 
   #-----------------------------------------------------------------------------
@@ -844,7 +850,8 @@ return unless $r.elems;
          and $diag-panel.attributes<name> eq 'diagnostic' {
 
         # move to the next panel if the next still has the same title
-        next if $r[$i + 1].defined and $diag-title eq $r[$i+1].attribs<title>;
+        next if $r[$i + 1].defined
+             and $diag-title eq $r[$i+1].attributes<title>;
 
         # test the title of the panel against that of the test-lines
         while $diag-title eq $diag-panel.attributes<title> {
