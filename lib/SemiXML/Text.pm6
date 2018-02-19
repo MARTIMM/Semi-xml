@@ -111,10 +111,13 @@ class Text does SemiXML::Node {
     else {
 
       $text ~~ s:g/ \n+ / /;      # remove return characters
-      $text ~~ s/ \n+ $//;
+      $text ~~ s/ \n+ $//;        # remove last return character
       $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
       $text ~~ s:g/^^ \h+ //;     # remove leading spaces
       $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
+
+      # add one leading space except before a punctuation char
+      $text ~~ s/^ <!before <punct>>/ /;
 
 #`{{
       if $!body-number != $previous-body-number {
@@ -123,8 +126,9 @@ class Text does SemiXML::Node {
       }
 }}
 
+#`{{
+#note "xml: {self.perl}";
       if $!inline {
-
         my SemiXML::Node $ps = self.previousSibling;
         if $ps.defined {
           if $ps.node-type !~~ SemiXML::NTText {
@@ -153,12 +157,13 @@ class Text does SemiXML::Node {
 
           else {
             $t = $ns.text;
-              if !$ns.inline and !$ns.keep {
+            if !$ns.inline and !$ns.keep {
               $text ~= ' ' if $t !~~ m/^ \s* <punct> /
             }
           }
         }
       }
+}}
     }
 
     # modifications
@@ -202,6 +207,7 @@ class Text does SemiXML::Node {
 #  $!text = $text;
 #$parent.append(SemiXML::XMLText.new(:$text));
 
+#note "txt: $!name -> '$text'";
     $text
   }
 
@@ -214,9 +220,25 @@ class Text does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method perl ( --> Str ) {
 
+    my Str $modifiers = ' (';
+    $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
+    $modifiers ~= $!noconv ?? '¬t ' !! 't '; # transform or not
+    $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
+    $modifiers ~= $!close ?? 's ' !! '¬s ';  # self closing or not
+
+    $modifiers ~= '| ';
+
+    $modifiers ~= 'F' if $!node-type ~~ SemiXML::NTFragment;
+    $modifiers ~= 'E' if $!node-type ~~ SemiXML::NTElement;
+    $modifiers ~= 'D' if $!node-type ~~ SemiXML::NTCData;
+    $modifiers ~= 'P' if $!node-type ~~ SemiXML::NTPI;
+    $modifiers ~= 'C' if $!node-type ~~ SemiXML::NTPI;
+
+    $modifiers ~= ')';
+
     my Str $text = $!text;
     $text ~~ s:g/ \n /\\n/;
 
-    "$!name '{$text.substr(0,54)} ...'"
+    "$!name $modifiers '{$text.substr(0,54)} ...'"
   }
 }
