@@ -96,10 +96,10 @@ class Element does SemiXML::Node {
       $node.run-method unless $node ~~ SemiXML::Text;
     }
 
-note "rm 0 $!name, $!node-type, $!body-number";
+#note "rm 0 $!name, $!node-type, $!body-number";
     # then from leaf back to top, check if node is a method node
     if $!node-type ~~ SemiXML::NTMethod {
-note "rm 1 $!module, $!method";
+#note "rm 1 $!module, $!method";
 
       # get the object
       my $object = self!get-object;

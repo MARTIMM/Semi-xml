@@ -68,18 +68,15 @@ class Actions {
 
     my Str $xml-text = '';
     if $!root.nodes.elems == 0 {
-note "0 elements";
       $xml-text = $!root.xml;
     }
 
     elsif $!root.nodes.elems == 1 {
-note "1 element";
       self!set-namespaces($!root.nodes[0]);
       $xml-text = $!root.nodes[0].xml;
     }
 
     elsif $!root.nodes.elems > 1 {
-note "more than 1 element";
       if $!globals.frag {
         self!set-namespaces($!root.nodes[0]);
         $xml-text = $!root.xml;
