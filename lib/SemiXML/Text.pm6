@@ -5,9 +5,6 @@ unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
 use SemiXML::Node;
-use SemiXML::XMLText;
-use SemiXML::Helper;
-use XML;
 
 #-------------------------------------------------------------------------------
 class Text does SemiXML::Node {
@@ -57,7 +54,6 @@ class Text does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  #method xml ( XML::Node $parent ) {
   method xml ( --> Str ) {
 
     my Str $t;
@@ -116,8 +112,8 @@ class Text does SemiXML::Node {
       $text ~~ s:g/^^ \h+ //;     # remove leading spaces
       $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
 
-      # add one leading space except before a punctuation char
-      $text ~~ s/^ <!before <punct>>/ /;
+#      # add one leading space except before a punctuation char
+#      $text ~~ s/^ <!before <punct>>/ /;
 
 #`{{
       if $!body-number != $previous-body-number {
@@ -126,8 +122,8 @@ class Text does SemiXML::Node {
       }
 }}
 
-#`{{
-#note "xml: {self.perl}";
+
+note "xml: {self.perl}";
       if $!inline {
         my SemiXML::Node $ps = self.previousSibling;
         if $ps.defined {
@@ -163,7 +159,6 @@ class Text does SemiXML::Node {
           }
         }
       }
-}}
     }
 
     # modifications
@@ -205,9 +200,9 @@ class Text does SemiXML::Node {
 #note "$!node-type ==>> '$t'";
 
 #  $!text = $text;
-#$parent.append(SemiXML::XMLText.new(:$text));
+#$parent.append(SemiXML::Text.new(:$text));
 
-#note "txt: $!name -> '$text'";
+note "txt: $!name -> '$text'";
     $text
   }
 

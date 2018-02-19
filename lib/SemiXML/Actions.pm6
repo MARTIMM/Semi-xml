@@ -8,9 +8,6 @@ use SemiXML::Node;
 use SemiXML::Element;
 use SemiXML::Text;
 use SemiXML::StringList;
-use SemiXML::Helper;
-use XML;
-use XML::XPath;
 
 #-------------------------------------------------------------------------------
 class Actions {
@@ -132,14 +129,14 @@ class Actions {
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # reverse engineer from xml to sxml tree
-  multi method sxml-tree ( XML::Node:D :$xml! ) {
+  multi method sxml-tree ( SemiXML::Node:D :$xml! ) {
 
-    sub cnvnodes ( XML::Node $parent ) {
+    sub cnvnodes ( SemiXML::Node $parent ) {
       for $parent.nodes -> $node {
-        when XML::Element {
+        when SemiXML::Element {
         }
 
-        when XML::Text {
+        when SemiXML::Text {
         }
 
         default {
@@ -154,8 +151,8 @@ class Actions {
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # reverse engineer from xml to sxml tree
   multi method sxml-tree ( Str:D :$xml-text! ) {
-    my XML::Document $xml = from-xml-file($xml-text);
-    self.sxml-tree(:xml($xml.root));
+#    my XML::Document $xml = from-xml-file($xml-text);
+#    self.sxml-tree(:xml($xml.root));
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

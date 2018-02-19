@@ -7,7 +7,6 @@ use SemiXML;
 use SemiXML::StringList;
 use SemiXML::Node;
 use SemiXML::Text;
-use XML;
 
 #-------------------------------------------------------------------------------
 class Element does SemiXML::Node {
@@ -450,7 +449,7 @@ class Element does SemiXML::Node {
     self!copy-nodes( $x, :keep);
     my Str $target = ($!attributes<target> // 'no-target').Str;
     my XML::PI $c .= new(
-      :data( SemiXML::XMLText.new(:text($target)), |$x.nodes)
+      :data( SemiXML::Text.new(:text($target)), |$x.nodes)
     );
 
     $parent.append($c);
@@ -467,7 +466,7 @@ class Element does SemiXML::Node {
     }
 
     else {
-      $parent.append(SemiXML::XMLText.new(:text('')));
+      $parent.append(SemiXML::Text.new(:text('')));
     }
   }
 
