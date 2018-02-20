@@ -222,7 +222,7 @@ note "txt: $!name -> '$text'";
   #-----------------------------------------------------------------------------
   method perl ( --> Str ) {
 
-    my Str $modifiers = ' (';
+    my Str $modifiers = '(';
     $modifiers ~= $!inline ?? 'i ' !! '¬i '; # inline or block
     $modifiers ~= $!noconv ?? '¬t ' !! 't '; # transform or not
     $modifiers ~= $!keep ?? 'k ' !! '¬k ';   # keep as typed or compress
