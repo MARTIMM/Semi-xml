@@ -209,7 +209,7 @@ note "il 2: ps text $ps";
 #  $!text = $text;
 #$parent.append(SemiXML::Text.new(:$text));
 
-note "txt: $!name -> '$text'";
+#note "txt: $!name -> '$text'";
     $text
   }
 
