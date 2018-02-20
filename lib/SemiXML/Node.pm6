@@ -117,7 +117,7 @@ role Node {
   #-----------------------------------------------------------------------------
   # insert a node to the start of the nodes array if the node is not
   # already in that array.
-  method insert ( SemiXML::Node:D $node ) {
+  multi method insert ( SemiXML::Node:D $node ) {
 
     $node.remove;
 

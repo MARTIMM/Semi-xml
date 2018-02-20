@@ -157,16 +157,78 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-#TODO move into separate module and use with 'handles'
-  # a more simple append is in the Node module. this method can not be defined
-  # there because of the need of Text module.
+  # more simple methods like append are in the Node module. this method
+  # can not be defined there because of the need of Element and Text module
+  # which will create circular reference errors when defined in Node.
   multi method append (
     Str $name?, Hash :$attributes = {}, Str :$text
     --> SemiXML::Node
   ) {
 
+    my SemiXML::Node $node = self!make-node-with-text(
+      $name, :$attributes, :$text
+    );
+
+    $!nodes.push($node);
+    $node.parent(self);
+
+    $node
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method insert (
+    Str $name?, Hash :$attributes = {}, Str :$text
+    --> SemiXML::Node
+  ) {
+
+    my SemiXML::Node $node = self!make-node-with-text(
+      $name, :$attributes, :$text
+    );
+
+    $!nodes.unshift($node);
+    $node.parent(self);
+
+    $node
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method before (
+    Str $name?, Hash :$attributes = {}, Str :$text
+    --> SemiXML::Node
+  ) {
+
+    my SemiXML::Node $node = self!make-node-with-text(
+      $name, :$attributes, :$text
+    );
+
+    $node.before(self);
+
+    $node
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method before (
+    Str $name?, Hash :$attributes = {}, Str :$text
+    --> SemiXML::Node
+  ) {
+
+    my SemiXML::Node $node = self!make-node-with-text(
+      $name, :$attributes, :$text
+    );
+
+    $node.after(self);
+
+    $node
+  }
+
+  #-----------------------------------------------------------------------------
+  method !make-node-with-text(
+    Str $name?, Hash :$attributes = {}, Str :$text
+    --> SemiXML::Node
+  ) {
+
     # create a text element, even when it is an empty string.
-    my SemiXML::Node $text-element = SemiXML::Text.new(:$text) if $text.defined;
+    my SemiXML::Text $text-element = SemiXML::Text.new(:$text) if $text.defined;
 
     # create an element only when the name is defined and not empty
     my SemiXML::Node $node =
@@ -183,13 +245,6 @@ class Element does SemiXML::Node {
     elsif ? $text-element {
       $node = $text-element;
     }
-
-    # else $name -> no change to $element. No name and no text is an error.
-#    die "No element nor text defined" unless ? $element;
-
-    # add the node when not found and set the parent in the node
-    $!nodes.push($node);
-    $node.parent(self);
 
     $node
   }
