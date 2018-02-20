@@ -79,8 +79,8 @@ subtest 'text, perl, str, append text', {
 
   is ~$ect1, "hoeperde poep\nzat op de stoep", 'text is the same as input';
   is $ect1.name, 'sxml:TN-hoeperdepo-001', 'text node name';
-  is $ect1.perl, "sxml:TN-hoeperdepo-001 'hoeperde poep\\nzat op de stoep ...'",
-                 'perl output';
+  is $ect1.perl, "sxml:TN-hoeperdepo-001 (¬i t ¬k ¬s | )" ~
+     " 'hoeperde poep\\nzat op de stoep ...'", 'perl output';
 
   is $ep.nodes[0], $ect1, "text child found";
 
