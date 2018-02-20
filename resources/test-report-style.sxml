@@ -24,7 +24,7 @@ $style =sxml:noconv =sxml:keep «
      float: left;
      margin-left: 5px;
      width: 92%;
-     background-color: #22a;
+     background-color: #232;
   }
 
   pre.aside-check {
@@ -206,6 +206,10 @@ $style =sxml:noconv =sxml:keep «
   th.summary-header {
      background-color: #cfef9f;
      width: 14%;
+  }
+
+  th.align-left {
+     text-align: left;
   }
 
   th.class-header {

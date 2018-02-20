@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2018-02-19T17:36:23.101310Z'
+  date         = '2018-02-20T20:21:25.975867Z'
   oskernel     = 'linux:4.14.18.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -139,14 +139,10 @@ $p title="purpose"  [
   chapter      = 'Element blocks and their different types.'
   diagnostic   = """
     not ok 12 - two blocks on an element
-    xml: sxml:TN-empty-001  (¬i t ¬k ¬s | ) '  ...'
-    txt: sxml:TN-empty-001 -> ''
-    xml: sxml:TN-empty-002  (¬i t ¬k ¬s | ) '  ...'
-    txt: sxml:TN-empty-002 -> ''
-    xml: sxml:TN-block1-003  (¬i t ¬k ¬s | ) ' block 1  ...'
-    txt: sxml:TN-block1-003 -> 'block 1'
-    xml: sxml:TN-block2-004  (¬i t ¬k ¬s | ) ' block 2  ...'
-    txt: sxml:TN-block2-004 -> 'block 2'
+    xml: sxml:TN-empty-001 (¬i t ¬k ¬s | ) '  ...'
+    xml: sxml:TN-empty-002 (¬i t ¬k ¬s | ) '  ...'
+    xml: sxml:TN-block1-003 (¬i t ¬k ¬s | ) ' block 1  ...'
+    xml: sxml:TN-block2-004 (¬i t ¬k ¬s | ) ' block 2  ...'
 """
 
 [ summary.line-56 ]

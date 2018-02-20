@@ -2,13 +2,13 @@
 
 $!summary.report title='Semi XML project summary report' [
 
-  $!summary.load metric=basic
-  $!summary.load metric=configuration
-  $!summary.load metric=sigils
-  $!summary.load metric=core-module
-  $!summary.load metric=lorem-ipsum
+  $!summary.load metric=basic []
+  $!summary.load metric=configuration []
+  $!summary.load metric=sigils []
+  $!summary.load metric=core-module []
+  $!summary.load metric=lorem-ipsum []
 
-  $!summary.load metric=documentation
+  $!summary.load metric=documentation []
 
   $!summary.conclusion [
 
