@@ -371,7 +371,7 @@ class Element does SemiXML::Node {
 
       # get value and convert doube quotes
       my Str $value = $!attributes{$key}.Str;
-      $value ~~ s:g/ '"' /\&quot/;
+      $value ~~ s:g/ '"' /\&quot;/;
       $xml-text ~= Q:qq| $key="$value"|;
     }
 
