@@ -1,8 +1,8 @@
 $html [
   $body [
     $p [
-      paragraph text $strong [ strong text ].
-      rest of paragraph $a href=link [ link text ] after link.
+      paragraph text $i [ $strong [ strong text ]].
+      rest of paragraph $a href=link [ link text ] after link. A one liner $strong { $some-element [ ] } should translate into $strong { <some-element></some-element> }. Because
     ]
   ]
 ]
