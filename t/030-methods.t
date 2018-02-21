@@ -22,25 +22,21 @@ spurt( $mod, q:to/EOMOD/);
 
       my SemiXML::Element $p .= new(:name<p>);
       $p.cp-std-attrs($m.attributes);
-
-      [ $p ]
+      $m.before($p);
     }
 
     # method 2 can not be used at top of document because it generates
     # more than one top level elements
     method mth2 ( SemiXML::Element $m ) {
 
-      my Array $element-array = [];
       my SemiXML::Element $p .= new(:name<p>);
-      $element-array.push($p);
+      $m.before($p);
       $p .= new(:name<p>);
-      $element-array.push($p);
+      $m.before($p);
 
       my Int $nbr-nodes = $m.nodes.elems;
       $p.insert($_) for $m.nodes.reverse;
       $p.append(:text("Added $nbr-nodes xml nodes"));
-
-      $element-array
     }
 
     method mth3 ( SemiXML::Element $m ) {
@@ -51,7 +47,7 @@ spurt( $mod, q:to/EOMOD/);
         $ul.append( 'li', :text($li-text));
       }
 
-      [ $ul ]
+      $m.before($ul);
     }
   }
 
@@ -68,7 +64,7 @@ my Str $content =
   '$!mod1.mth1 id=method1 class=top-method extra-attr=nonsense [ ]';
 
 # instantiate parser and parse with contents and config
-my SemiXML::Sxml $x .= new( :!trace, :merge);
+my SemiXML::Sxml $x .= new;
 $x.parse( :$config, :$content);
 
 my $xml = $x.get-xml-text;
@@ -80,6 +76,9 @@ like $xml, /'class="top-method"'/, "found class attribute in '$xml'";
 throws-like {
   $content = '$!mod1.mth2 [ ]';
   $x.parse( :$config, :$content);
+
+  # exception is thrown when result is retrieved
+  $x.Str;
 }, X::SemiXML, 'Too many nodes on top',
 :message(/:s Too many nodes on top level/);
 
