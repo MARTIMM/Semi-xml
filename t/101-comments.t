@@ -15,14 +15,14 @@ my $filename = "$dir/test-file.sxml";
 mkdir $dir unless $dir.IO ~~ :e;
 
 spurt( $filename, q:to/EOSX/);
-
     $html [
       $body [                                       # Body
         $h1 [ Data from file \# h1 ]                # outside h1
         $table [ data                               # table
           $tr [ trrr                                # trrr
             $th [ header \# th ]                    # outside th
-            $td [ data # td ]                       # inside and outside td
+            $td [ data # td
+            ]                                       # inside and outside td
             $td { $h1 # inside protected body }
             $td « $h2 # inside protected body »
           ]
@@ -34,8 +34,16 @@ spurt( $filename, q:to/EOSX/);
     EOSX
 
 # Parse
-my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<xml xml>]));
-$x.parse( :$filename, :config({C => {xml => {:!xml-show}}}), :!raw);
+my SemiXML::Sxml $x .= new(:refine([<xml xml>]));
+$x.parse(
+  :$filename,
+  :config( {
+      C => { xml => {:!xml-show} },
+      T => { :parse }
+    }
+  ), :!raw, :!trace
+);
+
 my Str $xml-text = ~$x;
 #diag $xml-text;
 

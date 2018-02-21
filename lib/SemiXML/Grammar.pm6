@@ -151,7 +151,7 @@ grammar Grammar {
   token entity          { '&' <-[;]>+ ';' }
 
   # comment text after '#'
-  token comment { \s* <!after <[\\\&]>> '#' \N* \n }
+  token comment { \s* '#' \N* \n }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.
