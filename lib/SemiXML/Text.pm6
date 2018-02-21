@@ -105,64 +105,88 @@ class Text does SemiXML::Node {
 
     else {
 
-      $text ~~ s:g/ \n+ / /;      # remove return characters
+      $text ~~ s:g/^ \n+ //;      # remove return characters
       $text ~~ s/ \n+ $//;        # remove last return character
       $text ~~ s:g/ \s\s+ / /;    # replace multiple spaces with one
       $text ~~ s:g/^^ \h+ //;     # remove leading spaces
       $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
 
-#      # add one leading space except before a punctuation char
-#      $text ~~ s/^ <!before <punct>>/ /;
-
-#`{{
+#note "BC: $!body-number != $previous-body-number";
       if $!body-number != $previous-body-number {
         $previous-body-number = $!body-number;
-        $text = " $text" if $!body-number > 1;
+        $text = " $text" if $!body-number > 1 and $text !~~ m/^ \s* $/;
       }
-}}
 
-
-note "xml: {self.perl}";
+#note "xml: text sofar '{self.perl}' --> '$text'";
       if $!inline {
-        my SemiXML::Node $ps = self.previousSibling;
-note "il 0: {$ps ?? $ps.name !! 'no prev sibling'}";
+        my SemiXML::Node $ps = self.previous-sibling;
         if $ps.defined {
-          if $ps.node-type !~~ SemiXML::NTText {
-note "il 1: ps text $ps";
-            my Str $t = ~$ps;
-            $text = ' ' ~ $text if $t ~~ m/ \S $/;
-          }
-
-          else {
-note "il 2: ps text $ps";
-            my Str $t = ~$ps;
+#note "il 1: ps text $ps";
+          my Str $t = ~$ps;
+          if !$ps.inline and !$ps.keep {
             $text = ' ' ~ $text if $t ~~ m/ \S $/;
           }
         }
 
         # must look at parents previous sibling (recurse)
         else {
+#note "il 3: 'no prev sibling";
+          my SemiXML::Node $pnode = self;
+          while my $p = $pnode.parent {
+#note "il 4: parent $p";
+            if my $pss = $p.previous-sibling {
+#note "il 5: p sibling: '$pss', $pss.inline(), $pss.keep()";
+              my Str $t = ~$pss;
 
+              # if this sibling must keep as it is and isn't inline
+              # then check if there are spaces at the end. these will be
+              # removed when that part is processed and therefore we must
+              # add a space here
+              if !$pss.inline and !$pss.keep {
+                $text = ' ' ~ $text if $t !~~ m/ \S $/;
+#note "il 5a: '$text'";
+                last;
+              }
+            }
+
+            $pnode = $p;
+          }
         }
 
-        my SemiXML::Node $ns = self.nextSibling;
+        my SemiXML::Node $ns = self.next-sibling;
         if $ns.defined {
-          if $ns.node-type !~~ SemiXML::NTText {
-            my Str $t = ~$ns;
+#note "il 6: n sibling: $ns";
+          my Str $t = ~$ns;
 
-            # if the next sibling is inline or keep, spaces will be inserted
-            # or kept as it was. In the case both are off, the spaces are
-            # removed and only a space is needed when no punctuation exists.
-            if !$ns.inline and !$ns.keep {
-              $text ~= ' ' if $t !~~ m/^ \s* <punct> /
-            }
+          # if the next sibling is inline or keep, spaces will be inserted
+          # or kept as it was. In the case both are off, the spaces are
+          # removed and only a space is needed when no punctuation exists.
+          if !$ns.inline and !$ns.keep {
+            $text ~= ' ' if $t !~~ m/^ \s* <punct> /
           }
+        }
 
-          else {
-            my Str $t = ~$ns;
-            if !$ns.inline and !$ns.keep {
-              $text ~= ' ' if $t !~~ m/^ \s* <punct> /
+        else {
+#note "il 7: no next sibling";
+          my SemiXML::Node $pnode = self;
+          while my $p = $pnode.parent {
+#note "il 8: parent $p";
+            if my $nss = $p.next-sibling {
+#note "il 9: n sibling: '$nss', $nss.inline(), $nss.keep()";
+              my Str $t = ~$nss;
+
+              # if this sibling must keep as it is and isn't inline
+              # then check if there are spaces at the end. these will be
+              # removed when that part is processed and therefore we must
+              # add a space here
+              if !$nss.inline and !$nss.keep {
+                $text ~= ' ' if $t !~~ m/^ \s* <punct> /;
+#note "il 9a: '$text'";
+                last;
+              }
             }
+
+            $pnode = $p;
           }
         }
       }
@@ -180,34 +204,8 @@ note "il 2: ps text $ps";
       $text ~~ s:g/ '>' /\&gt;/;
     }
 
-    # remove comments only when in BTBodyA. the other content bodies
-    # are left alone. only remove when not escaped or after &
-#    if $!body-type ~~ SemiXML::BTBodyA {
-#      $text ~~ s:g/ \s* <!after <[\\\&]>> '#' \N*: $$//;
-#    }
-
     # remove escape characters
     $text ~~ s/\\//;
-#`{{
-    # Remove rest of the backslashes unless followed by hex numbers prefixed
-    # by an 'x'
-    #
-    if $esc ~~ m/ '\\x' <xdigit>+ / {
-      my $set-utf8 = sub ( $m1, $m2) {
-        return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
-      };
-
-      $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
-    }
-}}
-
-
-#$t = $text;
-#$t ~~ s:g/\n/\\n/;
-#note "$!node-type ==>> '$t'";
-
-#  $!text = $text;
-#$parent.append(SemiXML::Text.new(:$text));
 
 #note "txt: $!name -> '$text'";
     $text
