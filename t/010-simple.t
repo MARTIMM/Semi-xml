@@ -55,15 +55,13 @@ subtest 'test multi liners', {
   }
 }}
 
-  $xml = parse(Q:q:to/EOXML/);
-    $aa [
-      $bb [ ][
-        $cc [ ]
-      ]
-    ]
-    EOXML
+  $xml = parse('$aa [ $bb [ $cc [ ] ][ $cc [ ] ] ]');
+  is $xml, '<aa><bb><cc></cc><cc></cc></bb></aa>', "3 tags: $xml";
 
-  is $xml, '<aa><bb><cc></cc></bb></aa>', "3 tags: $xml";
+  $xml = parse('$bb [ $cc [ ] text ][ more text $cc [ ] ]');
+
+  is $xml, '<bb><cc></cc>text more text<cc></cc></bb>',
+           "3 tags: $xml, blocks are separated with a space";
 
   $xml = parse('$aa [ $bb { $x[abc] } ]');
 
