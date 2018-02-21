@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2018-02-20T20:21:25.975867Z'
+  date         = '2018-02-21T14:17:13.549837Z'
   oskernel     = 'linux:4.14.18.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -64,8 +64,8 @@ $p title="purpose"  [
   skipped      = 0
 
 [ chapter.'Element blocks and their different types.' ]
-  success      = 1
-  fail         = 1
+  success      = 2
+  fail         = 0
   todo         = 0
   skipped      = 0
 
@@ -138,15 +138,11 @@ $p title="purpose"  [
 [ summary.line-50 ]
   chapter      = 'Element blocks and their different types.'
   diagnostic   = """
-    not ok 12 - two blocks on an element
-    xml: sxml:TN-empty-001 (¬i t ¬k ¬s | ) '  ...'
-    xml: sxml:TN-empty-002 (¬i t ¬k ¬s | ) '  ...'
-    xml: sxml:TN-block1-003 (¬i t ¬k ¬s | ) ' block 1  ...'
-    xml: sxml:TN-block2-004 (¬i t ¬k ¬s | ) ' block 2  ...'
+    ok 12 - two blocks on an element
 """
 
 [ summary.line-56 ]
   chapter      = 'Element blocks and their different types.'
   diagnostic   = """
-    ok 13 - Inner element is not translated
+    ok
 """
