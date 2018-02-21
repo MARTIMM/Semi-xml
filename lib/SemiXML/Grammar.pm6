@@ -15,7 +15,6 @@ grammar Grammar {
     my Str $t0 = $match.orig.substr( 0, $match.to);
     my Str $t1 = $match.orig.substr($match.to);
     my Int $i = min( $t0.chars, 50) - 1;
-note "F/T: $match.from(), $match.to()";
 
     # linenumber where error was found
     temp $/;
