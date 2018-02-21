@@ -182,14 +182,7 @@ class Sxml {
 
   #-----------------------------------------------------------------------------
   method Str ( --> Str ) {
-    my Str $text = self.get-xml-text;
-
-#Not needed anymore, XML will be kicked out
-    # substitute back all single quotes. it is never a problem that it needs
-    # to be escaped
-    #$text ~~ s:g/'&#39;'/'/;
-
-    $text
+    self.get-xml-text;
   }
 
   #-----------------------------------------------------------------------------
