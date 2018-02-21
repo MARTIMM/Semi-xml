@@ -155,7 +155,7 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
-  method previousSibling ( --> SemiXML::Node ) {
+  method previous-sibling ( --> SemiXML::Node ) {
 
     if $!parent.defined {
       my $pos = $!parent.index-of(self);
@@ -166,7 +166,7 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
-  method nextSibling ( --> SemiXML::Node ) {
+  method next-sibling ( --> SemiXML::Node ) {
 
     if $!parent.defined {
       my $pos = $.parent.index-of(self);
