@@ -6,9 +6,7 @@ use v6;
 #
 unit package SxmlLib:auth<github:MARTIMM>;
 
-use XML;
-#use SemiXML::Sxml;
-use SemiXML::Helper;
+use SemiXML::Element;
 
 #-------------------------------------------------------------------------------
 class Html::List {
@@ -24,32 +22,29 @@ class Html::List {
   has Hash $!top-level-attrs;
 
   #-----------------------------------------------------------------------------
-  method dir-list ( XML::Element $parent,
-                    Hash $attrs is copy,
-                    XML::Node :$content-body   # Ignored
-                  ) {
+  method dir-list ( SemiXML::Element $m ) {
 
-    $!directory = ~($attrs<directory>:delete) // '.';
-    $!ref-attr = ~($attrs<ref-attr>:delete) // 'href';
+    $!directory = ~($m.attributes<directory>:delete) // '.';
+    $!ref-attr = ~($m.attributes<ref-attr>:delete) // 'href';
+    my Str $id = ~($m.attributes<id>:delete) // 'dir-id';
 
     # Set the numbers into the array and fill it up using the last number
     # to the maximum length of C-MAX-LEVEL. So if arrey = [2,3] then
     # result will be [2,3,3,3,3,3,3]
     #
-    my @list = map {.Int}, (~($attrs<header>:delete)).split(',');
+    my @list = map {.Int}, (~($m.attributes<header>:delete)).split(',');
     @!header.push: |@list;
     @!header.push: |(@list[@list.end] xx (C-MAX-LEVEL - +@list));
 
     # convert other attributes from StringList to string
-    $!top-level-attrs = (map { $^k => $^v.Str }, $attrs.kv).Hash;
-    self!create-list( $parent, @($!directory))
+    $!top-level-attrs = (map { $^k => $^v.Str }, $m.attributes.kv).Hash;
+
+    my SemiXML::Element $div = $m.parent.append( 'div', :attributes({:$id}));
+    self!create-list( $div, @($!directory));
   }
 
   #-----------------------------------------------------------------------------
-  method !create-list (
-    XML::Element $parent, @files-to-process is copy
-    --> XML::Element
-  ) {
+  method !create-list ( SemiXML::Element $parent, @files-to-process is copy ) {
 
     while @files-to-process.shift() -> $file {
 
@@ -68,6 +63,7 @@ class Html::List {
         else {
           $!first_level = False;
         }
+
         my $ul = self!make-dir-entry( $parent, $dir);
         my @new-files = dir($dir)>>.Str;
         self!create-list( $ul, @(sort @new-files));
@@ -89,32 +85,33 @@ class Html::List {
         say "File $file is ignored, it is a special type of file";
       }
     }
-
-    $parent;
   }
 
   #-----------------------------------------------------------------------------
   method !make-dir-entry (
-    XML::Element $parent, Str $dir-label is copy
-    --> XML::Element
+    SemiXML::Element $parent, Str $dir-label is copy
+    --> SemiXML::Element
   ) {
 
-    # place left attributes only on the first directory shown
-    my XML::Element $ul = append-element( $parent, 'ul', $!top-level-attrs);
-    $!top-level-attrs = %();
-
-    my XML::Element $li = append-element( $ul, 'li');
-    my XML::Element $hdr = append-element( $li, 'h' ~ @!header[$!level]);
-
     $dir-label = $dir-label.IO.basename;
-    $hdr.append(XML::Text.new(:text($dir-label)));
+    $parent.append(
+      'h' ~ @!header[$!level],
+      :text($dir-label)
+    );
+
+    # place left attributes only on the first directory shown
+    my SemiXML::Element $ul = $parent.append(
+      'ul', :attributes($!top-level-attrs)
+    );
+    $!top-level-attrs = {};
 
     return $ul;
   }
 
   #-----------------------------------------------------------------------------
-  method !make-entry ( XML::Element $parent, Str $reference ) {
-    my XML::Element $li = append-element( $parent, 'li');
+  method !make-entry ( SemiXML::Element $parent, Str $reference ) {
+
+    my SemiXML::Element $li = $parent.append('li');
 
     my Hash $attrs = {};
     if $!ref-attr ne 'href' {
@@ -126,19 +123,16 @@ class Html::List {
       $attrs<href> = $reference;
     }
 
-    my XML::Element $a = append-element( $li, 'a', $attrs);
-
     # Cleanup the reference in such a way that it will become a nice label
     # The filename can have prefixed numbers so the sorting will automatically
     # have the proper sequence to show. The number will be removed from the
     # label.
-    #
     my $a-label = $reference;
     $a-label ~~ s:g/<-[\/]>+\///;     # Remove any path leading up to the file
     $a-label ~~ s/\.<-[\.]>*$//;      # Remove file extension
     $a-label ~~ s/\d+('-'|'_')*//;    # Remove number with optional '-' or '_'
     $a-label ~~ s:g/('-'|'_')+/ /;    # Substitute '-' or '_' with space.
 
-    $a.append(XML::Text.new(:text($a-label)));
+    $li.append( 'a', :attributes($attrs), :text($a-label));
   }
 }
