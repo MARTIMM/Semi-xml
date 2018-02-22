@@ -3,12 +3,6 @@ use Test;
 use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
-# Testing;
-#   Check of Core sxml methods
-#     $!SxmlCore.comment [comment text]
-#     $!SxmlCore.cdata [data text]
-#     $!SxmlCore.pi [code text]
-#-------------------------------------------------------------------------------
 # Setup
 my $dir = 't/D108';
 mkdir $dir unless $dir.IO ~~ :e;
@@ -19,16 +13,16 @@ $html [
   $body [
     $h1 [ Tests for comments etc ]
 
-    $!SxmlCore.comment [ comment text ]
-    $!SxmlCore.comment [ comment text $!SxmlCore.date [] ]
-    $!SxmlCore.comment [ comment text $p [ data in section ] $br ]
+    $sxml:comment [ comment text ]
+    $sxml:comment [ comment text $!SxmlCore.date ]
+    $sxml:comment [ comment text $p [ data in section ] $br ]
 
-    $!SxmlCore.cdata [cdata text]
-    $!SxmlCore.cdata [cdata text $!SxmlCore.date []]
-    $!SxmlCore.cdata [cdata text $p [ data in section] $br ]
+    $sxml:cdata [cdata text]
+    $sxml:cdata [cdata text $!SxmlCore.date ]
+    $sxml:cdata [cdata text $p [ data in section ] $br ]
 
-    $!SxmlCore.pi target=perl6 [ instruction text ]
-    $!SxmlCore.pi target=xml-stylesheet [href="mystyle.css" type="text/css"]
+    $sxml:pi target=perl6 [ instruction text ]
+    $sxml:pi target=xml-stylesheet [href="mystyle.css" type="text/css"]
 
     $h1 [ End of tests ]
   ]
@@ -37,14 +31,23 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-  S => { xml => { :fileext<html>, }, },
-  C => { xml => { :!xml-show, :!doctype-show, }, },
+#`{{
+  F => {
+    xio => {
+      inline => [ 'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time' ],
+      self-close => [ 'br' ],
+    }
+  },
+}}
+#  S => { xio => { :fileext<html>, }, },
+  #C => { xio => { :!xml-show, :!doctype-show, }, },
+  T => {:parse}
 };
 
 #-------------------------------------------------------------------------------
 # Parse
-my SemiXML::Sxml $x .= new;
-$x.parse( :filename($f1), :$config, :!raw, :!keep);
+my SemiXML::Sxml $x .= new(:refine[<html html>]);
+$x.parse( :filename($f1), :$config, :!trace);
 my Str $xml-text = ~$x;
 #diag $xml-text;
 
@@ -73,7 +76,7 @@ like $xml-text, /'<?xml-stylesheet href="mystyle.css" type="text/css"?>'
 
 #-------------------------------------------------------------------------------
 # Cleanup
-unlink $f1;
-rmdir $dir;
+#unlink $f1;
+#rmdir $dir;
 
 done-testing();

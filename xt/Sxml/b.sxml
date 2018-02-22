@@ -1,8 +1,18 @@
 $html [
   $body [
-    $p [
-      paragraph text $i [ $strong [ strong text ]].
-      rest of paragraph $a href=link [ link text ] after link. A one liner $strong { $some-element [ ] } should translate into $strong { <some-element></some-element> }. Because
-    ]
+    $h1 [ Tests for comments etc ]
+
+    $sxml:comment [ comment text ]
+    $sxml:comment [ comment text $!SxmlCore.date [] ]
+    $sxml:comment [ comment text $p [ data in section ] $br ]
+
+    $sxml:cdata [cdata text]
+    $sxml:cdata [cdata text $!SxmlCore.date []]
+    $sxml:cdata [cdata text $p [ data in section] $br ]
+
+    $sxml:pi target=perl6 [ instruction text ]
+    $sxml:pi target=xml-stylesheet [href="mystyle.css" type="text/css"]
+
+    $h1 [ End of tests ]
   ]
 ]
