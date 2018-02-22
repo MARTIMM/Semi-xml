@@ -37,7 +37,7 @@ class Element does SemiXML::Node {
       }
 
       when 'sxml:comment' {
-        $!node-type = SemiXML::NTPI;
+        $!node-type = SemiXML::NTComment;
         $!keep = True;
       }
 
@@ -267,7 +267,7 @@ class Element does SemiXML::Node {
         $xml-text ~= self!pi-xml;
       }
 
-      when SemiXML::NTPI {
+      when SemiXML::NTComment {
         $xml-text ~= self!comment-xml;
       }
     }
