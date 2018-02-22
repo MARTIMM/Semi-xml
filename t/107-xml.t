@@ -17,15 +17,15 @@ my $f1 = "$dir/test-file.sxml";
 spurt( $f1, q:to/EOSX/);
 $top [
   $!SxmlCore.date
-  $!SxmlCore.date year=1957 month=6 day=26
-  $!SxmlCore.date year=1957 day=26
-  $!SxmlCore.date year=1957 month=6
-  $!SxmlCore.date year=1957
+  $!SxmlCore.date year=1957 month=6 day=26 []
+  $!SxmlCore.date year=1957 day=26 []
+  $!SxmlCore.date year=1957 month=6 []
+  $!SxmlCore.date year=1957 []
   $A
   $X [ $!SxmlCore.date ]
   $Y [ $!SxmlCore.date-time ]
-  $Z [ $!SxmlCore.date-time timezone=960 ]
-  $Z2 [ $!SxmlCore.date-time utc=1 iso=0 ]
+  $Z [ $!SxmlCore.date-time timezone=960 []]
+  $Z2 [ $!SxmlCore.date-time utc=1 iso=0 []]
 ]
 EOSX
 
