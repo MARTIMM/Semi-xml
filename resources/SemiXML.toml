@@ -38,7 +38,12 @@
 [ F ]
   # modules and methods
   inline            = [
-    'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time'
+    'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time', 'sxml:comment',
+    'sxml:cdata'
+  ]
+
+  space-preserve    = [
+    'sxml:cdata', 'sxml:pi'
   ]
 
 
