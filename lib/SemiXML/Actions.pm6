@@ -161,18 +161,15 @@ class Actions {
 
     my SemiXML::Node $sxml-tree;
     if $!root.nodes.elems == 0 {
-note "0 elements";
       $sxml-tree = $!root;
     }
 
     elsif $!root.nodes.elems == 1 {
-note "1 element";
       $sxml-tree = $!root.nodes[0];
       $sxml-tree.parent(SemiXML::Element.new(:name<X>));
     }
 
     elsif $!root.nodes.elems > 1 {
-note "more than 1 element";
       if $!globals.frag {
         $sxml-tree = $!root;
       }
@@ -184,7 +181,6 @@ note "more than 1 element";
       }
     }
 
-note "GST Root: ", $sxml-tree.perl(:simple);
     $sxml-tree
   }
 
