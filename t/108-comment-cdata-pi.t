@@ -31,17 +31,8 @@ EOSX
 
 #-------------------------------------------------------------------------------
 my Hash $config = {
-#`{{
-  F => {
-    xio => {
-      inline => [ 'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time' ],
-      self-close => [ 'br' ],
-    }
-  },
-}}
-#  S => { xio => { :fileext<html>, }, },
-  #C => { xio => { :!xml-show, :!doctype-show, }, },
-  T => {:parse}
+  C => { html => { :!doctype-show, }, },
+  T => { :parse, :!tables, :!config},
 };
 
 #-------------------------------------------------------------------------------
@@ -70,13 +61,14 @@ like $xml-text, /:s '<![' CDATA '[' cdata text
                 /, 'Check cdata with embedded tags';
 
 like $xml-text, /:s '<?' perl6 instruction text '?>'/, 'Check pi data 1';
-like $xml-text, /'<?xml-stylesheet href="mystyle.css" type="text/css"?>'
-                /, 'Check pi data 2';
+like $xml-text, /'<?xml-stylesheet'/, 'PI xml stylesheet found';
+like $xml-text, /'href="mystyle.css"'/, 'PI href attibute';
+like $xml-text, /'type="text/css"'/, 'PI type atribute';
 
 
 #-------------------------------------------------------------------------------
 # Cleanup
-#unlink $f1;
-#rmdir $dir;
+unlink $f1;
+rmdir $dir;
 
 done-testing();

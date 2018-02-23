@@ -55,7 +55,7 @@ my Str $f = "$dir/f200.sxml";
 spurt $f, q:to/EOSXML/;
   $html [
     $body [
-      $h1 [ Burping at $!SxmlCore.date-time utc=0 iso=0 ]
+      $h1 [ Burping at $!SxmlCore.date-time utc=0 iso=0 []]
       $p [ this is &what;! ]
     ]
   ]

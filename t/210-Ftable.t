@@ -45,9 +45,9 @@ subtest 'self-closing on html defaults', {
     $html [
       $head [
         $title
-        $meta charset=UTF-8
-        $script src=prut.js
-        $link href='prut.css'
+        $meta charset=UTF-8 []
+        $script src=prut.js []
+        $link href=prut.css []
       ]
 
       $body [
