@@ -105,7 +105,7 @@ class Sxml {
         :$!objects, :$!refine, :$!refined-tables,
       )
     );
-note "Tr 0: $trace, ", $!globals.trace;
+
     # save the filename globally but only once
     $!globals.filename //= $!filename if ?$!filename;
 
