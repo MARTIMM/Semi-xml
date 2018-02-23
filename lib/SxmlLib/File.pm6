@@ -10,7 +10,6 @@ use SemiXML::Element;
 #-------------------------------------------------------------------------------
 class File {
 
-  has Hash $.symbols = {};
   has SemiXML::Globals $!globals .= instance;
 
 #TODO add a method to load parts like xpointer looking for fragments
