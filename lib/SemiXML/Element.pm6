@@ -429,7 +429,7 @@ class Element does SemiXML::Node {
   # PI node
   method !pi-xml ( --> Str ) {
 
-    my Str $target = ($!attributes<target> // 'no-target').Str;
+    my Str $target = ($!attributes<target>:delete // 'no-target').Str;
     my Str $xml-text = "<?$target";
     for $!attributes.keys.sort -> $key {
       # filter out sxml namespace attributes
