@@ -375,7 +375,7 @@ note "Tr 0: $trace, ", $!globals.trace;
     for @$!table-names -> $table {
 
       # document control
-      if $table ~~ any(<D DN E F ML R>) {
+      if $table ~~ any(<D DN E ML R>) {
         $!refined-tables{$table} =
           $!configuration.refine( $table, $!refine[IN], $basename);
       }
@@ -384,6 +384,59 @@ note "Tr 0: $trace, ", $!globals.trace;
       elsif $table ~~ any(<C H S X>) {
         $!refined-tables{$table} =
           $!configuration.refine( $table, $!refine[OUT], $basename);
+      }
+
+      elsif $table eq 'F' {
+        #$!refined-tables{$table} =
+        #  $!configuration.refine( $table, $basename);
+#  inline
+#  no-conversion
+#  space-preserve
+#  self-closing
+        my $merge-array = sub ( *@key-list, Bool :$filter = False --> Hash ) {
+
+          my Hash $refined-list = {};
+          my Hash $s = $c;
+          for @key-list -> $refine-key {
+
+            last unless $s{$refine-key}:exists and $s{$refine-key}.defined;
+            $s = $s{$refine-key} if $s{$refine-key} ~~ Hash;
+
+            for $s.keys -> $k {
+              next if $s{$k} ~~ Hash;
+
+              if $s{$k} ~~ Array {
+                $refined-list{$k} //= [];
+                $refined-list{$k} = [ |($refined-list{$k}), |($s{$k})];
+              }
+
+              # Looks like too much but it isn't. It must be able to remove
+              # previously set entries.
+              $refined-list{$k}:delete
+                if $filter and
+                   ( $s{$k} ~~ Bool and !$s{$k} or not $s{$k}.defined );
+            }
+          }
+
+          $refined-list;
+        };
+
+        $!refined-tables{$table} = $merge-array(
+          $table, $!refine[IN], $basename
+        );
+#`{{
+my Array $inline = [];
+if c<F>{$!refine[IN]} ~~ Array
+$inline = $c<F><inline>;
+
+$inline = [|$inline, |($c<F>{$!refine[IN]}<inline>)]
+if $c<F>{$!refine[IN]}<inline> ~~ Array;
+
+if $c<F>{$!refine[IN]}<inline>:exists {
+}
+
+$inline = [|$inline, |($c<F><inline> // [])
+}}
       }
 
       elsif $table eq 'T' {
