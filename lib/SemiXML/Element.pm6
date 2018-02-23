@@ -253,22 +253,26 @@ class Element does SemiXML::Node {
   #method xml ( XML::Node $parent ) {
   method xml ( --> Str ) {
 
-    my Str $xml-text = '';
+    my Str $xml-text;
     given $!node-type {
       when any( SemiXML::NTFragment, SemiXML::NTElement, SemiXML::NTMethod) {
-        $xml-text ~= self!plain-xml;
+        $xml-text = self!plain-xml;
       }
 
       when SemiXML::NTCData {
-        $xml-text ~= self!cdata-xml;
+        $xml-text = self!cdata-xml;
       }
 
       when SemiXML::NTPI {
-        $xml-text ~= self!pi-xml;
+        $xml-text = self!pi-xml;
       }
 
       when SemiXML::NTComment {
-        $xml-text ~= self!comment-xml;
+        $xml-text = self!comment-xml;
+      }
+
+      default {
+        $xml-text = '';
       }
     }
 
