@@ -103,10 +103,9 @@ class Sxml {
     $!globals.set-options( hash(
         :$trace, :$keep, :$raw, :$exec, :$frag,
         :$!objects, :$!refine, :$!refined-tables,
-#        :$!filename,
       )
     );
-
+note "Tr 0: $trace, ", $!globals.trace;
     # save the filename globally but only once
     $!globals.filename //= $!filename if ?$!filename;
 
@@ -401,9 +400,9 @@ class Sxml {
 
     note "\nComplete configuration: ", $!configuration.perl,
          "\nRefined configuration tables"
-         if $!globals.trace and $!globals.refined-tables<T><config>;
+         if $trace and $!refined-tables<T><config>;
 
-    if $!globals.trace and $!globals.refined-tables<T><tables> {
+    if $trace and $!refined-tables<T><tables> {
       note "Refine keys: $!refine[IN], $!refine[OUT]";
       note "File: $basename";
       for @$!table-names -> $table {
@@ -452,7 +451,7 @@ class Sxml {
     else {
       note "No need to parse and save data,",
            " $!target-fn is in its latest version"
-        if $!globals.trace and $!globals.refined-tables<T><file-handlin>;
+        if $trace and $!refined-tables<T><file-handlin>;
     }
 
     $found-dependency or $continue
