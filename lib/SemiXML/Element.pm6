@@ -331,7 +331,7 @@ class Element does SemiXML::Node {
       $modifiers ~= 'E' if $!node-type ~~ SemiXML::NTElement;
       $modifiers ~= 'D' if $!node-type ~~ SemiXML::NTCData;
       $modifiers ~= 'P' if $!node-type ~~ SemiXML::NTPI;
-      $modifiers ~= 'C' if $!node-type ~~ SemiXML::NTPI;
+      $modifiers ~= 'C' if $!node-type ~~ SemiXML::NTComment;
 
       $modifiers ~= ')';
     }
@@ -342,7 +342,7 @@ class Element does SemiXML::Node {
     }
 
     if $!node-type ~~ any(
-       SemiXML::NTElement, SemiXML::NTCData, SemiXML::NTPI, SemiXML::NTPI
+       SemiXML::NTElement, SemiXML::NTCData, SemiXML::NTPI, SemiXML::NTComment
     ) {
       $e = [~] '$', $!name, $modifiers, $attrs;
     }
