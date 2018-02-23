@@ -129,17 +129,44 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
-  multi method before ( SemiXML::Node $node, SemiXML::Node $new, :$offset=0 ) {
+  multi method before (
+    SemiXML::Node $node, SemiXML::Node $new, :$offset=0, *%formatting
+    --> SemiXML::Node
+  ) {
+
+    my SemiXML::Node $r;
 
     my Int $pos = self.index-of($node);
-    $!nodes.splice( $pos + $offset, 0, $new.reparent(self))
-      if $pos.defined and $pos >= 0 and ($pos + $offset) <= $!nodes.elems;
+    if $pos.defined and $pos >= 0 and ($pos + $offset) <= $!nodes.elems {
+      $!nodes.splice( $pos + $offset, 0, $new.reparent(self));
+      $new.set-formatting(|%formatting);
+      $r = $new;
+    }
+
+    $r
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi method before ( SemiXML::Node $node ) {
+  multi method before (
+    SemiXML::Node $node, *%formatting
+    --> SemiXML::Node
+  ) {
 
-    $!parent.before( self, $node) if $!parent.defined
+    my SemiXML::Node $r;
+    if $!parent.defined {
+      $r = $!parent.before( self, $node, |%formatting);
+    }
+
+    $r;
+  }
+
+  #-----------------------------------------------------------------------------
+  method set-formatting ( *%formatting ) {
+
+    $!inline = %formatting<inline> // False;
+    $!inline = %formatting<noconv> // False;
+    $!inline = %formatting<keep> // False;
+    $!inline = %formatting<close> // False;
   }
 
   #-----------------------------------------------------------------------------
