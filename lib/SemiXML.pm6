@@ -56,16 +56,8 @@ package SemiXML:auth<github:MARTIMM> {
     #---------------------------------------------------------------------------
     method set-options ( Hash:D $options ) {
 
-      my Hash $h = hash(
-        :trace($options<trace>), :keep($options<keep>),
-        :raw($options<raw>), :exec($options<exec>),
-        :frag($options<frag>), :tree($options<tree>),
-
-        #:filename($options<filename>),
-        :refine($options<refine>),
-        :refined-tables($options<refined-tables>),
-        :objects($options<objects>),
-      );
+      my @keys = <trace keep raw exec frag refine refined-tables objects>;
+      my Hash $h = hash(@keys Z=> $options{@keys});
 
       $!per-call-options.push: $h;
     }
