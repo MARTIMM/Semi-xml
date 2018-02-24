@@ -3,9 +3,7 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SxmlLib:auth<github:MARTIMM>;
 
-use XML;
-#use SemiXML::Sxml;
-use SemiXML::Helper;
+use SemiXML::Element;
 
 #-------------------------------------------------------------------------------
 class LoremIpsum {
@@ -55,7 +53,7 @@ class LoremIpsum {
   }
 
   #-----------------------------------------------------------------------------
-  method standard1500 ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+  method standard1500 ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:to/EOIPSUM/;
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
@@ -67,15 +65,11 @@ class LoremIpsum {
         culpa qui officia deserunt mollit anim id est laborum.
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
-  method cicero45bc (
-    XML::Element $parent,
-    Hash $attrs --> XML::Element
-  ) {
+  method cicero45bc ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:to/EOIPSUM/;
         Sed ut perspiciatis unde omnis iste natus error sit voluptatem
@@ -94,12 +88,11 @@ class LoremIpsum {
         pariatur?
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
-  method cupcake-ipsum ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+  method cupcake-ipsum ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:to/EOIPSUM/;
         Cupcake ipsum dolor sit. Amet I love liquorice jujubes pudding
@@ -109,15 +102,11 @@ class LoremIpsum {
         chocolate bar jujubes toffee.
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
-  method samuel-ipsum (
-    XML::Element $parent,
-    Hash $attrs --> XML::Element
-  ) {
+  method samuel-ipsum ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:to/EOIPSUM/;
         Now that there is the Tec-9, a crappy spray gun from South Miami.
@@ -127,15 +116,11 @@ class LoremIpsum {
         actually proud of that shit.
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
-  method bacon-ipsum (
-    XML::Element $parent,
-    Hash $attrs --> XML::Element
-  ) {
+  method bacon-ipsum ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:to/EOIPSUM/;
         Bacon ipsum dolor sit amet salami jowl corned beef, andouille flank
@@ -145,15 +130,11 @@ class LoremIpsum {
         drumstick.
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
-  method tuna-ipsum (
-    XML::Element $parent,
-    Hash $attrs --> XML::Element
-  ) {
+  method tuna-ipsum ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:to/EOIPSUM/;
         Moonfish, steelhead, lamprey southern flounder tadpole fish sculpin
@@ -163,15 +144,11 @@ class LoremIpsum {
         threadsail ayu cutlassfish.
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
-  method veggie-ipsum (
-    XML::Element $parent,
-    Hash $attrs --> XML::Element
-  ) {
+  method veggie-ipsum ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:qq:to/EOIPSUM/;
         Veggies sunt bona vobis, proinde vos postulo esse magis grape pea
@@ -182,15 +159,11 @@ class LoremIpsum {
         sea lettuce. Garbanzo tigernut earthnut pea fennel.
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
-  method cheese-ipsum (
-    XML::Element $parent,
-    Hash $attrs --> XML::Element
-  ) {
+  method cheese-ipsum ( SemiXML::Element $m ) {
 
     my Str $ipsum = Q:to/EOIPSUM/;
         I love cheese, especially airedale queso. Cheese and biscuits
@@ -201,13 +174,12 @@ class LoremIpsum {
         and cheese. Lancashire.
         EOIPSUM
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
   # Generate words by calling make-words
-  method words (XML::Element $parent, Hash $attrs --> XML::Element ) {
+  method words ( SemiXML::Element $m ) {
 
     # get the number of words
     my Int $nbr-words = ($attrs<n> // 1).Str.Int;
@@ -224,23 +196,20 @@ class LoremIpsum {
     $ipsum .= tc if ? $attrs{'tc'};
     $ipsum .= uc if ? $attrs{'uc'};
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
   # Generate a sentence using words from the text
-  method sentence ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+  method sentence ( SemiXML::Element $m ) {
 
     my Str $ipsum = self!make-sentence;
-    #$ipsum ~~ s:g/ <punct> //;
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
   # Generate sentences by calling sentence a few times
-  method sentences ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+  method sentences ( SemiXML::Element $m ) {
 
     # get the number of sentences
     my Int $nbr-sentences = ($attrs<n> // 1).Str.Int;
@@ -251,28 +220,22 @@ class LoremIpsum {
       $ipsum ~= self!make-sentence;
     }
 
-    $parent.append(XML::Text.new(:text($ipsum)));
-    $parent;
+    $m.before(SemiXML::Text.new(:text($ipsum)));
   }
 
   #-----------------------------------------------------------------------------
   # Generate sentences by calling sentence a few times
-  method paragraph ( XML::Element $parent, Hash $attrs --> XML::Element ) {
+  method paragraph ( SemiXML::Element $m ) {
 
     # get the number of sentences
     my Int $nbr-paragraphs = (~$attrs<n> // 1).Int;
-
-    my XML::Element $p;
 
     # use that point to get some words from the text
     for ^$nbr-paragraphs {
       my Str $ipsum = '';
       $ipsum ~= self!make-sentence ~ '. ' for ^(4 + (4.rand.Int));
-      $p = append-element( $parent, 'p');
-      append-element( $p, :text($ipsum));
+      $m.before.( 'p', :text($ipsum));
     }
-
-    $parent;
   }
 
   #-----------------------------------------------------------------------------
