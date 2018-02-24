@@ -235,29 +235,12 @@ class Sxml {
   }
 
   #-----------------------------------------------------------------------------
-#`{{
-  multi method get-config ( Str:D :$table, Str:D :$key --> Any ) {
-
-    $!refined-tables{$table}:exists ?? $!refined-tables{$table}{$key} !! Any
-  }
-}}
-
-  #-----------------------------------------------------------------------------
-  method root-element ( --> XML::Element ) {
-    my $doc = $!actions.get-document;
-    return ?$doc ?? $doc.root !! XML::Element;
-  }
-
-  #-----------------------------------------------------------------------------
   method !process-cmd-str( Str $cmd-string --> Str ) {
 
     my $cmd = $cmd-string;
 
     # Bind to S table
     my Hash $S := $!refined-tables<S>;
-
-    # filename is basename + extension
-#    my Str $filename = $S<filename> ~ '.' ~ $S<fileext>;
 
     $cmd ~~ s:g/ '%of' /$S<filename>/;
 
@@ -271,8 +254,6 @@ class Sxml {
     }
 
     $cmd ~~ s:g/ '%op' /$path/;
-
-#    my Str $ext = $S<fileext>;
     $cmd ~~ s:g/ '%oe' /$S<fileext>/;
 
     $cmd;
