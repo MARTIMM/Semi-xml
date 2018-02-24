@@ -6,7 +6,7 @@
     "Config::TOML",
     "Config::DataLang::Refine",
     "Terminal::ANSIColor",
-    "Color"
+    "Color", "XML", "XML::XPath"
   ],
   "license": "Artistic-2.0",
   "description": "Semi XML parser and XML generator",
