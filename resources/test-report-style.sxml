@@ -16,6 +16,8 @@ $style =sxml:noconv =sxml:keep «
      font-family: FreeMono;
      font-size: 12pt;
      line-height: 14pt;
+
+     white-space: pre-wrap;
   }
 
   pre.prettyprint {
