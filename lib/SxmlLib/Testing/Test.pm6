@@ -87,7 +87,7 @@ class Test {
 
     my SemiXML::Element $p = $div.append( 'p', :attributes({:title<purpose>}));
     $p.insert($_) for $m.nodes.reverse;
-note "Pur: $div.name(), $div.parent.name()";
+#note "Pur: $div.name(), $div.parent.name()";
   }
 
   #-----------------------------------------------------------------------------
@@ -316,7 +316,7 @@ note $code-text;
       [ SemiXML::SCDesc, 'p', SemiXML::SCAttr, '@title=purpose']
     );
 #note "Body: $!body";
-note "R0: ", $r;
+#note "R0: ", $r;
 return unless $r.elems;
 
     # add a paragraph below the users text and add the chapters to a list
@@ -361,7 +361,7 @@ return unless $r.elems;
 
     # insert place to display the code
     $m.before(self!create-code-element($code-text));
-note "CCE: ", $m.parent.Str;
+#note "CCE: ", $m.parent.Str;
     # insert place to display the test results
     $m.before(self!create-test-result($code-text));
 
