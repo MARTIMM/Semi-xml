@@ -43,7 +43,7 @@
   ]
 
   space-preserve    = [ 'sxml:cdata', 'sxml:pi' ]
-  no-conversion     = [ 'style', 'script', 'sxml:cdata', 'sxml:pi' ]
+  no-conversion     = [ 'sxml:cdata', 'sxml:pi' ]
 
 
 [ F.html ]
