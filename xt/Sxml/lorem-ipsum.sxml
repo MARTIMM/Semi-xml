@@ -1,0 +1,60 @@
+# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/lorem-ipsum.sxml
+
+$!test.run title='LoremIpsum module tests'
+       lang=perl6 highlight-skin=desert =linenumbers [
+
+  $!test.purpose title='Testing the module LoremIpsum' [
+    Purpose of this report is to test the module LoremIpsum. The module is ment to generate text as a temporary fill of elements. This can help to have an impression of a page without being extracted by content.
+  ]
+
+  $!test.chapter title='Setup usage of module' [
+    $p [
+      Set things up and test for proper instantiation. It will be used here in an HTML document so the refine input as well as its output is set to $strong[html]. First test is only about the $strong[html] element.
+    ]
+
+    $!test.code «
+      use SemiXML::Sxml;
+      my SemiXML::Sxml $sxml .= new(:refine([<html html>]));
+      isa-ok $sxml, SemiXML::Sxml;
+
+      my Hash $config = {
+        ML => { :lorem('SxmlLib::LoremIpsum') },
+        T => { :parse, :modules}
+      };
+
+      my Str $content = '$html';
+      $sxml.parse( :$content, :$config, :!trace);
+
+      like ~$sxml, /:s
+            '<!DOCTYPE html>'
+            '<html xmlns="http://www.w3.org/1999/xhtml"></html>'
+            /, "Simple html element";
+    »
+  ]
+
+  $!test.chapter title='Method standard1500' [
+    $p [ Above we see that the key $strong [lorem] is used to refer to the class $strong [SxmlLib::LoremIpsum]. Here we test method $strong [standard1500].
+    ]
+    $!test.code «
+      $content = q:to/EOSXML/;
+        $html [
+          $body [
+            $p [ $!lorem.standard1500 ]
+          ]
+        ]
+        EOSXML
+
+      $sxml.parse( :$content, :$config, :!trace);
+
+      like ~$sxml, /:s '<p>' Lorem ipsum dolor sit amet /,
+                   'a bit from the beginning of standard1500';
+      like ~$sxml, /:s mollit anim id est laborum '.' '</p>' /,
+                   'and bit from its end of standard1500';
+    »
+  ]
+
+  $!test.chapter title='Method cicero45bc' [
+    $p [ Next module to test is $strong [cicero45bc].
+    ]
+  ]
+]
