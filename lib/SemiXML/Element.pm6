@@ -470,8 +470,8 @@ class Element does SemiXML::Node {
   method !get-object ( --> Any ) {
 
     # get the object and test for existence of method
-    my $object = $!globals.objects{$!module}
-      if $!globals.objects{$!module}:exists;
+    my Hash $objects = $!globals.objects;
+    my $object = $objects{$!module} if $objects{$!module}:exists;
 
     if $object.defined {
       die X::SemiXML.new(
