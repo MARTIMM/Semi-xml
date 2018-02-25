@@ -479,7 +479,7 @@ $inline = [|$inline, |($c<F><inline> // [])
 
     # instantiate modules specified in the configuration
     if $found-dependency or $continue {
-      self!process-modules;
+      self!process-modules($trace);
     }
 
     else {
@@ -561,7 +561,7 @@ $inline = [|$inline, |($c<F><inline> // [])
   #-----------------------------------------------------------------------------
   # Get modulenames and library paths. Format of an entry in table ML is
   # mod-key => 'mod-name[;lib-path]'
-  method !process-modules ( ) {
+  method !process-modules ( Bool $trace ) {
 
     # no entries, no work
     return unless ? $!refined-tables<ML>;
@@ -587,7 +587,7 @@ $inline = [|$inline, |($c<F><inline> // [])
 }}
 
     # load and instantiate
-    note " " if $!globals.trace and $!globals.refined-tables<T><modules>;
+    note " " if $trace and $!refined-tables<T><modules>;
     for $mod.kv -> $key, $value {
       if $!objects{$key}:!exists {
         if $lib{$key}:exists {
@@ -604,12 +604,12 @@ $inline = [|$inline, |($c<F><inline> // [])
         $!objects{$key} = $obj if $obj.defined;
 
         note "Object for key '$key' installed from class $value"
-             if $!globals.trace and $!globals.refined-tables<T><modules>;
+             if $trace and $!refined-tables<T><modules>;
       }
 
       else {
         note "Object for '$key' already installed from class $value"
-             if $!globals.trace and $!globals.refined-tables<T><modules>;
+             if $trace and $!refined-tables<T><modules>;
       }
     }
   }
