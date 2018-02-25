@@ -36,13 +36,14 @@ package SemiXML:auth<github:MARTIMM> {
     submethod BUILD ( ) {
 
       # initialize and set defaults. this entry will never be popped
-      $!per-call-options = [];
-      self.set-options( hash(
+      $!per-call-options = [
+        hash(
           :!trace, :!keep, :!raw, :exec, :!frag, :!tree,
-          :objects({}), :filename<unknown.sxml>,
-          :refine([<xml xml>]), :refined-tables({}),
-        )
-      );
+          :objects({}), :refine([<xml xml>]), :refined-tables({}),
+        ),
+      ];
+
+      $!filename = 'unknown.sxml';
     }
 
     #---------------------------------------------------------------------------
