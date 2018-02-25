@@ -593,18 +593,33 @@ $inline = [|$inline, |($c<F><inline> // [])
         if $lib{$key}:exists {
 
 #TODO test for duplicate paths
-          my $repository = CompUnit::Repository::FileSystem.new(
-            :prefix($lib{$key})
-          );
+          my $repository =
+            CompUnit::Repository::FileSystem.new(:prefix($lib{$key}));
           CompUnit::RepositoryRegistry.use-repository($repository);
         }
 
-        (try require ::($value)) === Nil and say "Failed to load $value\n$!";
-        my $obj = ::($value).new;
-        $!objects{$key} = $obj if $obj.defined;
+        # Must fail and show why it failed
+        try {
+          require ::($value);
 
-        note "Object for key '$key' installed from class $value"
-             if $trace and $!refined-tables<T><modules>;
+          my $obj = ::($value).new;
+          if $obj.defined {
+            $!objects{$key} = $obj;
+
+            note "Object for key '$key' installed from class $value"
+              if $trace and $!refined-tables<T><modules>;
+          }
+
+          else {
+            die "Failed to instatiate object $value with key $key";
+          }
+
+          CATCH {
+            .note;
+#          die X::SemiXML.new(:message(::($value).Str)) if ::($value) ~~ Failure;
+          }
+        }
+
       }
 
       else {
