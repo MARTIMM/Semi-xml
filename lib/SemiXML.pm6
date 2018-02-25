@@ -42,8 +42,6 @@ package SemiXML:auth<github:MARTIMM> {
           :objects({}), :refine([<xml xml>]), :refined-tables({}),
         ),
       ];
-
-      $!filename = 'unknown.sxml';
     }
 
     #---------------------------------------------------------------------------
