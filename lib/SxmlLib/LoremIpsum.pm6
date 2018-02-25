@@ -8,7 +8,7 @@ use SemiXML::Element;
 #-------------------------------------------------------------------------------
 class LoremIpsum {
 
-  # could not use 'has' because of time of existence and calculatig length
+  # could not use 'has' because of time of existence and calculating length
   # in submethod BUILD
   #
   my Hash $lorem-texts = {
@@ -182,7 +182,7 @@ class LoremIpsum {
   method words ( SemiXML::Element $m ) {
 
     # get the number of words
-    my Int $nbr-words = ($attrs<n> // 1).Str.Int;
+    my Int $nbr-words = ($m.attributes<n> // 1).Str.Int;
 
     my Str $ipsum;
     $ipsum ~= self!make-word ~ ' ' for ^$nbr-words;
@@ -193,8 +193,8 @@ class LoremIpsum {
     $ipsum ~~ s:g/ \s+\s / /;
 
     $ipsum .= lc;
-    $ipsum .= tc if ? $attrs{'tc'};
-    $ipsum .= uc if ? $attrs{'uc'};
+    $ipsum .= tc if ? $m.attributes{'tc'};
+    $ipsum .= uc if ? $m.attributes{'uc'};
 
     $m.before(SemiXML::Text.new(:text($ipsum)));
   }
@@ -212,7 +212,7 @@ class LoremIpsum {
   method sentences ( SemiXML::Element $m ) {
 
     # get the number of sentences
-    my Int $nbr-sentences = ($attrs<n> // 1).Str.Int;
+    my Int $nbr-sentences = ($m.attributes<n> // 1).Str.Int;
 
     # use that point to get some words from the text
     my Str $ipsum = '';
@@ -228,7 +228,7 @@ class LoremIpsum {
   method paragraph ( SemiXML::Element $m ) {
 
     # get the number of sentences
-    my Int $nbr-paragraphs = (~$attrs<n> // 1).Int;
+    my Int $nbr-paragraphs = (~$m.attributes<n> // 1).Int;
 
     # use that point to get some words from the text
     for ^$nbr-paragraphs {
@@ -238,8 +238,7 @@ class LoremIpsum {
     }
   }
 
-  #-----------------------------------------------------------------------------
-  #-----------------------------------------------------------------------------
+  #---[ private methods ]-------------------------------------------------------
   method !make-sentence ( --> Str ) {
 
     # get some point in the first half of the text and find the next space
