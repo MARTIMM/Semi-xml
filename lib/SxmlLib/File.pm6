@@ -34,18 +34,8 @@ class File {
       die "Reference '$reference' not found";
     }
 
-    # read the content and parse
+    # read the content
     my $sxml-text = slurp($reference);
-    my SemiXML::Sxml $x .= new;
-    $x.parse( :content($sxml-text), :!trace, :frag,
-      config => {
-        T => { :parse }
-      }
-    );
-
-    # get the node tree and insert tree after this one
-    my SemiXML::Node $tree = $x.sxml-tree;
-
 
     given $type {
 #TODO get data using url reference
@@ -55,28 +45,49 @@ class File {
 
       # include sub document from file
       when 'include-all' {
+        my SemiXML::Sxml $x .= new;
+        $x.parse( :content($sxml-text), :!trace, :frag,
+          config => {
+            T => { :parse }
+          }
+        );
+
+        # get the node tree and insert tree after this one
+        my SemiXML::Node $tree = $x.sxml-tree;
+
         $m.after($tree);
         $x.done;
       }
 
       when 'include' {
+        my SemiXML::Sxml $x .= new;
+        $x.parse( :content($sxml-text), :!trace, :frag,
+          config => {
+            T => { :parse }
+          }
+        );
+
+        # get the node tree and insert tree after this one
+        my SemiXML::Node $tree = $x.sxml-tree;
+
         $m.after($_) for $tree.nodes.reverse;
         $x.done;
       }
-#`{{
+
       # include sub document from file
       when 'include-xml' {
 
-        # check if readable
-        if $reference.IO ~~ :r {
-          # new xml object
-          my XML::Document $xml = from-xml-file($reference);
+        # bind to other name because this will be xml instead of sxml
+        my Str $xml-text := $sxml-text;
+        $xml-text ~~ s/'<?xml' <-[\?]>* '?>'//;
 
-          # move nodes to the parent node
-          $parent.insert($xml.root);
-        }
+        # inject xml into sxml:xml element. check if attribute to-sxml is set
+        my Hash $attributes = {};
+        $attributes<to-sxml> = $m.attributes<to-sxml>:exists ?? 1 !! 0;
+        my SemiXML::Element $x .= new( :name<sxml:xml>, :$attributes);
+        $x.append(:text($sxml-text));
+        $m.before($x);
       }
-}}
 
       default {
         die "Type $type not recognized with include";

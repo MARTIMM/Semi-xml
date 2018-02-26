@@ -41,6 +41,11 @@ class Element does SemiXML::Node {
         $!keep = True;
       }
 
+      when 'sxml:xml' {
+        $!node-type = SemiXML::NTXml;
+#        $!keep = $!noconv = True;
+      }
+
       default {
         $!node-type = SemiXML::NTElement;
       }
@@ -83,7 +88,8 @@ class Element does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method run-method ( ) {
 
-    # finitialize object top down
+#TODO what to do when same element appears twice from same object
+    # initialize objects top down
     if $!node-type ~~ SemiXML::NTMethod {
       # get the object
       my $object = self!get-object;
@@ -222,31 +228,31 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  method !make-node-with-text(
-    Str $name?, Hash :$attributes = {}, Str :$text
-    --> SemiXML::Node
+  # clone given node
+  method clone-node (
+    SemiXML::Node $new-parent, SemiXML::Node $node --> SemiXML::Node
   ) {
 
-    # create a text element, even when it is an empty string.
-    my SemiXML::Text $text-element = SemiXML::Text.new(:$text) if $text.defined;
+    my SemiXML::Node $clone;
 
-    # create an element only when the name is defined and not empty
-    my SemiXML::Node $node =
-       SemiXML::Element.new( :$name, :$attributes) if ? $name;
+    # if an element must be cloned, clone everything recursively
+    if $node ~~ SemiXML::Element {
 
-#note "H: {$node//'-'}, T: $text-element";
+      $clone = SemiXML::Element.new(
+        :name($node.name), :attributes($node.attributes)
+      );
 
-    # if both are created than add text to the element
-    if ? $node and ? $text-element {
-      $node.append($text-element);
+      # recursivly clone all below node
+      for $node.nodes -> $n {
+        $clone.append(self.clone-node( $clone, $n));
+      }
     }
 
-    # if only text, then the element becomes the text element
-    elsif ? $text-element {
-      $node = $text-element;
+    elsif $node ~~ SemiXML::Text {
+      $clone = SemiXML::Text.new(:text($node.text));
     }
 
-    $node
+    $clone
   }
 
   #-----------------------------------------------------------------------------
@@ -269,6 +275,10 @@ class Element does SemiXML::Node {
 
       when SemiXML::NTComment {
         $xml-text = self!comment-xml;
+      }
+
+      when SemiXML::NTXml {
+        $xml-text = self!xml-xml;
       }
 
       default {
@@ -452,6 +462,20 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
+  # Xml node
+  method !xml-xml ( --> Str ) {
+
+#TODO $attributes<to-sxml> reverse engineer xml to sxml
+
+    my Str $xml-text = '';
+    for @$!nodes -> $node {
+      $xml-text ~= $node.xml;
+    }
+
+    $xml-text
+  }
+
+  #-----------------------------------------------------------------------------
   method !copy-nodes ( $parent ) {
 
     if $!nodes.elems {
@@ -463,6 +487,34 @@ class Element does SemiXML::Node {
     else {
       $parent.append(SemiXML::Text.new(:text('')));
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !make-node-with-text(
+    Str $name?, Hash :$attributes = {}, Str :$text
+    --> SemiXML::Node
+  ) {
+
+    # create a text element, even when it is an empty string.
+    my SemiXML::Text $text-element = SemiXML::Text.new(:$text) if $text.defined;
+
+    # create an element only when the name is defined and not empty
+    my SemiXML::Node $node =
+       SemiXML::Element.new( :$name, :$attributes) if ? $name;
+
+#note "H: {$node//'-'}, T: $text-element";
+
+    # if both are created than add text to the element
+    if ? $node and ? $text-element {
+      $node.append($text-element);
+    }
+
+    # if only text, then the element becomes the text element
+    elsif ? $text-element {
+      $node = $text-element;
+    }
+
+    $node
   }
 
   #-----------------------------------------------------------------------------
