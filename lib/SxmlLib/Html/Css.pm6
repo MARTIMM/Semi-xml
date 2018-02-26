@@ -9,7 +9,7 @@ use SemiXML::Text;
 
 #-------------------------------------------------------------------------------
 # Core module with common used methods
-class Css {
+class Html::Css {
 
   #-----------------------------------------------------------------------------
   method style ( SemiXML::Element $m ) {

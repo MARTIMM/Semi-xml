@@ -54,7 +54,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
     config => {
       ML => {
         :colors<SxmlLib::Colors>,
-        :css<SxmlLib::Css>,
+        :css<SxmlLib::Html::Css>,
       },
       T => {:!parse}
     },
