@@ -39,11 +39,11 @@
   # modules and methods
   inline            = [
     'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time', 'sxml:comment',
-    'sxml:cdata'
+    'sxml:cdata', 'sxml:xml'
   ]
 
-  space-preserve    = [ 'sxml:cdata', 'sxml:pi' ]
-  no-conversion     = [ 'sxml:cdata', 'sxml:pi' ]
+  space-preserve    = [ 'sxml:cdata', 'sxml:pi', 'sxml:xml' ]
+  no-conversion     = [ 'sxml:cdata', 'sxml:pi', 'sxml:xml' ]
 
 
 [ F.html ]
