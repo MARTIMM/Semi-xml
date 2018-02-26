@@ -24,6 +24,8 @@ $html [
     $sxml:pi target=perl6 [ instruction text ]
     $sxml:pi target=xml-stylesheet [href="mystyle.css" type="text/css"]
 
+    $sxml:xml { <p>hello world</p> }
+
     $h1 [ End of tests ]
   ]
 ]
@@ -65,6 +67,7 @@ like $xml-text, /'<?xml-stylesheet'/, 'PI xml stylesheet found';
 like $xml-text, /'href="mystyle.css"'/, 'PI href attibute';
 like $xml-text, /'type="text/css"'/, 'PI type atribute';
 
+like $xml-text, /'<p>hello world</p>'/, 'Injected xml text';
 
 #-------------------------------------------------------------------------------
 # Cleanup
