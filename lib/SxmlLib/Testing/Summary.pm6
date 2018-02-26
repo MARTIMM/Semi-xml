@@ -42,6 +42,18 @@ class Summary {
   }
 
   #-----------------------------------------------------------------------------
+  method preface ( SemiXML::Element $m ) {
+
+    my SemiXML::Element $div .= new(
+      :name<div>, :attributes({:class<repsection>})
+    );
+    $!body.append($div);
+
+    $div.insert($_) for $m.nodes.reverse;
+    $div.insert( 'h2', :attributes({:class<repheader>}), :text<Preface>);
+  }
+
+  #-----------------------------------------------------------------------------
   method load ( SemiXML::Element $m ) {
 
     my Str $basename = ($m.attributes<metric>//'no-metric-attribute').Str;
@@ -86,25 +98,15 @@ class Summary {
     my SemiXML::Element $div .= new(
       :name<div>, :attributes({:class<repsection>})
     );
-    $m.before($div);
+    $!body.append($div);
 
     $div.insert($_) for $m.nodes.reverse;
-    my SemiXML::Element $h2 .= new(
-      :name<h2>, :attributes({:class<repheader>}), :text<Conclusion>
-    );
-
-    $div.insert($h2);
+    $div.insert( 'h2', :attributes({:class<repheader>}), :text<Conclusion>);
   }
 
   #===[ private methods ]=======================================================
   method !initialize-report ( Hash $attrs ) {
-#`{{
-    $!html .= new(
-      :name<html>, :attribs(
-        xmlns => 'http://www.w3.org/199/xhtml', 'xml:lang' => 'en'
-      )
-    );
-}}
+
     $!html .= new(:name<html>, :attributes({'xml:lang' => 'en'}));
     self!head( $attrs);
     self!body( $attrs);
@@ -126,15 +128,6 @@ class Summary {
       'meta', :attributes({ 'http-equiv' => "language", :content<EN>})
     );
 
-#`{{
-    my $css = %?RESOURCES<report.css>.Str;
-    append-element(
-      $head, 'link', {
-        :href("file://$css"),
-        :type<text/css>, :rel<stylesheet>
-      }
-    );
-}}
     my SemiXML::Element $hook = $head.append(
       'test:hook',
       :attributes( {
@@ -153,13 +146,6 @@ class Summary {
   method !body ( Hash $attrs ) {
     $!body = $!html.append('body');
 
-#`{{
-    # if there is a title attribute, make a h1 title
-    append-element(
-      $!body, 'h1', { id => '___top', class => 'title'},
-      :text(~$attrs<title>)
-    ) if ? $attrs<title>;
-}}
     if ? $attrs<title> {
       my SemiXML::Element $t = $!body.append(
         'div', :attributes({class => 'title'})
