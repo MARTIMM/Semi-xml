@@ -50,7 +50,7 @@ class Actions {
 #note "NTop Tree F=$!globals.frag(), \n$!root.Str()";
 
     unless $!globals.raw {
-      self!subst-variables($!root);
+      $!root.subst-variables;
 #        self!remap-content($root-xml);
 
       # remove all tags from the sxml namespace.
@@ -425,82 +425,6 @@ class Actions {
     }
 
     return '';
-  }
-
-  #-----------------------------------------------------------------------------
-  # search for variables and substitute them
-  method !subst-variables ( SemiXML::Node $n ) {
-
-    # look for variable declarations
-    #for $x.find( '//sxml:var-decl', :to-list) -> $vdecl {
-    for @($n.search([ SemiXML::SCRootDesc, 'sxml:var-decl'])) -> $vdecl {
-
-      # get the name of the variable
-      my Str $var-name = ~$vdecl.attributes<name>;
-
-      # see if it is a global declaration
-      my Bool $var-global = $vdecl.attributes<global>:exists;
-
-      # now look for the variable to substitute
-      my Array $var-use;
-      if $var-global {
-        $var-use = $n.search( [
-            SemiXML::SCRootDesc, 'sxml:var-ref',
-            SemiXML::SCAttr, '@name=' ~ $var-name
-          ]
-        );
-      }
-
-      else {
-        $var-use = $n.search( [
-            SemiXML::SCParentDesc, 'sxml:var-ref',
-            SemiXML::SCAttr, '@name=' ~ $var-name
-          ]
-        );
-      }
-
-      for @$var-use -> $vuse {
-        for $vdecl.nodes.reverse -> $vdn {
-          $vuse.after(self!clone-node( $vuse.parent, $vdn));
-        }
-
-        # the variable declaration is substituted in all references,
-        # remove the element
-        $vuse.remove;
-      }
-
-      # all variables are substituted, remove declaration too, unless it is
-      # defined global. Other parts may have been untouched.
-      $vdecl.remove unless $var-global;
-    }
-  }
-
-  #-----------------------------------------------------------------------------
-  # clone given node
-  method !clone-node (
-    SemiXML::Node $new-parent, SemiXML::Node $node --> SemiXML::Node
-  ) {
-
-    my SemiXML::Node $clone;
-
-    # if an element must be cloned, clone everything recursively
-    if $node ~~ SemiXML::Element {
-
-      $clone = SemiXML::Element.new(
-        :name($node.name), :attributes($node.attributes)
-      );
-
-      # recursivly clone all below node
-      for $node.nodes -> $n {
-        $clone.append(self!clone-node( $clone, $n));
-      }
-    }
-
-    elsif $node ~~ SemiXML::Text {
-      $clone = SemiXML::Text.new(:text($node.text));
-    }
-
-    $clone
   }
 
   #-----------------------------------------------------------------------------

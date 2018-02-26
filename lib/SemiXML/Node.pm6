@@ -262,7 +262,7 @@ role Node {
 
     # define handler
     my $handler = sub ( SemiXML::Node $node ) {
-#note "FN: $find-node on $node.name()";
+note "FN: $find-node on $node.name()";
       given $find-node {
         when '*' {
           $search-results.push($node) if $node.node-type ~~ SemiXML::NTElement;
@@ -297,7 +297,7 @@ role Node {
         }
       }
 
-#note "SR: ", $search-results;
+note "SR: ", $search-results;
     }
 
     # check if we have to go down recursively
@@ -353,6 +353,55 @@ role Node {
           self.process-nodes( $n, $handler, :$recurse);
         }
       }
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # search for variables and substitute them
+  method subst-variables ( ) {
+
+    # look for variable declarations start search from root
+    #for $x.find( '//sxml:var-decl', :to-list) -> $vdecl {
+    for @(self.search([ SemiXML::SCRootDesc, 'sxml:var-decl'])) -> $vdecl {
+note "VD: ", $vdecl.attributes<name>;
+
+      # get the name of the variable
+      my Str $var-name = ~$vdecl.attributes<name>;
+
+      # see if it is a global declaration
+#      my Bool $var-global = $vdecl.attributes<global>:exists;
+
+      # now look for the variable to substitute but only starting from this node
+      my Array $var-use;
+#      if $var-global {
+#        $var-use = self.search( [
+#            SemiXML::SCRootDesc, 'sxml:var-ref',
+#            SemiXML::SCAttr, '@name=' ~ $var-name
+#          ]
+#        );
+#      }
+
+#      else {
+        $var-use = self.search( [
+            SemiXML::SCParentDesc, 'sxml:var-ref',
+            SemiXML::SCAttr, '@name=' ~ $var-name
+          ]
+        );
+#      }
+
+      for @$var-use -> $vuse {
+note "VU: ", $vuse.attributes<name>;
+        for $vdecl.nodes.reverse -> $vdn {
+          $vuse.after(self.clone-node( $vuse.parent, $vdn));
+        }
+
+        # the variable declaration is substituted remove the element
+        $vuse.remove;
+      }
+
+      # all variables are substituted, remove declaration too, unless it is
+      # defined global. Other parts may have been untouched.
+      #$vdecl.remove unless $var-global;
     }
   }
 

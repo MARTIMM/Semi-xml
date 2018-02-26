@@ -2,20 +2,19 @@
 
 $html [
   $head [
-    $meta charset=UTF-8
-    $meta http-equiv=Content-Style-Type content=text/css
+    $meta charset=UTF-8 []
+    $meta http-equiv=Content-Style-Type content=text/css []
 
-    $!css.style compress=0 [
-      $!css.reset type=condensed-universal
+    $!css.reset type=condensed-universal []
 
-      /* generate names like 'mono-scheme-color1' */
-      $!colors.palette base-hsl='180 100 50' type=color-scheme
-                       mode=monochromatic lighten=15 ncolors=6
-                       outspec=rgbhex set-name=mono
+    $!colors.palette base-hsl='180 100 50' type=color-scheme
+                     mode=monochromatic lighten=15 ncolors=6
+                     outspec=rgbhex set-name=mono []
 
+    $!css.style [
       $!css.b s=body [
       	background: white;
-      	color: $sxml:var-ref name=mono-scheme-color2;
+      	color: $sxml:var-ref name=mono-scheme-color2 [];
       	font: 12px/1.5 'segoe ui', 'lucida sans unicode', 'lucida grande', lucida, sans-serif;
       ]
 
@@ -52,7 +51,6 @@ $html [
         $!css.b s=.box [
         	position: absolute; top: 6px;
         	width: 75px; height: 25px;
-/*        	background: silver; */
       	]
 
         $!css.b s=h2 [
@@ -98,10 +96,6 @@ $html [
         background: $sxml:var-ref name=mono-scheme-color6 [];
       ]
 
-      /* @end */
-
-      /* @group menu */
-
       $!css.b s='#menu' [
       	margin: 0; padding: 1px 0;
       	list-style-type: none;
@@ -112,10 +106,6 @@ $html [
         	float: left;
         	margin: 0; padding: 0;
         	width: 20%;
-/*
-        	background: $sxml:var-ref name=mono-scheme-color2 [];
-        	color: $sxml:var-ref name=mono-scheme-color6;
-*/
       	]
 
         $!css.b s=a [
@@ -141,7 +131,7 @@ $html [
 
         $!css.b s='a:hover' [
         	background: $sxml:var-ref name=mono-scheme-color6 [];
-        	color: $sxml:var-ref name=mono-scheme-color2;
+        	color: $sxml:var-ref name=mono-scheme-color2 [];
       	]
 
         $!css.b s=a.sel [
@@ -149,8 +139,6 @@ $html [
         	color: $sxml:var-ref name=mono-scheme-color2 [];
       	]
     	]
-
-      /* @end */
 
       $!css.b s='#content' [
       	padding: 1px;
@@ -168,19 +156,6 @@ $html [
         $!css.b s=p [
         	margin: 0.25em 0;
       	]
-/*
-        $!css.b s=h3 [
-        	margin: 0.5em 0 0.3em;
-        	font-size: 18px;
-        	font-weight: bold;
-      	]
-
-        $!css.b s=h4 [
-        	margin: 0 0 0 6em;
-        	font-size: 100%;
-        	font-weight: bold;
-      	]
-*/
 
         $!css.b s=h3 [
         	clear: left;
@@ -205,9 +180,6 @@ $html [
         	font-size: 100%;
         	font-weight: bold;
           color: $sxml:var-ref name=mono-scheme-color3 [];
-/*
-          background-color: $sxml:var-ref name=mono-scheme-color1 [];
-*/
       	]
     	]
 
@@ -217,7 +189,6 @@ $html [
         padding: 1px;
         width: 90px;
         height: 90px;
-/*        background: $sxml:var-ref name=mono-scheme-color6 []; */
         border-radius: 5px;
         border-bottom: 2px solid $sxml:var-ref name=mono-scheme-color1 [];
         border-right: 2px solid $sxml:var-ref name=mono-scheme-color1 [];
@@ -226,12 +197,10 @@ $html [
 
         $!css.b s=svg [
           $!css.b s=path [
-/*            color: $sxml:var-ref name=mono-scheme-color1 []; */
             fill: $sxml:var-ref name=mono-scheme-color2 [];
           ]
 
           $!css.b s=circle [
-/*            color: $sxml:var-ref name=mono-scheme-color1 []; */
             fill: $sxml:var-ref name=mono-scheme-color2 [];
           ]
         ]
@@ -246,7 +215,6 @@ $html [
         padding: 1px;
         width: 80px;
         height: 80px;
-/*        background: $sxml:var-ref name=mono-scheme-color6 []; */
         border-radius: 5px;
         border-bottom: 2px solid $sxml:var-ref name=mono-scheme-color3 [];
         border-right: 2px solid $sxml:var-ref name=mono-scheme-color3 [];
@@ -255,12 +223,10 @@ $html [
 
         $!css.b s=svg [
           $!css.b s=path [
-/*           color: $sxml:var-ref name=mono-scheme-color1 []; */
             fill: $sxml:var-ref name=mono-scheme-color5 [];
           ]
 
           $!css.b s=circle [
-/*           color: $sxml:var-ref name=mono-scheme-color1 []; */
             fill: $sxml:var-ref name=mono-scheme-color5 [];
           ]
         ]
@@ -340,7 +306,6 @@ $html [
       $!css.b s='#footer' [
       	margin: 10px 0 10px 0;
       	padding: 5px 0;
-/*        font-size: smaller; */
       	text-align: center;
       	border-top: 2px solid $sxml:var-ref name=mono-scheme-color2 [];
       	border-bottom: 2px solid $sxml:var-ref name=mono-scheme-color2 [];
@@ -356,91 +321,93 @@ $html [
   ]
 
   $body [
-    $div id=topbg
+    $div id=topbg []
 
     $div id=main [
 
   	  $div id=header [
-    		$div id=hdr-box1 class=box
-    		$div id=hdr-box2 class=box
-    		$div id=hdr-box3 class=box
-    		$div id=hdr-box4 class=box
-    		$div id=hdr-box5 class=box
-    		$div id=hdr-box6 class=box
+    		$div id=hdr-box1 class=box []
+    		$div id=hdr-box2 class=box []
+    		$div id=hdr-box3 class=box []
+    		$div id=hdr-box4 class=box []
+    		$div id=hdr-box5 class=box []
+    		$div id=hdr-box6 class=box []
 
-    		$h1 [ $!lorem.words n=1 tc=1 ]
-    		$h2 [ $!lorem.words n=3 uc=1 ]
+    		$h1 [ $!lorem.words n=1 tc=1 [] ]
+    		$h2 [ $!lorem.words n=3 uc=1 [] ]
 
         $div id=wall-clock [
-          $!file.include type=include-xml reference=image/wall-clock.svg
+          $!file.include type=include-xml reference=image/wall-clock.svg []
         ]
     	]
 
     	$ul id=menu [
-    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
-    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
-    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
-    		$li [ $a href="#" class=sel [ $span $!lorem.words n=1 uc=1 ] ]
-    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 ] ]
+    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 [] ] ]
+    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 [] ] ]
+    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 [] ] ]
+    		$li [ $a href="#" class=sel [ $span $!lorem.words n=1 uc=1 [] ] ]
+    		$li [ $a href="#" [ $span $!lorem.words n=1 uc=1 [] ] ]
     	]
 
     	$div id=content [
     		$div id=left [
-    			$h3 class=ttl    [ $span $!lorem.words n=1 tc=1 ]
+    			$h3 class=ttl    [ $span $!lorem.words n=1 tc=1 [] ]
 
           # Comment lines should disapear!
-          $p               [ $!lorem.standard1500 ]
+          $p               [ $!lorem.standard1500 [] ]
     			$dl [
-    				$dt class=ttl  [ $!lorem.words n=1 tc=1 ]
-    				$dd            [ $!lorem.samuel-ipsum ]
-    				$dt class=ttl  [ $!lorem.words n=1 tc=1 ]
-    				$dd            [ $!lorem.bacon-ipsum ]
+    				$dt class=ttl  [ $!lorem.words n=1 tc=1 [] ]
+    				$dd            [ $!lorem.samuel-ipsum [] ]
+    				$dt class=ttl  [ $!lorem.words n=1 tc=1 [] ]
+    				$dd            [ $!lorem.bacon-ipsum [] ]
     			]
 
           $div id=server [
-            $!file.include type=include-xml reference=image/server.svg
+            $!file.include type=include-xml reference=image/server.svg []
           ]
-    			$h4              [ $!lorem.words n=5 tc=1 ]
+    			$h4              [ $!lorem.words n=5 tc=1 [] ]
     			$ul [
-    				$li            [ $a href='#' [ $!lorem.words n=2 tc=1 ] ]
-    				$li            [ $a href='#' [ $!lorem.words n=3 tc=1 ] ]
-    				$li            [ $a href='#' [ $!lorem.words n=1 tc=1 ] ]
+    				$li            [ $a href='#' [ $!lorem.words n=2 tc=1 [] ] ]
+    				$li            [ $a href='#' [ $!lorem.words n=3 tc=1 [] ] ]
+    				$li            [ $a href='#' [ $!lorem.words n=1 tc=1 [] ] ]
     			]
     		]
 
     		$div id=right [
     			$h3 class=ttl        [ $span $!lorem.sentence ]
-          $img class=photo src=image/books-shelves-architecture-wood-442420.jpeg
-    			$h4                  [ $!lorem.words n=5 tc=1 ]
-    			$p                   [ $!lorem.cheese-ipsum ]
-          $p class=link        [ $a href='#' [ $!lorem.words n=4 tc=1 ] ]
+          $img class=photo
+               src=image/books-shelves-architecture-wood-442420.jpeg []
+    			$h4                  [ $!lorem.words n=5 tc=1 [] ]
+    			$p                   [ $!lorem.cheese-ipsum [] ]
+          $p class=link        [ $a href='#' [ $!lorem.words n=4 tc=1 [] ] ]
 
-    			$h3 class=ttl        [ $span $!lorem.words n=4 tc=1 ]
-    			$p                   [ $!lorem.veggie-ipsum tc=1 ]
+    			$h3 class=ttl        [ $span $!lorem.words n=4 tc=1 [] ]
+    			$p                   [ $!lorem.veggie-ipsum tc=1 [] ]
 
-    			$div id=rbox         [ $span $!lorem.sentences n=2 ]
+    			$div id=rbox         [ $span $!lorem.sentences n=2 [] ]
 
-    			$button type=button  [ $!lorem.words n=2 tc=1 ]
+    			$button type=button  [ $!lorem.words n=2 tc=1 [] ]
 
-    			$div class=cleaner
+    			$div class=cleaner []
 
-          $img class=photo src=image/books-education-school-literature-51342.jpeg
-    			$h4                  [ $!lorem.words n=4 tc=1 ]
-    			$p                   [ $!lorem.cupcake-ipsum ]
-    			$p class=link        [ $a href='#' [ $!lorem.words n=1 tc=1 ] ]
+          $img class=photo
+               src=image/books-education-school-literature-51342.jpeg []
+    			$h4                  [ $!lorem.words n=4 tc=1 [] ]
+    			$p                   [ $!lorem.cupcake-ipsum [] ]
+    			$p class=link        [ $a href='#' [ $!lorem.words n=1 tc=1 [] ] ]
     		]
 
-    		$div class=cleaner
+    		$div class=cleaner []
 
     		$div id=footer [
     			© martimm $br
           Images are from Flaticon(SVG Dimitry Miroliubov) and Pexels (jpeg)
           Ideas are from $a href=Paletto.com [Paletto.com] $br
-    			$a href='#'          [ $!lorem.words n=1 ]
-    			$a href='#'          [ $!lorem.words n=1 ]
-    			$a href='#'          [ $!lorem.words n=1 ]
-    			$a href='#'          [ $!lorem.words n=1 ]
-    			$a href='#'          [ $!lorem.words n=1 ]
+    			$a href='#'          [ $!lorem.words n=1 [] ]
+    			$a href='#'          [ $!lorem.words n=1 [] ]
+    			$a href='#'          [ $!lorem.words n=1 [] ]
+    			$a href='#'          [ $!lorem.words n=1 [] ]
+    			$a href='#'          [ $!lorem.words n=1 [] ]
     		]
     	]
     ]

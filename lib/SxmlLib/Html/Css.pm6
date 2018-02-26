@@ -11,40 +11,8 @@ use SemiXML::Text;
 # Core module with common used methods
 class Html::Css {
 
-  #-----------------------------------------------------------------------------
-  method style ( SemiXML::Element $m ) {
-
-    my SemiXML::Element $style .= new(
-      :name<style>, :attributes({'sxml:noconv' => '1'}),
-      :text("\n")
-    );
-    $style.noconv = True;
-
-    my Array $r = $m.search( [
-        SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head',
-        SemiXML::SCChild, 'style'
-      ]
-    );
-
-    if $r.elems {
-      # place style after the last one
-      $r[*-1].after($style);
-    }
-
-    else {
-      $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head']);
-      if $r.elems {
-        # place style at the end of the head
-        $r[0].append($style);
-      }
-
-      else {
-        die 'Css must be placed in /html/head but head is not found';
-      }
-    }
-
-    self!css-blocks( $style, $m, '');
-  }
+  has SemiXML::Element $!style;
+  has Bool $!initialized = False;
 
   #-----------------------------------------------------------------------------
   #https://perishablepress.com/a-killer-collection-of-global-css-reset-styles/
@@ -422,26 +390,67 @@ class Html::Css {
   }
 
   #-----------------------------------------------------------------------------
+  method initialize ( SemiXML::Element $m ) {
+
+    return if $!initialized;
+
+    $!style .= new(
+      :name<style>, :attributes({'sxml:noconv' => '1'}),
+      :text("\n")
+    );
+    $!style.noconv = True;
+
+    my Array $r = $m.search( [
+        SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head',
+        SemiXML::SCChild, 'style'
+      ]
+    );
+
+    if $r.elems {
+      # place style after the last one
+      $r[*-1].after($!style);
+    }
+
+    else {
+      $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head']);
+      if $r.elems {
+        # place style at the end of the head
+        $r[0].append($!style);
+      }
+
+      else {
+        die 'Css must be placed in /html/head but head is not found';
+      }
+    }
+
+    $!initialized = True;
+  }
+
+  #-----------------------------------------------------------------------------
+  method style ( SemiXML::Element $m ) {
+
+note "Style: $!style.name()";
+    $!style.subst-variables;
+    self!css-blocks( $m, '');
+  }
+
+  #-----------------------------------------------------------------------------
   method b ( SemiXML::Element $m ) {
 
     my Str $selector = ($m.attributes<s>//'*').Str;
     my SemiXML::Element $css-block .= new(
       :name<sxml:css-block>,
-      :attributes({ s => $selector})
+      :attributes({s => $selector})
     );
 
-    for $m.nodes.reverse -> $node {
-      $css-block.insert($node);
-    }
-
-    $m.before($css-block);
+    $css-block.insert($_) for $m.nodes.reverse;
+note "Style B: $!style.name()";
+    $!style.append($css-block);
   }
 
   #-----------------------------------------------------------------------------
   #---[ private ]---------------------------------------------------------------
-  method !css-blocks (
-    SemiXML::Node $style, SemiXML::Node $css-block, Str $parent-select
-  ) {
+  method !css-blocks ( SemiXML::Node $css-block, Str $parent-select ) {
 
     my Str $css-body = '';
 
@@ -479,7 +488,7 @@ class Html::Css {
       $css-body ~~ s:g/ \s+ $//;
       $css-body = "$select \{\n  $css-body\n}\n\n";
 
-      $style.append(SemiXML::Text.new(:text($css-body)));
+      $!style.append(SemiXML::Text.new(:text($css-body)));
     }
 
     # not within a selector. can be user input or from other methods
@@ -493,14 +502,14 @@ class Html::Css {
       $css-body ~~ s:g/ \s+ $//;
 
       $css-body = "$css-body\n";
-      $style.append(SemiXML::Text.new(:text($css-body)));
+      $!style.append(SemiXML::Text.new(:text($css-body)));
     }
 
 
     # process the rest of the blocks
     for $css-block.nodes -> $node {
       if $node ~~ SemiXML::Element and $node.name eq 'sxml:css-block' {
-        self!css-blocks( $style, $node, $select);
+        self!css-blocks( $node, $select);
       }
     }
   }

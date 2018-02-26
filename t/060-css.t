@@ -27,7 +27,7 @@ subtest 'generated blended color variables', {
             ]
 
             $!css.b s=.user [
-              border: 1px solid black;
+              border: 2px solid black;
               $!css.b s='> .title' [
                 color: black;
               ]
@@ -44,6 +44,10 @@ subtest 'generated blended color variables', {
        'found some of the reset';
   like $style-text[1].text, /'.infobox > .message > .title'/,
        'found a selector line';
+  like $style-text[1].text, /'solid #' <xdigit>+/, 'found border color';
+  like $style-text[1].text, /'color: #' <xdigit>+/, 'found title color';
+  like $style-text[1].text, /'border: 1px'/, 'found border under message';
+  like $style-text[1].text, /'border: 2px'/, 'found border under user';
 }
 
 #-------------------------------------------------------------------------------
@@ -64,7 +68,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 
   # See the result
   my Str $xml-text = ~$x;
-  #diag $xml-text;
+  diag $xml-text;
   $x.done;
 
   XML::XPath.new(:xml($xml-text))
