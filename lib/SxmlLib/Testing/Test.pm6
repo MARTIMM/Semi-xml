@@ -87,7 +87,6 @@ class Test {
 
     my SemiXML::Element $p = $div.append( 'p', :attributes({:title<purpose>}));
     $p.insert($_) for $m.nodes.reverse;
-#note "Pur: $div.name(), $div.parent.name()";
   }
 
   #-----------------------------------------------------------------------------
@@ -200,14 +199,6 @@ class Test {
   #-----------------------------------------------------------------------------
   method !initialize-report ( Hash $attrs ) {
 
-#`{{
-    $!html .= new(
-      :name<html>, :attribs(
-        xmlns => 'http://www.w3.org/199/xhtml', 'xml:lang' => 'en'
-      )
-    );
-}}
-
     $!html .= new( :name<html>, :attributes({'xml:lang' => 'en'}));
     #my SemiXML::Element $head = self!head( $!html, $attrs);
     self!head($attrs);
@@ -247,15 +238,6 @@ class Test {
       #append-element( $jse, :text(' '));
     }
 
-#`{{
-    my $css = %?RESOURCES<report.css>.Str;
-    append-element(
-      $head, 'link', {
-        :href("file://$css"),
-        :type<text/css>, :rel<stylesheet>
-      }
-    );
-}}
     my SemiXML::Element $hook = $head.append(
       'test:hook',
       :attributes( {
@@ -276,14 +258,6 @@ class Test {
     $!body = $!html.append('body');
     $!body.attributes<onload> = 'prettyPrint()' if $!highlight-code;
 
-#`{{
-    # if there is a title attribute, make a h1 title
-    append-element(
-      $!body, 'h1', { id => '___top', class => 'title'},
-      :text(~$attrs<title>)
-    ) if ? $attrs<title>;
-}}
-
     if ? $attrs<title> {
       my SemiXML::Element $t = $!body.append(
         'div', :attributes({class => 'title'})
@@ -296,14 +270,6 @@ class Test {
       );
     }
   }
-
-#`{{
-    # Experiment to wrap all in EVALs
-    $code-text ~~ s:g/ ( \n \s* ['is'||'isnt'||'is-deeply'||'is-approx'||'like'||'unlike'||'cmp-ok'||'ok'||'nok'] '('? \s+ )
-                       ( <-[,]>* ) ( <-[;]>* )
-                     /$/[0]EVAL\('try {$/[1]}'\)$/[2]; note \$! if ? \$!/;
-note $code-text;
-}}
 
   #-----------------------------------------------------------------------------
   # modify the purpose to show what is tested and what is not. this can only
