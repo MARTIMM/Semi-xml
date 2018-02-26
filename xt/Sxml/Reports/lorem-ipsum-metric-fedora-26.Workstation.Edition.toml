@@ -5,7 +5,7 @@
   class        = '-'
   distribution = '-'
   label        = '-'
-  date         = '2018-02-24T13:37:04.642795Z'
+  date         = '2018-02-26T09:00:12.001083Z'
   oskernel     = 'linux:4.14.18.200.fc.26.x.86._.64'
   osdistro     = 'fedora:26.Workstation.Edition:26:False'
   perl         = 'Perl 6:6.c'
@@ -24,7 +24,13 @@ $p title="purpose"  [
   ]
   $ul  [
     $li  [
-    Generate a simple element
+    Setup usage of module
+    ]
+    $li  [
+    Method standard1500
+    ]
+    $li  [
+    Method cicero45bc
     ]
   ]
 ]
@@ -32,22 +38,40 @@ $p title="purpose"  [
 '''
 
 [ chapters ]
-  list         = [ 'Generate a simple element' ]
+  list         = [ 'Setup usage of module', 'Method standard1500', 'Method cicero45bc' ]
 
-[ chapter.'Generate a simple element' ]
+[ chapter.'Setup usage of module' ]
+  success      = 2
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Method standard1500' ]
   success      = 2
   fail         = 0
   todo         = 0
   skipped      = 0
 
 [ summary.line-7 ]
-  chapter      = 'Generate a simple element'
+  chapter      = 'Setup usage of module'
   diagnostic   = """
     ok 1 - The object is-a 'SemiXML::Sxml'
 """
 
 [ summary.line-17 ]
-  chapter      = 'Generate a simple element'
+  chapter      = 'Setup usage of module'
+  diagnostic   = """
+    ok 2 - Simple html element
+"""
+
+[ summary.line-32 ]
+  chapter      = 'Method standard1500'
+  diagnostic   = """
+    ok 3 - a bit from the beginning of standard1500
+"""
+
+[ summary.line-34 ]
+  chapter      = 'Method standard1500'
   diagnostic   = """
     ok
 """

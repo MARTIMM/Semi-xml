@@ -2,6 +2,12 @@
 
 $!summary.report title='Semi XML project summary report' [
 
+  $!summary.preface [
+    $p [
+      This report is a summary of all tests done for the project SemiXML.
+    ]
+  ]
+
   $!summary.load metric=basic []
   $!summary.load metric=configuration []
   $!summary.load metric=sigils []
