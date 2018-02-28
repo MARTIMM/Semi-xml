@@ -54,6 +54,13 @@ class Text does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
+  # clone given node
+  method clone-node ( --> SemiXML::Node ) {
+
+    SemiXML::Text.new(:$!text)
+  }
+
+  #-----------------------------------------------------------------------------
   method xml ( --> Str ) {
 
 #$t = $!text;

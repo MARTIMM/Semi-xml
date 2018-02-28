@@ -262,7 +262,7 @@ role Node {
 
     # define handler
     my $handler = sub ( SemiXML::Node $node ) {
-note "FN: $find-node on $node.name()";
+#note "FN: $find-node on $node.name()";
       given $find-node {
         when '*' {
           $search-results.push($node) if $node.node-type ~~ SemiXML::NTElement;
@@ -297,7 +297,7 @@ note "FN: $find-node on $node.name()";
         }
       }
 
-note "SR: ", $search-results;
+#note "SR: ", $search-results;
     }
 
     # check if we have to go down recursively
@@ -392,7 +392,7 @@ note "VD: ", $vdecl.attributes<name>;
       for @$var-use -> $vuse {
 note "VU: ", $vuse.attributes<name>;
         for $vdecl.nodes.reverse -> $vdn {
-          $vuse.after(self.clone-node( $vuse.parent, $vdn));
+          $vuse.after($vdn.clone-node($vuse.parent));
         }
 
         # the variable declaration is substituted remove the element

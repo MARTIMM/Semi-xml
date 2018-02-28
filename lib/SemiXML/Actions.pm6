@@ -50,7 +50,7 @@ class Actions {
 #note "NTop Tree F=$!globals.frag(), \n$!root.Str()";
 
     unless $!globals.raw {
-      $!root.subst-variables;
+#      $!root.subst-variables;
 #        self!remap-content($root-xml);
 
       # remove all tags from the sxml namespace.
