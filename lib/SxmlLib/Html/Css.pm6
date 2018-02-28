@@ -8,19 +8,24 @@ use SemiXML::Element;
 use SemiXML::Text;
 
 #-------------------------------------------------------------------------------
-# Core module with common used methods
+# Stylesheet manipulations
 class Html::Css {
 
   has SemiXML::Element $!style;
   has Bool $!initialized = False;
 
   #-----------------------------------------------------------------------------
-  #https://perishablepress.com/a-killer-collection-of-global-css-reset-styles/
-  method reset ( SemiXML::Element $m ) {
+#TODO stylesheets can be used in xml docs other than html
+  method initialize ( SemiXML::Element $m ) {
 
-    my SemiXML::Element $reset-style .= new(
-      :name<style>, :attributes({'sxml:noconv' => '1'}), :text("\n")
+    return if $!initialized;
+
+    $!style .= new(
+      :name<style>, :attributes({'sxml:noconv' => '1'}),
+      :text("\n")
     );
+    $!style.noconv = True;
+
     my Array $r = $m.search( [
         SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head',
         SemiXML::SCChild, 'style'
@@ -29,14 +34,14 @@ class Html::Css {
 
     if $r.elems {
       # place style after the last one
-      $r[*-1].after($reset-style);
+      $r[*-1].after($!style);
     }
 
+    # no style found add to the end of head
     else {
       $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head']);
       if $r.elems {
-        # place style at the end of the head
-        $r[0].append($reset-style);
+        $r[0].append($!style);
       }
 
       else {
@@ -44,10 +49,17 @@ class Html::Css {
       }
     }
 
+    $!initialized = True;
+  }
+
+  #-----------------------------------------------------------------------------
+  #https://perishablepress.com/a-killer-collection-of-global-css-reset-styles/
+  method reset ( SemiXML::Element $m ) {
+
     my Str $type = ($m.attributes<type>//'minimalistic').Str;
     given $type {
       when 'minimalistic' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             * {
             	outline: 0;
             	padding: 0;
@@ -58,7 +70,7 @@ class Html::Css {
       }
 
       when 'condensed-universal' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             * {
             	vertical-align: baseline;
             	font-weight: inherit;
@@ -74,7 +86,7 @@ class Html::Css {
       }
 
       when 'poor-man' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)))
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)))
             html, body {
             	padding: 0;
             	margin: 0;
@@ -92,7 +104,7 @@ class Html::Css {
       }
 
       when 'siolon-global' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             * {
             	vertical-align: baseline;
             	font-family: inherit;
@@ -119,7 +131,7 @@ class Html::Css {
       }
 
       when 'shaun-inman' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre,
             form, fieldset, input, p, blockquote, table, th, td, embed, object {
             	padding: 0;
@@ -156,7 +168,7 @@ class Html::Css {
       }
 
       when 'yahoo' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td {
             	padding: 0;
             	margin: 0;
@@ -192,7 +204,7 @@ class Html::Css {
       }
 
       when 'eric-meyer' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             html, body, div, span, applet, object, iframe, table, caption, tbody, tfoot, thead, tr, th, td,
             del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var,
             h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code,
@@ -239,7 +251,7 @@ class Html::Css {
       }
 
       when 'eric-meyer-condensed' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6,
             pre, form, fieldset, input, textarea, p, blockquote, th, td {
             	padding: 0;
@@ -276,7 +288,7 @@ class Html::Css {
       }
 
       when 'tantek' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             /* undohtml.css */
             /* (CC) 2004 Tantek Celik. Some Rights Reserved.                  */
             /* http://creativecommons.org/licenses/by/2.0                     */
@@ -306,7 +318,7 @@ class Html::Css {
       }
 
       when 'tripoli' {
-        $reset-style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
+        $!style.append(SemiXML::Text.new(:text(q:to/EOCSS/)));
             /*
                 Tripoli is a generic CSS standard for HTML rendering.
                 Copyright (C) 2007  David Hellsing
@@ -387,51 +399,20 @@ class Html::Css {
             EOCSS
       }
     }
-  }
 
-  #-----------------------------------------------------------------------------
-  method initialize ( SemiXML::Element $m ) {
-
-    return if $!initialized;
-
-    $!style .= new(
-      :name<style>, :attributes({'sxml:noconv' => '1'}),
-      :text("\n")
-    );
-    $!style.noconv = True;
-
-    my Array $r = $m.search( [
-        SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head',
-        SemiXML::SCChild, 'style'
-      ]
-    );
-
-    if $r.elems {
-      # place style after the last one
-      $r[*-1].after($!style);
-    }
-
-    else {
-      $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head']);
-      if $r.elems {
-        # place style at the end of the head
-        $r[0].append($!style);
-      }
-
-      else {
-        die 'Css must be placed in /html/head but head is not found';
-      }
-    }
-
-    $!initialized = True;
+    # work is done, next time init again
+    $!initialized = False;
   }
 
   #-----------------------------------------------------------------------------
   method style ( SemiXML::Element $m ) {
 
-note "Style: $!style.name()";
-    $!style.subst-variables;
+note "\nStyle 0:\n$m\n\n$!style";
     self!css-blocks( $m, '');
+note "\nStyle 1:\n$!style";
+
+    # work is done, next time init again
+    $!initialized = False;
   }
 
   #-----------------------------------------------------------------------------
@@ -444,15 +425,17 @@ note "Style: $!style.name()";
     );
 
     $css-block.insert($_) for $m.nodes.reverse;
-note "Style B: $!style.name()";
-    $!style.append($css-block);
+    $m.before($css-block);
   }
 
   #-----------------------------------------------------------------------------
   #---[ private ]---------------------------------------------------------------
-  method !css-blocks ( SemiXML::Node $css-block, Str $parent-select ) {
+  method !css-blocks (
+    SemiXML::Node $css-block, Str $parent-select, Array $block-content = []
+  ) {
 
-    my Str $css-body = '';
+note "node: $css-block.name()";
+    my Array $css-bodies = [|$block-content];
 
     # build current selector
     my Str $select = '';
@@ -472,44 +455,55 @@ note "Style B: $!style.name()";
 
     # do the textual parts first, then process rest
     for $css-block.nodes -> $node {
+note "node name loop: $node.name()";
       if $node.name ne 'sxml:css-block' {
-        $css-body ~= $node.Str;
+        $css-bodies.push: $node;
       }
     }
 
-
+note "nblocks: ", $css-block.nodes.elems, ', ', $css-bodies.elems;
+note "Array: ", $css-bodies.perl;
     # if the css body is not a string of only spaces, add it to the style
-    if $is-block and $css-body !~~ m/^ \s* $/ {
+    if $is-block and ([~] @$css-bodies) !~~ m/^ \s* $/ {
 
-      $css-body ~~ s:g/ \s\s+ / /;
-      $css-body ~~ s:g/ \n / /;
+#      $css-body ~~ s:g/ \s\s+ / /;
+#      $css-body ~~ s:g/ \n / /;
 
-      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
-      $css-body ~~ s:g/ \s+ $//;
-      $css-body = "$select \{\n  $css-body\n}\n\n";
+#      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
+#      $css-body ~~ s:g/ \s+ $//;
+#      $css-body = "$select \{\n  $css-body\n}\n\n";
 
-      $!style.append(SemiXML::Text.new(:text($css-body)));
+note "css block: $is-block, no spaces";
+      if [~] @$css-bodies ~~ m/ \S / {
+        $!style.append(:text("\n$select \{\n  "));
+.note for @$css-bodies;
+        $!style.append(.clone-node) for @$css-bodies;
+        $!style.append(:text("\n}\n\n"));
+      }
     }
 
     # not within a selector. can be user input or from other methods
-    elsif $css-body !~~ m/^ \s* $/ {
+    elsif ([~] @$css-bodies) !~~ m/^ \s* $/ {
+note "css block: $is-block, no spaces";
 
-      $css-body ~~ s:g/ \s\s+ / /;
-      $css-body ~~ s:g/ \n / /;
-      $css-body ~~ s:g/ \s+ '}' /}/;
+#      $css-body ~~ s:g/ \s\s+ / /;
+#      $css-body ~~ s:g/ \n / /;
+#      $css-body ~~ s:g/ \s+ '}' /}/;
 
-      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
-      $css-body ~~ s:g/ \s+ $//;
+#      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
+#      $css-body ~~ s:g/ \s+ $//;
 
-      $css-body = "$css-body\n";
-      $!style.append(SemiXML::Text.new(:text($css-body)));
+#      $css-body = "$css-body\n";
+      $!style.append(.clone-node) for @$css-bodies;
     }
-
+note "css block $css-block.name()\n$!style";
 
     # process the rest of the blocks
     for $css-block.nodes -> $node {
+note "$css-block.name() -> $node.name()";
       if $node ~~ SemiXML::Element and $node.name eq 'sxml:css-block' {
-        self!css-blocks( $node, $select);
+note "next level";
+        self!css-blocks( $node, $select, $css-bodies);
       }
     }
   }

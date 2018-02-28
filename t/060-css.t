@@ -16,6 +16,8 @@ subtest 'generated blended color variables', {
 
         $!css.style [
 
+          body { background-color: orange; }
+
           $!css.b s='.infobox >' [
             $!css.b s=.message [
               border: 1px solid $sxml:var-ref name=blend-color1 [];
@@ -67,12 +69,15 @@ sub get-xpath ( Str $content --> XML::XPath ) {
   );
 
   # See the result
-  my Str $xml-text = ~$x;
-  diag $xml-text;
+  mkdir 't/D060' unless 't/D060'.IO ~~ :e;
+  't/D060/css.html'.IO.spurt($x.Str);
   $x.done;
 
-  XML::XPath.new(:xml($xml-text))
+  XML::XPath.new(:xml($x.Str))
 }
 
 #-------------------------------------------------------------------------------
 done-testing;
+
+#unlink('t/D060/css.html');
+#rmdir('t/D060');
