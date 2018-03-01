@@ -236,6 +236,7 @@ class Actions {
         when 'attributes' {
           my SemiXML::Element $element = $!elements[$!element-idx];
           $element.attributes(self!attributes([$v.caps]));
+#note "Idx B: $!element-idx, $element.name(), $v.caps()";
 
           note "--> Created element: $element.perl()".indent($l)
             if $!globals.trace and $!globals.refined-tables<T><parse>;

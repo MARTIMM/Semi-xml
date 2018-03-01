@@ -11,7 +11,7 @@ role Node {
   has SemiXML::Globals $.globals;
 
   has Str $.name;
-  has Str $.namespace;
+#  has Str $.namespace;
 
   has Str $!module;
   has Str $!method;
@@ -226,6 +226,7 @@ role Node {
   # set attributes
   multi method attributes ( Hash:D $!attributes ) {
 
+#note "Attr Node: $!name, ", $!attributes.keys;
     self!process-attributes;
   }
 

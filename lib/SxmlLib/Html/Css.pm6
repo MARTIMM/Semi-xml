@@ -407,9 +407,9 @@ class Html::Css {
   #-----------------------------------------------------------------------------
   method style ( SemiXML::Element $m ) {
 
-note "\nStyle 0:\n$m\n\n$!style";
+#note "\nStyle 0:\n$m\n\n$!style";
     self!css-blocks( $m, '');
-note "\nStyle 1:\n$!style";
+#note "\nStyle 1:\n$!style";
 
     # work is done, next time init again
     $!initialized = False;
@@ -434,7 +434,7 @@ note "\nStyle 1:\n$!style";
     SemiXML::Node $css-block, Str $parent-select, Array $block-content = []
   ) {
 
-note "node: $css-block.name()";
+#note "node: $css-block.name()";
     my Array $css-bodies = [|$block-content];
 
     # build current selector
@@ -455,14 +455,14 @@ note "node: $css-block.name()";
 
     # do the textual parts first, then process rest
     for $css-block.nodes -> $node {
-note "node name loop: $node.name()";
+#note "node name loop: $node.name()";
       if $node.name ne 'sxml:css-block' {
         $css-bodies.push: $node;
       }
     }
 
-note "nblocks: ", $css-block.nodes.elems, ', ', $css-bodies.elems;
-note "Array: ", $css-bodies.perl;
+#note "nblocks: ", $css-block.nodes.elems, ', ', $css-bodies.elems;
+#note "Array: ", $css-bodies.perl;
     # if the css body is not a string of only spaces, add it to the style
     if $is-block and ([~] @$css-bodies) !~~ m/^ \s* $/ {
 
@@ -473,10 +473,10 @@ note "Array: ", $css-bodies.perl;
 #      $css-body ~~ s:g/ \s+ $//;
 #      $css-body = "$select \{\n  $css-body\n}\n\n";
 
-note "css block: $is-block, no spaces";
+#note "css block: $is-block, no spaces";
       if [~] @$css-bodies ~~ m/ \S / {
         $!style.append(:text("\n$select \{\n  "));
-.note for @$css-bodies;
+#.note for @$css-bodies;
         $!style.append(.clone-node) for @$css-bodies;
         $!style.append(:text("\n}\n\n"));
       }
@@ -484,7 +484,7 @@ note "css block: $is-block, no spaces";
 
     # not within a selector. can be user input or from other methods
     elsif ([~] @$css-bodies) !~~ m/^ \s* $/ {
-note "css block: $is-block, no spaces";
+#note "css block: $is-block, no spaces";
 
 #      $css-body ~~ s:g/ \s\s+ / /;
 #      $css-body ~~ s:g/ \n / /;
@@ -495,14 +495,15 @@ note "css block: $is-block, no spaces";
 
 #      $css-body = "$css-body\n";
       $!style.append(.clone-node) for @$css-bodies;
+      $css-bodies = [];
     }
-note "css block $css-block.name()\n$!style";
+#note "css block $css-block.name()\n$!style";
 
     # process the rest of the blocks
     for $css-block.nodes -> $node {
-note "$css-block.name() -> $node.name()";
+#note "$css-block.name() -> $node.name()";
       if $node ~~ SemiXML::Element and $node.name eq 'sxml:css-block' {
-note "next level";
+#note "next level";
         self!css-blocks( $node, $select, $css-bodies);
       }
     }

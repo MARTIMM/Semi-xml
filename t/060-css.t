@@ -16,7 +16,7 @@ subtest 'generated blended color variables', {
 
         $!css.style [
 
-          body { background-color: orange; }
+          body p { background-color: orange; }
 
           $!css.b s='.infobox >' [
             $!css.b s=.message [
@@ -28,7 +28,7 @@ subtest 'generated blended color variables', {
               ]
             ]
 
-            $!css.b s=.user [
+            $!css.b s=".user p" [
               border: 2px solid black;
               $!css.b s='> .title' [
                 color: black;
@@ -42,6 +42,9 @@ subtest 'generated blended color variables', {
 
   my XML::XPath $p = get-xpath($text);
   my Array $style-text = [$p.find( '//style/text()', :to-list)];
+
+  #diag "reset style:\n" ~  $style-text[0];
+  #diag "user style:\n" ~ $style-text[1];
   like $style-text[0].text, /'font-weight: inherit;'/,
        'found some of the reset';
   like $style-text[1].text, /'.infobox > .message > .title'/,
@@ -65,15 +68,16 @@ sub get-xpath ( Str $content --> XML::XPath ) {
       T => {:!parse}
     },
     :$content,
-    :!trace, :!raw, :!keep, :exec
+#    :!trace, :!raw, :!keep, :exec
   );
 
   # See the result
+  my Str $xml-text = ~$x;
   mkdir 't/D060' unless 't/D060'.IO ~~ :e;
-  't/D060/css.html'.IO.spurt($x.Str);
+  't/D060/css.html'.IO.spurt($xml-text);
   $x.done;
 
-  XML::XPath.new(:xml($x.Str))
+  XML::XPath.new(:xml($xml-text))
 }
 
 #-------------------------------------------------------------------------------

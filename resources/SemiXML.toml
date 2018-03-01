@@ -38,8 +38,8 @@
 [ F ]
   # modules and methods
   inline            = [
-    'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time', 'sxml:comment',
-    'sxml:cdata', 'sxml:xml'
+    'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time',
+    'sxml:comment', 'sxml:cdata', 'sxml:xml'
   ]
 
   space-preserve    = [ 'sxml:cdata', 'sxml:pi', 'sxml:xml' ]
@@ -93,6 +93,9 @@
 # Module and library path tables. Refined using IN and basename.
 [ ML ]
 #  label           = 'module[;path to module]'
+#  core            = 'SxmlLib::SxmlCore'
+#  css             = 'SxmlLib::Html::Css'
+#  core            = 'SxmlLib::SxmlCore'
   SxmlCore        = 'SxmlLib::SxmlCore'
 
 #-------------------------------------------------------------------------------
