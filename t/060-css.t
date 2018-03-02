@@ -83,5 +83,5 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 #-------------------------------------------------------------------------------
 done-testing;
 
-#unlink('t/D060/css.html');
-#rmdir('t/D060');
+unlink('t/D060/css.html');
+rmdir('t/D060');
