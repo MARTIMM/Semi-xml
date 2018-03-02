@@ -23,9 +23,17 @@ subtest 'generated blended color variables', {
               border: 1px solid $sxml:var-ref name=blend-color1 [];
               padding: 10px;
 
-              $!css.b s='> .title' [
+              $!css.b s='> .title1' [
                 color: $sxml:var-ref name=blend-color5 [];
               ]
+
+              width: 20pt;
+
+              $!css.b s='> .title2' [
+                color: $sxml:var-ref name=blend-color3 [];
+              ]
+
+              height: 10pt;
             ]
 
             $!css.b s=".user p" [
@@ -47,7 +55,7 @@ subtest 'generated blended color variables', {
   #diag "user style:\n" ~ $style-text[1];
   like $style-text[0].text, /'font-weight: inherit;'/,
        'found some of the reset';
-  like $style-text[1].text, /'.infobox > .message > .title'/,
+  like $style-text[1].text, /'.infobox > .message > .title1'/,
        'found a selector line';
   like $style-text[1].text, /'solid #' <xdigit>+/, 'found border color';
   like $style-text[1].text, /'color: #' <xdigit>+/, 'found title color';
@@ -83,5 +91,5 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 #-------------------------------------------------------------------------------
 done-testing;
 
-unlink('t/D060/css.html');
-rmdir('t/D060');
+#unlink('t/D060/css.html');
+#rmdir('t/D060');
