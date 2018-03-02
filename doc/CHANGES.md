@@ -1,5 +1,7 @@
 # Changes in SemiXML:: * and sxml2xml
 
+* 0.74.4
+  * Css module converted.
 * 0.47.3
   * Removed XMLText. it replaced the XML::Text module which is not needed anymore.
   * Color module is converted
