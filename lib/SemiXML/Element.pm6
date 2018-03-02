@@ -32,12 +32,10 @@ class Element does SemiXML::Node {
     given $!name {
       when 'sxml:cdata' {
         $!node-type = SemiXML::NTCData;
-#        $!keep = $!noconv = True;
       }
 
       when 'sxml:pi' {
         $!node-type = SemiXML::NTPI;
-#        $!keep = $!noconv = True;
       }
 
       when 'sxml:comment' {
@@ -47,7 +45,6 @@ class Element does SemiXML::Node {
 
       when 'sxml:xml' {
         $!node-type = SemiXML::NTXml;
-#        $!keep = $!noconv = True;
       }
 
       # store all declarations
@@ -55,8 +52,6 @@ class Element does SemiXML::Node {
 #note "Decl: $!name, ", $var-declarations.keys, ', ', $!attributes.keys;
         $!node-type = SemiXML::NTVDecl;
         $var-declarations{~$!attributes<name>} = self if $!attributes<name>;
-#        $!inline = True;
-#        $!keep = True;
       }
 
       # insert before reference all nodes from declaration
@@ -67,9 +62,6 @@ class Element does SemiXML::Node {
         # this meabs that processing is deferred to the moment xml
         # is generated.
         $!node-type = SemiXML::NTVRef;
-#        $!inline = True;
-#        $!keep = True;
-#        $!close = True;
       }
 
       default {
@@ -127,64 +119,22 @@ class Element does SemiXML::Node {
       $node.run-method unless $node ~~ SemiXML::Text;
     }
 
-#note "rm 0 $!name, $!node-type, $!body-number";
     # then from leaf back to top, check if node is a method node
     if $!node-type ~~ SemiXML::NTMethod {
-#note "rm 1 $!module, $!method";
 
       # get the object
       my $object = self!get-object;
 
-#note "MN 0: $!name, i=$!inline, n=$!noconv, k=$!keep, c=$!close ", $!parent.name;
 
       # call the objects method. the method must insert its data into the tree
       $object."$!method"(self);
-#`{{
-      $!nodes = [ |@$!nodes, |@($object."$!method"(self) // [])];
-      for @$!nodes.reverse -> $node {
-
-        # assume that the top level nodes do not have a parent
-        # with this the nodes become the methods children
-        $node.parent(self);
-
-#note "\nappend before $!name: $node.name()\n$node";
-        # set this node's attributes on every generated node
-        $node.inline = $!inline;
-        $node.noconv = $!noconv;
-        $node.keep = $!keep;
-        $node.close = $!close;
-
-        # and place them just before the method node
-        self.after($node);
-      }
-}}
 
       # when finished remove the method node and children
       # keep the parent object
       my SemiXML::Node $parent = $!parent;
-#`{{
-      # define a sub to do job recursively
-      sub rm-node ( $n ) {
-#note "rm $n.name()";
-        unless $n ~~ SemiXML::Text {
-          for $n.nodes -> $node is rw {
-            # first go deep
-            rm-node($node);
-            $node.parent(:undef);
-          }
 
-          $n.undef-nodes;
-        }
-
-        $n.parent(:undef);
-      }
-
-      # call sub
-      rm-node(self);
-}}
       # remove this method object from parent
       $parent.remove-child(self);
-#note "after inserting before:\n", $parent.Str;
     }
   }
 
@@ -566,8 +516,6 @@ class Element does SemiXML::Node {
     # create an element only when the name is defined and not empty
     my SemiXML::Node $node =
        SemiXML::Element.new( :$name, :$attributes) if ? $name;
-
-#note "H: {$node//'-'}, T: $text-element";
 
     # if both are created than add text to the element
     if ? $node and ? $text-element {
