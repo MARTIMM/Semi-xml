@@ -408,6 +408,11 @@ class Html::Css {
   method style ( SemiXML::Element $m ) {
 
 #note "\nStyle 0:\n$m\n\n$!style";
+
+    for $m.nodes.reverse -> $node {
+      $!style.insert($node) if $node.name ne 'sxml:css-block';
+    }
+
     self!css-blocks( $m, '');
 #note "\nStyle 1:\n$!style";
 
@@ -430,11 +435,16 @@ class Html::Css {
 
   #-----------------------------------------------------------------------------
   #---[ private ]---------------------------------------------------------------
+#TODO Convert text content of each block to key/value from "'key' : 'value' ;".
+# Store in a Hash to remove older entries automatically. An array of keys can
+# be used to keep same sequence as entered. If possible check with current
+# defaults to see if it can be left out.
+
   method !css-blocks (
     SemiXML::Node $css-block, Str $parent-select, Array $block-content = []
   ) {
+#note "Style xml: ", $css-block.nodes>>.xml.join(' ');
 
-#note "node: $css-block.name()";
     my Array $css-bodies = [|$block-content];
 
     # build current selector
@@ -455,28 +465,20 @@ class Html::Css {
 
     # do the textual parts first, then process rest
     for $css-block.nodes -> $node {
-#note "node name loop: $node.name()";
-      if $node.name ne 'sxml:css-block' {
+      if $node.name eq 'sxml:css-block' {
+        self!css-blocks( $node, $select, $css-bodies);
+      }
+
+      else {
         $css-bodies.push: $node;
       }
     }
 
-#note "nblocks: ", $css-block.nodes.elems, ', ', $css-bodies.elems;
-#note "Array: ", $css-bodies.perl;
     # if the css body is not a string of only spaces, add it to the style
     if $is-block and ([~] @$css-bodies) !~~ m/^ \s* $/ {
 
-#      $css-body ~~ s:g/ \s\s+ / /;
-#      $css-body ~~ s:g/ \n / /;
-
-#      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
-#      $css-body ~~ s:g/ \s+ $//;
-#      $css-body = "$select \{\n  $css-body\n}\n\n";
-
-#note "css block: $is-block, no spaces";
       if [~] @$css-bodies ~~ m/ \S / {
         $!style.append(:text("\n$select \{\n  "));
-#.note for @$css-bodies;
         $!style.append(.clone-node) for @$css-bodies;
         $!style.append(:text("\n}\n\n"));
       }
@@ -484,28 +486,9 @@ class Html::Css {
 
     # not within a selector. can be user input or from other methods
     elsif ([~] @$css-bodies) !~~ m/^ \s* $/ {
-#note "css block: $is-block, no spaces";
 
-#      $css-body ~~ s:g/ \s\s+ / /;
-#      $css-body ~~ s:g/ \n / /;
-#      $css-body ~~ s:g/ \s+ '}' /}/;
-
-#      $css-body ~~ s:g/ \s* ';' (\S*) /;\n$0  /;
-#      $css-body ~~ s:g/ \s+ $//;
-
-#      $css-body = "$css-body\n";
       $!style.append(.clone-node) for @$css-bodies;
       $css-bodies = [];
-    }
-#note "css block $css-block.name()\n$!style";
-
-    # process the rest of the blocks
-    for $css-block.nodes -> $node {
-#note "$css-block.name() -> $node.name()";
-      if $node ~~ SemiXML::Element and $node.name eq 'sxml:css-block' {
-#note "next level";
-        self!css-blocks( $node, $select, $css-bodies);
-      }
     }
   }
 }
