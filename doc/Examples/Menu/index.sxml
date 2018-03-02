@@ -3,11 +3,11 @@
 $html [
   #=============================================================================
   $head [
-    $meta charset=UTF-8
-    $meta http-equiv=Content-Style-Type content=text/css
+    $meta charset=UTF-8 []
+    $meta http-equiv=Content-Style-Type content=text/css []
 
     $!css.style compress=0 id=reset =!map [
-      $!css.reset type=condensed-universal
+      $!css.reset type=condensed-universal []
     ]
 
     $!css.style compress=0 id=page-style [
@@ -49,13 +49,13 @@ $html [
       #-------------------------------------------------------------------------
       # first page is the main page and is shown first
       $!menu.entry title=Home id=main-page =!home-button [
-        $h1 [ $!lorem.words n=6 tc=1 ]
+        $h1 [ $!lorem.words n=6 tc=1 [] ]
         $p [ $!lorem.cicero45bc ]
       ]
 
       #-------------------------------------------------------------------------
       $!menu.entry title=Contact id=sub-page1 =!open-button =!home-button [
-        $h1 [ $!lorem.words n=3 tc=1 ]
+        $h1 [ $!lorem.words n=3 tc=1 [] ]
         $p [ $!lorem.cheese-ipsum ]
         $a href="javascript:void(0)" class="menu-open-button"
            onclick="menu.openNavigation()" [ &#9776; ]
@@ -65,8 +65,8 @@ $html [
 
       #-------------------------------------------------------------------------
       $!menu.entry title=About id=sub-page2 [
-        $h1 [ $!lorem.words n=4 tc=1 ]
-        $p [ $!lorem.veggie-ipsum ]
+        $h1 [ $!lorem.words n=4 tc=1 [] ]
+        $p [ $!lorem.veggie-ipsum [] ]
       ]
     ]
   ]

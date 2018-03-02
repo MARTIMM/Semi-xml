@@ -4,9 +4,7 @@ use v6;
 # Example from w3schools
 unit package SxmlLib:auth<github:MARTIMM>;
 
-use XML;
-#use SemiXML::Sxml;
-use SemiXML::Helper;
+use SemiXML::Element;
 
 #-------------------------------------------------------------------------------
 class Html::Menu {
@@ -15,24 +13,20 @@ class Html::Menu {
   my Str $main-page-id;
 
   #-----------------------------------------------------------------------------
-  method container (
-    XML::Element $parent,
-    Hash $attrs is copy,
-    XML::Node :$content-body
-  ) {
-    my Str $id = ($attrs<id>//'SideNav').Str;
-    my Str $class = ($attrs<class>//'sidenav').Str;
-    my Str $side = ($attrs<side>//'').Str;
+  method container ( SemiXML::Element $m ) {
+
+    my Str $id = ($m.attributes<id>//'SideNav').Str;
+    my Str $class = ($m.attributes<class>//'sidenav').Str;
+    my Str $side = ($m.attributes<side>//'').Str;
     $side = 'left' unless $side ~~ any( 'left', 'right');
 
     # style element and their setting for the menu and pages
-    self!create-style( $parent, $id, $class, $side);
+    self!create-style( $m, $id, $class, $side);
 
-    my XML::Element $menu-div = append-element(
-      $parent, 'div', {
-        id => $id, class => $class,
-      }
+    my SemiXML::Element $menu-div .= new(
+      :name<div>, :attributes( { :$id, :$class})
     );
+    $m.before($menu-div);
 
     self!create-script( $parent, $id);
 
@@ -75,13 +69,13 @@ class Html::Menu {
   #-----------------------------------------------------------------------------
   method entry (
     XML::Element $parent,
-    Hash $attrs is copy,
+    Hash $m.attributes is copy,
     XML::Node :$content-body
   ) {
-    my Str $title = ($attrs<title>//'...title...').Str;
-    my Str $id = ($attrs<id>//'...id...').Str;
-    my Bool $open-button = ($attrs<open-button>//1).Int.Bool;
-    my Bool $home-button = ($attrs<home-button>//1).Int.Bool;
+    my Str $title = ($m.attributes<title>//'...title...').Str;
+    my Str $id = ($m.attributes<id>//'...id...').Str;
+    my Bool $open-button = ($m.attributes<open-button>//1).Int.Bool;
+    my Bool $home-button = ($m.attributes<home-button>//1).Int.Bool;
 
     # $main-page-id is set to the id of the current entry and it is
     # global to the class.
