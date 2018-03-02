@@ -336,9 +336,10 @@ class Element does SemiXML::Node {
         }
 
         else {
-#note "VR: $!attributes<name>, ", $!attributes.keys, ', ', $var-declarations.keys, "\n", $var-declarations.perl;
+#note "VR: $!attributes<name>, ", $!attributes.keys, ', ', $var-declarations.keys;
           $xml-text = ' ';
-          my SemiXML::Element $vdecl = $var-declarations{~$!attributes<name>};
+          my SemiXML::Element $vdecl =
+            $var-declarations{~$!attributes<name>} // SemiXML::Element;
           if $vdecl.defined {
             for $vdecl.nodes -> $node {
               $xml-text ~= $node.xml;
