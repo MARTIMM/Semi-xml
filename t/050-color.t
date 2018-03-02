@@ -82,14 +82,14 @@ subtest 'generated blended color variables 2', {
   my XML::XPath $p = get-xpath($text);
 
   my Str $style-text = $p.find( '//style/text()', :to-list)[0].text;
-  like $style-text, /:s color ':' '#1200FFFF;' /, 'Found base color';
-  like $style-text, / 'border-color: #' <xdigit>**8 ';' /,
+  like $style-text, /:s color ':' '#1200FFFF' ';' /, 'Found base color';
+  like $style-text, /:s 'border-color:' '#' <xdigit>**8 ';' /,
        'Found border color';
-  like $style-text, / 'background-color: #' <xdigit>**8 ';' /,
+  like $style-text, /:s 'background-color:' '#' <xdigit>**8 ';' /,
        'Found background color';
 
   $style-text = $p.find( '//body/p/set0/text()', :to-list)[0].text;
-  like $style-text, / '#' <xdigit>**8 /,
+  like $style-text, /:s '#' <xdigit>**8 /,
        'Found background color somewhere else';
 }
 
@@ -133,7 +133,7 @@ sub get-xpath ( Str $content --> XML::XPath ) {
       ML => { :Colors<SxmlLib::Colors>, },
       T => { :config, :tables, :modules, :parse, },
     },
-    :$content, :!raw, :!trace, :keep
+    :$content, :!raw, :!trace, :!keep
   );
 
   # See the result
