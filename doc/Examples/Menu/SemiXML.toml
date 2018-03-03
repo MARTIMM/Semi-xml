@@ -10,9 +10,9 @@
 #------------------------------------------------------------------------------
 [ ML.html ]
   colors        = 'SxmlLib::Colors'
-  css           = 'SxmlLib::Css'
   file          = 'SxmlLib::File'
   lorem         = 'SxmlLib::LoremIpsum'
+  css           = 'SxmlLib::Html::Css'
   menu          = 'SxmlLib::Html::Menu'
 
 #------------------------------------------------------------------------------
