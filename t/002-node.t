@@ -291,8 +291,12 @@ subtest 'search complex 3', {
   );
   $ep.append('e3');
 
+  #diag "Xml: " ~ $ep.xml;
+
   my Array $r = $e1.search( [ SemiXML::SCChild, '*']);
   is $r.elems, 1, '1 element ./* on e1';
+
+  #diag "R: " ~ $r.perl;
 
   $r = $e1.search( [ SemiXML::SCChild, 'node()']);
   is $r.elems, 2, '2 elements ./node() on e1';
