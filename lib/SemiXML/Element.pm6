@@ -197,11 +197,12 @@ class Element does SemiXML::Node {
 
     $node.before(self);
 
+note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.keys;
     $node
   }
 
   #-----------------------------------------------------------------------------
-  multi method before (
+  multi method after (
     Str $name?, Hash :$attributes = {}, Str :$text
     --> SemiXML::Node
   ) {
