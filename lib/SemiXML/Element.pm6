@@ -195,7 +195,8 @@ class Element does SemiXML::Node {
       $name, :$attributes, :$text
     );
 
-    $node.before(self);
+    # then move it
+    self.before($node);
 
 note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.keys;
     $node
@@ -211,7 +212,7 @@ note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.k
       $name, :$attributes, :$text
     );
 
-    $node.after(self);
+    self.after($node);
 
     $node
   }
@@ -506,6 +507,8 @@ note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.k
   }
 
   #-----------------------------------------------------------------------------
+  # make a node without a parent. add text if defined. return text only
+  # if name is not defined
   method !make-node-with-text(
     Str $name?, Hash :$attributes = {}, Str :$text
     --> SemiXML::Node
@@ -520,12 +523,13 @@ note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.k
 
     # if both are created than add text to the element
     if ? $node and ? $text-element {
-      $node.append($text-element);
+      $node.append( $text-element);
     }
 
     # if only text, then the element becomes the text element
     elsif ? $text-element {
       $node = $text-element;
+      $node.parent(self);
     }
 
     $node
