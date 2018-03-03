@@ -6,11 +6,11 @@ $html [
     $meta charset=UTF-8 []
     $meta http-equiv=Content-Style-Type content=text/css []
 
-    $!css.style compress=0 id=reset =!map [
+    $!css.style id=reset [
       $!css.reset type=condensed-universal []
     ]
 
-    $!css.style compress=0 id=page-style [
+    $!css.style id=page-style [
       $!css.b s='*' [
         font-family:    'sans';
       ]
@@ -21,7 +21,7 @@ $html [
       ]
     ]
 
-    $!css.style compress=0 id=menu-changes [
+    $!css.style id=menu-changes [
       $!css.b s=.sidenav [
         background:     rgb( 0, 110, 110);
 #        color:          rgb( 0, 200, 200);
@@ -58,9 +58,9 @@ $html [
         $h1 [ $!lorem.words n=3 tc=1 [] ]
         $p [ $!lorem.cheese-ipsum ]
         $a href="javascript:void(0)" class="menu-open-button"
-           onclick="menu.openNavigation()" [ &#9776; ]
+           onclick="menu.openNavigation()" « &#9776; »
         $a href="javascript:void(0)" class="menu-home-button"
-           onclick="menu.showPage('main-page')" [ &#x1F3DB; ]
+           onclick="menu.showPage('main-page')" « &#x1F3DB; »
       ]
 
       #-------------------------------------------------------------------------

@@ -12,6 +12,56 @@ class Html::Menu {
   my Bool $menu-js-stored = False;
   my Str $main-page-id;
 
+  has SemiXML::Element $!style;
+  has SemiXML::Element $!body;
+  has SemiXML::Element $!script;
+  has Bool $!initialized = False;
+
+  #-----------------------------------------------------------------------------
+  method initialize ( SemiXML::Element $m ) {
+
+    return if $!initialized;
+
+    $!style .= new(
+      :name<style>, :attributes({'sxml:noconv' => '1'}), :text("\n")
+    );
+    $!style.noconv = True;
+
+    my Array $r = $m.search( [
+        SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head',
+        SemiXML::SCChild, 'style'
+      ]
+    );
+
+    if $r.elems {
+      # place style after the last one
+      $r[*-1].after($!style);
+    }
+
+    # no style found add to the end of head
+    else {
+      $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'head']);
+      if $r.elems {
+        $r[0].append($!style);
+      }
+
+      else {
+        die 'Css must be placed in /html/head but head is not found';
+      }
+    }
+
+    $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'body']);
+    if $r.elems > 0 {
+      $!body = $r[0];
+    }
+
+    else {
+      die 'A body element is not found';
+    }
+
+    $!initialized = True;
+  }
+
   #-----------------------------------------------------------------------------
   method container ( SemiXML::Element $m ) {
 
@@ -28,31 +78,39 @@ class Html::Menu {
     );
     $m.before($menu-div);
 
-    self!create-script( $parent, $id);
+    self!create-script( $m, $id);
 
-    my XML::Element $pages-hook = append-element( $parent, 'sxml:hook');
-    drop-parent-container($content-body);
-
-    for $content-body.nodes.reverse -> $node {
-      if $node ~~ XML::Element and $node.name eq 'a' {
+    for $m.nodes.reverse -> $node {
+note "Node: $node.name(), ", $node.attributes.keys;
+      if $node ~~ SemiXML::Element and $node.name eq 'a' {
         $menu-div.insert($node);
       }
 
-      elsif $node ~~ XML::Element and $node.name eq 'div' {
-        $pages-hook.after($node);
+      elsif $node ~~ SemiXML::Element and $node.name eq 'div' {
+        # The order of the pages are reversed this way but it should not make
+        # a difference as long as the pages are referenced properly
+        $!script.before($node);
+
+        if $node.attributes<class>:exists
+           and $node.attributes<class> eq 'menu-page' {
+          $node.attributes({ style => 'display: block;'});
+          last;
+        }
       }
     }
 
-    my XML::Element $a = append-element(
-      $menu-div, 'a', {
-        href => 'javascript:void(0)',
-        class => 'menu-close-button',
-        onclick => 'menu.closeNavigation()',
-      }
+    $menu-div.append(
+      'a',
+      :attributes( {
+          href => 'javascript:void(0)',
+          class => 'menu-close-button',
+          onclick => 'menu.closeNavigation()',
+        }
+      ),
+      :text('&#x2716;')
     );
 
-    append-element( $a, :text('&#x2716;'));
-
+#`{{
     for $parent.nodes -> $node {
       if $node ~~ XML::Element and $node.name eq 'div' {
         if $node.attribs<class>:exists and $node.attribs<class> eq 'menu-page' {
@@ -64,14 +122,14 @@ class Html::Menu {
 
     $pages-hook.remove;
     $parent;
+}}
   }
 
   #-----------------------------------------------------------------------------
-  method entry (
-    XML::Element $parent,
-    Hash $m.attributes is copy,
-    XML::Node :$content-body
-  ) {
+  method entry ( SemiXML::Element $m ) {
+
+note "Entry: $m.name(), ", $m.attributes.keys;
+
     my Str $title = ($m.attributes<title>//'...title...').Str;
     my Str $id = ($m.attributes<id>//'...id...').Str;
     my Bool $open-button = ($m.attributes<open-button>//1).Int.Bool;
@@ -81,66 +139,63 @@ class Html::Menu {
     # global to the class.
     $main-page-id //= $id;
 
-    drop-parent-container($content-body);
-
     # make a link with an empty reference and an onclick function which must
     # show the selected page.
-    my XML::Element $a = append-element(
-      $parent, 'a', {
-        href => 'javascript:void(0)',
-        onclick => Q:s "menu.showPage('$id')",
-      }
-    );
-    append-element( $a, :text($title));
-
-    my XML::Element $page-div = append-element(
-      $parent, 'div', {
-        id => $id,
-        style => 'display: none',
-        class => 'menu-page'
-      }
+    $m.before(
+      'a',
+      :attributes( {
+          href => 'javascript:void(0)',
+          onclick => Q:s "menu.showPage('$id')",
+        }
+      ),
+      :text($title)
     );
 
-    $page-div.insert($_) for $content-body.nodes.reverse;
+    my SemiXML::Element $page-div = $m.before(
+      'div',
+      :attributes( {
+          id => $id,
+          style => 'display: none',
+          class => 'menu-page'
+        }
+      )
+    );
+
+    $page-div.insert($_) for $m.nodes.reverse;
 
     if $open-button {
-      my XML::Element $open-a = insert-element(
-        $page-div, 'a', {
-          href => 'javascript:void(0)',
-          class => 'menu-open-button',
-          onclick => 'menu.openNavigation()'
-        }
+      $page-div.insert(
+        'a',
+        :attributes( {
+            href => 'javascript:void(0)',
+            class => 'menu-open-button',
+            onclick => 'menu.openNavigation()'
+          }
+        ),
+        :text('&#9776;')
       );
-
-      append-element( $open-a, :text('&#9776;'));
     }
 
     if $home-button {
-      my XML::Element $home-a = insert-element(
-        $page-div, 'a', {
-          href => 'javascript:void(0)',
-          class => 'menu-home-button',
-          onclick => Q:s "menu.showPage('$main-page-id')"
-        }
+      $page-div.insert(
+        'a',
+        :attributes( {
+            href => 'javascript:void(0)',
+            class => 'menu-home-button',
+            onclick => Q:s "menu.showPage('$main-page-id')"
+          }
+        ),
+        :text('&#x1F3E0;')
       );
-
-      append-element( $home-a, :text('&#x1F3E0;'));
     }
-
-    $parent;
+note "M Parent: ", $m.parent.Str;
   }
 
   #-----------------------------------------------------------------------------
   # create a style element with the properties for a menu
-  method !create-style( XML::Element $parent, Str $id, Str $class, Str $side ) {
+  method !create-style( SemiXML::Element $m, Str $id, Str $class, Str $side ) {
 
-    # map the contents to the end of /html/head
-    my XML::Element $remap-style = append-element(
-      $parent, 'sxml:remap', { map-to => "/html/head",}
-    );
-
-    my XML::Element $style = append-element( $remap-style, 'style');
-    append-element( $style, :text(Q:s:to/EOSTYLE/));
+    $!style.append( :text(Q:s:to/EOSTYLE/));
       /* The side navigation menu */
       .$class {
           height:     100%;               /* 100% Full-height */
@@ -206,15 +261,11 @@ class Html::Menu {
   }
 
   #-----------------------------------------------------------------------------
-  method !create-script ( $parent, $id ) {
+  method !create-script ( $m, $id ) {
 
     if !$menu-js-stored {
-      my XML::Element $remap-js = append-element(
-        $parent, 'sxml:remap', { map-to => "/html/body",}
-      );
-
-      my XML::Element $script = append-element( $remap-js, 'script');
-      append-element( $script, :text(Q:s:to/EOJS/));
+      $!script = $!body.append('script');
+      $!script.append(:text(Q:s:to/EOJS/));
         var menu = {
           openNavigation: function ( ) {
             document.getElementById('$id').style.width = "250px";
