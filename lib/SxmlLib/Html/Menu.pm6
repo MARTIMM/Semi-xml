@@ -163,6 +163,8 @@ note "Entry: $m.name(), ", $m.attributes.keys;
 
     $page-div.insert($_) for $m.nodes.reverse;
 
+note "Bttns, $open-button, $home-button";
+
     if $open-button {
       $page-div.insert(
         'a',
@@ -175,6 +177,9 @@ note "Entry: $m.name(), ", $m.attributes.keys;
         :text('&#9776;')
       );
     }
+
+note "X: $page-div";
+#return;
 
     if $home-button {
       $page-div.insert(

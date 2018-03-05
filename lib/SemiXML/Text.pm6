@@ -125,6 +125,9 @@ class Text does SemiXML::Node {
       $text ~~ s:g/^^ \h+ //;     # remove leading spaces
       $text ~~ s:g/ \h+ $$//;     # remove trailing spaces
 
+      # when a text is created later outside the parsing process, this number
+      # is undefined, so init if needed
+      $!body-number //= 0;
 #note "BC: $!body-number != $previous-body-number";
       if $!body-number != $previous-body-number {
         $previous-body-number = $!body-number;
@@ -228,7 +231,7 @@ class Text does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method Str ( --> Str ) {
 
-    $!text
+    self.xml;
   }
 
   #-----------------------------------------------------------------------------

@@ -76,7 +76,7 @@ role Node {
     self.remove;
     $!parent = $parent;
     self!process-attributes;
-    return self
+    self
   }
 
   #-----------------------------------------------------------------------------
@@ -85,7 +85,8 @@ role Node {
 
     # remove if it has a parent
     $!parent.remove-child(self) if $!parent;
-    return self
+
+    self
   }
 
   #-----------------------------------------------------------------------------
@@ -93,7 +94,6 @@ role Node {
   method remove-child ( SemiXML::Node $node ) {
 
     my $pos = self.index-of($node);
-#note "rm child: $!name, $node.name(), pos = {$pos//'-'}";
     $!nodes.splice( $pos, 1) if $pos.defined;
   }
 
@@ -101,33 +101,48 @@ role Node {
 #TODO move into separate module and use with 'handles'
   # append a node to the end of the nodes array if the node is not
   # already in that array.
-  multi method append ( SemiXML::Node:D $node! ) {
+  multi method append ( SemiXML::Node:D $node! --> SemiXML::Node ) {
 
     # if node has a parent, remove the node from the parent first
     $node.remove;
+note "NApp: node $node.name() removed from $!name";
 
     # add the node when not found and set the parent in the node
     my $pos = self.index-of($node);
+note "NApp: pos={$pos//'-'}";
+
     unless $pos.defined {
       $!nodes.push($node);
+note "NApp Node pushed";
       $node.parent(self);
+note "NApp Node parented, {$!parent ?? $!parent.name !! '-'}";
     }
+
+    $node
   }
 
   #-----------------------------------------------------------------------------
   # insert a node to the start of the nodes array if the node is not
   # already in that array.
-  multi method insert ( SemiXML::Node:D $node ) {
+  multi method insert ( SemiXML::Node:D $node! --> SemiXML::Node ) {
 
     $node.remove;
+note "NIns: node $node.name() removed from $!name";
 
     my $pos = self.index-of($node);
+note "NIns: pos={$pos//'-'}";
+
     unless $pos.defined {
       $!nodes.unshift($node);
+note "NIns Node unshifted";
       $node.parent(self);
+note "NIns Node parented, {$!parent ?? $!parent.name !! '-'}";
     }
+
+    $node
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   multi method before (
     SemiXML::Node $node, SemiXML::Node $new, :$offset=0, *%formatting
@@ -145,40 +160,81 @@ role Node {
 
     $r
   }
+}}
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method before (
-    SemiXML::Node $node, *%formatting
+    SemiXML::Node $node!, :$offset = 0 #, *%formatting
     --> SemiXML::Node
   ) {
 
-    my SemiXML::Node $r;
+#    my SemiXML::Node $r;
     if $!parent.defined {
-      $r = $!parent.before( self, $node, |%formatting);
+#      $r = $!parent.before( self, $node, |%formatting);
+      my Int $pos = $!parent.index-of(self);
+      if $pos.defined and ($pos + $offset) <= $!parent.nodes.elems {
+        $!nodes.splice( $pos + $offset, 0, $node.reparent($!parent));
+#        $new.set-formatting(|%formatting);
+#        $r = $node;
+      }
+
+      else {
+        die "If there is a parent, pos should be defined!";
+      }
     }
 
-    $r;
+    else {
+      die "node $!name does not have a parent";
+    }
+
+    $node
   }
 
   #-----------------------------------------------------------------------------
-  method set-formatting ( *%formatting ) {
-
-    $!inline = %formatting<inline> // False;
-    $!inline = %formatting<noconv> // False;
-    $!inline = %formatting<keep> // False;
-    $!inline = %formatting<close> // False;
-  }
-
-  #-----------------------------------------------------------------------------
+#`{{
   multi method after ( SemiXML::Node $node, SemiXML::Node $new, :$offset=1 ) {
 
     self.before( $node, $new, :$offset);
   }
+}}
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi method after ( SemiXML::Node $node ) {
+  multi method after ( SemiXML::Node $node!, :$offset = 1 --> SemiXML::Node ) {
 
-    $!parent.after( self, $node) if $!parent.defined;
+#    $!parent.after( self, $node) if $!parent.defined;
+#    self.before( self, $node);
+note "A0 $!name\.after\($node.name())";
+
+
+
+#    my SemiXML::Node $r;
+    if $!parent.defined {
+note "A1 $!parent.name(): ", $!parent.nodes>>.name.join(' ');
+#      $r = $!parent.before( self, $node, |%formatting);
+      my Int $pos = $!parent.index-of(self);
+note "A2 pos: {$pos//'-'}";
+      my Int $loc = $pos + $offset;
+      $loc = 0 if $loc < 0;
+      $loc = $!parent.nodes.end if $loc > $!parent.nodes.elems;
+      if $pos.defined {
+        $!nodes.splice( $loc, 0, $node.reparent($!parent));
+#        $new.set-formatting(|%formatting);
+#        $r = $node;
+      }
+
+      else {
+        die "If there is a parent, pos should be defined!" unless $pos.defined;
+        die "Position + Offset is too low or too high, elems: " ~
+            $!parent.nodes.elems ~ ", pos+off = $loc"
+              if $loc < 0 or $loc > $!parent.nodes.elems;
+      }
+    }
+
+    else {
+      die "node $!name does not have a parent";
+    }
+
+    $node
   }
 
   #-----------------------------------------------------------------------------
@@ -201,6 +257,15 @@ role Node {
     }
 
     return SemiXML::Node;
+  }
+
+  #-----------------------------------------------------------------------------
+  method set-formatting ( *%formatting ) {
+
+    $!inline = %formatting<inline> // False;
+    $!inline = %formatting<noconv> // False;
+    $!inline = %formatting<keep> // False;
+    $!inline = %formatting<close> // False;
   }
 
   #-----------------------------------------------------------------------------

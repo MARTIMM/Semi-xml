@@ -40,7 +40,7 @@ subtest 'Append, insert, before', {
   is $ep.nodes[1], $ec2, "second child $ec1.name() found in parent";
 
   my SemiXML::Element $ec3 .= new(:name<e3>);
-  $ep.before( $ec1, $ec3);
+  $ec1.before($ec3);
   is $ep.nodes[0], $ec3, "first child now $ec3.name(), before";
 
   my SemiXML::Element $n = $ec3.remove;
@@ -48,16 +48,16 @@ subtest 'Append, insert, before', {
   is $ep.nodes[0], $ec1, "e3 removed, first child $ec1.name() again";
 
   # insert one element further before $ec2
-  $ep.before( $ec2, $ec3, :offset(-1));
+  $ec2.before( $ec3, :offset(-1));
   is $ep.nodes[0], $ec3,
      "first child now $ec3.name() again, before with offset";
 
   $ec3.remove;
-  $ep.after( $ec1, $ec3);
+  $ec1.after($ec3);
   is $ep.nodes[1], $ec3, "2nd child now $ec3.name(), after";
 
   $ec3.remove;
-  $ep.after( $ec1, $ec3, :offset(2));
+  $ec1.after( $ec3, :offset(2));
   is $ep.nodes[2], $ec3, "3rd child now $ec3.name(), after with offset";
 
   $ec3.remove;

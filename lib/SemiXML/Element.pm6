@@ -15,7 +15,7 @@ class Element does SemiXML::Node {
 
   #-----------------------------------------------------------------------------
   multi submethod BUILD (
-    Str:D :$!name!, SemiXML::Node :$parent, Hash :$!attributes = {}
+    Str:D :$!name!, SemiXML::Element :$parent is copy, Hash :$!attributes = {}
   ) {
 
     # init
@@ -68,6 +68,11 @@ class Element does SemiXML::Node {
         $!node-type = SemiXML::NTElement;
       }
     }
+
+    # every node should have a parent except for the parents themselves. so,
+    # if not defined, create a stand-in.
+#    $parent .= new(:name<sxml:parent>)
+#      unless $parent or $!name eq 'sxml:parent';
 
     # connect to parent, root doesn't have a parent
     $parent.append(self) if ?$parent;
@@ -151,22 +156,21 @@ class Element does SemiXML::Node {
   }
 
   #-----------------------------------------------------------------------------
-  # more simple methods like append are in the Node module. this method
-  # can not be defined there because of the need of Element and Text module
-  # which will create circular reference errors when defined in Node.
+  # more methods like append are in the Node module. this method can not
+  # be defined there because of the need of class Element and Text which
+  # will create circular reference errors when defined in Node.
   multi method append (
     Str $name?, Hash :$attributes = {}, Str :$text
     --> SemiXML::Node
   ) {
 
     my SemiXML::Node $node = self!make-node-with-text(
-      $name, :$attributes, :$text
+      $name, :$attributes, :$text, :operation<append>
     );
 
-    $!nodes.push($node);
-    $node.parent(self);
-
-    $node
+    #$!nodes.push($node);
+    #$node.parent(self);
+    #$node
   }
 
   #-----------------------------------------------------------------------------
@@ -175,14 +179,8 @@ class Element does SemiXML::Node {
     --> SemiXML::Node
   ) {
 
-    my SemiXML::Node $node = self!make-node-with-text(
-      $name, :$attributes, :$text
-    );
-
-    $!nodes.unshift($node);
-    $node.parent(self);
-
-    $node
+note "Insert: $!name, $name, $attributes.keys(), $text";
+    self!make-node-with-text( $name, :$attributes, :$text, :operation<insert>);
   }
 
   #-----------------------------------------------------------------------------
@@ -191,15 +189,8 @@ class Element does SemiXML::Node {
     --> SemiXML::Node
   ) {
 
-    my SemiXML::Node $node = self!make-node-with-text(
-      $name, :$attributes, :$text
-    );
-
-    # then move it
-    self.before($node);
-
-note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.keys;
-    $node
+note "Before: $!name, $name, $attributes.keys(), $text";
+    self!make-node-with-text( $name, :$attributes, :$text, :operation<before>);
   }
 
   #-----------------------------------------------------------------------------
@@ -208,13 +199,8 @@ note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.k
     --> SemiXML::Node
   ) {
 
-    my SemiXML::Node $node = self!make-node-with-text(
-      $name, :$attributes, :$text
-    );
-
-    self.after($node);
-
-    $node
+note "After: $!name, $name, $attributes.keys(), $text";
+    self!make-node-with-text( $name, :$attributes, :$text, :operation<after>);
   }
 
   #-----------------------------------------------------------------------------
@@ -311,23 +297,23 @@ note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.k
   }
 
   #-----------------------------------------------------------------------------
-  method Str ( Str $t is copy = '' --> Str ) {
+  method Str ( Str $t is copy = '', Int $l = 0 --> Str ) {
 
-    $t = $t ~ (self.perl(:simple) ~ "[");
+    $t = $t ~ ("\n" ~ self.perl(:simple) ~ "[\n").indent($l);
 
     for @$!nodes -> $node {
       given $node {
         when SemiXML::Text {
-          $t ~= $node.Str;
+          $t ~= $node.Str.indent($l + 2);
         }
 
         default {
-          $t = $node.Str($t);
+          $t = $node.Str( $t, $l + 2);
         }
       }
     }
 
-    $t ~= "]";
+    $t ~= "\n]".indent($l);
 
     $t
   }
@@ -510,27 +496,40 @@ note "Before: $!name, $node.name(), ", $node.parent.defined, ', ', $attributes.k
   # make a node without a parent. add text if defined. return text only
   # if name is not defined
   method !make-node-with-text(
-    Str $name?, Hash :$attributes = {}, Str :$text
+    Str $name?, Hash :$attributes = {}, Str :$text, Str:D :$operation
     --> SemiXML::Node
   ) {
 
+    # create a parent for element and text node. remove when reparented
+    my SemiXML::Element $parent .= new( :name<sxml:parent>, :$attributes);
+
     # create a text element, even when it is an empty string.
-    my SemiXML::Text $text-element = SemiXML::Text.new(:$text) if $text.defined;
+    my SemiXML::Text $text-element =
+       SemiXML::Text.new( :$text, :$parent) if $text.defined;
 
     # create an element only when the name is defined and not empty
     my SemiXML::Node $node =
-       SemiXML::Element.new( :$name, :$attributes) if ? $name;
+       SemiXML::Element.new( :$name, :$attributes, :$parent) if ? $name;
 
     # if both are created than add text to the element
     if ? $node and ? $text-element {
-      $node.append( $text-element);
+      $node.append($text-element);
     }
 
     # if only text, then the element becomes the text element
     elsif ? $text-element {
       $node = $text-element;
-      $node.parent(self);
     }
+
+    # at last move the node from the fake parent to 'before', 'after',
+    # 'append' or 'insert'. undefine the parent after that.
+note "\nMNWT 0: $!name\.$operation, $node.name(), $parent";
+
+    self."$operation"($node);
+    $parent = Nil;
+
+note "MNWT 1: $!name\.$operation, $node.parent()";
+note ' ';
 
     $node
   }
