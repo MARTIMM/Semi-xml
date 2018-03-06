@@ -173,7 +173,7 @@ note "NIns Node parented, {$!parent ?? $!parent.name !! '-'}";
 #      $r = $!parent.before( self, $node, |%formatting);
       my Int $pos = $!parent.index-of(self);
       if $pos.defined and ($pos + $offset) <= $!parent.nodes.elems {
-        $!nodes.splice( $pos + $offset, 0, $node.reparent($!parent));
+        $!parent.nodes.splice( $pos + $offset, 0, $node.reparent($!parent));
 #        $new.set-formatting(|%formatting);
 #        $r = $node;
       }
