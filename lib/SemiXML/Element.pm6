@@ -299,7 +299,10 @@ note "After: $!name, $name, $attributes.keys(), $text";
   #-----------------------------------------------------------------------------
   method Str ( Str $t is copy = '', Int $l = 0 --> Str ) {
 
-    $t = $t ~ ("\n" ~ self.perl(:simple) ~ "[\n").indent($l);
+    $t = $t ~ ( "\n" ~
+                self.perl(:simple) ~
+                "[" ~ ($!nodes.elems ?? "\n" !! '')
+              ).indent($l);
 
     for @$!nodes -> $node {
       given $node {
@@ -313,7 +316,7 @@ note "After: $!name, $name, $attributes.keys(), $text";
       }
     }
 
-    $t ~= "\n]".indent($l);
+    $t ~= ($!nodes.elems ?? "\n" !! '') ~ "]".indent($l);
 
     $t
   }
