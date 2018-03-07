@@ -73,10 +73,10 @@ sub get-xpath ( Str $content --> XML::XPath ) {
         :colors<SxmlLib::Colors>,
         :css<SxmlLib::Html::Css>,
       },
-      T => {:!parse}
+      T => { :parse, :file-handling}
     },
     :$content,
-#    :!trace, :!raw, :!keep, :exec
+    :!trace, :!raw
   );
 
   # See the result
@@ -91,5 +91,5 @@ sub get-xpath ( Str $content --> XML::XPath ) {
 #-------------------------------------------------------------------------------
 done-testing;
 
-#unlink('t/D060/css.html');
-#rmdir('t/D060');
+unlink('t/D060/css.html');
+rmdir('t/D060');

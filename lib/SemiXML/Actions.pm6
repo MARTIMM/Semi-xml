@@ -207,7 +207,7 @@ class Actions {
     my Bool $prune = False;
 
     for $m.caps -> Pair $pair ( :key($k), :value($v)) {
-
+#note "PA: caps $k, $v";
       if $!globals.trace and $!globals.refined-tables<T><parse> {
         unless $k ~~ any(<sym tag-name element attribute attr-key attr-value
                           attr-value-spec bool-true-attr bool-false-attr

@@ -41,7 +41,7 @@ subtest 'Append, insert, before', {
 
   my SemiXML::Element $ec3 .= new(:name<e3>);
   $ec1.before($ec3);
-  diag "ep: $ep";
+  #diag "ep: $ep";
   is $ep.nodes[0], $ec3, "first child now $ec3.name(), before";
 
   my SemiXML::Element $n = $ec3.remove;

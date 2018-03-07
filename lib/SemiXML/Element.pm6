@@ -420,7 +420,6 @@ note "After: $!name, $name, $attributes.keys(), $text";
   # comment node
 #TODO things go wrong when comments are nested
   method !comment-xml ( --> Str ) {
-
     my Str $xml-text = '<!--';
     for @$!nodes -> $node {
       $xml-text ~= $node.xml;
@@ -526,13 +525,13 @@ note "After: $!name, $name, $attributes.keys(), $text";
 
     # at last move the node from the fake parent to 'before', 'after',
     # 'append' or 'insert'. undefine the parent after that.
-note "\nMNWT 0: $!name\.$operation, $node.name(), $parent";
+#note "\nMNWT 0: $!name\.$operation, $node.name(), $parent";
 
     self."$operation"($node);
     $parent = Nil;
 
-note "MNWT 1: $!name\.$operation, $node.parent()";
-note ' ';
+#note "MNWT 1: $!name\.$operation, $node.parent()";
+#note ' ';
 
     $node
   }
