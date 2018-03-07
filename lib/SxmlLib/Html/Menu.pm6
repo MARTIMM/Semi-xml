@@ -34,8 +34,23 @@ class Html::Menu {
     );
 
     if $r.elems {
-      # place style after the last one
-      $r[*-1].after($!style);
+      my Str $style-after-id = ($m.attributes<style-after-id> // '').Str;
+
+      # try to find style and insert after that one
+      if ?$style-after-id {
+        # place style after given id or last one if not found
+        for @$r -> $style-node {
+          if $style-node.attributes<id> eq $style-after-id {
+            $style-node.after($!style);
+            last;
+          }
+        }
+      }
+
+      # no attribute used so insert after the last style element
+      else {
+        $r[*-1].after($!style);
+      }
     }
 
     # no style found add to the end of head
@@ -65,6 +80,7 @@ class Html::Menu {
   #-----------------------------------------------------------------------------
   method container ( SemiXML::Element $m ) {
 
+#note "\nContainer";
     my Str $id = ($m.attributes<id>//'SideNav').Str;
     my Str $class = ($m.attributes<class>//'sidenav').Str;
     my Str $side = ($m.attributes<side>//'').Str;
@@ -72,34 +88,28 @@ class Html::Menu {
 
     # style element and their setting for the menu and pages
     self!create-style( $m, $id, $class, $side);
-
-    my SemiXML::Element $menu-div .= new(
-      :name<div>, :attributes( { :$id, :$class})
-    );
-    $m.before($menu-div);
-
     self!create-script( $m, $id);
 
+    my SemiXML::Element $side-nav .= new(
+      :name<div>, :attributes( { :$id, :$class})
+    );
+    $m.before($side-nav);
+
+    # insert a hook element to insert the pages after
+    my SemiXML::Element $hook = $m.after('sxml:hook');
+
     for $m.nodes.reverse -> $node {
-note "Node: $node.name(), ", $node.attributes.keys;
+#note "Node: $node.name(), ", $node.attributes.keys;
       if $node ~~ SemiXML::Element and $node.name eq 'a' {
-        $menu-div.insert($node);
+        $side-nav.insert($node);
       }
 
       elsif $node ~~ SemiXML::Element and $node.name eq 'div' {
-        # The order of the pages are reversed this way but it should not make
-        # a difference as long as the pages are referenced properly
-        $!script.before($node);
-
-        if $node.attributes<class>:exists
-           and $node.attributes<class> eq 'menu-page' {
-          $node.attributes({ style => 'display: block;'});
-          last;
-        }
+        $hook.after($node);
       }
     }
 
-    $menu-div.append(
+    $side-nav.append(
       'a',
       :attributes( {
           href => 'javascript:void(0)',
@@ -110,25 +120,27 @@ note "Node: $node.name(), ", $node.attributes.keys;
       :text('&#x2716;')
     );
 
-#`{{
-    for $parent.nodes -> $node {
-      if $node ~~ XML::Element and $node.name eq 'div' {
-        if $node.attribs<class>:exists and $node.attribs<class> eq 'menu-page' {
-          $node.set( 'style', 'display: block;');
+    # run through the page divs again and toggle the first page from
+    # display:none to display:block to make the first one visible
+    for $!script.parent.nodes -> $node {
+      if $node ~~ SemiXML::Element and $node.name eq 'div' {
+        if $node.attributes<class>:exists and
+           $node.attributes<class> eq 'menu-page' {
+
+          $node.attributes( {:style('display: block;')}, :modify);
           last;
         }
       }
     }
 
-    $pages-hook.remove;
-    $parent;
-}}
+    # remove hook
+    $hook.remove;
   }
 
   #-----------------------------------------------------------------------------
   method entry ( SemiXML::Element $m ) {
 
-note "Entry: $m.name(), ", $m.attributes.keys;
+#note "\nEntry: $m.name(), ", $m.attributes.keys;
 
     my Str $title = ($m.attributes<title>//'...title...').Str;
     my Str $id = ($m.attributes<id>//'...id...').Str;
@@ -146,6 +158,7 @@ note "Entry: $m.name(), ", $m.attributes.keys;
       :attributes( {
           href => 'javascript:void(0)',
           onclick => Q:s "menu.showPage('$id')",
+          class => 'menu-entry'
         }
       ),
       :text($title)
@@ -153,17 +166,10 @@ note "Entry: $m.name(), ", $m.attributes.keys;
 
     my SemiXML::Element $page-div = $m.before(
       'div',
-      :attributes( {
-          id => $id,
-          style => 'display: none',
-          class => 'menu-page'
-        }
-      )
+      :attributes( { :$id, :style('display: none'), :class('menu-page')})
     );
 
     $page-div.insert($_) for $m.nodes.reverse;
-
-note "Bttns, $open-button, $home-button";
 
     if $open-button {
       $page-div.insert(
@@ -171,15 +177,13 @@ note "Bttns, $open-button, $home-button";
         :attributes( {
             href => 'javascript:void(0)',
             class => 'menu-open-button',
-            onclick => 'menu.openNavigation()'
+            onclick => 'menu.openNavigation()',
+            title => 'Open menu'
           }
         ),
         :text('&#9776;')
       );
     }
-
-note "X: $page-div";
-#return;
 
     if $home-button {
       $page-div.insert(
@@ -187,19 +191,20 @@ note "X: $page-div";
         :attributes( {
             href => 'javascript:void(0)',
             class => 'menu-home-button',
-            onclick => Q:s "menu.showPage('$main-page-id')"
+            onclick => Q:s "menu.showPage('$main-page-id')",
+            title => 'Home page'
           }
         ),
         :text('&#x1F3E0;')
       );
     }
-note "M Parent: ", $m.parent.Str;
   }
 
   #-----------------------------------------------------------------------------
   # create a style element with the properties for a menu
   method !create-style( SemiXML::Element $m, Str $id, Str $class, Str $side ) {
 
+    $!style.attributes( {:id($class ~ '-menu-style')}, :modify);
     $!style.append( :text(Q:s:to/EOSTYLE/));
       /* The side navigation menu */
       .$class {
@@ -233,10 +238,21 @@ note "M Parent: ", $m.parent.Str;
       /* Position and style the close button (top right corner) */
       .$class .menu-close-button {
           position: absolute;
-          top: 0;
-          right: 25px;
+          top: 5px;
+          left: 5px;
           font-size: 36px;
-          margin-left: 50px;
+          padding-left: 10px;
+          border: 2px solid black;
+          border-radius: 6px;
+          width: 40px;
+          height: 40px;
+      }
+
+      .$class .menu-entry {
+          border: 2px solid black;
+          border-radius: 6px;
+          padding-left: 5px;
+          margin: 0 5px 2px 5px;
       }
 
       /* Position and style the close button (top right corner) */

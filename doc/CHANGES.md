@@ -1,8 +1,10 @@
 # Changes in SemiXML:: * and sxml2xml
 
+* 0.74.5
+  * Menu module converted and improved.
 * 0.74.4
   * Css module converted.
-  * Removed $parent.before( $node, $new) and $parent.after( $node, $new). Now only $node.before($new) $node.after($new) works.
+  * Removed $parent.before( $node, $new) and $parent.after( $node, $new). Now only $node.before($new) $node.after($new) works. The attribute :offset can be used to move back- or forward from the pivot node. Default is 0 or 1 for before and after resp. Out of range values are set to the minimum or maximum of the range which translates the operation into insert to the start or end of the container of the parent.
 * 0.47.3
   * Removed XMLText. it replaced the XML::Text module which is not needed anymore.
   * Color module is converted
