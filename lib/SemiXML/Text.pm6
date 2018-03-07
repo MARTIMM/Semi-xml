@@ -70,10 +70,6 @@ class Text does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method xml ( --> Str ) {
 
-#$t = $!text;
-#$t ~~ s:g/\n/\\n/;
-#note "$!node-type, $!body-number, i=$!inline, n=$!noconv, k=$!keep, c=$!close  $!parent.name(), '$t'";
-
     state $previous-body-number = -1;
 
     my Str $text = $!text;
@@ -231,7 +227,8 @@ class Text does SemiXML::Node {
   #-----------------------------------------------------------------------------
   method Str ( --> Str ) {
 
-    self.xml;
+    #self.xml; This causes recursive calls
+    $!text;
   }
 
   #-----------------------------------------------------------------------------
