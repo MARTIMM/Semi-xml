@@ -14,7 +14,7 @@ $html [
     $h1 [ Tests for comments etc ]
 
     $sxml:comment [ comment text ]
-    $sxml:comment [ comment text $!SxmlCore.date ]
+    $sxml:comment [ comment text \ $!SxmlCore.date ]
     $sxml:comment [ comment text $p [ data in section ] $br ]
 
     $sxml:cdata [cdata text]
@@ -34,13 +34,13 @@ EOSX
 #-------------------------------------------------------------------------------
 my Hash $config = {
   C => { html => { :!doctype-show, }, },
-  T => { :parse, :!tables, :!config},
+  T => { :parse, :!tables, :!config, :file-handling},
 };
 
 #-------------------------------------------------------------------------------
 # Parse
 my SemiXML::Sxml $x .= new(:refine[<html html>]);
-$x.parse( :filename($f1), :$config, :!trace);
+$x.parse( :filename($f1), :$config, :!trace, :!raw);
 my Str $xml-text = ~$x;
 #diag $xml-text;
 
