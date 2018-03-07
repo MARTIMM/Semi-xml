@@ -98,24 +98,19 @@ role Node {
   }
 
   #-----------------------------------------------------------------------------
-#TODO move into separate module and use with 'handles'
   # append a node to the end of the nodes array if the node is not
   # already in that array.
   multi method append ( SemiXML::Node:D $node! --> SemiXML::Node ) {
 
     # if node has a parent, remove the node from the parent first
     $node.remove;
-note "NApp: node $node.name() removed from $!name";
 
     # add the node when not found and set the parent in the node
     my $pos = self.index-of($node);
-note "NApp: pos={$pos//'-'}";
 
     unless $pos.defined {
       $!nodes.push($node);
-note "NApp Node pushed";
       $node.parent(self);
-note "NApp Node parented, {$!parent ?? $!parent.name !! '-'}";
     }
 
     $node
@@ -127,55 +122,23 @@ note "NApp Node parented, {$!parent ?? $!parent.name !! '-'}";
   multi method insert ( SemiXML::Node:D $node! --> SemiXML::Node ) {
 
     $node.remove;
-note "NIns: node $node.name() removed from $!name";
-
     my $pos = self.index-of($node);
-note "NIns: pos={$pos//'-'}";
 
     unless $pos.defined {
       $!nodes.unshift($node);
-note "NIns Node unshifted";
       $node.parent(self);
-note "NIns Node parented, {$!parent ?? $!parent.name !! '-'}";
     }
 
     $node
   }
 
-#`{{
-  #-----------------------------------------------------------------------------
-  multi method before (
-    SemiXML::Node $node, SemiXML::Node $new, :$offset=0, *%formatting
-    --> SemiXML::Node
-  ) {
-
-    my SemiXML::Node $r;
-
-    my Int $pos = self.index-of($node);
-    if $pos.defined and $pos >= 0 and ($pos + $offset) <= $!nodes.elems {
-      $!nodes.splice( $pos + $offset, 0, $new.reparent(self));
-      $new.set-formatting(|%formatting);
-      $r = $new;
-    }
-
-    $r
-  }
-}}
-
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi method before (
-    SemiXML::Node $node!, :$offset = 0 #, *%formatting
-    --> SemiXML::Node
-  ) {
+  multi method before ( SemiXML::Node $node!, :$offset = 0 --> SemiXML::Node ) {
 
-#    my SemiXML::Node $r;
     if $!parent.defined {
-#      $r = $!parent.before( self, $node, |%formatting);
       my Int $pos = $!parent.index-of(self);
       if $pos.defined and ($pos + $offset) <= $!parent.nodes.elems {
         $!parent.nodes.splice( $pos + $offset, 0, $node.reparent($!parent));
-#        $new.set-formatting(|%formatting);
-#        $r = $node;
       }
 
       else {
@@ -190,36 +153,16 @@ note "NIns Node parented, {$!parent ?? $!parent.name !! '-'}";
     $node
   }
 
-  #-----------------------------------------------------------------------------
-#`{{
-  multi method after ( SemiXML::Node $node, SemiXML::Node $new, :$offset=1 ) {
-
-    self.before( $node, $new, :$offset);
-  }
-}}
-
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi method after ( SemiXML::Node $node!, :$offset = 1 --> SemiXML::Node ) {
 
-#    $!parent.after( self, $node) if $!parent.defined;
-#    self.before( self, $node);
-note "A0 $!name\.after\($node.name())";
-
-
-
-#    my SemiXML::Node $r;
     if $!parent.defined {
-note "A1 $!parent.name(): ", $!parent.nodes>>.name.join(' ');
-#      $r = $!parent.before( self, $node, |%formatting);
       my Int $pos = $!parent.index-of(self);
-note "A2 pos: {$pos//'-'}";
       my Int $loc = $pos + $offset;
       $loc = 0 if $loc < 0;
       $loc = $!parent.nodes.end if $loc > $!parent.nodes.elems;
       if $pos.defined {
-        $!nodes.splice( $loc, 0, $node.reparent($!parent));
-#        $new.set-formatting(|%formatting);
-#        $r = $node;
+        $!parent.nodes.splice( $loc, 0, $node.reparent($!parent));
       }
 
       else {
@@ -291,7 +234,6 @@ note "A2 pos: {$pos//'-'}";
   # set attributes
   multi method attributes ( Hash:D $!attributes ) {
 
-#note "Attr Node: $!name, ", $!attributes.keys;
     self!process-attributes;
   }
 
