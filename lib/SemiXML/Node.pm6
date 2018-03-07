@@ -136,14 +136,11 @@ role Node {
   multi method before ( SemiXML::Node $node!, :$offset = 0 --> SemiXML::Node ) {
 
     if $!parent.defined {
-      my Int $pos = $!parent.index-of(self);
-      if $pos.defined and ($pos + $offset) <= $!parent.nodes.elems {
-        $!parent.nodes.splice( $pos + $offset, 0, $node.reparent($!parent));
-      }
-
-      else {
-        die "If there is a parent, pos should be defined!";
-      }
+      my Int $pos = $!parent.index-of(self) // 0;
+      my Int $loc = $pos + $offset;
+      $loc = 0 if $loc < 0;
+      $loc = $!parent.nodes.end if $loc > $!parent.nodes.elems;
+      $!parent.nodes.splice( $pos + $offset, 0, $node.reparent($!parent));
     }
 
     else {
@@ -157,20 +154,11 @@ role Node {
   multi method after ( SemiXML::Node $node!, :$offset = 1 --> SemiXML::Node ) {
 
     if $!parent.defined {
-      my Int $pos = $!parent.index-of(self);
+      my Int $pos = $!parent.index-of(self) // 0;
       my Int $loc = $pos + $offset;
       $loc = 0 if $loc < 0;
       $loc = $!parent.nodes.end if $loc > $!parent.nodes.elems;
-      if $pos.defined {
-        $!parent.nodes.splice( $loc, 0, $node.reparent($!parent));
-      }
-
-      else {
-        die "If there is a parent, pos should be defined!" unless $pos.defined;
-        die "Position + Offset is too low or too high, elems: " ~
-            $!parent.nodes.elems ~ ", pos+off = $loc"
-              if $loc < 0 or $loc > $!parent.nodes.elems;
-      }
+      $!parent.nodes.splice( $loc, 0, $node.reparent($!parent));
     }
 
     else {
@@ -232,7 +220,15 @@ role Node {
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # set attributes
-  multi method attributes ( Hash:D $!attributes ) {
+  multi method attributes ( Hash:D $attributes, :$modify = False ) {
+
+    if $modify {
+      $!attributes = hash( |$!attributes, |$attributes);
+    }
+
+    else {
+      $!attributes = $attributes;
+    }
 
     self!process-attributes;
   }
@@ -364,6 +360,7 @@ role Node {
     }
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   # search for variables and substitute them
   method subst-variables ( ) {
@@ -412,6 +409,7 @@ note "VU: ", $vuse.attributes<name>;
       #$vdecl.remove unless $var-global;
     }
   }
+}}
 
   #----[ private stuff ]--------------------------------------------------------
   # process the text processing control parameters and set sxml attributes
