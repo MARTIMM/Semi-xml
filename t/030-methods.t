@@ -98,7 +98,7 @@ like $xml, /'<x><p></p><p>Added 1 xml nodes</p></x>'/,
      "mth2 sees at least 1 space in its content";
 
 $content = '$x =a =!b [ $!mod1.mth2 [$h [abc] $h[def]]]';
-$x.parse( :$config, :$content, :trace);
+$x.parse( :$config, :$content, :!trace);
 
 $xml = $x.get-xml-text;
 like $xml, /:s '<x a="1" b="0">'
