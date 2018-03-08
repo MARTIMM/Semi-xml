@@ -218,21 +218,6 @@ role Node {
     $!attributes
   }
 
-  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # set attributes
-  multi method attributes ( Hash:D $attributes, :$modify = False ) {
-
-    if $modify {
-      $!attributes = hash( |$!attributes, |$attributes);
-    }
-
-    else {
-      $!attributes = $attributes;
-    }
-
-    self!process-attributes;
-  }
-
   #-----------------------------------------------------------------------------
   # search xpath like https://www.w3.org/TR/xpath-3/
   multi method search (

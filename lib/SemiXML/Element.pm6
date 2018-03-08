@@ -149,8 +149,15 @@ class Element does SemiXML::Node {
       $var-declarations{~$!attributes<name>} = self;
     }
 
-    # continue processing in Node class
-    callsame;
+    if $modify {
+      $!attributes = hash( |$!attributes, |$attributes);
+    }
+
+    else {
+      $!attributes = $attributes;
+    }
+
+    self!process-attributes;
   }
 
   #-----------------------------------------------------------------------------
