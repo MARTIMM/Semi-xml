@@ -34,14 +34,16 @@ class Html::Menu {
     );
 
     if $r.elems {
-      my Str $style-after-id = ($m.attributes<style-after-id> // '').Str;
+      my Str $style-pivot-id = ($m.attributes<style-pivot-id> // '').Str;
+      my Str $oper = ($m.attributes<insert-style> // '').Str;
+      $oper = 'after' unless $oper ~~ any(<before after>);
 
       # try to find style and insert after that one
-      if ?$style-after-id {
+      if ?$style-pivot-id {
         # place style after given id or last one if not found
         for @$r -> $style-node {
-          if $style-node.attributes<id> eq $style-after-id {
-            $style-node.after($!style);
+          if ($style-node.attributes<id>//'--').Str eq $style-pivot-id {
+            $style-node."$oper"($!style);
             last;
           }
         }
@@ -49,7 +51,7 @@ class Html::Menu {
 
       # no attribute used so insert after the last style element
       else {
-        $r[*-1].after($!style);
+        $r[*-1]."$oper"($!style);
       }
     }
 
@@ -72,6 +74,53 @@ class Html::Menu {
 
     else {
       die 'A body element is not found';
+    }
+
+    # the script element should go to the end but must look for id's
+    # to place the element carefully. search in the body for scripts first.
+    $!script .= new(
+      :name<script>, :attributes({'sxml:noconv' => '1'}), :text("\n")
+    );
+
+    $!style.noconv = True;
+    $r = $m.search( [
+        SemiXML::SCRoot, 'html', SemiXML::SCChild, 'body',
+        SemiXML::SCChild, 'script'
+      ]
+    );
+
+    if $r.elems {
+      my Str $script-pivot-id = ($m.attributes<script-pivot-id> // '').Str;
+      my Str $oper = ($m.attributes<insert-script> // '').Str;
+      $oper = 'after' unless $oper ~~ any(<before after>);
+
+      # try to find script and insert after that one
+      if ?$script-pivot-id {
+        # place style after given id or last one if not found
+        for @$r -> $script-node {
+          if ($script-node.attributes<id>//'--').Str eq $script-pivot-id {
+            $script-node."$oper"($!script);
+            last;
+          }
+        }
+      }
+
+      # no attribute used so insert after the last style element
+      else {
+        $r[*-1]."$oper"($!script);
+      }
+    }
+
+    # no style found add to the end of head
+    else {
+      $r = $m.search( [ SemiXML::SCRoot, 'html', SemiXML::SCChild, 'body']);
+      if $r.elems {
+        $r[0].append($!script);
+      }
+
+      else {
+        die 'Script must be placed in /html/body but body is not found';
+      }
     }
 
     $!initialized = True;
@@ -135,6 +184,9 @@ class Html::Menu {
 
     # remove hook
     $hook.remove;
+
+    # prepare for next setup, although it will not work (yet) if at all logical
+    $!initialized = False;
   }
 
   #-----------------------------------------------------------------------------
@@ -285,7 +337,6 @@ class Html::Menu {
   method !create-script ( $m, $id ) {
 
     if !$menu-js-stored {
-      $!script = $!body.append('script');
       $!script.append(:text(Q:s:to/EOJS/));
         var menu = {
           openNavigation: function ( ) {

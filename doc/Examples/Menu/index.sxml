@@ -21,7 +21,7 @@ $html [
       ]
     ]
 
-    $!css.style id=menu-changes [
+    $!css.style id=menu-style [
       $!css.b s=.sidenav [
         background:     rgb( 0, 110, 110);
 
@@ -43,7 +43,7 @@ $html [
   $body [
 
     #---------------------------------------------------------------------------
-    $!menu.container side=right style-after-id=reset [
+    $!menu.container side=right style-pivot-id=reset insert-style=after [
 
       #-------------------------------------------------------------------------
       # first page is the main page and is shown first
