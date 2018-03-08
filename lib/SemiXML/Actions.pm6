@@ -202,14 +202,14 @@ class Actions {
   #----[ private stuff ]--------------------------------------------------------
   method !process-ast ( Match $m, Int $l = 0 ) {
 
-    # do not go deeper into the tree after having processed some parts via
-    # other calls
+    # set True after processing tag-bodies
     my Bool $prune = False;
 
     for $m.caps -> Pair $pair ( :key($k), :value($v)) {
 #note "PA: caps $k, $v";
+
       if $!globals.trace and $!globals.refined-tables<T><parse> {
-        unless $k ~~ any(<sym tag-name element attribute attr-key attr-value
+        unless $k ~~ any(<sym tag tag-name element attribute attr-key attr-value
                           attr-value-spec bool-true-attr bool-false-attr
                           pre-body
                         >) {
@@ -221,30 +221,22 @@ class Actions {
       }
 
       given $k {
-        when 'tag' {
+        when 'tag-spec' {
           my SemiXML::Element $element = self!create-element(
-            $v, $!elements[$!element-idx - 1]
+            $v.hash<tag>,
+            $!elements[$!element-idx - 1],
+            self!attributes([$v.hash<attributes>.caps])
           );
+
+          # insert in array
           $!elements[$!element-idx] = $element;
-          #$!elements[$!element-idx - 1].append($element);
 
           note ("--> Append element: $element.name() to " ~
                 "$!elements[$!element-idx - 1].name()").indent($l)
             if $!globals.trace and $!globals.refined-tables<T><parse>;
-        }
 
-        when 'attributes' {
-          my SemiXML::Element $element = $!elements[$!element-idx];
-          $element.attributes(self!attributes([$v.caps]));
-#note "Idx B: $!element-idx, $element.name(), $v.caps()";
-
-          note "--> Created element: $element.perl()".indent($l)
-            if $!globals.trace and $!globals.refined-tables<T><parse>;
-
-          # note that bodies must use 'index - 1' because of the
-          # index of the elements array is now incremented
+          # element in content of this one
           $!element-idx++;
-#note "Idx B: $!element-idx";
         }
 
         when 'tag-bodies' {
@@ -288,7 +280,7 @@ class Actions {
 
   #-----------------------------------------------------------------------------
   method !create-element (
-    Match $tag, SemiXML::Node $parent
+    Match:D $tag, SemiXML::Node:D $parent, Hash:D $attributes
     --> SemiXML::Element
   ) {
 
@@ -296,12 +288,13 @@ class Actions {
 
     my Str $symbol = $tag<sym>.Str;
     if $symbol eq '$' {
-      $element .= new( :name($tag<tag-name>.Str), :$parent);
+      $element .= new( :name($tag<tag-name>.Str), :$parent, :$attributes);
     }
 
     elsif $symbol eq '$!' {
       $element .= new(
-        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str), :$parent
+        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str),
+        :$parent, :$attributes
       );
     }
 
