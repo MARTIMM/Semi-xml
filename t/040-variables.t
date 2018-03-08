@@ -19,7 +19,7 @@ subtest 'variables', {
     EOTXT
 
   my SemiXML::Sxml $x .= new;
-  $x.parse( :content($text), :!trace, :!raw,
+  $x.parse( :content($text), :!trace,
     config => {
       C => { :trace },
       T => { :parse }
@@ -41,13 +41,10 @@ subtest 'variables', {
      'Found 2nd substitution';
 }
 
-done-testing;
-exit(0);
-
 #-------------------------------------------------------------------------------
 subtest 'undeclared variable', {
 
-  my $text = q:to/EOTXT/;
+  my $content = q:to/EOTXT/;
     $html [
       $body [
         $h1 id=h1001 [ Introduction ]
@@ -57,7 +54,7 @@ subtest 'undeclared variable', {
     EOTXT
 
   my SemiXML::Sxml $x .= new;
-  $x.parse(content => $text);
+  $x.parse( :$content, :!trace);
 
   # See the result
   my Str $xml-text = ~$x;
