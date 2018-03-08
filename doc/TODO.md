@@ -101,7 +101,7 @@ Node <|-- Text
 ## Parser and actions.
 * [x] An exception class X::SemiXML is created to throw parsing errors.
 * [x] Throwing happens from within Grammar and Actions instead of Sxml.
-  * [x] **Attributes must be followed by a content body**. Error is thrown when attributes are used but no content body follows. Previously it was possible but it makes the readability worse. E.g What is more understandable; `$a key=value text follows` or `$a key=value [] text follows`? For elements without attributes it is still useful to leave the breakets it there is no content. E.g. `$p [ first line $br second line ]`
+  * [x] **Attributes must be followed by a content body**. Error is thrown when attributes are used but no content body follows. Previously it was possible but it makes the readability worse. E.g What is more understandable; `$a key=value text follows` or `$a key=value [] text follows`? For elements without attributes it is still useful to leave the breakets if there is no content. E.g. `$p [ first line $br second line ]`
   * [x] **Cannot start a content body with '['**.
   * [x] **Unexpected content body start/close character**.
 
@@ -130,11 +130,11 @@ Node <|-- Text
 * Notes;
   1) `$*|`, `$|*` and `$**` All types are removed.
 
-  2) Removed comment parsing and is done at a later phase after parsing.
+  2) Removing comments is done at a later phase after parsing.
 
   3) The configuration will be searched for those elements which are inline and need a special treatment of spacing around elements. Also non nestable and space preserving elements are searched for in the configuration. The inline elements must also check for some non-alphanumeric characters following the block. E.g. in case of `,` or `.` etc. no space should be placed between the block and the following character.
 
-  4) The key is a label mapped to the module in the configuration. The method must be available in that module. Need to think about how to communicate the way spacing needs to be done around the result of the call.
+  4) The module methods have also a name placed in the sxml namespace. E.g. $!module.method gets a name **sxml:module.method**. Therefore these names can also be used in the F-table entries. See below about info of the sxml namespace.
 
   5) The space reserving '=' character at the start of a block is removed completely. One can specify that some elements are to be space preserving in a local configuration file. Furthermore the :keep option will keep all spacing as was typed in.
 
@@ -475,8 +475,10 @@ Methods can only generate something in a given parent container. This parent con
 * [ ] XInclude, see spec at [w3c][xincl].
 * [ ] XML Binary, see spec at [w3c][xbin].
 * [ ] Fragments. W3C has closed their specification of XML Fragments but is used by this module as a leading specification, see spec at [w3c][frag].
-* [ ] XML Stylesheets (xsl), see spec ate [w3c][xstyle].
+* [ ] XML Stylesheets (xsl), see spec at [w3c][xstyle].
 * [ ] XML Schema (xsd), see spec at [w3c][xschema].
+
+* [ ] Generating javascript to make text dynamic
 
 ## And …
   * [ ] Documentation in a manual.
