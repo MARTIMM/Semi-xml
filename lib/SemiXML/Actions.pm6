@@ -211,7 +211,7 @@ class Actions {
       if $!globals.trace and $!globals.refined-tables<T><parse> {
         unless $k ~~ any(<sym tag tag-name element attribute attr-key attr-value
                           attr-value-spec bool-true-attr bool-false-attr
-                          pre-body
+                          pre-body mod-name meth-name
                         >) {
           my Str $value-text = $k ~~ any(<tag-bodies document>)
                  ?? ( $v ~~ m/ \n / ?? " ... " !! $v.Str )
