@@ -3,7 +3,7 @@
   tracing       = true
 
 #------------------------------------------------------------------------------
-[ML.html]
+[ML]
   lorem         = 'SxmlLib::LoremIpsum'
   file          = 'SxmlLib::File'
 
@@ -17,8 +17,8 @@
 [ T ]
 #  config-search = false
   config        = false
-  tables        = true
+  tables        = false
   modules       = true
-  parse         = false
+  parse         = true
   parse-result  = false
   file-handling = true

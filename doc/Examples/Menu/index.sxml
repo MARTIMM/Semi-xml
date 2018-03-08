@@ -1,0 +1,72 @@
+# sxml2xml.pl6 --in=html --out=index doc/Examples/Menu/index.sxml
+
+$html [
+  #=============================================================================
+  $head [
+    $meta charset=UTF-8 []
+    $meta http-equiv=Content-Style-Type content=text/css []
+
+    $!css.style id=reset [
+      $!css.reset type=condensed-universal []
+    ]
+
+    $!css.style id=page-style [
+      $!css.b s='*' [
+        font-family:    'sans';
+      ]
+
+      $!css.b s=h1 [
+        font-size:      larger;
+        font-weight:    bold;
+      ]
+    ]
+
+    $!css.style id=menu-changes [
+      $!css.b s=.sidenav [
+        background:     rgb( 0, 110, 110);
+
+        $!css.b s=a [
+          margin:         1px;
+          padding:        1px;
+          background:     rgb( 0, 100, 100);
+          color:          rgb( 0, 200, 200);
+        ]
+
+        $!css.b s=a:hover [
+          color:          rgb( 0, 240, 240);
+        ]
+      ]
+    ]
+  ]
+
+  #=============================================================================
+  $body [
+
+    #---------------------------------------------------------------------------
+    $!menu.container side=right style-after-id=reset [
+
+      #-------------------------------------------------------------------------
+      # first page is the main page and is shown first
+      $!menu.entry title=Home id=main-page =!home-button [
+        $h1 [ $!lorem.words n=6 tc=1 [] ]
+        $p [ $!lorem.cicero45bc ]
+      ]
+
+      #-------------------------------------------------------------------------
+      $!menu.entry title=Contact id=sub-page1 =!open-button =!home-button [
+        $h1 [ $!lorem.words n=3 tc=1 [] ]
+        $p [ $!lorem.cheese-ipsum ]
+        $a href="javascript:void(0)" class="menu-open-button"
+           title='Open sesame' onclick="menu.openNavigation()" « &#9776; »
+        $a href="javascript:void(0)" class="menu-home-button"
+           title='Zu house' onclick="menu.showPage('main-page')" « &#x1F3DB; »
+      ]
+
+      #-------------------------------------------------------------------------
+      $!menu.entry title=About id=sub-page2 [
+        $h1 [ $!lorem.words n=4 tc=1 [] ]
+        $p [ $!lorem.veggie-ipsum [] ]
+      ]
+    ]
+  ]
+]

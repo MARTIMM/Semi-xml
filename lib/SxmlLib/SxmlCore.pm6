@@ -1,54 +1,36 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-use XML;
-#use SemiXML::Sxml;
-use SxmlLib::SxmlHelper;
+unit package SxmlLib:auth<github:MARTIMM>;
 
-#-------------------------------------------------------------------------------
-unit package SxmlLib:auth<https://github.com/MARTIMM>;
+use SemiXML::Element;
 
 #-------------------------------------------------------------------------------
 # Core module with common used methods
 class SxmlCore {
 
   #-----------------------------------------------------------------------------
-  method is-method-inline ( Str $method-name --> Bool ) {
-    $method-name ~~ any(<date date-time>);
-  }
-
-  #-----------------------------------------------------------------------------
   # $!SxmlCore.date year=nn month=nn day=nn []
-  method date ( XML::Element $parent,
-                Hash $attrs,
-                XML::Node :$content-body   # Ignored
-                --> XML::Node
-              ) {
-
-    $parent.append(XML::Text.new(:text(' ')));
+  method date ( SemiXML::Element $method ) {
 
     my Date $today = Date.today;
 
-    my Int $year = ($attrs<year> // $today.year.Str).Int;
-    my Int $month = ($attrs<month> // $today.month.Str).Int;
-    my Int $day = ($attrs<day> // $today.day.Str).Int;
+    my Int $year = ($method.attributes<year> // $today.year.Str).Int;
+    my Int $month = ($method.attributes<month> // $today.month.Str).Int;
+    my Int $day = ($method.attributes<day> // $today.day.Str).Int;
 
-    append-element( $parent, :text(Date.new( $year, $month, $day).Str));
-
-    $parent;
+    $method.before(
+      SemiXML::Text.new(:text(Date.new( $year, $month, $day).Str))
+    );
   }
 
   #-----------------------------------------------------------------------------
   # $!SxmlCore.date-time timezone=tz iso=n []
-  method date-time ( XML::Element $parent,
-                     Hash $attrs,
-                     XML::Node :$content-body   # Ignored
-                     --> XML::Node
-                   ) {
+  method date-time ( SemiXML::Element $method ) {
 
-    my Bool $iso = $attrs<iso>:exists ?? ? $attrs<iso>.Int !! True;
-    my Bool $utc = $attrs<utc>:exists ?? ? $attrs<utc>.Int !! False;
-    my Int $tz = $attrs<timezone>:exists ?? $attrs<timezone>.Int !! 0;
+    my Bool $iso = ($method.attributes<iso> // 1).Int.Bool;
+    my Bool $utc = ($method.attributes<utc> // 0).Int.Bool;
+    my Int $tz = ($method.attributes<timezone> // 0).Int;
 
     my DateTime $date-time;
 
@@ -63,67 +45,44 @@ class SxmlCore {
     $date-time .= utc if ?$utc;
     my Str $dtstr = $date-time.Str;
 
-    if !$iso {
+    unless $iso {
       $dtstr ~~ s/'T'/ /;
       $dtstr ~~ s/'+'/ +/;
       $dtstr ~~  s/\.\d+//;
     }
 
-    append-element( $parent, :text($dtstr));
-    $parent;
+    $method.before(SemiXML::Text.new( :text($dtstr)));
   }
 
   #-----------------------------------------------------------------------------
-  # $!SxmlCore.comment []
-  method comment ( XML::Element $parent,
-                   Hash $attrs,
-                   XML::Node :$content-body
-                   --> XML::Node
-                 ) {
+  # $!SxmlCore.var-decl name=xyz [<data>] generates
+  # <sxml:var-decl name=xyz>...</sxml:var-decl>
+  # namespace xmlns:sxml="github:MARTIMM" is placed on top level element
+  # and removed later when document is ready.
+  method var-decl ( SemiXML::Element $method ) {
 
-    # Textify all body content
-    my Str $comment-content = [~] $content-body.nodes;
-
-    # Remove textitified container tags from the text
-    $comment-content ~~ s:g/ '<' '/'? '__PARENT_CONTAINER__>' //;
-
-    $parent.append(XML::Comment.new(:data($comment-content)));
-    $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  # $!SxmlCore.cdata []
-  method cdata ( XML::Element $parent,
-                 Hash $attrs,
-                 XML::Node :$content-body
-                 --> XML::Node
-               ) {
-
-    # Textify all body content
-    my Str $cdata-content = [~] $content-body.nodes;
-
-    # Remove container tags from the text
-    $cdata-content ~~ s:g/ '<' '/'? '__PARENT_CONTAINER__>' //;
-
-    $parent.append(XML::CDATA.new(:data($cdata-content)));
-    $parent;
-  }
-
-  #-----------------------------------------------------------------------------
-  # $!SxmlCore.pi []
-  method pi ( XML::Element $parent,
-              Hash $attrs,
-              XML::Node :$content-body
-              --> XML::Node
-            ) {
-
-    $parent.append(
-      XML::PI.new(
-        :data((
-          (( ~$attrs<target> // 'no-target'), $content-body.nodes).join(' ')
-        ))
-      )
+    my $var = SemiXML::Element.new(
+      :name<sxml:var-decl>, :attributes($method.attributes)
     );
-    $parent;
+
+    for $method.nodes.reverse -> $node {
+      $var.insert($node);
+    }
+
+    # If global attribute is 1, place the declaration at the top as
+    # its first element
+    if $method.attributes<global> // False {
+      my Array $r = $method.search([ SemiXML::SCRoot, '*']);
+      $r[0].insert($var);
+    }
+
+    else {
+      $method.before($var);
+    }
   }
+
+  #-----------------------------------------------------------------------------
+  # $!SxmlCore.drop []
+  # Remove all that is enclosed by not processing them
+  method drop ( SemiXML::Element $parent ) {  }
 }

@@ -1,12 +1,12 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
+unit package SemiXML:auth<github:MARTIMM>;
 
 #-------------------------------------------------------------------------------
 # StringList is used to have attributes with a split brain like IntStr and the
 # like. Normally they are used as a string value but with methods they can
-# have a value as a list.
+# have a list as its value.
 #
 class StringList does Callable {
 
@@ -18,7 +18,7 @@ class StringList does Callable {
   #-----------------------------------------------------------------------------
   submethod BUILD (
     Str :$!string = '',
-    :$!delimiter where $_ ~~ any(Str|Regex) = ' ',
+    :$!delimiter where $_ ~~ any(Str|Regex) = / <[\s,;:]>+ /,
     Bool :$!use-as-list = False
   ) {
     $!list = $!string.split($!delimiter).List;
@@ -46,27 +46,27 @@ class StringList does Callable {
 
   #-----------------------------------------------------------------------------
   method value ( --> Any ) {
-    $!use-as-list ?? $!list !! $!string;
+    $!use-as-list ?? $!list !! $!string
   }
 
   #-----------------------------------------------------------------------------
   method Str ( --> Str ) {
-    self.string;
+    $!string
   }
 
   #-----------------------------------------------------------------------------
   method Int ( --> Int ) {
-    $!list[0].Int;
+    $!list[0].Int
   }
 
   #-----------------------------------------------------------------------------
   method Numeric ( --> Numeric ) {
-    + $!list[0];
+    + $!list[0]
   }
 
   #-----------------------------------------------------------------------------
   method List ( --> List ) {
-    self.list;
+    $!list
   }
 
   #-----------------------------------------------------------------------------

@@ -23,11 +23,15 @@ for grep( /^ '--'/, @*ARGS) -> $a {
 #}
 
 #-------------------------------------------------------------------------------
+#TODO doc
 sub MAIN (
   Str $filename, Str :$in = 'xml', Str :$out = 'xml',
-  Bool :$merge = False
+  Bool :$force = False, Bool :$trace = False, Bool :$keep = False,
+  Bool :$raw = False, Bool :$exec = True, Bool :$frag = False
 ) {
 
-  my SemiXML::Sxml $x .= new( :$merge, :refine([ $in, $out]));
-  $x.save if $x.parse(:$filename);
+  my SemiXML::Sxml $x .= new(:refine([ $in, $out]));
+  $x.save if $x.parse(
+    :$filename, :$raw, :$force, :$trace, :$keep, :$exec, :$frag
+  );
 }

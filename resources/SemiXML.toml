@@ -1,10 +1,9 @@
-#------------------------------------------------------------------------------
-# Content additions tables
+#-------------------------------------------------------------------------------
+# Content additions tables. Refined using OUT and basename.
 [ C ]
   xml-show          = false
   doctype-show      = false
   header-show       = false
-  tracing           = false
 
 [ C.xml ]
   xml-show          = true
@@ -12,17 +11,41 @@
 [ C.html ]
   doctype-show      = true
 
-#------------------------------------------------------------------------------
-# Dependency tables
-#[ D ]
-#  files             = [ ]
+#-------------------------------------------------------------------------------
+# Dependency tables. Refined using IN and basename.
+#[ D.html ]
+#  pdf = [ 'xml; html; table1.xml', 'xml; html; table2.xml']
 
-#------------------------------------------------------------------------------
-# Doctype entity tables
+#-------------------------------------------------------------------------------
+# Default namespaces table. Refined using IN and basename.
+#  xi      = 'http://www.w3.org/2001/XInclude'
+#  xlink   = 'http://www.w3.org/1999/xlink'
+#  xml     = "http://www.w3.org/XML/1998/namespace"
+
+[ DN.html ]
+  default = "http://www.w3.org/1999/xhtml"
+
+[ DN.db5 ]
+  default = "http://docbook.org/ns/docbook"
+
+#-------------------------------------------------------------------------------
+# Doctype entity tables. Refined using IN and basename.
 #[ E.xml ]
 #  copy              = '&#xa9;'
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# Element handling tables. Refined using IN and basename.
+[ F ]
+  # modules and methods
+  inline            = [
+    'sxml:SxmlCore.date', 'sxml:SxmlCore.date-time',
+    'sxml:comment', 'sxml:cdata', 'sxml:xml'
+  ]
+
+  space-preserve    = [ 'sxml:cdata', 'sxml:pi', 'sxml:xml' ]
+  no-conversion     = [ 'sxml:cdata', 'sxml:pi', 'sxml:xml' ]
+
+
 [ F.html ]
   inline            = [
     'a', 'b', 'big', 'i', 'strong', 'small', 'tt', 'abbr', 'acronym', 'cite',
@@ -31,35 +54,69 @@
     'input', 'label', 'select', 'textarea'
   ]
 
-  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
+#  non-nesting       = [ 'code', 'script', 'style', 'tt', 'kbd']
+  no-conversion     = [ 'style', 'script']
   space-preserve    = [ 'pre' ]
   self-closing      = [
     'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input',
     'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
   ]
 
-#------------------------------------------------------------------------------
-# Header table
-[ H.html ]
-  Content-Type    = 'text/html; charset="utf-8"'
-#  From            = 'my-addr@gmail.com'
-#  User-Agent      = 'SemiXML'
 
-#------------------------------------------------------------------------------
-# Module and library path tables
+# Docbook 5
+[ F.db5 ]
+  inline            = [
+    'emphasis'
+  ]
+
+  no-conversion       = [
+
+  ]
+
+  space-preserve    = [
+    'programlisting'
+  ]
+
+  self-closing      = [
+
+  ]
+
+#-------------------------------------------------------------------------------
+# Header table. Refined using OUT and basename.
+[ H.html ]
+  Content-Type          = 'text/html; charset="utf-8"'
+#  From                  = 'my-addr@gmail.com'
+#  User-Agent            = 'SemiXML'
+#  Content-Style-Type    = 'text/css'
+
+#-------------------------------------------------------------------------------
+# Module and library path tables. Refined using IN and basename.
 [ ML ]
+#  label           = 'module[;path to module]'
+#  core            = 'SxmlLib::SxmlCore'
+#  css             = 'SxmlLib::Html::Css'
+#  core            = 'SxmlLib::SxmlCore'
   SxmlCore        = 'SxmlLib::SxmlCore'
 
-#------------------------------------------------------------------------------
-# Running programs tables
+#-------------------------------------------------------------------------------
+# Running programs tables. Refined using IN and basename. The keys are
+# selected by OUT.
+[ R ]
+  cat             = 'cat > "%op/%of.%oe"'
+
 [ R.xml ]
   fmt             = 'xmllint --format - > "%op/%of.%oe"'
 #  fmt             = 'xmllint --format --noent - > %op/%of.%oe'
 #  pdf             = 'wkhtmltopdf - %op/%of.pdf'
-#  chk             = 'tidy -'
+#  chk             = [ 'tidy -xml > tidy.html', 'tidy.html']
+#  other           = ['cat > backup.xml', 'backup.xml']
 
-#------------------------------------------------------------------------------
-# Storage tables
+#-------------------------------------------------------------------------------
+# Storage tables. Refined using OUT and basename.
+# [ S.* ]
+#   rootpath
+#   filepath
+#   fileext
 [ S ]
   fileext       = 'xml'
 
@@ -78,10 +135,9 @@
 [ S.xsl ]
   fileext       = 'xsl'
 
-#------------------------------------------------------------------------------
-# Tracing tables
+#-------------------------------------------------------------------------------
+# Tracing tables. Refined using basename.
 [ T ]
-#  config-search = false
   config        = false
   tables        = false
   modules       = false
@@ -89,8 +145,12 @@
   parse-result  = false
   file-handling = true
 
-#------------------------------------------------------------------------------
-# XML description tables
+#-------------------------------------------------------------------------------
+# User definitions to be used by modules. Refined using IN, OUT and basename.
+[ U ]
+
+#-------------------------------------------------------------------------------
+# XML description tables. Refined using OUT and basename.
 [ X ]
   xml-version     = '1.0'
   xml-encoding    = 'UTF-8'

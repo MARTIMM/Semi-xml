@@ -1,4 +1,4 @@
-$style [!
+$style «
 
    /* These are styles for html */
 
@@ -117,4 +117,4 @@ $style [!
      border-width:      1px;
      background-color:  \#fefffe;
    }
-!]
+»

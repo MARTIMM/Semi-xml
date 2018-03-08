@@ -1,11 +1,10 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SxmlLib:auth<https://github.com/MARTIMM>;
+unit package SxmlLib:auth<github:MARTIMM>;
 
-use XML;
+use SemiXML::Element;
 use SemiXML::Text;
-use SxmlLib::SxmlHelper;
 
 #-------------------------------------------------------------------------------
 class Docbook5::FixedLayout {
@@ -23,17 +22,17 @@ class Docbook5::FixedLayout {
   # keep-literal=<0/1>  Substitute < > characters with &lt; and &gr;
   # fix-indent=<n>      Remove some space in front of every line.
   #
-  method load-test-example ( XML::Element $parent, Hash $attrs ) {
-    my Str $path = ~($attrs<path> // '');
-    my Str $ltype = ~($attrs<ltype> // '');
-    my Str $start = ~($attrs<start> // '#`{{Example-Start}}');
-    my Str $stop = ~($attrs<stop> // '#`{{Example-Stop}}');
+  method load-test-example ( SemiXML::Element $m ) {
+    my Str $path = ~($m.attributes<path> // '');
+    my Str $ltype = ~($m.attributes<ltype> // '');
+    my Str $start = ~($m.attributes<start> // '#`{{Example-Start}}');
+    my Str $stop = ~($m.attributes<stop> // '#`{{Example-Stop}}');
     my Bool $keep-literal =
-       ($attrs<keep-literal>:exists and ?$attrs<keep-literal>) ?? True !! False;
-    my $fix-indent = ~($attrs<fix-indent> // '0');
-    my $callout-prefix = ~($attrs<callout-prefix> // 'c.');
-    my $callout-rows = ~($attrs<callout-rows> // '');
-    my $callout-col = ~($attrs<callout-col> // '80');
+       ($m.attributes<keep-literal>:exists and ?$m.attributes<keep-literal>) ?? True !! False;
+    my $fix-indent = ~($m.attributes<fix-indent> // '0');
+    my $callout-prefix = ~($m.attributes<callout-prefix> // 'c.');
+    my $callout-rows = ~($m.attributes<callout-rows> // '');
+    my $callout-col = ~($m.attributes<callout-col> // '80');
 
     my $text;
     if $path.IO ~~ :r {
@@ -68,8 +67,8 @@ class Docbook5::FixedLayout {
     }
 
     # Create the container
-    my $pl = XML::Element.new(:name('programlisting'));
-    $parent.append($pl);
+    my $pl = SemiXML::Element.new(:name<programlisting>);
+    $m.before($pl);
 
     # When callouts must be placed in the text, the text must be added in
     # pieces with the callout tags in between on the proper places.
@@ -107,7 +106,7 @@ class Docbook5::FixedLayout {
             }
 
             $pl.append(SemiXML::Text.new(:$text));
-            my $co = XML::Element.new(
+            my $co = SemiXML::Element.new(
               :name('co'),
               :attribs(
                 hash('xml:id' => $callout-prefix ~ $callout-count.fmt('%02d'))
@@ -138,7 +137,5 @@ class Docbook5::FixedLayout {
       # Place the selected code in the container
       $pl.append(SemiXML::Text.new(:$text));
     }
-
-    $parent;
   }
 }

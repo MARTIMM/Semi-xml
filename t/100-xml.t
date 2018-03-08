@@ -1,13 +1,11 @@
-use v6.c;
+use v6;
 
 use Test;
 use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing;
-#   Role add to parser class
 #   Translation of SemiXML text
-#   Control of output via role
 #   Result to text
 #   test attributes
 #-------------------------------------------------------------------------------
@@ -27,8 +25,8 @@ $html [
     $x class='green blue' [ empty but not ]
     $y data_1='quoted"test"' [ empty but not ]
     $z data_2="double 'quoted' attrs" [ empty but not ]
-    $eq1 empty-single=''
-    $eq2 empty-double=""
+    $eq1 empty-single='' []
+    $eq2 empty-double="" []
     $br
   ]
 ]
@@ -55,7 +53,7 @@ $x.parse(
 
 # See the result
 my Str $xml-text = ~$x;
-#note $xml-text;
+#diag $xml-text;
 
 like $xml-text, /:s '<?xml' 'version="1.0"' 'encoding="UTF-8"?>'/,
    'Xml prelude found';
@@ -71,12 +69,12 @@ like $xml-text,
      /'<y data_1="quoted&quot;test&quot;">'/,
      'Class test 3';
 like $xml-text,
-     / :s '<z data_2="double' "'quoted'" 'attrs">'/,
+     / :s '<z data_2="double \'quoted\' attrs">'/,
      'Class test 4';
 
 like $xml-text, / :s eq1 empty\-single\=\"\" /, "single quotes";
 like $xml-text, / :s eq2 empty\-double\=\"\" /, "double quotes";
+
 #-------------------------------------------------------------------------------
 # Cleanup
-done-testing();
-exit(0);
+done-testing;

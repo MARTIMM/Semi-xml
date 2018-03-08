@@ -1,0 +1,77 @@
+[ general ]
+  title        = 'LoremIpsum module tests'
+  package      = '-'
+  module       = '-'
+  class        = '-'
+  distribution = '-'
+  label        = '-'
+  date         = '2018-02-26T09:00:12.001083Z'
+  oskernel     = 'linux:4.14.18.200.fc.26.x.86._.64'
+  osdistro     = 'fedora:26.Workstation.Edition:26:False'
+  perl         = 'Perl 6:6.c'
+  compiler     = 'rakudo:2018.01.195.g.5.ae.1.ca.51.f'
+  vm           = 'moar:2018.01.89.ga.01.cdb.449'
+
+[ purpose ]
+  purposetitle = 'Testing the module LoremIpsum'
+  purpose      = '''
+$p title="purpose"  [
+
+    Purpose of this report is to test the module LoremIpsum. The module is ment to generate text as a temporary fill of elements. This can help to have an impression of a page without being extracted by content.
+  
+  $p  [
+  The tests comprises the following chapters
+  ]
+  $ul  [
+    $li  [
+    Setup usage of module
+    ]
+    $li  [
+    Method standard1500
+    ]
+    $li  [
+    Method cicero45bc
+    ]
+  ]
+]
+
+'''
+
+[ chapters ]
+  list         = [ 'Setup usage of module', 'Method standard1500', 'Method cicero45bc' ]
+
+[ chapter.'Setup usage of module' ]
+  success      = 2
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Method standard1500' ]
+  success      = 2
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ summary.line-7 ]
+  chapter      = 'Setup usage of module'
+  diagnostic   = """
+    ok 1 - The object is-a 'SemiXML::Sxml'
+"""
+
+[ summary.line-17 ]
+  chapter      = 'Setup usage of module'
+  diagnostic   = """
+    ok 2 - Simple html element
+"""
+
+[ summary.line-32 ]
+  chapter      = 'Method standard1500'
+  diagnostic   = """
+    ok 3 - a bit from the beginning of standard1500
+"""
+
+[ summary.line-34 ]
+  chapter      = 'Method standard1500'
+  diagnostic   = """
+    ok
+"""

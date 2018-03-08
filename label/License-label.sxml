@@ -1,6 +1,6 @@
 $svg xmlns=http://www.w3.org/2000/svg width=162 height=20 [
   $!SxmlCore.comment [
-    Example found at https://github.com/MadcapJake/Test-Lab/blob/master/README.md
+    Example found at https://img.shields.io/travis/MadcapJake/Test-Lab.svg
   ]
 
   $linearGradient id=b x2=0 y2=100% [

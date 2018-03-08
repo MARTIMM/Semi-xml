@@ -1,419 +1,316 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
+unit package SemiXML:auth<github:MARTIMM>;
 
-use XML;
+use SemiXML;
+use SemiXML::Node;
+use SemiXML::Element;
 use SemiXML::Text;
 use SemiXML::StringList;
 
 #-------------------------------------------------------------------------------
 class Actions {
 
-  # Caller SemiXML::Sxml object
-  has $!sxml-obj;
+  has SemiXML::Globals $!globals;
 
-  # Objects hash with one predefined object for core methods
-  has Hash $.objects is rw = {};
-  has XML::Document $!xml-document;
+  # the root should only have one element. when there are more, convert
+  # the result into a fragment.
+  has SemiXML::Element $.root;
 
-  # The F-table is devised elsewhere as well. This table is read from the config
-  has Hash $.F-table is rw = {};
-
-  # Keep current state of affairs. Hopefully some info when parsing fails
-  has Int $.from;
-  has Int $.to;
-  has Str $.prematch;
-  has Str $.postmatch;
-  has Str $.state;
-
-  has Array $.unleveled-brackets = [];
-  has Array $.mismatched-brackets = [];
-
-  # Save a list of tags from root to deepest level. This is possible because
-  # body is processed later than tag-spec. The names are the element name,
-  # method name or symbol name. The xml namesspace and module name are not
-  # added because these can be any name defined by the user.
-  #
-  has Array $!tag-list = [];
+  # array of element showing the path to the currently parsed element. therefore
+  # an element in the array will always be the parent of the one next to it.
+  has Array $!elements;
+  has Int $!element-idx;
 
   #-----------------------------------------------------------------------------
-#TODO can we remove the BUILD?
-  submethod BUILD ( :$!sxml-obj ) { }
+  submethod BUILD ( ) {
 
-  #-----------------------------------------------------------------------------
-  method init-doc ( $match ) {
-
-    self!current-state( $match, 'initializing doc');
-    state $init-to-fail =
-      XML::Element.new(:name<failed-to-parse-sxml-document>);
-    $!xml-document .= new($init-to-fail);
+    $!globals .= instance;
   }
 
   #-----------------------------------------------------------------------------
   method TOP ( $match ) {
 
-    self!current-state( $match, 'at the top');
-
-    my $parent = $match<document>.made;
-
-    # Cleanup residue tags left from processing methods. The childnodes in
-    # '__PARENT_CONTAINER__' tags must be moved to the parent of it. There
-    # is one exception, that is when the tag is at the top. Then there may
-    # only be one tag. If there are more, an error tag is generated.
-    #
-    my $containers = $parent.elements(
-      :TAG<__PARENT_CONTAINER__>,
-      :RECURSE, :NEST,
+    # initialize root node and place in the array. this node will never be
+    # overwritten.
+    $!root .= new(
+      :name<sxml:fragment>,
+      :attributes({'xmlns:sxml' => 'https://github.com/MARTIMM/Semi-xml'})
     );
+    $!elements = [$!root];
+    $!element-idx = 1;
 
-    for @$containers -> $node {
+#note "\nAt the end of parsing";
+    # process the result tree
+    self!process-ast($match);
 
-      my $children = $node.nodes;
+    # execute any method bottom up and generate sxml structures
+    $!root.run-method if $!globals.exec;
+#note "NTop Tree F=$!globals.frag(), \n$!root.Str()";
 
-      # eat from the end of the list and add just after the container element.
-      # somehow they get lost from the array when done otherwise.
-      #
-      for @$children.reverse {
-        $node.parent.after( $node, $^a);
-      }
+    unless $!globals.raw {
+#      $!root.subst-variables;
+#        self!remap-content($root-xml);
 
-      # remove the now empty element
-      $node.remove;
+      # remove all tags from the sxml namespace.
+      #self!remove-sxml-namespace($!root);
+#note "NTop 2d: $root-xml";
     }
-
-    # process top level method container
-    if $parent.name eq '__PARENT_CONTAINER__' {
-      if +$parent.nodes == 0 {
-        # No nodes generated
-        $parent = XML::Element.new;
-      }
-
-      elsif +$parent.nodes == 1 {
-        # One node generated
-        $parent = $parent.nodes[0];
-      }
-
-      else {
-        my $tag-ast = $match<document><tag-spec>.made;
-        $parent = XML::Element.new(
-          :name('method-generated-too-many-nodes'),
-          :attribs( module => $tag-ast[3], method => $tag-ast[4])
-        );
-      }
-    }
-
-    # conversion to xml escapes is done as late as possible
-    my Sub $after-math = sub ( XML::Element $x ) {
-
-      # process attributes to escape special chars, Stringify attr value because
-      # of its type: StringList
-      my %a = $x.attribs;
-      for %a.kv -> $k, $v {
-        $x.set( $k, self!process-esc( ~$v, :is-attr));
-      }
-
-      # process body text to escape special chars
-      for $x.nodes -> $node {
-        if $node ~~ any( SemiXML::Text, XML::Text) {
-          my Str $s = self!process-esc(~$node);
-          $node.parent.replace( $node, SemiXML::Text.new(:text($s)));
-        }
-
-        elsif $node ~~ XML::Element {
-          my Array $self-closing = $!F-table<self-closing> // [];
-
-#note "Ftab: ", $self-closing;
-          # Check for self closing tag, and if so remove content if any
-          if $node.name ~~ any(@$self-closing) {
-#note "Found self closing tag: $node.name()";
-            # elements not able to contain any content; remove any content
-            for $node.nodes.reverse -> $child {
-              $node.removeChild($child);
-            }
-          }
-
-          else {
-            # recurively process through all elements
-            $after-math($node);
-
-            # If this is not a self closing element and there is no content, insert
-            # an empty string to get <a></a> instead of <a/>
-            if ! $node.nodes {
-              $node.append(SemiXML::Text.new(:text('')));
-            }
-          }
-        }
-
-#        elsif $node ~~ any(XML::Text|SemiXML::Text) {
-#
-#        }
-      }
-    }
-
-    &$after-math($parent);
-
-    # return the completed document
-    $!xml-document .= new($parent);
-  }
-
-  #---------------------------------------------------------------------------
-  method pop-tag-from-list ( $match ) {
-
-#TODO only after the last block. Also when no block is found!
-    # This level is done so drop an element tag from the list
-    $!tag-list.pop;
   }
 
   #-----------------------------------------------------------------------------
-  method document ( $match ) {
+  # always perform xml transforms when asked for xml-text
+  method xml-text ( ) {
 
-    self!current-state( $match, 'document');
+    my Str $xml-text = '';
+    if $!root.nodes.elems == 0 {
+      $xml-text = $!root.xml;
+    }
 
-    # Try to find indent level to match up open '[' with close ']'.
-    #
-    # 1) $x                     no body at all
-    # 2) $x [ ]                 no newline in body
-    # 3) $x [                   with newline, the ']' should line up with $x.
-    #    ]
-    # 4) $x [ ] [ ]             multiple bodies no newline
-    # 5) $x [                   idem with newline in first body. 1st ']'
-    #    ] [                    lines up with $x. When in 2nd, the 2nd ']'
-    #    ]                      should also line up with $x
-    # 6) $x [ $y [ ] ]          nested bodies no newline
-    # 7) $x [                   with newline, outer ']' should line up
-    #      $y [                 with $x and inner ']' with $y.
-    #      ]
-    #    ]
-    #
-    my Str $orig = $match.orig;
+    elsif $!root.nodes.elems == 1 {
+      self!set-namespaces($!root.nodes[0]);
+      $xml-text = $!root.nodes[0].xml;
+    }
 
-    my Array $tag-bodies = $match<tag-body>;
-    loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
-
-      my Int $b-from = $match.from;
-      my Int $b-to = $match.to;
-
-#TODO test for ] in special bodies and for !] in non-special ones
-      # test for special body
-      my Bool $special-body = ?$orig.substr(
-        $b-from, $b-to - $b-from
-      ) ~~ m/^ '[!' /;
-
-      $orig.substr( $tag-bodies[$mi].to - 3, 3);
-
-      # find start of body
-      my Int $bstart = $orig.substr(
-        $b-from, $b-to - $b-from
-      ).index('[') + $b-from;
-
-      # find end of body, search from the end
-      my Int $bend;
-      if $special-body {
-        $bend = $orig.substr( $bstart, $b-to - $bstart).rindex('!]');
-
-        if ?$bend {
-           $bend += $bstart;
-        }
-
-        else {
-          note "special body $special-body, $bstart, $b-to - $bstart";
-          note "$orig.substr( $bstart, $b-to - $bstart)";
-        }
+    elsif $!root.nodes.elems > 1 {
+      if $!globals.frag {
+        self!set-namespaces($!root.nodes[0]);
+        $xml-text = $!root.xml;
       }
 
       else {
-        $bend = $orig.substr(
-          $bstart, $b-to - $bstart
-        ).rindex(']') + $bstart;
+        die X::SemiXML.new(
+          :message(
+            "Too many nodes on top level. Maximum allowed nodes is one"
+          )
+        )
+      }
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # always perform xml transforms when asked for xml-text
+  method root-name ( --> Str ) {
+
+    my $root-name = '';
+    if $!root.nodes.elems == 0 {
+      $root-name = $!root.name;
+    }
+
+    elsif $!root.nodes.elems == 1 {
+      $root-name = $!root.nodes[0].name;
+    }
+
+    elsif $!root.nodes.elems > 1 {
+      if $!globals.frag {
+        $root-name = $!root.name;
       }
 
-      # check for newlines in this body
-      my Bool $has-nl = (
-        $orig.substr( $bstart, $bend - $bstart).index("\n")
-      ).defined;
+      else {
+        die X::SemiXML.new(
+          :message(
+            "Too many nodes on top level. Maximum allowed nodes is one"
+          )
+        )
+      }
+    }
 
-#note "BE: $bstart, $bend, $has-nl";
-      # if there is a newline, check alignment
-      if $has-nl {
+    $root-name
+  }
 
-        my Int $tag-loc = $match<tag-spec>.from;
-        my Int $indent-start =
-            $tag-loc - ($orig.substr( 0, $tag-loc).rindex("\n") // -1) - 1;
+  #-----------------------------------------------------------------------------
+  # set the result sxml
+  multi method sxml-tree ( SemiXML::Node:D :$sxml-tree! ) {
 
-        my Int $indent-end =
-            $bend - ($orig.substr( 0, $bend).rindex("\n") // -1) - 1;
-#note "NLDoc  $tag-loc, $indent-start, $indent-end, $bstart, $bend";
+    $!root .= new(:name<sxml:fragment>);
+    $!root.append($sxml-tree);
+  }
 
-        # make a note when indents are not the same, it might reveal a
-        # missing bracket.
-        if $indent-start != $indent-end {
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # reverse engineer from xml to sxml tree
+  multi method sxml-tree ( SemiXML::Node:D :$xml! ) {
 
-          # get line numbers of begin and end of body
-          $orig.substr( 0, $tag-loc) ~~ m:g/ (\n) /;
-          my Int $line-begin = $/.elems + 1;
+    sub cnvnodes ( SemiXML::Node $parent ) {
+      for $parent.nodes -> $node {
+        when SemiXML::Element {
+        }
 
-          $orig.substr( 0, $bend) ~~ m:g/ (\n) /;
-          my Int $line-end = $/.elems + 1;
+        when SemiXML::Text {
+        }
 
-          # save data
-          my $bracket-info := $!unleveled-brackets;
-          $bracket-info := $.mismatched-brackets
-            if $orig.substr( $tag-bodies[$mi].to - 3, 3) ~~ m/ '!]' /;
-
-          $bracket-info.push: {
-            tag-name => $match<tag-spec><tag>.Str,
-            :$line-begin,
-            :$line-end,
-            body-count => $mi + 1
-          };
+        default {
         }
       }
     }
 
-    my XML::Element $x;
+    $!root .= new(:name<sxml:fragment>);
 
-    ( my $tt,                 # tag type
-      my $ns, my $tn,         # namespace and tag name
-      my $mod, my $meth,      # module and method
-      my $attrs               # attributes
-    ) = @($match<tag-spec>.made);
-#note "doc attrs: ", $attrs.WHAT;
-#for $attrs.keys -> $k { note "Key $k: ", $attrs{$k}.WHAT; };
+  }
 
-    # Check the node type
-    given $tt {
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # reverse engineer from xml to sxml tree
+  multi method sxml-tree ( Str:D :$xml-text! ) {
+#    my XML::Document $xml = from-xml-file($xml-text);
+#    self.sxml-tree(:xml($xml.root));
+  }
 
-      # Any normal tag
-      when any(< $** $*| $|* $ >) {
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # get the result sxml
+  multi method sxml-tree ( --> SemiXML::Node ) {
 
-        my Str $tag = (?$ns ?? "$ns:" !! '') ~ $tn;
+    my SemiXML::Node $sxml-tree;
+    if $!root.nodes.elems == 0 {
+      $sxml-tree = $!root;
+    }
 
-        # A bit of hassle to get the StringList values converted into Str explicitly
-        $x .= new( :name($tag), :attribs(%($attrs.keys Z=> $attrs.values>>.Str)));
+    elsif $!root.nodes.elems == 1 {
+      $sxml-tree = $!root.nodes[0];
+      $sxml-tree.parent(SemiXML::Element.new(:name<X>));
+    }
 
-        # Check for xmlns uri definitions and set them on the current node
-        for $attrs.keys {
-          when m/^ 'xmlns:' ( <before '='>* ) $/ {
-            my $ns-prefix = $0;
-            $x.setNamespace( ~$attrs{$_}, $0);
-          }
-        }
-
-        self!build-content-body( $match, $x);
+    elsif $!root.nodes.elems > 1 {
+      if $!globals.frag {
+        $sxml-tree = $!root;
       }
 
-      # Method tag
-      when '$!' {
+      else {
+        die X::SemiXML.new(
+          :message( "Too many nodes on top level. Maximum allowed nodes is one")
+        )
+      }
+    }
 
-        # Get the module if it exists
-        my $module = self!can-method( $mod, $meth, :!optional);
+    $sxml-tree
+  }
 
-        # When module and/or method is not found an error is generated in the
-        # form of XML.
-        if $module ~~ XML::Element {
-          $x = $module;
+#`{{
+  #-----------------------------------------------------------------------------
+  # messages
+  method tag-spec ( $match ) { self!make-note( $match, 'tag-spec'); }
+  method body-a ( $match ) { self!make-note( $match, 'body-a'); }
+  method body-b ( $match ) { self!make-note( $match, 'body-b'); }
+  method body-c ( $match ) { self!make-note( $match, 'body-c'); }
+  #method  ( $match ) {
+  #method  ( $match ) {
+
+  method !make-note ( $match, $routine-name ) {
+    note "$routine-name: $match"
+      if $!globals.trace and $!globals.refined-tables<T><parse>;
+  }
+}}
+  #----[ private stuff ]--------------------------------------------------------
+  method !process-ast ( Match $m, Int $l = 0 ) {
+
+    # set True after processing tag-bodies
+    my Bool $prune = False;
+
+    for $m.caps -> Pair $pair ( :key($k), :value($v)) {
+#note "PA: caps $k, $v";
+
+      if $!globals.trace and $!globals.refined-tables<T><parse> {
+        unless $k ~~ any(<sym tag tag-name element attribute attr-key attr-value
+                          attr-value-spec bool-true-attr bool-false-attr
+                          pre-body
+                        >) {
+          my Str $value-text = $k ~~ any(<tag-bodies document>)
+                 ?? ( $v ~~ m/ \n / ?? " ... " !! $v.Str )
+                 !! $v.Str;
+          note "$k: '$value-text'".indent($l);
         }
+      }
 
-        # Otherwise it is the module on which method can be called
-        else {
-#note "Method call attribs: ", $attrs;
-
-          # call user method and expect result in $x
-          $x = $module."$meth"(
-            XML::Element.new(:name('__PARENT_CONTAINER__')),
-            $attrs,
-            :content-body(
-              self!build-content-body(
-                $match,
-                XML::Element.new(:name('__PARENT_CONTAINER__'))
-              )
-            ),
-            :$!tag-list
+      given $k {
+        when 'tag-spec' {
+          my SemiXML::Element $element = self!create-element(
+            $v.hash<tag>,
+            $!elements[$!element-idx - 1],
+            self!attributes([$v.hash<attributes>.caps])
           );
 
-          if not $x.defined {
-            $x .= new(
-              :name('method-returned-no-result'),
-              :attribs( module => $mod, method => $meth)
+          # insert in array
+          $!elements[$!element-idx] = $element;
+
+          note ("--> Append element: $element.name() to " ~
+                "$!elements[$!element-idx - 1].name()").indent($l)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+
+          # element in content of this one
+          $!element-idx++;
+        }
+
+        when 'tag-bodies' {
+
+          my Str $pre-body = self!process-bodies(
+            $!elements[$!element-idx - 1], [$v.caps], $l + 2
+          );
+
+          # prune the rest because recursive calls are made from
+          # process-bodies() when a document is encountered
+          $prune = True;
+
+          # also don't bring this line before the call because
+          # of the same reasons.
+          $!element-idx--;
+#note "Idx C: $!element-idx";
+
+          if ?$pre-body {
+            # to insert the space we must select the element just one lower on
+            # the stack of elements
+            my SemiXML::Element $element = $!elements[$!element-idx - 1];
+            my SemiXML::Text $t .= new(
+              :text($pre-body.Str), :parent($element)
             );
+            $t.body-type = SemiXML::BTBodyC;  # dont care really, only spaces
+            $t.body-number = $element.body-count;
+            #$element.append($t);
+
+            my $v1 = $v;
+            $v1 ~~ s:g/ \n /\\n/;
+            note ("[$element.body-count()] --> moved down and append '$v1'" ~
+                  " to $element.name()").indent(max(0,$l-4))
+              if $!globals.trace and $!globals.refined-tables<T><parse>;
           }
         }
       }
-    }
 
-    # Set AST on node document
-    $match.make($x);
+      self!process-ast( $v, $l + 2) unless $prune;
+    }
   }
 
   #-----------------------------------------------------------------------------
-  method !build-content-body (
-    Match $match, XML::Element $parent
-    --> XML::Element
+  method !create-element (
+    Match:D $tag, SemiXML::Node:D $parent, Hash:D $attributes
+    --> SemiXML::Element
   ) {
 
-    my Array $comments = $match<comment>;
-    my Array $tag-bodies = $match<tag-body>;
-    loop ( my $mi = 0; $mi < $tag-bodies.elems; $mi++ ) {
+    my SemiXML::Element $element;
 
-      my $match = $tag-bodies[$mi];
-      for @($match.made) {
-
-        # Any piece of found text in bodies. Filter out any comments.
-        when Str {
-          my Str $txt = $_;
-          if ? $txt {
-#TODO maybe all lines prefixed with a space and one at the end.
-            $parent.append(SemiXML::Text.new(:text(' '))) if $mi;
-            $parent.append(SemiXML::Text.new(:text($txt)));
-          }
-        }
-
-        # Nested document: Ast holds { :tag-ast, :body-ast, :doc-ast}
-        when Hash {
-#note "Ast hash: ", $_.keys;
-#note "Ast tag: ", $_<tag-ast>;
-#note "Ast body: ", $_<body-ast>;
-#note "Ast doc: ", $_<doc-ast>;
-          # tag ast: [ tag type, namespace, tag name, module, method, attributes ]
-          my Array $tag-ast = $_<tag-ast>;
-
-#TODO see above
-          # Test if spaces are needed before the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $*| >);
-
-          $parent.append($_<doc-ast>);
-
-#TODO see above
-          # Test if spaces are needed after the document
-          $parent.append(SemiXML::Text.new(:text(' ')))
-            if $tag-ast[0] ~~ any(< $** $|* >);
-        }
-      }
+    my Str $symbol = $tag<sym>.Str;
+    if $symbol eq '$' {
+      $element .= new( :name($tag<tag-name>.Str), :$parent, :$attributes);
     }
 
-    $parent;
+    elsif $symbol eq '$!' {
+      $element .= new(
+        :module($tag<mod-name>.Str), :method($tag<meth-name>.Str),
+        :$parent, :$attributes
+      );
+    }
+
+    $element
   }
 
   #-----------------------------------------------------------------------------
-  method tag-spec ( $match ) {
-
-    self!current-state( $match, 'tag specification');
-
-    # Name of element or method to be saved in array $!tag-list on $!level
-    my Str $tag-name;
-    my Array $ast = [];
-    my Str $symbol = $match<tag><sym>.Str;
-    $ast.push: $symbol;
-#note "Tag: ", $match<tag>.kv;
+  method !attributes ( Array $attr-specs --> Hash ) {
 
     # define the attributes for the element. attr value is of type StringList
     # where ~$strlst gives string, @$strlst returns list and $strlist.value
     # either string or list depending on :use-as-list which in turn depends
     # on the way an attribute is defined att='val1 val2' or att=<val1 val2>.
     my Hash $attrs = {};
-    for $match<attributes>.caps -> $as {
+    for @$attr-specs -> $as {
+
       next unless $as<attribute>:exists;
       my $a = $as<attribute>;
       my SemiXML::StringList $av;
@@ -435,285 +332,140 @@ class Actions {
           :use-as-list(?($a<attr-value-spec><attr-list-value> // False))
         );
       }
-#note "AV $a<attr-key>: ", $av;
+
       $attrs{$a<attr-key>.Str} = $av;
     }
 
-    if $symbol ~~ any(< $** $|* $*| $ >) {
-
-      my $tn = $match<tag><tag-name>;
-      $ast.push: ($tn<namespace> // '').Str, $tn<element>.Str, '', '';
-      $tag-name = $tn<element>.Str;
-    }
-
-    elsif $symbol eq '$!' {
-
-      my $tn = $match<tag>;
-      $ast.push: '', '', $tn<mod-name>.Str, $tn<meth-name>.Str;
-      $tag-name = $tn<meth-name>.Str;
-
-      # Check if there is a method initialize in the module. If so call it
-      # with the found attributes.
-      my $module = self!can-method( $tn<mod-name>.Str, 'initialize');
-      $module.initialize(
-        $!sxml-obj, $attrs, :method($tn<meth-name>.Str)
-      ) if $module;
-    }
-
-    # Add to the list
-    $!tag-list.push($tag-name);
-#note "Tag name: $tag-name";
-
-    $ast.push: $attrs;
-
-    # Set AST on node tag-name
-    $match.make($ast);
+    $attrs;
   }
 
   #-----------------------------------------------------------------------------
-  method tag-body ( $match ) {
-
-    self!current-state( $match, 'tag body');
-    my Array $ast = [];
-    for $match.caps {
-
-      # keys can be body1-contents..body4-contents
-      my $p = $^a.key;
-      my $v = $^a.value;
-
-      # Text cannot have nested documents and text must be taken literally
-      if $p eq 'body1-contents' {
-
-        $ast.push: self!clean-text( $v<body2-text>.Str, :fixed, :!comment);
-      }
-
-      # Text cannot have nested documents and text may be re-formatted
-      elsif $p eq 'body2-contents' {
-
-        $ast.push: self!clean-text( $v<body2-text>.Str, :!fixed, :!comment);
-      }
-
-      # Text can have nested documents and text must be taken literally
-      if $p eq 'body3-contents' {
-
-        for $match<body3-contents>.caps {
-
-          # keys can be body1-text or document
-          my $p3 = $^a.key;
-          my $v3 = $^a.value;
-
-          # body1-text
-          if $p3 eq 'body1-text' {
-
-            $ast.push: self!clean-text( $v3.Str, :fixed, :comment);
-          }
-
-          # document
-          elsif $p3 eq 'document' {
-
-            my $d = $v3;
-            my $tag-ast = $d<tag-spec>.made;
-            my $body-ast = $d<tag-body>;
-            $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.made)};
-          }
-        }
-      }
-
-      # Text can have nested documents and text may be re-formatted
-      elsif $p eq 'body4-contents' {
-
-        # walk through all body pieces
-        for $match<body4-contents>.caps {
-
-          # keys can be body1-text or document
-          my $p4 = $^a.key;
-          my $v4 = $^a.value;
-
-          # body1-text
-          if $p4 eq 'body1-text' {
-
-            $ast.push: self!clean-text( $v4.Str, :!fixed, :comment);
-          }
-
-          # document
-          elsif $p4 eq 'document' {
-
-            my $d = $v4;
-            my $tag-ast = $d<tag-spec>.made;
-            my $body-ast = $d<tag-body>;
-            $ast.push: { :$tag-ast, :$body-ast, :doc-ast($d.made)};
-          }
-        }
-      }
-    }
-
-    # Set AST on node tag-body
-    $match.make($ast);
-  }
-
-#`{{
-  #-----------------------------------------------------------------------------
-  method attr-value-spec ( Match $match ) {
-    note $match.Str;
-  }
-}}
-#`{{
-  #-----------------------------------------------------------------------------
-  method comment ( Match $match ) {
-    dump $match;
-  }
-}}
-
-  #-----------------------------------------------------------------------------
-  # Return object if module and method is found. Otherwise return Any
-  method !can-method ( Str $mod-name, $meth-name, Bool :$optional = True ) {
-
-    my XML::Element $x;
-
-    my $module = $!objects{$mod-name} if $!objects{$mod-name}:exists;
-
-    if $module.defined {
-      if $module.^can($meth-name) {
-        $module;
-      }
-
-      else {
-        $x .= new(
-          :name('undefined-method'),
-          :attribs( module => $mod-name, method => $meth-name)
-        ) unless $optional;
-      }
-    }
-
-    else {
-      $x .= new( :name('undefined-module'), :attribs(module => $mod-name))
-        unless $optional;
-    }
-  }
-
-  #-----------------------------------------------------------------------------
-  method !clean-text (
-    Str $t is copy, Bool :$fixed = False, Bool :$comment = True
+  method !process-bodies (
+    SemiXML::Element $element, Array $body-specs, Int $l
     --> Str
   ) {
 
-    # filter comments
-    $t ~~ s:g/ <.ws> '#' \N* \n // if $comment;
-    $t ~~ s:g/^ '#' \N* \n // if $comment;
+    my SemiXML::BodyType $btype;
 
-    # remove leading spaces at begin of text
-    $t ~~ s/^ \s+ // unless $fixed;
-
-    # remove trailing spaces at every line
-    $t ~~ s:g/ \h+ $$ //;
-
-    # substitute multiple spaces with one space
-    $t ~~ s:g/ \s\s+ / / unless $fixed;
-
-    # remove return characters if found
-    $t ~~ s:g/ \n+ / / unless $fixed;
-
-    # remove leading spaces for the minimum number of spaces when the content
-    # should be fixed
-    if $fixed {
-      my Int $min-indent = 1_000_000_000;
-      for $t.lines -> $line {
-        $line ~~ m/^ $<indent>=(\s*) /;
-        my Int $c = $/<indent>.Str.chars;
-
-        # adjust minimum only when there is something non-spacical on the line
-        $min-indent = $c if $line ~~ m/\S/ and $c < $min-indent;
-      }
-
-      my $new-t = '';
-      my Str $indent = ' ' x $min-indent;
-      for $t.lines {
-        my $l = $^line;
-        $l ~~ s/^ $indent//;
-        $new-t ~= "$l\n";
-      }
-      $t = $new-t;
-    }
-
-    $t;
-  }
-
-  #-----------------------------------------------------------------------------
-  # Substitute some escape characters in entities and remove the remaining
-  # backslashes.
-  #
-  method !process-esc ( Str $esc is copy, Bool :$is-attr = False --> Str ) {
-
-    # Entity must be known in the xml result!
-    $esc ~~ s:g/\& <!before '#'? \w+ ';'>/\&amp;/ unless $is-attr;
-    $esc ~~ s:g/\\\s/\&nbsp;/ unless $is-attr;
-    $esc ~~ s:g/ '<' /\&lt;/ unless $is-attr;
-    $esc ~~ s:g/ '>' /\&gt;/ unless $is-attr;
-
-    $esc ~~ s:g/\"/\&quot;/ if $is-attr;
-    $esc ~~ s:g/'\\'//;
-
-#`{{
-    # Remove rest of the backslashes unless followed by hex numbers prefixed
-    # by an 'x'
+    # When there is something like '$a [ abc $b def ]' $b does not have a
+    # body but the 'pre-body' will eat the spaces following it anyway. These
+    # spaces belong to $a but will be ignored in that case. the next text $a
+    # gets is then 'def ' which should be ' def '. Now to get that right, we
+    # first see that this set will only have one member namely 'pre-body'.
     #
-    if $esc ~~ m/ '\\x' <xdigit>+ / {
-      my $set-utf8 = sub ( $m1, $m2) {
-        return Blob.new( :16($m1.Str), :16($m2.Str)).decode;
-      };
+    # However, this is also true here '$a [ abc $b [] def ]. Here, the 'prebody'
+    # belongs to $b and must be ignored. So '$<body-started>=<?>' is inserted
+    # just after the opening '[' of the tag-nody token. This will only be
+    # visible in the AST when something of the rule is found and thus will
+    # allways force two or more members.
 
-      $esc ~~ s:g/ '\\x' (<xdigit>**2) (<xdigit>**2) /{&$set-utf8( $0, $1)}/;
-    }
-}}
+    my Bool $only-pre-body = $body-specs.elems == 1;
+    return $body-specs[0].value.Str if $only-pre-body;
 
-    return $esc;
-  }
+    for @$body-specs -> Pair $pair ( :key($k), :value($v)) {
 
-  #-----------------------------------------------------------------------------
-  method !current-state ( Match $match, Str $state ) {
+      note "[$element.body-count()] $k".indent($l)
+        if $!globals.trace and $!globals.refined-tables<T><parse>;
 
-    $!from = $match.from;
-    $!to = $match.to;
-    $!prematch = $match.prematch;
-    $!postmatch = $match.postmatch;
-    $!state = $state;
-  }
-
-  #-----------------------------------------------------------------------------
-  method Xset-objects( Hash:D $objects ) {
-
-    $!objects = $objects;
-  }
-
-  #-----------------------------------------------------------------------------
-  method Xprocess-modules ( Hash :$lib = {}, Hash :$mod = {} ) {
-
-    # cleanup old objects
-    for $!objects.keys -> $k {
-      undefine $!objects{$k};
-      $!objects{$k}:delete;
-    }
-
-    for $mod.kv  -> $key, $value {
-      if $!objects{$key}:!exists {
-        if $lib{$key}:exists {
-
-          my $repository = CompUnit::Repository::FileSystem.new(
-            :prefix($lib{$key})
-          );
-          CompUnit::RepositoryRegistry.use-repository($repository);
+      given $k {
+        when 'body-started' {
+          $element.body-count++;
         }
 
-        require ::($value);
-        my $obj = ::($value).new;
-        $!objects{$key} = $obj;
+        when 'body-a' {
+          my Str $text = $v.Str;
+
+          # Remove all comment
+          for $v.caps -> Pair $p ( :key($ba-k), :value($ba-v)) {
+            if $ba-k eq 'comment' {
+              my $vtxt = $ba-v.Str;
+              $text ~~ s/ $vtxt //;
+            }
+          }
+
+          my SemiXML::Text $t .= new( :text($text), :parent($element));
+          $t.body-type = SemiXML::BTBodyA;
+          $t.body-number = $element.body-count;
+
+          my Str $v1 = $t.perl;
+          note "--> append '$v1' to $element.name()".indent($l+4)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
+
+        when 'body-b' {
+          my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
+          $t.body-type = SemiXML::BTBodyB;
+          $t.body-number = $element.body-count;
+
+          my Str $v1 = $t.perl;
+          note "--> append '$v1' to $element.name()".indent($l+4)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
+
+        when 'body-c' {
+          my SemiXML::Text $t .= new( :text($v.Str), :parent($element));
+          $t.body-type = SemiXML::BTBodyC;
+          $t.body-number = $element.body-count;
+
+          my Str $v1 = $t.perl;
+          note "--> append '$v1' to $element.name()".indent($l+4)
+            if $!globals.trace and $!globals.refined-tables<T><parse>;
+        }
+
+        when 'document' {
+          self!process-ast( $v, $l+4);
+        }
+      }
+    }
+
+    return '';
+  }
+
+  #-----------------------------------------------------------------------------
+  # set namespaces on the element
+  method !set-namespaces ( SemiXML::Element $element ) {
+
+    # add namespaces xmlns
+    my Hash $refIn = $!globals.refined-tables<DN> // {};
+
+    for $refIn.keys -> $ns {
+      if $ns eq 'default' {
+        $element.attributes<xmlns> = $refIn{$ns};
+      }
+
+      else {
+        $element.attributes<xmlns:$ns> = $refIn{$ns};
       }
     }
   }
 
+#`{{
   #-----------------------------------------------------------------------------
-  method get-document ( --> XML::Document ) {
+  # remove leftover elements and attributes from SemiXML namespace
+  method !remove-sxml-namespace ( SemiXML::Node $node ) {
 
-    return $!xml-document;
+    unless $node ~~ SemiXML::Text {
+
+      # remove nodes from the sxml namespace except for the fragment node
+      unless $node.name ~~ any(<sxml:fragment sxml:comment sxml:cdata {
+        if $node.name ~~ m/^ sxml \: / {
+          $node.remove;
+          return;
+        }
+
+        else {
+          # check the node for any sxml namespace attributes and reove them
+          for $node.attributes.keys -> $k {
+            $node.attributes{$k}:delete if $k ~~ m/^ sxml \: /;
+            $node.attributes{$k}:delete if $k ~~ m/^ xmlns \: sxml /;
+          }
+        }
+      }
+
+      self!remove-sxml-namespace($_) for $node.nodes;
+    }
+
+    # else is text node of which no attributes gets displayed
   }
+}}
 }

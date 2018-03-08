@@ -1,0 +1,31 @@
+# Setup for index.sxml using the default options --in=html --out=index
+#------------------------------------------------------------------------------
+[ C ]
+  tracing       = true
+
+#------------------------------------------------------------------------------
+[ R.html ]
+#  index         = 'xmllint --html --format - > %op/%of.%oe'
+
+#------------------------------------------------------------------------------
+[ ML.html ]
+  colors        = 'SxmlLib::Colors'
+  file          = 'SxmlLib::File'
+  lorem         = 'SxmlLib::LoremIpsum'
+  css           = 'SxmlLib::Html::Css'
+  menu          = 'SxmlLib::Html::Menu'
+
+#------------------------------------------------------------------------------
+[S.index]
+  fileext       = 'html'
+
+#------------------------------------------------------------------------------
+# Tracing tables
+[ T ]
+#  config-search   = false
+#  config          = true
+#  tables          = true
+#  modules         = true
+#  parse           = true
+#  parse-result    = true
+  file-handling   = true

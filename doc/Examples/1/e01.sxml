@@ -1,8 +1,10 @@
+# run: sxml2xml.pl6 --in=html --out=pdf doc/Examples/1/e01.sxml
+
 $html lang=en-US dir=ltr [
   $head [
-    $meta charset=utf-8 []
+    $meta charset=utf-8
     $title [ Example 1 ]
-    $style [!
+    $style «=
       #svg1 {
         background-color:          #ffffe0;
       }
@@ -15,9 +17,9 @@ $html lang=en-US dir=ltr [
         margin:                    1px;
         padding:                   4px;
       }
-    !]
+    »
   ]
-  
+
   $body [
     $div id=svg1 [
       $svg xmlns=http://www.w3.org/2000/svg
@@ -31,7 +33,7 @@ $html lang=en-US dir=ltr [
       ]
 
       $div id=text1 [
-        $!Lorem.cicero45bc []
+        $!lorem.cicero45bc
       ]
     ]
   ]

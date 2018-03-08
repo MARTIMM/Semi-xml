@@ -3,11 +3,13 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package SemiXML:auth<github:MARTIMM>;
 
+use SemiXML;
+
 use SemiXML::Grammar;
 use SemiXML::Actions;
+use SemiXML::Node;
 use SemiXML::Text;
 use Config::DataLang::Refine;
-use Terminal::ANSIColor;
 
 use XML;
 
@@ -21,44 +23,56 @@ class Sxml {
 
   enum RKeys <<:IN(0) :OUT(1)>>;
   has Array $!refine;
-  has Array $!refine-tables;
-  has Hash $!refined-config;
+  has Array $!table-names;
+  has Hash $!refined-tables;
+  has Hash $!objects;
 
-  has Hash $!objects = {};
+#  has Hash $!objects = {};
 
   has Str $!filename;
+  has Str $!target-fn;
 
   has Bool $!drop-cfg-filename;
   has Hash $!user-config;
-  has Bool $!trace = False;
-  has Bool $!merge;
 
   # structure to check for dependencies
   my Hash $processed-dependencies = {};
 
+  has SemiXML::Globals $!globals;
+
   #-----------------------------------------------------------------------------
-  submethod BUILD ( Array :$!refine = [], :$!merge = False ) {
+  submethod BUILD ( Array :$!refine = [<xml xml>] ) {
 
-    $!grammar .= new;
-    $!actions .= new(:sxml-obj(self));
+    $!globals .= instance;
 
-    # Make sure that in and out keys are defined with defaults
+    # initialize the refined config tables
+    $!table-names = [<C D DN E F H ML R S T U X>];
+    $!refined-tables = %(@$!table-names Z=> ( {} xx $!table-names.elems ));
+
     $!refine[IN] = 'xml' unless ?$!refine[IN];
     $!refine[OUT] = 'xml' unless ?$!refine[OUT];
 
-    # Initialize the refined config tables
-    $!refine-tables = [<C D E F H ML R S T X>];
-    $!refined-config = %(@$!refine-tables Z=> ( {} xx $!refine-tables.elems ));
+    $!grammar .= new;
+    $!actions .= new;
   }
 
   #-----------------------------------------------------------------------------
-  multi method parse ( Str:D :$!filename!, Hash :$config --> Bool ) {
+  multi method parse (
+    Str:D :$!filename!, Hash :$config,
+    Bool :$raw = False, Bool :$force = False, Bool :$exec = True,
+    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False
+    --> Bool
+  ) {
 
     my Bool $pr;
 
     if $!filename.IO ~~ :r {
       my $text = slurp($!filename);
-      $pr = self.parse( :content($text), :$config, :!drop-cfg-filename);
+      $pr = self.parse(
+        :content($text), :$config, :!drop-cfg-filename,
+        :$raw, :$force, :$trace, :$keep, :$exec, :$frag
+      );
+
       die "Parse failure" if $pr ~~ Nil;
     }
 
@@ -67,67 +81,39 @@ class Sxml {
       exit(1);
     }
 
-    $pr;
+    $pr
   }
 
   #-----------------------------------------------------------------------------
   multi method parse (
-    Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True
+    Str:D :$content! is copy, Hash :$config, Bool :$!drop-cfg-filename = True,
+    Bool :$force = False, Bool :$exec = True, Bool :$raw = False,
+    Bool :$trace = False, Bool :$keep = False, Bool :$frag = False
     --> Bool
   ) {
 
     $!user-config = $config;
     $!filename = Str if $!drop-cfg-filename;
 
-    # Prepare config and process dependencies. If result is newer than source
+    # prepare config and process dependencies. if result is newer than source
     # prepare returns False to note that further work is not needed.
-    # Generate a proper Match object to return.
-    return False unless self!prepare-config;
+    return False unless self!prepare-config( :$trace, :$force);
+
+    # set options. when user is done() with this session they will be removed
+    $!globals.set-options( hash(
+        :$trace, :$keep, :$raw, :$exec, :$frag,
+        :$!objects, :$!refine, :$!refined-tables,
+      )
+    );
+
+    # save the filename globally but only once
+    $!globals.filename //= $!filename if ?$!filename;
 
     # Parse the content. Parse can be recursively called
-    $SemiXML::Grammar::trace = ($!trace and $!refined-config<T><parse>);
     my Match $m = $!grammar.subparse( $content, :actions($!actions));
+    my Bool $result-ok = $m.defined;
 
-    # Throw an exception when there is a parsing failure
-    my $last-bracket-index = $content.rindex(']') // $content.chars;
-    if $!trace and $!refined-config<T><parse-result> {
-      my $mtrace = ~$m;
-      $mtrace .= substr( 0, 200);
-      $mtrace ~= " ... \n";
-      note "\nMatch: $m.from(), $m.to(), $last-bracket-index\n$mtrace";
-    }
-#    if $m.to != $last-bracket-index {
-    if $m.to != $content.chars {
-      my Str $before = $!actions.prematch();
-      my Str $after = $!actions.postmatch();
-      my Str $current = $content.substr( $!actions.from, $!actions.to - $!actions.from);
-
-      $before ~ $current ~~ m:g/ (\n) /;
-      my Int $nth-line = $/.elems + 1;
-
-      $before ~~ s:g/ <-[\n]>* \n //;
-      $after ~~ s:g/ \n <-[\n]>* //;
-
-      if $!actions.unleveled-brackets.elems {
-        die [~] "Parse failure possible missing bracket at\n",
-        map {"  line $_<line-begin>-$_<line-end>, tag $_<tag-name>, body number $_<body-count>\n"},
-            @($!actions.unleveled-brackets);
-      }
-
-      if $!actions.mismatched-brackets.elems {
-        die [~] "Parse failure possible mismatched bracket types at\n",
-        map {"  line $_<line-begin>-$_<line-end>, tag $_<tag-name>, body number $_<body-count>\n"},
-            @($!actions.mismatched-brackets);
-      }
-
-      if $after.chars {
-        die "Parse failure just after '$!actions.state()' at line $nth-line\n" ~
-            $before ~ $current ~
-            color('red') ~ "\x[23CF]$after" ~ color('reset');
-      }
-    }
-
-    True;
+    $result-ok;
   }
 
   #-----------------------------------------------------------------------------
@@ -135,19 +121,19 @@ class Sxml {
   method save ( ) {
 
     # Get the document text
-    my $document = self.get-xml-text;
+    my $document = self.Str;
 
     # If a run code is defined, use that code as a key to find the program
     # to send the result to. If R-table entry is an Array, take the first
     # element. The second element is a result filename to check for modification
     # date. Check is done before parsing to see if parsing is needed.
     my $cmd;
-    if $!refined-config<R>{$!refine[OUT]} ~~ Array {
-      $cmd = $!refined-config<R>{$!refine[OUT]}[0];
+    if $!refined-tables<R>{$!refine[OUT]} ~~ Array {
+      $cmd = $!refined-tables<R>{$!refine[OUT]}[0];
     }
 
     else {
-      $cmd = $!refined-config<R>{$!refine[OUT]};
+      $cmd = $!refined-tables<R>{$!refine[OUT]};
     }
 
     # command is defined and non-empty
@@ -156,7 +142,7 @@ class Sxml {
       $cmd = self!process-cmd-str($cmd);
 
       note "Send file to program: $cmd"
-        if $!trace and $!refined-config<T><file-handling>;
+        if $!globals.trace and $!globals.refined-tables<T><file-handling>;
 
       my Proc $p = shell "$cmd", :in;
       $p.in.print($document);
@@ -166,35 +152,43 @@ class Sxml {
     else {
 
       my $filename = self!process-cmd-str("%op/%of.%oe");
-
       spurt( $filename, $document);
       note "Saved file in $filename"
-        if $!trace and $!refined-config<T><file-handling>;
+        if $!globals.trace and $!globals.refined-tables<T><file-handling>;
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method sxml-tree ( SemiXML::Node:D :$sxml-tree! ) {
+    $!actions.sxml-tree(:$sxml-tree);
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method sxml-tree( XML::Node:D :$xml! ) {
+    $!actions.sxml-tree(:$xml);
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method sxml-tree ( --> SemiXML::Node ) {
+    $!actions.sxml-tree
+  }
+
+  #-----------------------------------------------------------------------------
+  method done ( ) {
+#TODO cleanup things here and in actions?
+    $!globals.pop-options;
   }
 
   #-----------------------------------------------------------------------------
   method Str ( --> Str ) {
-    return self.get-xml-text;
+    self.get-xml-text;
   }
 
   #-----------------------------------------------------------------------------
-  method get-xml-text ( :$other-document --> Str ) {
+  method get-xml-text ( --> Str ) {
 
-    # Get the top element name
-    my $root-element;
-    if ?$other-document {
-      $root-element = $other-document.root.name;
-    }
-
-    else {
-      my $doc = $!actions.get-document;
-      $root-element = ?$doc ?? $doc.root.name !! Any;
-    }
-    return '' unless $root-element.defined;
-
-    # remove namespace part from root element
-    $root-element ~~ s/^(<-[:]>+\:)//;
+    my Str $xml-text = $!actions.xml-text;
+    my Str $root-element = $!actions.root-name;
 
     my Str $document = '';
 
@@ -202,18 +196,19 @@ class Sxml {
     if ?$root-element {
 
       # Check if a http header must be shown
-      if $!refined-config<C><header-show> and ? $!refined-config<H> {
-        for $!refined-config<H>.kv -> $k, $v {
+      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+      if $!refined-tables<C><header-show> and ? $!refined-tables<H> {
+        for $!refined-tables<H>.kv -> $k, $v {
           $document ~= "$k: $v\n";
         }
         $document ~= "\n";
       }
 
       # Check if xml prelude must be shown
-      if ? $!refined-config<C><xml-show> {
-        my $version = $!refined-config<X><xml-version> // '1.0';
-        my $encoding = $!refined-config<X><xml-encoding> // 'utf-8';
-        my $standalone = $!refined-config<X><xml-standalone>;
+      if ? $!refined-tables<C><xml-show> {
+        my $version = $!refined-tables<X><xml-version> // '1.0';
+        my $encoding = $!refined-tables<X><xml-encoding> // 'utf-8';
+        my $standalone = $!refined-tables<X><xml-standalone>;
 
         $document ~= '<?xml version="' ~ $version ~ '"';
         $document ~= ' encoding="' ~ $encoding ~ '"';
@@ -222,8 +217,8 @@ class Sxml {
       }
 
       # Check if doctype must be shown
-      if ? $!refined-config<C><doctype-show> {
-        my Hash $entities = $!refined-config<E> // {};
+      if ? $!refined-tables<C><doctype-show> {
+        my Hash $entities = $!refined-tables<E> // {};
         my Str $start = ?$entities ?? " [\n" !! '';
         my Str $end = ?$entities ?? "]>" !! ">";
         $document ~= "<!DOCTYPE $root-element$start";
@@ -233,42 +228,10 @@ class Sxml {
         $document ~= "$end\n";
       }
 
-      $document ~= ?$other-document
-                      ?? $other-document.root
-                      !! $!actions.get-document.root;
+      $document ~= $xml-text;
     }
 
-    return $document;
-  }
-
-  #-----------------------------------------------------------------------------
-  multi method get-config ( Str:D :$table, Str:D :$key --> Any ) {
-
-    return (
-      $!refined-config{$table}:exists
-        ?? $!refined-config{$table}{$key}
-        !! Any
-    );
-  }
-
-  #-----------------------------------------------------------------------------
-  method root-element ( --> XML::Element ) {
-    my $doc = $!actions.get-document;
-    return ?$doc ?? $doc.root !! XML::Element;
-  }
-
-  #-----------------------------------------------------------------------------
-#TODO check if still needed
-  method get-current-filename ( --> Str ) {
-
-    my Hash $S = $!refined-config<S>;
-    if ?$S<filepath> {
-      "$S<rootpath>/$S<filepath>/$S<filename>.$S<fileext>";
-    }
-
-    else {
-     "$S<rootpath>/$S<filename>.$S<fileext>";
-    }
+    $document
   }
 
   #-----------------------------------------------------------------------------
@@ -277,10 +240,7 @@ class Sxml {
     my $cmd = $cmd-string;
 
     # Bind to S table
-    my Hash $S := $!refined-config<S>;
-
-    # filename is basename + extension
-#    my Str $filename = $S<filename> ~ '.' ~ $S<fileext>;
+    my Hash $S := $!refined-tables<S>;
 
     $cmd ~~ s:g/ '%of' /$S<filename>/;
 
@@ -294,35 +254,22 @@ class Sxml {
     }
 
     $cmd ~~ s:g/ '%op' /$path/;
-
-#    my Str $ext = $S<fileext>;
     $cmd ~~ s:g/ '%oe' /$S<fileext>/;
 
     $cmd;
   }
 
   #-----------------------------------------------------------------------------
-  method !prepare-config ( --> Bool ) {
+  method !prepare-config ( Bool:D :$trace, Bool:D :$force --> Bool ) {
 
     # 1) Cleanup old configs
     $!configuration = Config::DataLang::Refine;
 
     # 2) load the SemiXML.toml from resources directory
-
-# There is a bug locally to this package. Resources get wrong path when using
-# local distribution. However, strange as it is, not on Travis! This is Caused
-# by wrong? use of PERL6LIB env variable.
-#note "\nR: ", %?RESOURCES.perl;
-#note "\nC: ", %?RESOURCES<SemiXML.toml>;
-
-#my Str $rp = %?RESOURCES<SemiXML.toml>.Str;
-#if ! %?RESOURCES.dist-id and %?RESOURCES.repo !~~ m/ '/lib' $/ {
-#  $rp = "/home/marcel/Languages/Perl6/Projects/Semi-xml/resources/SemiXML.toml"
-#}
-# pick only one config file. Will always be there.
-#self!load-config( :config-name($rp.IO.absolute), :!merge);
-
-    self!load-config( :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge);
+    # first is resource and there is no merge from other configs
+    self!load-config(
+      :config-name(%?RESOURCES<SemiXML.toml>.Str), :!merge, :$trace
+    );
 
     # 3) if filename is given, use its path also
     my Array $locations;
@@ -341,13 +288,17 @@ class Sxml {
 #      $fext = $*PROGRAM.extension;
 
       # 3a) to load SemiXML.TOML from the files location, current dir
-      #     (also hidden), and in $HOME. merge is controlled by user.
-      self!load-config( :config-name<SemiXML.toml>, :$locations, :merge);
+      #     (also hidden), and in $HOME.
+      self!load-config(
+        :config-name<SemiXML.toml>, :$locations, :merge, :$trace
+      );
 
       # 3b) same as in 3a but use the filename now.
       $fext = $!filename.IO.extension;
       $basename ~~ s/ $fext $/toml/;
-      self!load-config( :config-name($basename), :$locations, :merge);
+      self!load-config(
+        :config-name($basename), :$locations, :merge, :$trace
+      );
     }
 
     # 4) if filename is not given, the configuration is searched using the
@@ -357,7 +308,7 @@ class Sxml {
       # in case it was set by previous parse actions but not found or readable
       $!filename = Str;
 
-      self!load-config(:merge);
+      self!load-config( :merge, :$trace);
     }
 
     # 5) merge any user configuration in it
@@ -366,9 +317,6 @@ class Sxml {
 
     # $c is bound to the config in the configuration object.
     my Hash $c := $!configuration.config;
-
-    # Do we need to show things
-    $!trace = $c<C><tracing>;
 
     # set filename, path etc. if not set, extension is set in default config.
     $c<S> = {} unless $c<S>:exists;
@@ -405,81 +353,139 @@ class Sxml {
     $c<S><filepath> //= '';
 
     # Fill the special purpose tables with the refined searches in the config
-    for @$!refine-tables -> $table {
+    for @$!table-names -> $table {
+
       # document control
-      if $table ~~ any(<D E F ML R>) {
-        $!refined-config{$table} =
+      if $table ~~ any(<D DN E ML R>) {
+        $!refined-tables{$table} =
           $!configuration.refine( $table, $!refine[IN], $basename);
       }
 
       # output control
       elsif $table ~~ any(<C H S X>) {
-        $!refined-config{$table} =
+        $!refined-tables{$table} =
           $!configuration.refine( $table, $!refine[OUT], $basename);
       }
 
+      elsif $table eq 'F' {
+        #$!refined-tables{$table} =
+        #  $!configuration.refine( $table, $basename);
+#  inline
+#  no-conversion
+#  space-preserve
+#  self-closing
+        my $merge-array = sub ( *@key-list, Bool :$filter = False --> Hash ) {
+
+          my Hash $refined-list = {};
+          my Hash $s = $c;
+          for @key-list -> $refine-key {
+
+            last unless $s{$refine-key}:exists and $s{$refine-key}.defined;
+            $s = $s{$refine-key} if $s{$refine-key} ~~ Hash;
+
+            for $s.keys -> $k {
+              next if $s{$k} ~~ Hash;
+
+              if $s{$k} ~~ Array {
+                $refined-list{$k} //= [];
+                $refined-list{$k} = [ |($refined-list{$k}), |($s{$k})];
+              }
+
+              # Looks like too much but it isn't. It must be able to remove
+              # previously set entries.
+              $refined-list{$k}:delete
+                if $filter and
+                   ( $s{$k} ~~ Bool and !$s{$k} or not $s{$k}.defined );
+            }
+          }
+
+          $refined-list;
+        };
+
+        $!refined-tables{$table} = $merge-array(
+          $table, $!refine[IN], $basename
+        );
+#`{{
+my Array $inline = [];
+if c<F>{$!refine[IN]} ~~ Array
+$inline = $c<F><inline>;
+
+$inline = [|$inline, |($c<F>{$!refine[IN]}<inline>)]
+if $c<F>{$!refine[IN]}<inline> ~~ Array;
+
+if $c<F>{$!refine[IN]}<inline>:exists {
+}
+
+$inline = [|$inline, |($c<F><inline> // [])
+}}
+      }
+
       elsif $table eq 'T' {
-        $!refined-config{$table} =
+        $!refined-tables{$table} =
           $!configuration.refine( $table, $basename);
       }
 
-#`{{
-      elsif $table eq 'S' {
-        $!refined-config{$table} =
-          $!configuration.refine( $table, $basename);
+      elsif $table eq 'U' {
+        $!refined-tables{$table} = $!configuration.refine(
+          $table, $!refine[IN], $!refine[OUT], $basename
+        );
       }
-}}
     }
 
     note "\nComplete configuration: ", $!configuration.perl,
          "\nRefined configuration tables"
-         if $!trace and $!refined-config<T><config>;
+         if $trace and $!refined-tables<T><config>;
 
-    if $!trace and $!refined-config<T><tables> {
+    if $trace and $!refined-tables<T><tables> {
       note "Refine keys: $!refine[IN], $!refine[OUT]";
       note "File: $basename";
-      for @$!refine-tables -> $table {
+      for @$!table-names -> $table {
         note "Table $table:\n",
-          $!configuration.perl(:h($!refined-config{$table}));
+          $!configuration.perl(:h($!refined-tables{$table}));
       }
     }
-
-    # before continuing, process dependencies first
-    my Bool $found-dependency = self!run-dependencies;
 
     #TODO Check exitence and modification time of result to see
-    # if wee need to continue parsing
+    # if we need to continue parsing
     my Bool $continue = True;
 
-    # Use the R-table if the entry is an Array. If R-table entry is an Array,
-    # take the second element. It is a result filename to check for modification
-    # date. Check is done before parsing to see if paqrsing is needed.
-    my $fn = 'unknown.unknown';
-    if ?$!filename {
-      if $!refined-config<R>{$!refine[OUT]} ~~ Array {
-        $fn = self!process-cmd-str($!refined-config<R>{$!refine[OUT]}[1]);
-        $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
-      }
+    if ! $force {
 
-      else {
-        $fn = self!process-cmd-str("%op/%of.%oe");
-        $continue = (!$fn.IO.e or ($!filename.IO.modified.Int > $fn.IO.modified.Int));
+      # Use the R-table if the entry is an Array. If R-table entry is an Array,
+      # take the second element. It is a result filename to check for modification
+      # date. Check is done before parsing to see if parsing is needed.
+      $!target-fn = 'unknown.unknown';
+      if ?$!filename {
+        if $!refined-tables<R>{$!refine[OUT]} ~~ Array {
+          $!target-fn = self!process-cmd-str(
+            $!refined-tables<R>{$!refine[OUT]}[1]
+          );
+        }
+
+        else {
+          $!target-fn = self!process-cmd-str("%op/%of.%oe");
+        }
+
+        $continue = (
+          ! $!target-fn.IO.e or (
+            $!filename.IO.modified.Int > $!target-fn.IO.modified.Int
+          )
+        );
       }
     }
 
-#    $continue = True;
+    # before continuing, process dependencies first. $!target-fn is used there
+    my Bool $found-dependency = self!run-dependencies;
 
     # instantiate modules specified in the configuration
     if $found-dependency or $continue {
-      self!process-modules;
-
-      # Place the F-table in the actions environment
-      $!actions.F-table = $!refined-config<F>;
+      self!process-modules($trace);
     }
 
     else {
-      note "No need to parse and save data, $fn is in its latest version"
-           if $!trace and $!refined-config<T><parse>;
+      note "No need to parse and save data,",
+           " $!target-fn is in its latest version"
+        if $trace and $!refined-tables<T><file-handlin>;
     }
 
     $found-dependency or $continue
@@ -492,7 +498,7 @@ class Sxml {
     my Bool $dependency-found = False;
 
     # get D-table. selection is already made on in-key
-    my Hash $D = $!refined-config<D> // {};
+    my Hash $D = $!refined-tables<D> // {};
     # select the entry pointed by the out-key. this must be an array of
     # dependency specs
     my $d = $D{$!refine[OUT]} // [];
@@ -508,7 +514,7 @@ class Sxml {
         $processed-dependencies{$filename} = True;
 
         # get S table
-        my Hash $S := $!refined-config<S>;
+        my Hash $S := $!refined-tables<S>;
 
         # prefix filename with path when filename is relative
         if ?$S<filepath> {
@@ -519,15 +525,32 @@ class Sxml {
           $filename = $S<rootpath> ~ '/' ~ $filename;
         }
 
-        my Array $refine = [@d[ IN, OUT]];
-        my SemiXML::Sxml $x .= new( :$!trace, :$!merge, :$refine);
+        # if one of the IN or OUT keys is a '-' then it is supposed not to
+        # do any work but compare the modification time of the file with that
+        # of the target
+        if @d[IN] eq '-' or @d[OUT] eq '-' {
 
-        note "Process dependency: --in=@d[0] --out=@d[1] @d[2]"
-          if $!trace and $!refined-config<T><file-handling>;
+          $dependency-found = (
+            ! $!target-fn.IO.e or (
+              $!filename.IO.modified.Int > $!target-fn.IO.modified.Int
+            )
+          );
+        }
 
-        if $x.parse(:$filename) {
-          $x.save;
-          $dependency-found = True;
+        else {
+
+          my Array $refine = [@d[ IN, OUT]];
+          my SemiXML::Sxml $x .= new( :trace($!globals.trace), :$refine);
+
+          note "Process dependency: --in=@d[IN] --out=@d[OUT] $filename"
+            if $!globals.trace and $!globals.refined-tables<T><file-handling>;
+
+          if $x.parse(:$filename) {
+            $x.save;
+            $dependency-found = True;
+          }
+
+          $x.done;
         }
       }
     }
@@ -538,59 +561,75 @@ class Sxml {
   #-----------------------------------------------------------------------------
   # Get modulenames and library paths. Format of an entry in table ML is
   # mod-key => 'mod-name[;lib-path]'
-  method !process-modules ( ) {
+  method !process-modules ( Bool $trace ) {
 
     # no entries, no work
-    return unless ? $!refined-config<ML>;
+    return unless ? $!refined-tables<ML>;
 
+    $!objects //= {};
     my Hash $lib = {};
     my Hash $mod = {};
-    for $!refined-config<ML>.keys -> $modkey {
+    for $!refined-tables<ML>.keys -> $modkey {
 
-      next unless ? $!refined-config<ML>{$modkey};
+      next unless ? $!refined-tables<ML>{$modkey};
 
-      ( my $m, my $l) = $!refined-config<ML>{$modkey}.split(';');
+      ( my $m, my $l) = $!refined-tables<ML>{$modkey}.split(';');
       $lib{$modkey} = $l if $l;
       $mod{$modkey} = $m;
     }
 
+#`{{
     # cleanup old objects
     for $!objects.keys -> $k {
       undefine $!objects{$k};
       $!objects{$k}:delete;
     }
+}}
 
     # load and instantiate
-    note " " if $!trace and $!refined-config<T><modules>;
+    note " " if $trace and $!refined-tables<T><modules>;
     for $mod.kv -> $key, $value {
       if $!objects{$key}:!exists {
         if $lib{$key}:exists {
 
 #TODO test for duplicate paths
-          my $repository = CompUnit::Repository::FileSystem.new(
-            :prefix($lib{$key})
-          );
+          my $repository =
+            CompUnit::Repository::FileSystem.new(:prefix($lib{$key}));
           CompUnit::RepositoryRegistry.use-repository($repository);
         }
 
-        (try require ::($value)) === Nil and say "Failed to load $value\n$!";
-        my $obj = ::($value).new;
-        $!objects{$key} = $obj if $obj.defined;
+        # Must fail and show why it failed
+        try {
+          require ::($value);
 
-        note "Object for key '$key' installed from class $value"
-             if $!trace and $!refined-config<T><modules>;
+          my $obj = ::($value).new;
+          if $obj.defined {
+            $!objects{$key} = $obj;
+
+            note "Object for key '$key' installed from class $value"
+              if $trace and $!refined-tables<T><modules>;
+          }
+
+          else {
+            die "Failed to instatiate object $value with key $key";
+          }
+
+          CATCH {
+            .note;
+#          die X::SemiXML.new(:message(::($value).Str)) if ::($value) ~~ Failure;
+          }
+        }
+
       }
 
       else {
         note "Object for '$key' already installed from class $value"
-             if $!trace and $!refined-config<T><modules>;
+             if $trace and $!refined-tables<T><modules>;
       }
     }
-
-    # Place in actions object.
-    $!actions.objects = $!objects;
   }
 
+#`{{
   #-----------------------------------------------------------------------------
   method get-sxml-object ( Str $class-name ) {
 
@@ -604,31 +643,25 @@ class Sxml {
 
     $object;
   }
+}}
 
   #-----------------------------------------------------------------------------
   method !load-config (
-    Str :$config-name, Array :$locations = [], Bool :$merge is copy
+    Str :$config-name, Array :$locations = [], Bool :$merge, :$trace
   ) {
-
-    $merge = $!merge ?& $merge;
 
     try {
 
       # $!configuration is always undefined the first time.
-      if ?$!configuration {
+      if $!configuration.defined {
         $!configuration .= new(
           :$config-name, :$locations, :other-config($!configuration.config),
-          :$merge, :!trace
-#          :trace($!trace and ($!refined-config<T><config-search> // False))
+          :$merge, :$trace
         );
       }
 
       else {
-        $!configuration .= new(
-          :$config-name, :$locations, :$merge,
-          :!trace
-#          :trace($!trace and ($!refined-config<T><config-search> // False))
-        );
+        $!configuration .= new( :$config-name, :$locations, :$merge, :$trace);
       }
 
       CATCH {

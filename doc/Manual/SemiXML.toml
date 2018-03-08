@@ -5,13 +5,13 @@
   tracing       = true
 
 #------------------------------------------------------------------------------
-[ D.Db5 ]
+[ D.db5 ]
   pdf           = 'xml; xsl; ss-fo.sxml'
   chunk         = [ 'xml;xsl;ss-chunk.sxml']
   xhtml         = [ 'xml;xsl;ss-xhtml.sxml']
 
 #------------------------------------------------------------------------------
-[ E.Db5.Manual ]
+[ E.db5.Manual ]
   pack          = 'SemiXML'
   mod           = 'SemiXML::Sxml'
   act           = 'SemiXML::Actions'
@@ -22,19 +22,20 @@
   nbsp          = ' '
   copy          = '&#xa9;'
   E             = 'element'
+  exclam        = '&#33;'
 
 #------------------------------------------------------------------------------
-[ ML.Db5 ]
+[ ML.db5 ]
   lorem         = 'SxmlLib::LoremIpsum'
-  Db5b          = 'SxmlLib::Docbook5::Basic'
-  Db5f          = 'SxmlLib::Docbook5::FixedLayout'
+  db5b          = 'SxmlLib::Docbook5::Basic'
+  db5f          = 'SxmlLib::Docbook5::FixedLayout'
 
 #------------------------------------------------------------------------------
 [ R.xml ]
   xml           = 'xmllint --format - > %op/%of.%oe'
   xsl           = [ 'xmllint --format - > %op/%of.%oe', '%op/%of.%oe']
 
-[ R.Db5 ]
+[ R.db5 ]
   pdf           = [
    'xsltproc --encoding utf-8 %op/Xsl/ss-fo.xsl - | xep -fo - -pdf %op/%of.%oe',
    '%op/%of.%oe'
@@ -68,8 +69,8 @@
 #------------------------------------------------------------------------------
 [ T ]
 #  config-search = false
-  config        = false
-  tables        = false
+  config        = true
+#  tables        = true
   modules       = true
   parse         = false
   parse-result  = false

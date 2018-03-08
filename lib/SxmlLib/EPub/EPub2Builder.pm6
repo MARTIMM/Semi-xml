@@ -3,13 +3,13 @@ use v6;
 # Check sigil, pandoc, perl5 EBook::EPUB,
 
 #-------------------------------------------------------------------------------
-unit package SxmlLib:auth<https://github.com/MARTIMM>;
+unit package SxmlLib:auth<github:MARTIMM>;
 
 use SxmlLib::EPub;
 
 use XML;
 #use SemiXML::Sxml;
-use SxmlLib::SxmlHelper;
+use SemiXML::Helper;
 
 #-------------------------------------------------------------------------------
 #TODO compatibility with version2 NCX navigation documents?

@@ -1,0 +1,24 @@
+[ C ]
+  tracing       = false
+
+[ C.xml ]
+  xml-show      = false
+  doctype-show  = false
+
+#-------------------------------------------------------------------------------
+[ ML.html ]
+  css           = 'SxmlLib::Css'
+
+#-------------------------------------------------------------------------------
+[ S ]
+  rootpath      = 'resources'
+
+#-------------------------------------------------------------------------------
+# Tracing tables
+[ T ]
+#  config        = true
+#  tables        = true
+#  modules       = true
+#  parse         = true
+#  parse-result  = true
+  file-handling = true

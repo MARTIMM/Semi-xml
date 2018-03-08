@@ -1,0 +1,148 @@
+[ general ]
+  title        = 'Basic SemiXML tests'
+  package      = '-'
+  module       = '-'
+  class        = '-'
+  distribution = '-'
+  label        = '-'
+  date         = '2018-02-21T14:17:13.549837Z'
+  oskernel     = 'linux:4.14.18.200.fc.26.x.86._.64'
+  osdistro     = 'fedora:26.Workstation.Edition:26:False'
+  perl         = 'Perl 6:6.c'
+  compiler     = 'rakudo:2018.01.195.g.5.ae.1.ca.51.f'
+  vm           = 'moar:2018.01.89.ga.01.cdb.449'
+
+[ purpose ]
+  purposetitle = 'Testing the basic use of SemiXML'
+  purpose      = '''
+$p title="purpose"  [
+
+    Purpose of this report is that it tests the parsing and translating process
+    of the several parts of the language. Here only the simple structures are
+    tested and not the methods to generate new content.
+  
+  $p  [
+  The tests comprises the following chapters
+  ]
+  $ul  [
+    $li  [
+    Generate a simple element
+    ]
+    $li  [
+    Add attributes.
+    ]
+    $li  [
+    Nested elements.
+    ]
+    $li  [
+    Element blocks and their different types.
+    ]
+  ]
+]
+
+'''
+
+[ chapters ]
+  list         = [ 'Generate a simple element', 'Add attributes.', 'Nested elements.', 'Element blocks and their different types.' ]
+
+[ chapter.'Generate a simple element' ]
+  success      = 2
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Add attributes.' ]
+  success      = 8
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Nested elements.' ]
+  success      = 1
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ chapter.'Element blocks and their different types.' ]
+  success      = 2
+  fail         = 0
+  todo         = 0
+  skipped      = 0
+
+[ summary.line-7 ]
+  chapter      = 'Generate a simple element'
+  diagnostic   = """
+    ok 1 - The object is-a 'SemiXML::Sxml'
+"""
+
+[ summary.line-10 ]
+  chapter      = 'Generate a simple element'
+  diagnostic   = """
+    ok 2 - The generated xml is conforming the standard
+"""
+
+[ summary.line-15 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 3 - attribute with bracketed <> value
+"""
+
+[ summary.line-20 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 4 - attribute without spaces in value
+"""
+
+[ summary.line-25 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 5 - attribute with double quoted value
+"""
+
+[ summary.line-30 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 6 - attribute with single quoted value
+"""
+
+[ summary.line-35 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 7 - attribute a1 found
+"""
+
+[ summary.line-36 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 8 - attribute a2 found
+"""
+
+[ summary.line-40 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 9 - true boolean attribute a1 found
+"""
+
+[ summary.line-41 ]
+  chapter      = 'Add attributes.'
+  diagnostic   = """
+    ok 10 - false boolean attribute a2 found
+"""
+
+[ summary.line-44 ]
+  chapter      = 'Nested elements.'
+  diagnostic   = """
+    ok 11 - An element within another
+"""
+
+[ summary.line-50 ]
+  chapter      = 'Element blocks and their different types.'
+  diagnostic   = """
+    ok 12 - two blocks on an element
+"""
+
+[ summary.line-56 ]
+  chapter      = 'Element blocks and their different types.'
+  diagnostic   = """
+    ok
+"""

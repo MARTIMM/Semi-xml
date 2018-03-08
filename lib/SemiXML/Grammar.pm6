@@ -1,64 +1,67 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SemiXML:auth<https://github.com/MARTIMM>;
-#parser fails when: use Grammar::Tracer;
+unit package SemiXML:auth<github:MARTIMM>;
+use SemiXML;
+use Terminal::ANSIColor;
 
 #-------------------------------------------------------------------------------
 grammar Grammar {
 
-  # Show what is found
-  our $trace = False;
+  #-----------------------------------------------------------------------------
+  sub error ( Match:D $match, Str:D $message is copy ) {
 
-  # Actions initialize
-  rule init-doc { <?> { note " " if $trace; } }
+    # number of chars to show before error location
+    my Str $t0 = $match.orig.substr( 0, $match.to);
+    my Str $t1 = $match.orig.substr($match.to);
+    my Int $i = min( $t0.chars, 50) - 1;
 
-  # A document is only a tag with its content in a body. Defined like this
-  # there can only be one toplevel document. In the following body documents
-  # can be nested.
-  #
-  # Possible comments outside toplevel document
-  rule TOP {
-    <.init-doc>
-    <.comment>*         # Needed to make empty lines between comments possible.
-                        # Only here is needed body*-contents is taking care for
-                        # the rest.
-    [ <document> {
-        note "Parse: Top level >>{$/.Str.substr( $/.from, $/.from+30)} ... <<"
-             if $trace;
-      }
-    ]
-    <.comment>*
-    { note " " if $trace; }
+    # linenumber where error was found
+    temp $/;
+    $t0 ~~ m:g/\n/;
+    my Int $l = $/[*].elems + 1;
+
+    # below evere \n character is substituted for two, '\' and 'n'.
+    # so correct the $i with line number
+    $i += $l;
+
+    # substitute \n for readability
+    $t0 ~~ s:g/\n/\\n/;
+    $t1 ~~ s:g/\n/\\n/;
+
+    $message = [~] "\n", $message,
+          " line $l\n... $t0.substr( *-$i, *-0)",  color('red'),
+          "\x[23CF]", $t1.substr( 0, 28), color('reset'), "\n\n";
+
+    my X::SemiXML $x .= new(:$message);
+    die $x;
   }
 
-  # Rule to pop the current bottomlevel element from the stack. It is not
-  # possible to use a rule to add the element to this stack. This happens in
-  # the actions method for <tag-spec>.
-  #
-  rule pop-tag-from-list { <?> }
-  rule document {
-    <tag-spec> {
-      note "Parse: Tag $/<tag-spec>" if $trace;
-    }
-    <tag-body>* <.pop-tag-from-list>
+  #-----------------------------------------------------------------------------
+  token TOP {
+    [ <body-a> ||
+      <document> ||
+      [ <[\[\]\{\}«»]> {
+          error( $/, "Unexpected content body start/close character");
+        }
+      ]
+    ]*
   }
+
+  token document { <tag-spec> <tag-bodies> }
 
   # A tag is an identifier prefixed with a symbol to attach several semantics
   # to the tag.
-  #
-  rule tag-spec { <tag> <attributes> }
+  # '<body-a>?' is attached to cope with spaces. When there is no body found it
+  # backtracks to only `<tag> <attributes>` and the rest is eaten in the parents
+  # production of the body.
+  token tag-spec { <tag> <attributes> }
 
   proto token tag { * }
   token tag:sym<$!>   { <sym> <mod-name> '.' <meth-name> }
-  token tag:sym<$|*>  { <sym> <tag-name> }
-  token tag:sym<$*|>  { <sym> <tag-name> }
-  token tag:sym<$**>  { <sym> <tag-name> }
-  #TODO token tag:sym<$|> { <sym> <tag-name> }
   token tag:sym<$>    { <sym> <tag-name> }
 
   token mod-name      { <.identifier> }
-#  token sym-name      { <.identifier> }
   token meth-name     { <.identifier> }
   token tag-name      { [ <namespace> ':' ]? <element> }
   token element       { <.xml-identifier> }
@@ -67,8 +70,14 @@ grammar Grammar {
   # The tag may be followed by attributes. These are key=value constructs. The
   # key is an identifier and the value can be anything. Enclose the value in
   # quotes ' or " when there are whitespace characters in the value.
-  #
-  rule attributes     { [ <attribute> ]* }
+  # when there are attributes found a content body must follow!
+  token attributes    {
+    [ [ <.ws> <attribute> ]+ <!before \s* <?[\[\{«]> > {
+        error( $/, "Attributes must be followed by a content body");
+      }
+    ] ||
+    [ <.ws> <attribute> ]*
+  }
 
   token attribute     {
     <attr-key> '=' <attr-value-spec> ||
@@ -83,63 +92,66 @@ grammar Grammar {
   token attr-value-spec {
     [ "'" ~ "'" $<attr-value>=<.attr-q-value> ]  ||
     [ '"' ~ '"' $<attr-value>=<.attr-qq-value> ] ||
-#TODO somewhere in a test the following is still used
-#    [\^ $<attr-value>=<.attr-pw-value> \^] ||
     [ '<' ~ '>' $<attr-value>=$<attr-list-value>=<.attr-pw-value> ] ||
     $<attr-value>=<.attr-s-value>
   }
   token attr-q-value  { [ <.escaped-char> || <-[\']> ]* }
   token attr-qq-value { [ <.escaped-char> || <-[\"]> ]* }
-#TODO somewhere in a test the following is still used
-#  token attr-pw-value { [ <.escaped-char> || <-[\^]> ]+ }
   token attr-pw-value { [ <.escaped-char> || <-[\>]> ]* }
   token attr-s-value  { [ <.escaped-char> || <-[\s]> ]+ }
 
-  # important to use token instead of rule to get spaces in the body*-contents
-  token tag-body { [
-      '[!=' ~ '!]'    <body1-contents> { note "Parse: body type [!= ... !]" if $trace; } ||
-      '[!' ~  '!]'    <body2-contents> { note "Parse: body type [! ... !]" if $trace; } ||
-      '[=' ~   ']'    <body3-contents> { note "Parse: body type [= ... ]" if $trace; } ||
-      '[' ~    ']'    <body4-contents> { note "Parse: body type [ ... ]" if $trace; }
-    ]
+  token tag-bodies { $<pre-body>=\s* [
+      # Content body can have child elements.
+      [ $<body-started>=<?> '[' ~ ']' [ <body-a> || <document> ]* ] ||
+
+      # Content body can not have child elements. All other characters
+      # remain unprocessed
+      [ $<body-started>=<?> '{' ~ '}' [ <body-b> ]* ] ||
+
+      # Alternative for '{ ... }'
+      [ $<body-started>=<?> '«' ~ '»' [ <body-c> ]* ]
+    ]*
   }
 
-  # The content can be anything mixed with document tags except following the
-  # no-elements character. To use the brackets and other characters in the
-  # text, the characters must be escaped.
-  token body1-contents { <body2-text> }
-  token body2-contents { <body2-text> }
-  token body3-contents { [ <body1-text> || <document> || <.comment> ]* }
-  token body4-contents { [ <body1-text> || <document> || <.comment> ]* }
-
-  token body1-text {
-    [ <.escaped-char> ||    # an escaped character
-      <entity> ||
-      <-[\$\]\#\\]>         # any character not being '\', '$', '#' or ']'
-                            # to stop at escaped char, a document
-                            # comment or end of current document.
+  token body-a {
+    [ [ <.escaped-char>+ || <.entity>+ || <comment> || <-[\\\$\[\]\#]>+ ]+ ||
+      [ ('[') {
+        error( $/,
+          "Cannot start a content body with '$0', did you mean '\\$0'?"
+        );
+      } ]
     ]+
   }
 
-  # No comments recognized in [! ... !]. This works because a nested documents
-  # are not recognized and thus no extra comments are checked and handled as such.
-  token body2-text {
-    [ <.escaped-char> ||    # an escaped character
-      <entity> ||
-#      '!' <!before ']'> ||
-      <-[\!\\]>             # any character not being '\' or '!'
-                            # to stop at escaped char or end of
-                            # current document
+  token body-b {
+    [ [ <.escaped-char>+ || <-[\\\{\}]>+ ]+ ||
+      [ ('{') {
+        error( $/,
+          "Cannot start a content body with '$0', did you mean '\\$0'?"
+        );
+      } ]
     ]+
   }
 
-  token escaped-char {
-    '\\' .            ||
-    [ "'" ~ "'" [ . || '[!' || '!]' ] ]   ||
-    [ '"' ~ '"' [ . || '[!' || '!]' ] ]
+  token body-c {
+    [ [ <.escaped-char>+ || <-[\\«»]>+ ]+ ||
+      [ ('«') {
+        error( $/,
+          "Cannot start a content body with '$0', did you mean '\\$0'?"
+        );
+      } ]
+    ]+
   }
 
+  token escaped-char { '\\' . }
+
+  # entities must be parsed separately because some of them can
+  # use a '#' which interferes with the comment start. This is
+  # only necessary in the normal block 'body-a'
   token entity          { '&' <-[;]>+ ';' }
+
+  # comment text after '#'
+  token comment { \s* '#' \N* \n }
 
   # See STD.pm6 of perl6. A tenee bit simplified. .ident is precooked and a
   # dash within the string is accepted.
@@ -152,6 +164,7 @@ grammar Grammar {
 
   # From w3c https://www.w3.org/TR/2004/REC-xml-names11-20040204/#ns-decl
   token xml-ns-identifier { <.ns-name-start-char> <.ns-name-char>* }
+
   # Don't know which characters are covered by the :Alpha definition so I take
   # the description from the w3c
   token ns-name-start-char {
@@ -160,10 +173,9 @@ grammar Grammar {
     <[\x2070..\x218F]> || <[\x2C00..\x2FEF]> || <[\x3001..\xd7ff]> ||
     <[\xf900..\xfdcf]> || <[\xFDF0..\xFFFD]> || <[\x10000..\xEFFFF]>
   }
+
   token ns-name-char {
     <.name-start-char> | <[- . 0..9]> | <[\xB7]> |
     <[\x0300..\x036F]> | <[\x203F..\x2040]>
   }
-
-  token comment { \s* '#' \N* \n }
 }

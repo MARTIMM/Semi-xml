@@ -2,7 +2,7 @@ $html lang=en-US dir=ltr [
   $head [
     $meta charset=utf-8
     $title [ Example 2, Html5 and Css styling ]
-    $!file.include type=include reference=doc/Examples/2/e02-style.sxml
+    $!file.include type=include reference=e02-style.sxml
   ]
 
   $body [
@@ -19,12 +19,12 @@ $html lang=en-US dir=ltr [
           ]
         ]
 
-        $aside [ $p [ $!Lorem.sentences n=4 ] ]
+        $aside [ $p [ $!lorem.sentences n=4 ] ]
 
-        $p [ $!Lorem.veggie-ipsum ]
+        $p [ $!lorem.veggie-ipsum ]
 
         $footer [
-          $p [ &#xA9; mt1957 ]
+          $p { &#xA9; mt1957 }
 
           $nav [
             $ul [

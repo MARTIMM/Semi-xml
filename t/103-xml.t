@@ -1,11 +1,11 @@
-use v6.c;
+use v6;
 use Test;
 use SemiXML::Sxml;
 
 #-------------------------------------------------------------------------------
 # Testing;
 #   Test $tag [ ... ]   Normal content
-#   Test $tag [! ... !] Text only no child elements
+#   Test $tag « ... »   Text only no child elements
 #   Test $*!tag [ ... ] Spacing around tags
 #
 #-------------------------------------------------------------------------------
@@ -19,16 +19,16 @@ my $f2 = 't/D103/f1.html';
 spurt( $f1, q:to/EOSX/);
 $html [
   $head [
-    $style type=text/css [!=
+    $style type=text/css «
       green {
         color: #0f0;
         background-color: #f0f;
       }
-    !]
-    $script [!=
+    »
+    $script «
       var a_tags = $('a');
       var b = a_tags[1];
-    !]
+    »
   ]
 
   $body [
@@ -36,9 +36,9 @@ $html [
     $table [
       $tr [
         $th[ header ]
-        $td[ data at $*|a href='http://example.com/' []
+        $td[ data at $a href='http://example.com/' []
           $p [
-            bla bla $b [bla] bla $*|u [bla $b [bla]].
+            bla bla $b [bla] bla $u [bla $b [bla]].
           ]
         ]
       ]
@@ -50,16 +50,12 @@ EOSX
 #-------------------------------------------------------------------------------
 my Hash $config = {
   C => {
-    out-fmt => {
-      doctype-show => True,
-      xml-show => True,
-    },
+    out-fmt => { :doctype-show, :xml-show },
   },
 
-  X => {
-    out-fmt => {
-      xml-version => 1.1,
-      xml-encoding => 'UTF-8',
+  F => {
+    in-fmt => {
+      space-preserve => [<style>,]
     }
   },
 
@@ -69,20 +65,31 @@ my Hash $config = {
       rootpath => 't/D103',
       fileext => 'html',
     }
-  }
+  },
+
+  T => {
+    :tables, :parse, :file-handling
+  },
+
+  X => {
+    out-fmt => {
+      xml-version => 1.1,
+      xml-encoding => 'UTF-8',
+    }
+  },
 }
 
 # Parse
-my SemiXML::Sxml $x .= new( :!trace, :merge, :refine([<in-fmt out-fmt>]));
-$x.parse( :filename($f1), :$config);
+my SemiXML::Sxml $x .= new(:refine([<in-fmt out-fmt>]));
+$x.parse( :filename($f1), :$config, :!trace, :!raw, :!keep);
 
 my Str $xml-text = ~$x;
-#note $xml-text;
+#diag $xml-text;
 
 
-ok $xml-text ~~ ms/'<?xml' 'version="1.1"' 'encoding="UTF-8"' '?>'/,
-   'Xml prelude found';
-ok $xml-text ~~ ms/'<!DOCTYPE' 'html>'/, 'Doctype found';
+like $xml-text, /:s '<?' xml version '="1.1"' encoding '="UTF-8"' '?>' /,
+     'Xml prelude found';
+like $xml-text, /:s '<!' DOCTYPE html '>' /, 'Doctype found';
 
 ok $xml-text ~~ m/
 'green {
@@ -91,17 +98,10 @@ ok $xml-text ~~ m/
 }'
 /, 'Check for literal text in css';
 
-ok $xml-text ~~ ms/var a_tags '=' "\$('a');" var b '=' a_tags/,
+like $xml-text, /:s var a_tags '=' "\$('a');" var b '=' a_tags/,
    'Check for literal text in javascript';
 
 ok $xml-text ~~ ms/ '<tr>' '<th>' /, "'Th' after 'tr' found";
-
-ok $xml-text ~~ ms/'data at <a href="http://example.com/"></a><p>'/,
-   "Testing \$* tag";
-
-like $xml-text, / :s "bla<b>bla</b>bla <u>bla<b>bla</b></u>."/,
-     'Check part of result spacing tag $*|';
-
 
 $x.save;
 ok $f2.IO ~~ :e, "File $f2 written";

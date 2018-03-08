@@ -1,63 +1,97 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit package SxmlLib:auth<https://github.com/MARTIMM>;
+unit package SxmlLib:auth<github:MARTIMM>;
 
-use XML;
+use SemiXML;
 use SemiXML::Sxml;
+use SemiXML::Element;
 
 #-------------------------------------------------------------------------------
 class File {
 
-  has Hash $.symbols = {};
+  has SemiXML::Globals $!globals .= instance;
 
+#TODO add a method to load parts like xpointer looking for fragments
+#TODO add a method to select lines like in FixedLayout module for docbook
   #-----------------------------------------------------------------------------
-  method include ( XML::Element $parent,
-                   Hash $attrs,
-                   XML::Element :$content-body
-                 ) {
+  method include ( SemiXML::Element $m ) {
 
-    my $type = ~$attrs<type> // 'reference';
-    my $reference = ~$attrs<reference> // '';
-    my $document;
+    my SemiXML::Globals $globals .= instance;
+
+    my $type = ($m.attributes<type> // 'reference').Str;
+    my $reference = ~$m.attributes<reference> // '';
+
+    # make reference to the parsed sxml file absolute if relative
+    unless $reference ~~ m/^ '/'/ {
+      $reference =
+        $globals.filename.IO.absolute.IO.dirname ~
+        "/$reference";
+    }
+
+    # check if readable
+    if $reference.IO !~~ :r {
+      die "Reference '$reference' not found";
+    }
+
+    # read the content
+    my $sxml-text = slurp($reference);
+
     given $type {
-
-      #TODO get data using url reference
+#TODO get data using url reference
       when 'reference' {
 
       }
 
       # include sub document from file
+      when 'include-all' {
+        my SemiXML::Sxml $x .= new;
+        $x.parse( :content($sxml-text), :!trace, :frag,
+          config => {
+            T => { :parse }
+          }
+        );
+
+        # get the node tree and insert tree after this one
+        my SemiXML::Node $tree = $x.sxml-tree;
+
+        $m.after($tree);
+        $x.done;
+      }
+
       when 'include' {
+        my SemiXML::Sxml $x .= new;
+        $x.parse( :content($sxml-text), :!trace, :frag,
+          config => {
+            T => { :parse }
+          }
+        );
 
-        # check if readable
-        if $reference.IO ~~ :r {
+        # get the node tree and insert tree after this one
+        my SemiXML::Node $tree = $x.sxml-tree;
 
-          # read the content
-          my $sxml-text = slurp($reference);
+        $m.after($_) for $tree.nodes.reverse;
+        $x.done;
+      }
 
-          # new parser object
-          my SemiXML::Sxml $x .= new;
+      # include sub document from file
+      when 'include-xml' {
 
-          # the top level node xx-xx-xx is used to be sure there is only one
-          # element at the top when parsing starts.
-          #
-          my $e = $x.parse(:content("\$XX-XX-XX [ $sxml-text ]"));
+        # bind to other name because this will be xml instead of sxml
+        my Str $xml-text := $sxml-text;
+        $xml-text ~~ s/'<?xml' <-[\?]>* '?>'//;
 
-          # move nodes to the parent node
-          $parent.insert($_) for $x.root-element.nodes.reverse;
-        }
-
-        else {
-          die "Reference '$reference' not found";
-        }
+        # inject xml into sxml:xml element. check if attribute to-sxml is set
+        my Hash $attributes = {};
+        $attributes<to-sxml> = $m.attributes<to-sxml>:exists ?? 1 !! 0;
+        my SemiXML::Element $x .= new( :name<sxml:xml>, :$attributes);
+        $x.append(:text($sxml-text));
+        $m.before($x);
       }
 
       default {
-        die "Type $type not recognized with \$!include";
+        die "Type $type not recognized with include";
       }
     }
-
-    $parent;
   }
 }

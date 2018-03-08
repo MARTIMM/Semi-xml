@@ -1,0 +1,36 @@
+# run: sxml2xml.pl6 --in=html --out=pdf xt/Sxml/summary.sxml
+
+$!summary.report title='Semi XML project summary report' [
+
+  $!summary.preface [
+    $p [
+      This report is a summary of all tests done for the project SemiXML.
+    ]
+  ]
+
+  $!summary.load metric=sxml-methods []
+
+  $!summary.load metric=basic []
+
+  $!summary.load metric=configuration []
+  $!summary.load metric=sigils []
+
+  $!summary.load metric=core-module []
+  $!summary.load metric=lorem-ipsum []
+  $!summary.load metric=file-io []
+  $!summary.load metric=css []
+  $!summary.load metric=color []
+
+  $!summary.load metric=documentation []
+
+  $!summary.conclusion [
+
+    $p [
+      And here we are at the end of it all.
+    ]
+
+    $p [
+      Lots to do now but lets not give up hope and struggle on.
+    ]
+  ]
+]

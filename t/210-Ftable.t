@@ -14,21 +14,20 @@ subtest 'self-closing', {
 
   spurt $cfg, qq:to/EOCONFIG/;
     [ F.t210 ]
-    self-closing = [ 'e1', 'e2']
+      self-closing = [ 'e1', 'e2']
     EOCONFIG
 
   spurt $sxml, Q:to/EOSXML/;
     $top [
-    $e1                         # stays ok
-    $e2 [ abc def ]             # content will be dropped
-    $e3                         # content of ' ' added
-    $e4 [ non empty element ]   # stays ok
+      $e1                         # stays ok
+      $e2 [ abc def ]             # content will be dropped
+      $e3                         # content of ' ' added
+      $e4 [ non empty element ]   # stays ok
     ]
     EOSXML
 
   my SemiXML::Sxml $x;
   $x .= new( :trace, :merge, :refine([ <t210 xml>]));
-  isa-ok $x, 'SemiXML::Sxml';
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;
@@ -46,9 +45,9 @@ subtest 'self-closing on html defaults', {
     $html [
       $head [
         $title
-        $meta  charset=UTF-8
-        $script src=prut.js
-        $link href='prut.css'
+        $meta charset=UTF-8 []
+        $script src=prut.js []
+        $link href=prut.css []
       ]
 
       $body [
@@ -61,12 +60,11 @@ subtest 'self-closing on html defaults', {
     EOSXML
 
   my SemiXML::Sxml $x;
-  $x .= new( :trace, :merge, :refine([ <html html>]));
-  isa-ok $x, 'SemiXML::Sxml';
+  $x .= new( :!trace, :merge, :refine([ <html html>]));
 
   $x.parse(:filename($sxml));
   my Str $xml-text = ~$x;
-  note $xml-text;
+  #diag $xml-text;
   like $xml-text, /'<title></title>'/, 'empty title found';
   like $xml-text, /'<meta charset="UTF-8"/>'/, 'meta found';
   like $xml-text, /'<p></p>'/, 'empty p found';
