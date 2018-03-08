@@ -408,14 +408,11 @@ class Html::Css {
   #-----------------------------------------------------------------------------
   method style ( SemiXML::Element $m ) {
 
-#note "\nStyle 0:\n$m\n\n$!style";
-
     for $m.nodes.reverse -> $node {
       $!style.insert($node) if $node.name ne 'sxml:css-block';
     }
 
     self!css-blocks( $m, '');
-#note "\nStyle 1:\n$!style";
 
     # work is done, next time init again
     $!initialized = False;
