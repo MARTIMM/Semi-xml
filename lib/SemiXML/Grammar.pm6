@@ -33,7 +33,7 @@ grammar Grammar {
           " line $l\n... $t0.substr( *-$i, *-0)",  color('red'),
           "\x[23CF]", $t1.substr( 0, 28), color('reset'), "\n\n";
 
-    my X::SemiXML $x .= new(:$message);
+    my X::SemiXML::Parse $x .= new(:$message);
     die $x;
   }
 

@@ -16,7 +16,7 @@ subtest 'test oneliners', {
 
   throws-like(
     { $xml = parse('$st [ $f w [] hj ]'); },
-    X::SemiXML, 'Parse failure',
+    X::SemiXML::Parse, 'Parse failure',
     :message(/:s Cannot start a content body/)
   );
 
@@ -75,14 +75,16 @@ sub parse ( Str $content is copy --> Str ) {
   my Bool $r = $x.parse(
     :$content,
     :config( {
-        T => { :!config, :!parse },
+        T => { :!config, :parse },
       }
-    )
+    ),
+    :!trace
   );
 #  $content ~~ s:g/\n/ /;
 #  $content ~~ s:g/\s+/ /;
 #  ok $r, "match $content";
 
+  #diag ~$x;
   ~$x
 }
 

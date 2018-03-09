@@ -26,7 +26,7 @@ package SemiXML:auth<github:MARTIMM> {
 }
 
 #-------------------------------------------------------------------------------
-class X::SemiXML is Exception {
+class X::SemiXML::Parse is Exception {
 
   has Str $.message;
 
@@ -36,5 +36,19 @@ class X::SemiXML is Exception {
   #-----------------------------------------------------------------------------
   # prevent a stackdump, see 'Uncaught Exceptions' at
   # https://docs.perl6.org/language/exceptions#Catching_exceptions
-  multi method gist(X::SemiXML:D:) { $.message }
+  multi method gist(X::SemiXML::Parse:D:) { $.message }
+}
+
+#-------------------------------------------------------------------------------
+class X::SemiXML::Core is Exception {
+
+  has Str $.message;
+
+  #-----------------------------------------------------------------------------
+  submethod BUILD ( :$!message ) { }
+
+  #-----------------------------------------------------------------------------
+  # prevent a stackdump, see 'Uncaught Exceptions' at
+  # https://docs.perl6.org/language/exceptions#Catching_exceptions
+  multi method gist(X::SemiXML::Core:D:) { $.message }
 }

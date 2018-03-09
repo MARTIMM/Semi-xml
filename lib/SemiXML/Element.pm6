@@ -543,7 +543,7 @@ class Element does SemiXML::Node {
     my $object = $objects{$!module} if $objects{$!module}:exists;
 
     if $object.defined {
-      die X::SemiXML.new(
+      die X::SemiXML::Parse.new(
         :message(
           "Method $!method in module $!module ($object.^name()) not defined"
         )
@@ -551,7 +551,7 @@ class Element does SemiXML::Node {
     }
 
     else {
-      die X::SemiXML.new(:message("Module $!module not defined"));
+      die X::SemiXML::Parse.new(:message("Module $!module not defined"));
     }
 
     $object

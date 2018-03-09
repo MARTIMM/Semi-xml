@@ -79,7 +79,7 @@ throws-like {
 
   # exception is thrown when result is retrieved
   $x.Str;
-}, X::SemiXML, 'Too many nodes on top',
+}, X::SemiXML::Core, 'Too many nodes on top',
 :message(/:s Too many nodes on top level/);
 
 lives-ok {
