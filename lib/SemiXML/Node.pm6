@@ -201,13 +201,14 @@ role Node {
 
   #-----------------------------------------------------------------------------
   # copy a few html global attributes; class, data-*, id, style and title.
-  method cp-std-attrs ( Hash $attributes ) {
+  method cp-std-attrs ( Hash $attributes, Bool :$delete = False ) {
 
     return unless ?$attributes;
 
-    for $attributes.keys {
-      when /^ [ class || data\- \S+ || id || style || title ] $/ {
-        $!attributes{$_} = ~$attributes{$_};
+    for $attributes.keys -> $key {
+      if $key ~~ any(<class id style title>) or $key ~~ /^ data\- \S+ / {
+        $!attributes{$key} = ~$attributes{$key};
+        $attributes{$key}:delete if $delete;
       }
     }
   }
