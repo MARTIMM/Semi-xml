@@ -4,6 +4,7 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
+use SemiXML::Globals;
 use SemiXML::Node;
 use SemiXML::Element;
 use SemiXML::Text;
@@ -44,6 +45,9 @@ class Actions {
 #note "\nAt the end of parsing";
     # process the result tree
     self!process-ast($match);
+
+    # clear array to save space
+    $!elements = [];
 
     # execute any method bottom up and generate sxml structures
     $!root.run-method if $!globals.exec;

@@ -4,7 +4,7 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
-
+use SemiXML::Globals;
 use SemiXML::Grammar;
 use SemiXML::Actions;
 use SemiXML::Node;

@@ -20,6 +20,7 @@
     "SemiXML":                          "lib/SemiXML.pm6",
     "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
     "SemiXML::Element":                 "lib/SemiXML/Element.pm6",
+    "SemiXML::Globals":                 "lib/SemiXML/Globals.pm6",
     "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
     "SemiXML::Node":                    "lib/SemiXML/Node.pm6",
     "SemiXML::StringList":              "lib/SemiXML/StringList.pm6",
