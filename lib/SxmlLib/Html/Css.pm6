@@ -24,7 +24,7 @@ class Html::Css {
       :name<style>, :attributes({'sxml:noconv' => '1'}),
       :text("\n")
     );
-    $!style.attributes( $m.attributes, :modify);
+    $!style.cp-std-attrs( $m.attributes, :delete);
     $!style.noconv = True;
 
     my Array $r = $m.search( [
