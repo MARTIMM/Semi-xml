@@ -19,6 +19,7 @@
   "provides": {
     "SemiXML":                          "lib/SemiXML.pm6",
     "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
+    "SemiXML::Document":                "lib/SemiXML/Document.pm6",
     "SemiXML::Element":                 "lib/SemiXML/Element.pm6",
     "SemiXML::Globals":                 "lib/SemiXML/Globals.pm6",
     "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
@@ -26,6 +27,7 @@
     "SemiXML::StringList":              "lib/SemiXML/StringList.pm6",
     "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
     "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
+    "SemiXML::Xml":                     "lib/SemiXML/Xml.pm6",
 
     "SxmlLib::Colors":                  "lib/SxmlLib/Colors.pm6",
     "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
@@ -66,5 +68,5 @@
   ],
 
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.47.5"
+  "version": "v0.48.0"
 }
