@@ -616,7 +616,6 @@ $inline = [|$inline, |($c<F><inline> // [])
 
           CATCH {
             .note;
-#          die X::SemiXML.new(:message(::($value).Str)) if ::($value) ~~ Failure;
           }
         }
 
