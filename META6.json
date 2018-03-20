@@ -19,12 +19,15 @@
   "provides": {
     "SemiXML":                          "lib/SemiXML.pm6",
     "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
+    "SemiXML::Document":                "lib/SemiXML/Document.pm6",
     "SemiXML::Element":                 "lib/SemiXML/Element.pm6",
+    "SemiXML::Globals":                 "lib/SemiXML/Globals.pm6",
     "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
     "SemiXML::Node":                    "lib/SemiXML/Node.pm6",
     "SemiXML::StringList":              "lib/SemiXML/StringList.pm6",
     "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
     "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
+    "SemiXML::Xml":                     "lib/SemiXML/Xml.pm6",
 
     "SxmlLib::Colors":                  "lib/SxmlLib/Colors.pm6",
     "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
@@ -40,35 +43,14 @@
   },
 
   "provides-original": {
-    "SemiXML":                          "lib/SemiXML.pm6",
-    "SemiXML::Actions":                 "lib/SemiXML/Actions.pm6",
-    "SemiXML::Element":                 "lib/SemiXML/Element.pm6",
-    "SemiXML::Grammar":                 "lib/SemiXML/Grammar.pm6",
-    "SemiXML::Node":                    "lib/SemiXML/Node.pm6",
-    "SemiXML::StringList":              "lib/SemiXML/StringList.pm6",
-    "SemiXML::Sxml":                    "lib/SemiXML/Sxml.pm6",
-    "SemiXML::Text":                    "lib/SemiXML/Text.pm6",
-
-    "SxmlLib::Colors":                  "lib/SxmlLib/Colors.pm6",
-    "SxmlLib::SxmlCore":                "lib/SxmlLib/SxmlCore.pm6",
-    "SxmlLib::File":                    "lib/SxmlLib/File.pm6",
-    "SxmlLib::LoremIpsum":              "lib/SxmlLib/LoremIpsum.pm6",
-
-
     "SxmlLib::Html::FixedLayout":       "lib/SxmlLib/Html/FixedLayout.pm6",
-    "SxmlLib::Html::List":              "lib/SxmlLib/Html/List.pm6",
-    "SxmlLib::Html::Css":               "lib/SxmlLib/Html/Css.pm6",
-    "SxmlLib::Html::Menu":              "lib/SxmlLib/Html/Menu.pm6",
 
     "SxmlLib::Docbook5::Basic":         "lib/SxmlLib/Docbook5/Basic.pm6",
     "SxmlLib::Docbook5::FixedLayout":   "lib/SxmlLib/Docbook5/FixedLayout.pm6",
 
     "SxmlLib::EPub":                    "lib/SxmlLib/EPub.pm6",
     "SxmlLib::EPub::EPub2Builder":      "lib/SxmlLib/EPub/EPub2Builder.pm6",
-    "SxmlLib::EPub::EPub3Builder":      "lib/SxmlLib/EPub/EPub3Builder.pm6",
-
-    "SxmlLib::Testing::Test":           "lib/SxmlLib/Testing/Test.pm6",
-    "SxmlLib::Testing::Summary":        "lib/SxmlLib/Testing/Summary.pm6"
+    "SxmlLib::EPub::EPub3Builder":      "lib/SxmlLib/EPub/EPub3Builder.pm6"
   },
 
   "resources": [
@@ -86,5 +68,5 @@
   ],
 
   "source-url": "git://github.com/MARTIMM/Semi-xml.git",
-  "version": "v0.47.3"
+  "version": "v0.48.0"
 }

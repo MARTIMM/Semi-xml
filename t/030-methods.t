@@ -79,7 +79,7 @@ throws-like {
 
   # exception is thrown when result is retrieved
   $x.Str;
-}, X::SemiXML, 'Too many nodes on top',
+}, X::SemiXML::Core, 'Too many nodes on top',
 :message(/:s Too many nodes on top level/);
 
 lives-ok {
@@ -98,7 +98,7 @@ like $xml, /'<x><p></p><p>Added 1 xml nodes</p></x>'/,
      "mth2 sees at least 1 space in its content";
 
 $content = '$x =a =!b [ $!mod1.mth2 [$h [abc] $h[def]]]';
-$x.parse( :$config, :$content, :trace);
+$x.parse( :$config, :$content, :!trace);
 
 $xml = $x.get-xml-text;
 like $xml, /:s '<x a="1" b="0">'

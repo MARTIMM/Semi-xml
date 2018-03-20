@@ -1,11 +1,10 @@
 # SemiXML
 
-[![Build Status](https://travis-ci.org/MARTIMM/Semi-xml.svg?branch=master)](https://travis-ci.org/MARTIMM/Semi-xml)
-[![License](http://martimm.github.io/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
+[![Build Status](https://travis-ci.org/MARTIMM/Semi-xml.svg?branch=master)](https://travis-ci.org/MARTIMM/Semi-xml) [![License](http://martimm.github.io/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
 
 ## Description
 
-Package to generate XML typed languages from an easier readable and writable description plus, because it is written in Perl 6, the possibility to insert XML using code elements.
+Package to generate XML typed languages from an easier readable and writable description plus, because it is written in Perl 6, the possibility to insert new elements using methods in external objects.
 
 ## Introduction
 
@@ -23,7 +22,7 @@ The following piece of xml (html) text
 </html>
 ```
 
-I want to write something like the following
+can be written in this semi xml language as
 
 ```
 $html [
@@ -43,7 +42,7 @@ Less characters typed and still indenting. Besides this, the xml generated from 
 
 While the example above does not show a big advantage, there are some summarized below.
 
-* This semi xml has a bit better reading capabilities because no textual end tag is needed. It is just a closing bracket.
+* This semi xml has a bit better reading capabilities because no textual end tag is needed. It is just a closing bracket. (']', '}' or '»').
 * Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: ', " and ^ when needed.
 * An XML element is introduced by **\$**. This translates just to the XML element. E.g. **\$html []** becomes **\<html/>**.
 * Empty element content does not have to be written in the way shown above. It can be written just like **\$html**. However, when attributes are used, the brackets are needed. This is made obligatory to make the following text better separated from the element and also to have better checks on mistakes.

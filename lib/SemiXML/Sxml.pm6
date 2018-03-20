@@ -4,7 +4,7 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
-
+use SemiXML::Globals;
 use SemiXML::Grammar;
 use SemiXML::Actions;
 use SemiXML::Node;
@@ -616,7 +616,6 @@ $inline = [|$inline, |($c<F><inline> // [])
 
           CATCH {
             .note;
-#          die X::SemiXML.new(:message(::($value).Str)) if ::($value) ~~ Failure;
           }
         }
 

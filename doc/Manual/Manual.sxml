@@ -258,7 +258,7 @@ $!SxmlCore.drop [
       $para [
 #TODO RSS in glossary
         A more complex example shows a part of RSS or Really Simple Syndication.
-        $programlisting {=
+        $programlisting {
           $rss version=2.0 [
             $channel [
               $title [W3Schools Home Page]
@@ -560,7 +560,7 @@ $!SxmlCore.drop «
       $para [
         Below you see an example of two options to let the xml prelude be
         written as well as a doctype at the start of the result.
-        $programlisting {=
+        $programlisting {
         }
       ]
 
@@ -646,7 +646,7 @@ option/doctype/definition: [
         $sect4 [
           $title [ output/program ]
           $para [
-            $programlisting {=
+            $programlisting {
 output/program/pdf:
   | xsltproc --encoding utf-8 --xinclude stylesheet.xsl -
   | xep -fo - -pdf sxml2xml.pdf
@@ -694,7 +694,7 @@ output/program/pdf:
     $sect2 [
       $title [Program arguments]
       $para [
-        $synopsis {=
+        $synopsis {
           sxml2xml [--run=<run-selector>] <sxml-file>
         }
       ]
@@ -730,7 +730,7 @@ $!SxmlCore.drop {
   $sect1 xml:id=syntax [
     $title [Syntax]
     $para [
-      $programlisting {=
+      $programlisting {
 <sxml-syntax> ::= <prelude-section>? <document>;
 
 <prelude-section> ::= '---' <new-line> <key-value-pairs>* '---' <new-line>;

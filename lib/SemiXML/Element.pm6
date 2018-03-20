@@ -4,6 +4,7 @@ use v6;
 unit package SemiXML:auth<github:MARTIMM>;
 
 use SemiXML;
+use SemiXML::Globals;
 use SemiXML::StringList;
 use SemiXML::Node;
 use SemiXML::Text;
@@ -149,8 +150,15 @@ class Element does SemiXML::Node {
       $var-declarations{~$!attributes<name>} = self;
     }
 
-    # continue processing in Node class
-    callsame;
+    if $modify {
+      $!attributes = hash( |$!attributes, |$attributes);
+    }
+
+    else {
+      $!attributes = $attributes;
+    }
+
+    self!process-attributes;
   }
 
   #-----------------------------------------------------------------------------
@@ -535,7 +543,7 @@ class Element does SemiXML::Node {
     my $object = $objects{$!module} if $objects{$!module}:exists;
 
     if $object.defined {
-      die X::SemiXML.new(
+      die X::SemiXML::Parse.new(
         :message(
           "Method $!method in module $!module ($object.^name()) not defined"
         )
@@ -543,7 +551,7 @@ class Element does SemiXML::Node {
     }
 
     else {
-      die X::SemiXML.new(:message("Module $!module not defined"));
+      die X::SemiXML::Parse.new(:message("Module $!module not defined"));
     }
 
     $object

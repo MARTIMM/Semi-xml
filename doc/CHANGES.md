@@ -1,10 +1,15 @@
 # Changes in SemiXML:: * and sxml2xml
 
-* 0.74.5
+* 0.48.0
+  * Add Document module. Move code from Actions to this module. Added methods to convert XML to Sxml object tree.
+  * X::SemiXML exception class modified into X::SemiXML::Parse
+  * X::SemiXML::Core exception class added
+* 0.47.5
   * Menu module converted and improved.
-* 0.74.4
+  * A lot of bugs fixed.
+* 0.47.4
   * Css module converted.
-  * Removed $parent.before( $node, $new) and $parent.after( $node, $new). Now only $node.before($new) $node.after($new) works. The attribute :offset can be used to move back- or forward from the pivot node. Default is 0 or 1 for before and after resp. Out of range values are set to the minimum or maximum of the range which translates the operation into insert to the start or end of the container of the parent.
+  * Removed two argument before and after. Now only the one argument methods work. The attribute :offset can be used to move back- or forward from the pivot node. Default is 0 or 1 for before and after resp. Out of range values are set to the minimum or maximum of the range which translates the operation into insert to the start or end of the container of the parent.
 * 0.47.3
   * Removed XMLText. it replaced the XML::Text module which is not needed anymore.
   * Color module is converted

@@ -56,7 +56,7 @@ my Hash $config = {
 my SemiXML::Sxml $x .= new(:refine([<in-fmt out-fmt>]));
 $x.parse( :filename($f1), :$config, :!raw, :!keep);
 my Str $xml-text = ~$x;
-diag $xml-text;
+#diag $xml-text;
 
 like $xml-text, /:s '<h1>' Intro '</h1>' /, "Check 'Intro' included";
 like $xml-text, /'<p>'/, 'Check p included';
