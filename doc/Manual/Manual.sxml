@@ -4,7 +4,8 @@ $!db5b.article [
   $title [ Package &pack; to describe and use semi XML ]
   $!db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
               city=Haarlem country=Netherlands
-              copy-year='2015, * + 1 ... Inf' copy-holder='Marcel Timmerman' [
+              copy-year='2015, * + 1 ... Inf'
+              copy-holder='Marcel Timmerman' [
     $para [
       The &pack; package comprises of a set of Perl 6 modules to convert a language coined 'semi xml' or &lang; text into $emphasis[XML] languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[XSL].
     ]
