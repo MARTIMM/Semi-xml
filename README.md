@@ -42,12 +42,12 @@ Less characters typed and still indenting. Besides this, the xml generated from 
 
 While the example above does not show a big advantage, there are some summarized below.
 
-* This semi xml has a bit better reading capabilities because no textual end tag is needed. It is just a closing bracket. (']', '}' or '»').
-* Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: ', " and ^ when needed.
-* An XML element is introduced by **\$**. This translates just to the XML element. E.g. **\$html []** becomes **\<html/>**.
-* Empty element content does not have to be written in the way shown above. It can be written just like **\$html**. However, when attributes are used, the brackets are needed. This is made obligatory to make the following text better separated from the element and also to have better checks on mistakes.
-* Other symbols following the **\$** changes its meaning.
-  * **\$!** is used to call a method defined in an external module to insert xml controlled by data from elsewhere. This is the most important part of this package because with a simple sxml line a table can be created with data from a database. More humble things can also be accomplished e.g. generating the start of a document with lots of namespace declarations or inserting the current date and time.
+* This semi xml has a bit better reading capabilities because no textual end tag is needed. It is just a matching closing bracket. (**]**, **}** or **»**).
+* Attribute values do not need quoting when there are no spaces in the value. However there are three possible quoting characters: **'**, **"** and **\< \>** when needed.
+* An XML element is introduced by **\$**. This translates just to the XML element. E.g. **\$abc []** becomes **\<abc/>** or **\<abc>\</abc>** depending on some other information found in the configuration.
+* Empty element content does not have to be written in the way shown above. It can be written just like **\$abc**. However, when attributes are used, the brackets are needed. This is made obligatory to make the text following an empty content better visually separated from the element and also to have better checks when mistakes are made.
+* Other symbols following the **\$** changes its meaning. For the moment there is only one change namely;
+  * **\$!**. This symbol is used to call a method defined in an external module. This method normally will insert xml elements. This process is controlled by e.g. attributes, its content or by data found elsewhere. This is the most important purpose of the package because with a simple sxml method a table can be created with data from a database. More humble things can also be accomplished e.g. generating the start of a document with lots of namespace declarations or inserting the current date and time.
 * Square brackets **[** and **]** are used to contain nested text or other element nodes as shown in the example above. There are other characters which can be used instead;
   * **{** and **}** are used where no nested node elements are allowed. This comes in handy when text is entered with a lot of **\$** characters like in javascript or perl code. Comments are not filtered out in these texts.
   * **«** **»**. These brackets have the same meaning as above but there is less need to escape characters.
