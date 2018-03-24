@@ -65,8 +65,62 @@
 
 # Docbook 5
 [ F.db5 ]
+  # From https://tdg.docbook.org/tdg/5.1/ch02.html, 3.8. Content model patterns
+  # There are several repetitions of elements
   inline            = [
-    'emphasis'
+    # Bibliography inlines
+    'citation', 'citerefentry', 'citetitle', 'citebiblioid', 'author', 'person', 'personname', 'org', 'orgname', 'editor', 'jobtitle',
+
+    # Computer-output inlines
+    'inlinemediaobject', 'remark', 'xref', 'link', 'olink', 'anchor', 'biblioref', 'alt', 'trademark', 'abbrev', 'acronym', 'date', 'emphasis', 'footnote', 'footnoteref', 'foreignphrase', 'phrase', 'quote', 'subscript', 'superscript', 'wordasword', 'annotation', 'firstterm', 'glossterm', 'indexterm', 'coref', 'prompt', 'envar', 'filename', 'command', 'computeroutput', 'userinput', 'replaceable', 'package', 'parameter', 'termdef', 'nonterminal', 'systemitem', 'option', 'optional', 'property', 'co', 'tag', 'markup', 'token', 'symbol', 'literal', 'code', 'constant', 'email', 'uri',
+
+    # Error inlines
+    'errorcode', 'errortext', 'errorname', 'errortype',
+
+    # Graphic inlines
+    'inlinemediaobject',
+
+    # GUI inlines
+    'guiicon', 'guibutton', 'guimenuitem', 'guimenu', 'guisubmenu', 'guilabel', 'menuchoice', 'mousebutton',
+
+    # Indexing inlines
+    'indexterm',
+
+    # Keyboard inlines
+    'keycombo', 'keycap', 'keycode', 'keysym', 'shortcut', 'accel',
+
+    # Linking inlines
+    'xref', 'link', 'olink', 'anchor', 'biblioref',
+
+    # Markup inlines
+    'tag', 'markup', 'token', 'symbol', 'literal', 'code', 'constant', 'email', 'uri',
+
+    # Math inlines
+    'inlineequation',
+
+    # Object-oriented programming inlines
+    'ooclass', 'ooexception', 'oointerface',
+
+    # Operating system inlines
+    'prompt', 'envar', 'filename', 'command', 'computeroutput', 'userinput',
+
+    # Product inlines
+    'trademark', 'productnumber', 'productname', 'database', 'application', 'hardware',
+
+    # Programming inlines
+    'function', 'parameter', 'varname', 'returnvalue', 'type', 'classname', 'exceptionname', 'interfacename', 'methodname', 'modifier', 'initializer', 'ooclass', 'ooexception', 'oointerface',
+
+    # Publishing inlines
+    'abbrev', 'acronym', 'date', 'emphasis', 'footnote', 'footnoteref', 'foreignphrase', 'phrase', 'quote', 'subscript', 'superscript', 'wordasword', 'firstterm', 'glossterm', 'coref',
+
+    # Technical inlines
+    'replaceable', 'package', 'parameter', 'termdef', 'nonterminal', 'systemitem', 'option', 'optional', 'property',
+
+    # Ubiquitous inlines
+    'inlinemediaobject', 'remark', 'xref', 'link', 'olink', 'anchor', 'biblioref', 'alt', 'trademark', 'abbrev', 'acronym', 'date', 'emphasis', 'footnote', 'footnoteref', 'foreignphrase', 'phrase', 'quote', 'subscript', 'superscript', 'wordasword', 'annotation', 'firstterm', 'glossterm', 'indexterm', 'coref',
+
+    # User-input inlines
+    'inlinemediaobject', 'remark', 'xref', 'link', 'olink', 'anchor', 'biblioref', 'alt', 'trademark', 'abbrev', 'acronym', 'date', 'emphasis', 'footnote', 'footnoteref', 'foreignphrase', 'phrase', 'quote', 'subscript', 'superscript', 'wordasword', 'annotation', 'firstterm', 'glossterm', 'indexterm', 'coref', 'prompt', 'envar', 'filename', 'command', 'computeroutput', 'userinput', 'replaceable', 'package', 'parameter', 'termdef', 'nonterminal', 'systemitem', 'option', 'optional', 'property', 'co', 'tag', 'markup', 'token', 'symbol', 'literal', 'code', 'constant', 'email', 'uri', 'guiicon', 'guibutton', 'guimenuitem', 'guimenu', 'guisubmenu', 'guilabel', 'menuchoice', 'mousebutton', 'keycombo', 'keycap', 'keycode', 'keysym', 'shortcut', 'accel'
   ]
 
   no-conversion       = [
