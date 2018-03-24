@@ -5,6 +5,8 @@
 * [ ] Pre and cons
 * [ ] Language examples
 
+## Terms and font usage
+
 ## Syntax
 * [ ] Sigils: **$ \$!**
 * [ ] Elements: **$foo**
