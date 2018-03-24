@@ -128,7 +128,8 @@
   ]
 
   space-preserve    = [
-    'programlisting'
+    # Verbatim elements
+    'screen', 'literallayout', 'programlistingco', 'screenco', 'programlisting', 'synopsis'
   ]
 
   self-closing      = [
