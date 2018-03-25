@@ -16,11 +16,11 @@
 ## Syntax
 * [ ] Sigils: **$ \$!**
 * [ ] Elements: **$foo**
-* [ ] Attributes: **$foo bar=1 baz='a b' taz="a b" caz=<2,3,4> =xyz =!pqr []**
+* [ ] Attributes: **$foo bar=5 baz='a b' taz="a b" caz=<2,3,4> =xyz =!pqr []**
 * [ ] Content: **[ ] { } « »**
 * [ ] Methods: **$!foo.bar**
 * [ ] Pre defined methods
-  * [ ] Predefined module label SxmlCore
+  * [ ] Predefined module label **SxmlCore**
   * [ ] **\$!SxmlCore.date**
   * [ ] **\$!SxmlCore.date-time**
 
