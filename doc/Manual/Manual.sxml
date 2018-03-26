@@ -11,7 +11,7 @@ $!db5.article [
     ]
 
     $para [
-      The manual will also explain how the programs work which are deleivered with this package.
+      The manual will also explain how the programs work which are installed with this package.
 
     $para [
       The latest version of this document is generated on date $!SxmlCore.date.
@@ -22,19 +22,20 @@ $!db5.article [
   $sect1 xml:id=Introduction [
     $title [ Introduction of package &pack; ]
     $para [
-      Welcome to the $emphasis[&pack;] package. As mentioned in the abstract, the modules and programs in this package will help you to convert text written in this language called &lang; into $emphasis[XML] or any dialect thereof.
+      Welcome to the $emphasis[&pack;] package. The &pack; package comprises of a set of Perl 6 modules to convert a text written in a language coined &lang; into one of the $emphasis[XML] family of languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[SVG]. There are dynamic ways to generate elements by calling methods in external modules. This is also the way to extend the language by creating your own methods.
     ]
 
     $para [
-      The &pack; package comprises of a set of Perl 6 modules to convert a text written in a language coined &lang; into one of the $emphasis[XML] family of languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[XSL].
+      In the package there is also a program called &prog1; which uses &mainmod; in the package &pack; to transform &lang; text from a given file into XML after which it can be written to another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
+      There is a second program &prog2; in the making. It is used to reverse engineer XML into sxml. The methods used to do this can also insert xml into the tree directly as an element or convert it completely to the internal node tree representation.
     ]
 
     $para [
-      In the package there is also a program called $emphasis[&prog1;] which uses module in the package &pack; to transform &lang; text from a given file into XML after which it can be written to another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
+      Furthermore there are modules designed to generate fragments of html, docbook or other specific constructs like Epub and testing reports. Much of this code need more additions and some refinements but it shows the strength of this package.
     ]
 
     $para [
-      Furthermore there are modules designed to generate fragments of html, docbook or other specific constructs like Epub and testing reports. Much of this code need some more refinements but it shows the strength of this package.
+      This language is for people who want to write XML in a more readable way and want to add dynamic constructs to insert information much the same way as $emphasis[PHP] does in html.
     ]
 
     #---------------------------------------------------------------------------
@@ -43,13 +44,15 @@ $!db5.article [
       $itemizedlist [
         $listitem [
           $para [
-            While I find this &lang; more clear to read, this is not the main
-            purpose of this language.
+            The language has a better readability because the end tag of an elements is absent. The end of an element is just the ending character of the content.
+          ]
 
-            In this language, constructs are introduced to call methods coded in
-            modules to generate xml elements. An example of this is shown in the
-            example above to insert a date. This date will always be the
-            current date when the text is processed.
+          $para [
+            
+          ]
+
+          $para [
+            In this language, constructs are introduced to call methods coded in modules to generate xml elements. An example of this is shown in the example above to insert a date. This date will always be the current date when the text is processed.
           ]
         ]
 
