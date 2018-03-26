@@ -12,23 +12,26 @@
 
 #------------------------------------------------------------------------------
 [ E.db5.Manual ]
-  pack          = 'SemiXML'
-  mod           = 'SemiXML::Sxml'
-  act           = 'SemiXML::Actions'
-  gram          = 'SemiXML::Grammar'
-  lib           = 'SxmlLib'
-  prog          = 'sxml2xml'
-  lang          = 'sxml'
+  pack          = '<exclam>SemiXML</exclam>'
+  mainmod       = '<exclam>SemiXML::Sxml</exclam>'
+  #act           = 'SemiXML::Actions'
+  #gram          = 'SemiXML::Grammar'
+  #lib1          = 'SemiXML'
+  #lib2          = 'SxmlLib'
+  prog1         = '<exclam>sxml2xml</exclam>'
+  prog2         = '<exclam>xml2sxml</exclam>'
+  fileext       = '<exclam>.sxml</exclam>'
+  lang          = '<exclam>semi-xml</exclam>'
   nbsp          = ' '
   copy          = '&#xa9;'
-  E             = 'element'
-  exclam        = '&#33;'
+  #E             = 'element'
+  #exclam        = '&#33;'
 
 #------------------------------------------------------------------------------
 [ ML.db5 ]
   lorem         = 'SxmlLib::LoremIpsum'
-  db5b          = 'SxmlLib::Docbook5::Basic'
-  db5f          = 'SxmlLib::Docbook5::FixedLayout'
+  db5           = 'SxmlLib::Docbook5::Basic'
+  #db5f          = 'SxmlLib::Docbook5::FixedLayout'
 
 #------------------------------------------------------------------------------
 [ R.xml ]
