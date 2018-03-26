@@ -4,14 +4,15 @@
 * [ ] What to expect and for whom is it for
 * [ ] Pre and cons
 * [ ] Language examples
-
-## Conventions
-* [ ] Italic: Indicates new terms, URLs, email addresses, filenames, and file extensions.
-* [ ] Constant width: Used for program listings, as well as within paragraphs to refer to element and attribute names, program examples, attribute value literals, start- and end-tags, and source code example text.
-* [ ] Constant width bold: Shows commands or other text that should be typed literally by the user.
-* [ ] Constant width italic: Shows text that should be replaced with user-supplied values or by values determined by context. An example is filename, where the word “filename” is a placeholder for the actual filename.
-* [ ] <img src='tip.gif' />: This icon signifies a tip, suggestion, or general note.
-* [ ] <img src='caution.gif' />: This icon indicates a warning or caution.
+* [ ] Overview of the manual
+* [ ] Conventions
+  * [ ] Italic: Indicates new terms, URLs, email addresses, filenames, and file extensions.
+  * [ ] Constant width: Used for program listings, as well as within paragraphs to refer to element and attribute names, program examples, attribute value literals, start- and end-tags, and source code example text.
+  * [ ] Constant width bold: Shows commands or other text that should be typed literally by the user.
+  * [ ] Constant width italic: Shows text that should be replaced with user-supplied values or by values determined by context. An example is filename, where the word “filename” is a placeholder for the actual filename.
+  * [ ] <img src='tip.gif' />: This icon signifies a tip, suggestion, or general note.
+  * [ ] <img src='caution.gif' />: This icon indicates a warning or caution.
+  The icons are examples from other books. Need to use other symbols or devise my own to prevent license problems. Also the text must be placed in an `aside` area.
 
 ## Syntax
 * [ ] Sigils: **$ \$!**
@@ -19,10 +20,16 @@
 * [ ] Attributes: **$foo bar=5 baz='a b' taz="a b" caz=<2,3,4> =xyz =!pqr []**
 * [ ] Content: **[ ] { } « »**
 * [ ] Methods: **$!foo.bar**
+* [ ] Text
+* [ ] Comments: **#**
+* [ ] Escape character: **\\**
 * [ ] Pre defined methods
   * [ ] Predefined module label **SxmlCore**
+  * [ ] Internal name of element: **sxml:label.method**
   * [ ] **\$!SxmlCore.date**
   * [ ] **\$!SxmlCore.date-time**
+  * [ ] **\$!SxmlCore.var-decl**
+  * [ ] **\$!SxmlCore.drop**
 
 ## Configuration
 * [ ] Toml

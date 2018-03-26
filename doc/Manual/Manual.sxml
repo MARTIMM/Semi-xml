@@ -1,72 +1,43 @@
 # sxml2xml.pl6 --in=db5 --out=pdf doc/Manual/Manual.sxml
 
-$!db5b.article [
-  $!db5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
+$!db5.article [
+  $!db5.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
               city=Haarlem country=Netherlands
               copy-year='2015, * + 1 ... Inf'
               copy-holder='Marcel Timmerman' [
               title="Package &pack; to describe and use semi XML"
     $para [
-      The &pack; package comprises of a set of Perl 6 modules to convert a language coined 'semi xml' or &lang; text into $emphasis[XML] languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[XSL].
+      This manual explains the use of a set of classes to convert &lang; text into $emphasis[XML] typed languages. A description of the syntax is given and the configuration controlling this process. Furthermore, the dynamic aspects of this language is explained as well as how to extend this language with your own classes.
     ]
 
     $para [
-      In the package there is also a program called $emphasis[&prog;] which uses &pack; to transform &lang; text from a given file into XML after which it is stored in another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
-    ]
-
-    $para [
-      Furthermore there are modules designed to generate fragments of html, docbook or other specific constructs like Epub and testing reports. Much of this code need some more refinements but it shows the strength of this package.
-    ]
+      The manual will also explain how the programs work which are deleivered with this package.
 
     $para [
       The latest version of this document is generated on date $!SxmlCore.date.
     ]
   ]
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   $sect1 xml:id=Introduction [
     $title [ Introduction of package &pack; ]
     $para [
-      Welcome to the $emphasis[&pack;] package. As mentioned in the abstract, the modules and programs in this package help to convert &lang; text into $emphasis[XML] or any dialect thereof.
+      Welcome to the $emphasis[&pack;] package. As mentioned in the abstract, the modules and programs in this package will help you to convert text written in this language called &lang; into $emphasis[XML] or any dialect thereof.
     ]
 
     $para [
-      An example will speak for itself when Sxml is compared with the generated
-      HTML. The generated html shown here is pretty printed but would
-      normally be as compact as possible.
-
-      $example [
-        $title [ Input &lang; text ]
-        $programlisting language=sxml {
-          $html [
-            $head [
-              $title [ My First Sxml Document ]
-            ]
-
-            $body [
-              $h1 [ My First Sxml Document ]
-              $p [ Hello world! And it is said on $!SxmlCore.date. ]
-            ]
-          ]
-        }
-      ]
-
-      $example [
-        $title [ Generated html text ]
-        $programlisting language=html {
-          <html>
-            <head>
-              <title>My First Sxml Document</title>
-            </head>
-            <body>
-              <h1>My First Sxml Document</h1>
-              <p>Hello world\! And it is said on 2016-03-22.</p>
-            </body>
-          </html>
-        }
-      ]
+      The &pack; package comprises of a set of Perl 6 modules to convert a text written in a language coined &lang; into one of the $emphasis[XML] family of languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[XSL].
     ]
 
+    $para [
+      In the package there is also a program called $emphasis[&prog1;] which uses module in the package &pack; to transform &lang; text from a given file into XML after which it can be written to another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
+    ]
+
+    $para [
+      Furthermore there are modules designed to generate fragments of html, docbook or other specific constructs like Epub and testing reports. Much of this code need some more refinements but it shows the strength of this package.
+    ]
+
+    #---------------------------------------------------------------------------
     $sect2 [
       $title [Advantages using this language]
       $itemizedlist [
@@ -102,7 +73,9 @@ $!db5b.article [
             you should not be bothered learning this language. Especially when
             the dynamic constructs aren't used.
           ]
+        ]
 
+        $listitem [
           $para [
             Pointing to the proper spot in the sxml text when an error occurs
             has been proven difficult because the only thing the parser has is
@@ -134,6 +107,43 @@ $!db5b.article [
     ]
 
     $sect2 [
+      $para [
+        Finally a few examples will speak for itself when Sxml is compared with the generated HTML. The generated html shown here is pretty printed but would normally be as compact as possible.
+
+        $example [
+          $title [ Input &lang; text ]
+          $programlisting language=sxml {
+            $html [
+              $head [
+                $title [ My First Sxml Document ]
+              ]
+
+              $body [
+                $h1 [ My First Sxml Document ]
+                $p [ Hello world! And it is said on $!SxmlCore.date. ]
+              ]
+            ]
+          }
+        ]
+
+        $example [
+          $title [ Generated html text ]
+          $programlisting language=html {
+            <html>
+              <head>
+                <title>My First Sxml Document</title>
+              </head>
+              <body>
+                <h1>My First Sxml Document</h1>
+                <p>Hello world\! And it is said on 2016-03-22.</p>
+              </body>
+            </html>
+          }
+        ]
+      ]
+    ]
+
+    $sect2 [
       $title [What the manual explains]
       $itemizedlist [
         $listitem [
@@ -157,7 +167,7 @@ $!db5b.article [
             $emphasis[Configuration]. The toml configuration file will be
             explained. This section explains how to control the output
             of the result and where modules are to be found.
-            &prog;. Defaults are also explained.
+            &prog1;. Defaults are also explained.
           ]
         ]
 
@@ -171,7 +181,7 @@ $!db5b.article [
 
         $listitem [
           $para [
-            $emphasis[The program]. The program &prog; is used to read
+            $emphasis[The program]. The program &prog1; is used to read
             &lang; from a file and saved or send away. Explanation of
             arguments and prelude options can be found here.
           ]
@@ -253,7 +263,7 @@ $!SxmlCore.drop [
         $programlisting {
           $html
         }
-        Something to mention here is that there is no need to add a XML description or Doctype. These are all controlled by the configuration data.
+        Something to mention here is that there is no need to add a XML description, Doctype or default namespace. These are all controlled by the configuration data.
       ]
 
       $para [
@@ -343,7 +353,7 @@ $!SxmlCore.drop «
 
 $!SxmlCore.drop «
     $para [
-      The result after running through &prog; is shown below. Importend to
+      The result after running through &prog1; is shown below. Importend to
       note that this text is nicely formatted for this example and the output
       would be more like a one-liner.
 
@@ -574,7 +584,7 @@ $!SxmlCore.drop {
 }
 
       $sect3 [
-        $title [ Options used by the library &pack; ]
+        $title [ Options used by the module &mainmod; ]
 
         $sect4 [
           $title [ module ]
@@ -687,7 +697,7 @@ output/program/pdf:
   ]
 
   $sect1 xml:id=Use-prog [
-    $title [Using program &prog;]
+    $title [Using program &prog1;]
     $para [
 
     ]
