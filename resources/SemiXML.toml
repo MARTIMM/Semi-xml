@@ -22,6 +22,9 @@
 #  xlink   = 'http://www.w3.org/1999/xlink'
 #  xml     = "http://www.w3.org/XML/1998/namespace"
 
+#[ DN ]
+#  sxml = "https://github.com/MARTIMM/Semi-xml"
+
 [ DN.html ]
   default = "http://www.w3.org/1999/xhtml"
 
@@ -146,8 +149,9 @@
 
 #-------------------------------------------------------------------------------
 # Module and library path tables. Refined using IN and basename.
-[ ML ]
 #  label           = 'module[;path to module]'
+[ ML ]
+
 #  core            = 'SxmlLib::SxmlCore'
 #  css             = 'SxmlLib::Html::Css'
 #  core            = 'SxmlLib::SxmlCore'
