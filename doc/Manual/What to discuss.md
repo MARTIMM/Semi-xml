@@ -5,6 +5,7 @@
 * [ ] Pre and cons
 * [ ] Language examples
 * [ ] Overview of the manual
+* [ ] How to install
 * [ ] Conventions
   * [ ] Italic: Indicates new terms, URLs, email addresses, filenames, and file extensions.
   * [ ] Constant width: Used for program listings, as well as within paragraphs to refer to element and attribute names, program examples, attribute value literals, start- and end-tags, and source code example text.
@@ -23,17 +24,32 @@
 * [ ] Text
 * [ ] Comments: **#**
 * [ ] Escape character: **\\**
-* [ ] Pre defined methods
-  * [ ] Predefined module label **SxmlCore**
-  * [ ] Internal name of element: **sxml:label.method**
-  * [ ] **\$!SxmlCore.date**
-  * [ ] **\$!SxmlCore.date-time**
-  * [ ] **\$!SxmlCore.var-decl**
-  * [ ] **\$!SxmlCore.drop**
+* Namespaces
+  * [ ] Reserved namespace: **sxml*** [x] reserved prefix name is **sxml**
+  * [ ] url for the ns is **https://github.com/MARTIMM/Semi-xml**
+  * Elements
+    * [ ] **sxml:fragment**. Top level element. Not always visible when only one top element is created.
+    * [ ] **sxml:TN- < max-10-characters-text > - < 3-digit-hexnum >**. Text node names generated from the content and a generator e.g. **sxml:TN-thatsit-00A**.
+    * [ ] **sxml:comment**. XML comment `<!-- ... -->`.
+    * [ ] **sxml:cdata**. XML CDATA `<![CDATA[ ... ]]>`.
+    * [ ] **sxml:pi**. XML Processing Instruction `<?target attributes content ?>`
+    * [ ] **sxml:xml**. Direct insertion of XML text.
+    * [ ] **sxml:var-decl**. Declare a variable.
+    * [ ] **sxml:var-ref**. Reference to a variable declaration.
+    * [ ] **sxml:module-label.method**. Generated name for a method node.
+  *  Attributes
+    * [ ] **sxml:inline**
+    * [ ] **sxml:keep**
+    * [ ] **sxml:noconv**
+    * [ ] **sxml:close**
 
 ## Configuration
 * [ ] Toml
-* [ ] Tables
+* [ ] Refine input, output keywords
+* [ ] Configuration locations
+* [ ] Refinement process
+* [ ] Predefined table entries
+* Tables
   * [ ] C Table
   * [ ] D Table
   * [ ] DN Table
@@ -46,17 +62,27 @@
   * [ ] T Table
   * [ ] U Table
   * [ ] X Table
-* [ ] Predefined table entries
-* [ ] Configuration locations
-* [ ] Refine input, output keywords
 
-## Program Interface
-* [ ] Sxml2xml.pl6
-* [ ] Sxml.pm6
+## API
+* Program Interface
+  * [ ] sxml2xml.pl6
+  * [ ] xml2sxml.pl6
+* Main library class
+  * [ ] Class SemiXML::Sxml
+  * [ ] Exception class X::SemiXML
 
 ## Method Interface
-* [ ] Method api
+* Method api
+  * [ ] initialization
+  * [ ] call interface
 
 ## Other modules and methods
 * [ ] Configuration ML table
-* [ ] SemiXML.pm6
+* [ ] Module SemiXML.pm6
+* [ ] Class SemiXML::Globals
+* Predefined methods
+  * [ ] Predefined module label **SxmlCore**
+  * [ ] **\$!SxmlCore.date**
+  * [ ] **\$!SxmlCore.date-time**
+  * [ ] **\$!SxmlCore.var-decl**
+  * [ ] **\$!SxmlCore.drop**
