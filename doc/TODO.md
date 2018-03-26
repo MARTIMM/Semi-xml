@@ -1,5 +1,3 @@
-[TOC]
-
 # Bugs and Todo list
 
 
@@ -115,6 +113,7 @@ Node <|-- Text
 
       $|xyz []                $xyz                        x
       $|xyz [x]               $xyz [x]                    x
+      $xyz a=b                $xyz a=b []         7       x
 
       $*|inline [x]           $inline [x]         3       x
       $|*inline [x]           $inline [x]         3       x
@@ -142,6 +141,8 @@ Node <|-- Text
 
   6) Some of the above can be changed by using boolean attributes like `sxml:inline`, `sxml:keep`, `sxml:noconv` and `sxml:close`.
 
+  7) The content brackets are made obligatory even when there is no content.
+
 ## List of elements and attributes in sxml ns
 ### Namespace
 * [x] reserved prefix name is **sxml**
@@ -161,23 +162,14 @@ Node <|-- Text
 * [x] **sxml:var-ref**. Reference to a variable declaration.
 * [x] **sxml:modkey.method**. Generated name for a method node.
 
-### Namespace for test module
-* [x] reserved prefix name is **test**
-* [x] url for the ns is **https://github.com/MARTIMM/Semi-xml/lib/SxmlLib/Test**
-
-### Elements in ns test
-* [x] test:hook
-
 ## Addition of several types of comments
-  * [x] **# \<text> EOL**. Comments are removed and can only be used at top the level and in **\$x [ ... ]** parts. '#' Characters used within **\$x { ... }** or **\$x « ... »** are unprocessed. Comments are not parsed but removed after the parsing process.
+  * [x] **# \<text> EOL**. Comments are removed and can only be used at top the level and in **\$x [ ... ]** parts. '#' Characters used within **\$x { ... }** or **\$x « ... »** are unprocessed.
   * [x] Generated XML Comments using **\$!SxmlCore.comment [ ]**. These produce `<!-- ... -->` texts.
   * [x] $!SxmlCore.drop « ... » throws away all that is enclosed.
-
 
 ## External modules located in SxmlLib tree
 * [x] Library paths to find modules are provided using the ML table in default configuration from the resources directory.
 * [ ] A module should be accessible from within another perl6 sxml module. Problem of registration.
-* [ ] Now XML::Text is improved, SemiXML::Text should be abandoned to use XML::Text again.
 
 
 ## Attribute grammar
@@ -185,11 +177,8 @@ Node <|-- Text
 * [x] **key='v a l u e'**. Value can have spaces.
 * [x] **key="v a l u e"**. Value can have spaces.
 * [x] **=x** and  **=!x** meaning **x=true** or **x=false**. Boolean attributes
-* [x] **key=<v a l u e>**. Attributes are also given as argument to module methods. In this case the attribute value becomes a list of values ('v','a','l','u',e'). The items are split on spaces and the characters ',', ';', ':'. The value can therefore also be written like **key=<v, a,l,u :;e>**. Of course, choose wisely for readability! Empty items are not possible.
+* [x] **key=<v a l u e>**. Attributes are also given as argument to module methods. In this case the attribute value becomes a list of values ('v','a','l','u',e'). The items are split on spaces and the characters ',', ';' or ':'. The value can therefore also be written like **key=<v, a,l,u :;e>**. Of course, choose wisely for readability! Empty items are not possible.
 
-
-## Text handling
-Text must be handled differently depending on F-Table, content delimiters and attributes.
 
 ### Content body delimiters.
 * [x] `[ ... ]`. The content can have other elements which is handled automatically by the grammar. The content text can be any range of characters of which the characters `$`, `[`, `]`, `\` must be escaped using a backslash character. E.g. `\[` or `\]`. After parsing all comments are removed. These start with `#` and will end at the end of a line or end of a content body. To use a `#` in text, it must also be escaped.
@@ -225,11 +214,6 @@ Special attributes can be used to modify the behavior of the F-tables. These are
 * [x] `$!SxmlCore.comment` is now `$sxml:comment`
 * [x] `$!SxmlCore.cdata` is now `$sxml:cdata`
 * [x] `$!SxmlCore.pi target=x` is now `$sxml:pi target=x`
-
-## Tests
-  * [ ] tags without body but with attributes
-  * [ ] comments in sxml
-  * [ ] lineup of brackets of body to find errors
 
 ## Configuration
 The configuration is maintained in a `toml` type of config file. The user must edit this file to control the transformation process. There can be many files which are merged together using the Config::DataLang::Refined module. There are several steps to find and merge these config files;
