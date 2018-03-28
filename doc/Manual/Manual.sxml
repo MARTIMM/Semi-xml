@@ -44,13 +44,11 @@ $!db5.article [
       $itemizedlist [
         $listitem [
           $para [
-            The language has a better readability because the end tag of an elements is absent. The end of an element is just the ending character of the content.
+            The language has a better readability because the end tag of an elements is absent. The end of an element is just the ending character of the content. Also, when attribute values are simple, i.e. without spaces, quoting is not necessary.
           ]
+        ]
 
-          $para [
-            
-          ]
-
+        $listitem [
           $para [
             In this language, constructs are introduced to call methods coded in modules to generate xml elements. An example of this is shown in the example above to insert a date. This date will always be the current date when the text is processed.
           ]
