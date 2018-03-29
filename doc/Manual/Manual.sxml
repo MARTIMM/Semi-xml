@@ -50,66 +50,54 @@ $!db5.article [
 
         $listitem [
           $para [
-            In this language, constructs are introduced to call methods coded in modules to generate xml elements. An example of this is shown in the example above to insert a date. This date will always be the current date when the text is processed.
+            When output is generated, the library consults the configuration to see if an element is inlined (e.g. $emphasis[b] in html) or is self-closing (e.g. $emphasis[br] and $emphasis[meta] in html). There two more situation which need attention. These are space preserving elements like $emphasis[pre] (in html) and $emphasis[programlisting] (from docbook) and no conversion elements which is needed for $emphasis[script] and $emphasis[style](both from html).
+          ]
+        ]
+
+$SxmlCore.drop {
+        $listitem [
+          $para [
+
+          ]
+        ]
+}
+
+        $listitem [
+          $para [
+            In this language, constructs are introduced to call methods coded in modules to generate XML elements. An example of this is shown in the example above to insert a date. This date will always be the current date when the text is processed.
           ]
         ]
 
         $listitem [
           $para [
-            The language is extensible. Developers can add their own libraries
-            to insert xml elements. Humble ideas such as inserting simple html
-            elements to alleviate repetative tasks or more eleborate
-            projects to insert tables with data loaded from a database.
+            The language is extensible. Developers can add their own libraries to insert XML elements. Humble ideas such as inserting simple HTML elements to alleviate repetitive tasks or more elaborate projects to insert tables with data loaded from a database.
           ]
         ]
       ]
     ]
 
+    #---------------------------------------------------------------------------
     $sect2 [
       $title [Disadvantages]
       $itemizedlist [
         $listitem [
           $para [
-            There is an extra level of processing. If the XML text is simple,
-            you should not be bothered learning this language. Especially when
-            the dynamic constructs aren't used.
+            There is an extra level of processing. If the XML text is simple, you should not be bothered writing stuff in this language. Especially when the dynamic constructs aren't used.
           ]
         ]
 
         $listitem [
           $para [
-            Pointing to the proper spot in the sxml text when an error occurs
-            has been proven difficult because the only thing the parser has is
-            the element format, attributes and
-            matching brackets. When the parser arrives at the end of the
-            document it may miss a
-            closing bracket or seeing one too many. It is not easy to show
-            where
-            the bracket is missing or where there is one typed too many.
-            However, a few solutions are implemented to help finding the
-            error if there is one. This also needs some attention.
-          ]
-        ]
-
-        $listitem [
-          $para [
-            This project is only just started. There are many things left on
-            the wish list. E.g. I would like to give proper messages when
-            mistakes are
-            made in the syntax or from within a method in a module.
-          ]
-
-          $para [
-            Well, I would say it can only improve when modules and methods are
-            added and syntax evolve.
+            Pointing to the proper spot in the sxml text when an error occurs has been proven difficult because the only thing the parser has is the element format, attributes and matching brackets. When the parser arrives at the end of the document it may miss a closing bracket or seeing one too many. It is not easy to show where the bracket is missing or where there is one typed too many. However, a few solutions are implemented to help finding the error if there is one. This also needs some attention.
           ]
         ]
       ]
     ]
 
+    #---------------------------------------------------------------------------
     $sect2 [
       $para [
-        Finally a few examples will speak for itself when Sxml is compared with the generated HTML. The generated html shown here is pretty printed but would normally be as compact as possible.
+        Finally an example will speak for itself when Sxml input is compared with the generated HTML. The generated html shown here is pretty printed but would normally be as compact as possible.
 
         $example [
           $title [ Input &lang; text ]
@@ -121,7 +109,9 @@ $!db5.article [
 
               $body [
                 $h1 [ My First Sxml Document ]
-                $p [ Hello world! And it is said on $!SxmlCore.date. ]
+                $p class=hello [
+                  Hello world! And it is said on $!SxmlCore.date.
+                ]
               ]
             ]
           }
@@ -136,7 +126,7 @@ $!db5.article [
               </head>
               <body>
                 <h1>My First Sxml Document</h1>
-                <p>Hello world\! And it is said on 2016-03-22.</p>
+                <p class="hello">Hello world\! And it is said on 2016-03-22.</p>
               </body>
             </html>
           }
@@ -144,14 +134,19 @@ $!db5.article [
       ]
     ]
 
+    #---------------------------------------------------------------------------
     $sect2 [
-      $title [What the manual explains]
+      $title [Overview]
       $itemizedlist [
         $listitem [
           $para [
-            $emphasis[The package]. An overview of the parts comprising the
-            package. This will be about the parsing modules, the included xml
-            generating modules, the program and configuration.
+            $emphasis[Install and setup]. This part will help you to start by showing how to install the package and make a start with your first document.
+          ]
+        ]
+
+        $listitem [
+          $para [
+            $emphasis[The package]. An overview of the parts comprising the package. This section will tell something about the parsing modules, the included XML generating modules, the programs and configuration.
           ]
         ]
 
@@ -163,7 +158,6 @@ $!db5.article [
         ]
 
         $listitem [
-
           $para [
             $emphasis[Configuration]. The toml configuration file will be
             explained. This section explains how to control the output

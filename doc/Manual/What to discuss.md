@@ -1,11 +1,10 @@
 # Manual Content
 
 ## Introduction
-* [ ] What to expect and for whom is it for
-* [ ] Pre and cons
-* [ ] Language examples
-* [ ] Overview of the manual
-* [ ] How to install
+* [x] What to expect and for whom is it for
+* [x] Pre and cons
+* [x] Language examples
+* [x] Overview of the manual
 * [ ] Conventions
   * [ ] Italic: Indicates new terms, URLs, email addresses, filenames, and file extensions.
   * [ ] Constant width: Used for program listings, as well as within paragraphs to refer to element and attribute names, program examples, attribute value literals, start- and end-tags, and source code example text.
