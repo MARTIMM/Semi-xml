@@ -246,6 +246,13 @@ The configuration file represents a few tables which can be refined using keywor
     out-key = [ 'dep-file in-key;dep-file out-key;dep-file', ...]
     out-key = 'dep-file in-key;dep-file out-key;dep-file'
 
+    # [DN] Default namespaces and other namespaces on the root element
+    [ DN.in-key ]
+    [ DN.in-key.file ]
+    # attributes xmlns="url1" and xmlns:svg="url2"
+    default = "url1"
+    svg = "url2"
+
     # [E] Entity table. Only with in-key and file.
     # Looked up after parsing to prefix data to result.
     [ E ]
@@ -412,7 +419,7 @@ An example css definition
 ```
 $!SxmlCore.var name=aCommonText [Lorem ipsum dolor simet ...]
 ```
-That method sets a variable in a `sxml` namespace which is removed afterwards. Any use of **\$sxml:aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into **\<sxml:aCommonText />**. What it generates is simple and can be written more directly as **\$sxml:variable name=aCommonText [ \$strong [Lorem ipsum dolor simet ...] ]** without calling the `var` method.
+That method sets a variable in the `sxml` namespace. Any use of **\$sxml:var-ref name=aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into **\<sxml:var-decl name="aCommonText" />**. What it generates is simple and can be written more directly as **\$sxml:var-decl name=aCommonText [ \$strong [Lorem ipsum dolor simet ...] ]** without calling the `var` method.
 
 Scope is local except when global attribute is set. The local scope is however a bit strange because the use of a variable might come before the declaration of it. This is because the declaration is searched first and then, with that information, searched for the variable uses in the set of child elements found in the parent element of the declaration.
 
@@ -437,10 +444,6 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
   * [ ] Type of calculation
   * [ ] Output variables
 
-#### Remapping of generated structures
-Methods can only generate something in a given parent container. This parent container does not yet take part of the document. It can happen that, at some point, a method generates elements which really belong in some other part of a document. E.g. A menu can have a need of a set of style controls and these must be placed in the `/html/head/style` (xpath notation). There it is necessary to have a remapping opereration so as to move the generated part to its proper place.
-* [x] **\<sxml:remap map-to="/html/head" as="style"> ... content ... \</sxml:remap>**. There is no need to create a method resembling this tag. Only a need to search for this remap element.
-
 ### Other ideas
 * [ ] Handle and generate ebooks
 
@@ -451,10 +454,10 @@ Methods can only generate something in a given parent container. This parent con
   * [ ] Make code coverage reports with `Rakudo::Perl6::Tracer`.
   * [x] Possibility to modify layout with css
 
-* [ ] Make use of javascript
-* [ ] avatar linking
+* [ ] Make use of javascript to make text dynamic
+* [ ] Avatar linking
 * [ ] Generating tables
-* [ ] Generating graphics, statistics, svg etc
+* [ ] Generating graphics, statistics, etc using javascript libraries
 * [ ] Scalable Vector Graphics or SVG, see spec at [w3c][svg].
 * [ ] Make use of XPointer, see spec at [w3c][xpoint].
 * [ ] XLink, see spec at [w3c][xlink].
@@ -464,7 +467,8 @@ Methods can only generate something in a given parent container. This parent con
 * [ ] XML Stylesheets (xsl), see spec at [w3c][xstyle].
 * [ ] XML Schema (xsd), see spec at [w3c][xschema].
 
-* [ ] Generating javascript to make text dynamic
+* [ ] Syntax highlighter for atom editor.
+* [ ] Execution and display result in atom like Markdown-preview-enhance.
 
 ## And …
   * [ ] Documentation in a manual.
