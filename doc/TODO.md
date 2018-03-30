@@ -468,6 +468,7 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
 * [ ] XML Schema (xsd), see spec at [w3c][xschema].
 
 * [ ] Syntax highlighter for atom editor.
+* [ ] Syntax checker using one of the parsers shown [here][jsparse].
 * [ ] Execution and display result in atom like Markdown-preview-enhance.
 
 ## And …
@@ -482,6 +483,7 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
 [colors2]: http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/
 
 [svg]: https://www.w3.org/TR/SVG11/
+[jsparse]: https://tomassetti.me/parsing-in-javascript/
 
 [xlink]: https://www.w3.org/TR/xlink11/
 [xinclude]: https://www.w3.org/TR/xinclude/
