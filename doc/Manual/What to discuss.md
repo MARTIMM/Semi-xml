@@ -14,6 +14,21 @@
   * [ ] <img src='caution.gif' />: This icon indicates a warning or caution.
   The icons are examples from other books. Need to use other symbols or devise my own to prevent license problems. Also the text must be placed in an `aside` area.
 
+## Overview
+* Install and setup. This part will help you to start by showing how to install the package and make a start with your first document.
+  * [x] Zef installer program.
+  * [x] Install command.
+  * [x] Atom editor, language-sxml module for syntax highlighting.
+* The package. An overview of the parts comprising the package. This section will tell something about the parsing modules, the included XML generating modules, the programs and configuration.
+    * [ ] Classes belonging to the core of the library
+    * [ ] Classes added for convenience
+    * [ ] Programs
+* [ ] The language or syntax
+* [ ] Configuration.
+* [ ] The programmers view.
+* [ ] The programs.
+* [ ] Examples
+
 ## Syntax
 * [ ] Sigils: **$ \$!**
 * [ ] Elements: **$foo**

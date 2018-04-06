@@ -27,7 +27,7 @@ $!db5.article [
 
     $para [
       In the package there is also a program called &prog1; which uses &mainmod; in the package &pack; to transform &lang; text from a given file into XML after which it can be written to another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
-      There is a second program &prog2; in the making. It is used to reverse engineer XML into sxml. The methods used to do this can also insert xml into the tree directly as an element or convert it completely to the internal node tree representation.
+      There is a second program &prog2; in the making. It is used to reverse engineer XML into sxml. The methods used to do this can also insert xml into the tree directly as a 'literal' element node or convert it completely to the internal node tree representation.
     ]
 
     $para [
@@ -146,7 +146,7 @@ $SxmlCore.drop {
 
         $listitem [
           $para [
-            $emphasis[The package]. An overview of the parts comprising the package. This section will tell something about the parsing modules, the included XML generating modules, the programs and configuration.
+            $emphasis[The package]. An overview of the parts comprising the package. This section will tell something about the parsing modules, the included XML generating modules and the programs.
           ]
         ]
 
@@ -159,26 +159,19 @@ $SxmlCore.drop {
 
         $listitem [
           $para [
-            $emphasis[Configuration]. The toml configuration file will be
-            explained. This section explains how to control the output
-            of the result and where modules are to be found.
-            &prog1;. Defaults are also explained.
+            $emphasis[Configuration]. The toml configuration file will be explained. This section explains how to control the output of the result and where control files are found. Defaults are also explained.
           ]
         ]
 
         $listitem [
           $para [
-            $emphasis[The programmers view]. Developers can write new modules
-            with methods to process tasks not yet captured by this package.
-            This section will talk about classes, data and methods
+            $emphasis[The programmers view]. Developers can write new modules with methods to process tasks not yet captured by this package. This section will talk about classes, data and methods.
           ]
         ]
 
         $listitem [
           $para [
-            $emphasis[The program]. The program &prog1; is used to read
-            &lang; from a file and saved or send away. Explanation of
-            arguments and prelude options can be found here.
+            $emphasis[The programs]. The program &prog1; is used to read &lang; from a file and saved or send away. Explanation of arguments and prelude options can be found here. While not available yet &prog2; is used to transform $emphasis[XML] to &lang;
           ]
         ]
 
@@ -188,13 +181,40 @@ $SxmlCore.drop {
           ]
         ]
 
-$!SxmlCore.drop [
+$!SxmlCore.drop {
         $listitem [
           $emphasis[].
         ]
-]
+}
       ]
     ]
+  ]
+
+  #----------------------------------------------------------------------------
+  $sect1 xml:id=install [
+    $title [Install and setup]
+
+    $para [
+      To install the package and programs the $emphasis[zef] $emphasis[perl6] module installer must be used. How to install perl6 and zef is not documented in this manual and one must look for the per6 documentation elsewhere.
+#TODO link to install of perl6?
+    ]
+
+    $para [
+      The command is simple and is shown below;
+      $programlisting {
+        > zef install SemiXML
+      }
+      If you want to skip testing add an option
+      $programlisting {
+        > zef --/test install SemiXML
+      }
+    ]
+
+    Another facility which is very helpful when editing is syntax highlighting. A highlighting package is made for the atom package. For the moment not yet in the atom repository but only on github. Do the following to get this working;
+    $programlisting {
+      > git clone https://github.com/MARTIMM/language-sxml.git
+      > apm link .
+    }
   ]
 
   #----------------------------------------------------------------------------
@@ -202,22 +222,13 @@ $!SxmlCore.drop [
     $title [The package]
 
     $para [
-      There are several parts in this package. First there is the core consisting
-      of several modules. These modules handle tasks to load the configuration,
-      instantiating the external modules aiding the dynamic parts while parsing,
-      the parsing of sxml text, saving results to a file or sending it to
-      programs for further processing.
+      There are several parts in this package. First there is the core consisting of several modules. These modules handle tasks to load the configuration, instantiating the external modules aiding the dynamic parts while parsing, the parsing of sxml text, saving results to a file or sending it to programs for further processing.
     ]
 
     $sect2 [
       $title [Configuration]
       $para [
-        The configuration is needed to control the several phases of the Translation
-        process. For exmple, there is the addition of extra text upfront of the xml
-        result text such as xml description, doctype and header messages. Other
-        parts control the output to a file or sending the result to another
-        program. The format of the configuration file and how the data is processed
-        is described in a separate chapter.
+        The configuration is needed to control the several phases of the Translation process. For exmple, there is the addition of extra text upfront of the xml result text such as xml description, doctype and header messages. Other parts control the output to a file or sending the result to another program. The format of the configuration file and how the data is processed is described in a separate chapter.
       ]
     ]
 
