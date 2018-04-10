@@ -210,7 +210,7 @@ $!SxmlCore.drop {
       }
     ]
 
-    Another facility which is very helpful when editing is syntax highlighting. A highlighting package is made for the atom package. For the moment not yet in the atom repository but only on github. Do the following to get this working;
+    Another facility which is very helpful when editing is syntax highlighting. A highlighting package is made for the atom editor. For the moment not yet in the atom repository but only on github. For the time being, one can do the following to get this working;
     $programlisting {
       > git clone https://github.com/MARTIMM/language-sxml.git
       > apm link .
@@ -222,7 +222,23 @@ $!SxmlCore.drop {
     $title [The package]
 
     $para [
-      There are several parts in this package. First there is the core consisting of several modules. These modules handle tasks to load the configuration, instantiating the external modules aiding the dynamic parts while parsing, the parsing of sxml text, saving results to a file or sending it to programs for further processing.
+      There are several parts in this package. First there is the core consisting of several modules. These modules handle tasks to load the configuration, instantiating the external modules aiding the dynamic parts while parsing, the parsing of sxml text, saving results to a file or sending it to programs for further processing and much more.
+    ]
+
+    $para [
+      We can devide the package in several pieces;
+    ]
+
+    $itemizedlist [
+      $listitem [
+        $para [
+          There is a configuration file to set defaults.
+        ]
+      ]
+    ]
+
+
+    $sect2 [
     ]
 
     $sect2 [
