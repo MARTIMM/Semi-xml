@@ -417,37 +417,52 @@ An example css definition
 
 * [x] This is defined in the main lib SxmlCore. An example;
 ```
-$!SxmlCore.var name=aCommonText [Lorem ipsum dolor simet ...]
+$!SxmlCore.var name=aCommonText [ $strong[Lorem ipsum dolor simet ...] ]
 ```
-That method sets a variable in the `sxml` namespace. Any use of **\$sxml:var-ref name=aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into **\<sxml:var-decl name="aCommonText" />**. What it generates is simple and can be written more directly as **\$sxml:var-decl name=aCommonText [ \$strong [Lorem ipsum dolor simet ...] ]** without calling the `var` method.
+That method sets a variable in the `sxml` namespace. Any use of **\$sxml:var-ref name=aCommonText** would then be substituted by the variable value `Lorem ipsum...` instead of translating it into an XML element **\<sxml:var-ref name="aCommonText" />**. What the method generates is simple and can be written more directly as **\$sxml:var-decl name=aCommonText [ \$strong [Lorem ipsum dolor simet ...] ]** without calling the `var` method.
 
-Scope is local except when global attribute is set. The local scope is however a bit strange because the use of a variable might come before the declaration of it. This is because the declaration is searched first and then, with that information, searched for the variable uses in the set of child elements found in the parent element of the declaration.
+Scope is local except when global attribute is set. The local scope is however a bit strange because the use of a variable might come before the declaration of it. This is because the declaration is searched first and then, with that information, searched for the variable uses in the set of child elements found in the parent element of the declaration. This needs some more thought to get the behavior one expects from 'local'.
 
-* [x] User methods can also declare variables. The only thing it needs to do is generating an element such as from the example above **\<sxml:variable name="aCommonText">\<strong>Lorem ipsum dolor simet ...\</strong>\</sxml:variable>**.
+* [x] User methods can also declare variables. The only thing it needs to do is generating an element such as from the example above;
+    ```
+    my SemiXML::Element $var .= new(
+      :name<sxml:var-decl>, :attributes(%(:name=<aCommonText>))
+    );
 
-* [x] Mistakes in names of variables can be prevented by writing the brackets with empty content like so **pre\$sxml:abc[]_map**. If **\$sxml:abc** was set to `pqr` this would become `prepqr_map`.
+    $var.append(
+      :name<strong>, :text('Lorem ipsum dolor simet ...')
+    );
+    ```
 
-* [ ] A variable declaration which behaves like a function. E.g. a declaration like **\$!SxmlCore.var name=hello _name='World' [Hello \$name]** has a variable in it. This is used like **\$sxml:hello name=Piet** which translates to `Hello Piet` and **$sxml:hello** translates to `Hello World` where the default is used. In this example the declaration attribute `_name` is used to define a default value for **\$name**.
+* [x] Mistakes in names of variables can be prevented by writing the brackets with empty content like so **pre\$sxml:var-ref name=data []_map**. If **\$sxml:var-decl name=data [ pqr ]**, this would become `prepqr_map`.
+
+* [ ] A variable declaration with some kind of substitution. E.g. a declaration like **\$!SxmlCore.var-decl name=hello |name='World' [Hello \$|name]** has a variable in it. This is used like **\$sxml:var-ref name=hello |name=Piet []** which translates to `Hello Piet` and **\$sxml:var-ref name=hello []** translates to `Hello World` where the default is used. One might also think of **\$sxml:var-ref- name=hello [Other Planet]** which translates to `Hello Other Planet`. In this example the declaration attribute `|name` is used to define a default value for **\$|name**. With this the syntax must be extended to understand |name and $|name. Extending; **\$!SxmlCore.var-decl name=hello |planet='Earth' |moon='Moon' [Hello \$|planet and \$|moon]**. To refer to that one; **\$sxml:var-ref name=hello |planet=jupiter [io]** translates to: `Hello jupiter and io`.
 
 * [ ] Substitution in attribute values.
 * [ ] Map one variable to another
 
 
 #### Calculation of color palettes
-* [ ] Generating a set of colors is useful in defining several of the properties in css. Instead of coding the colors individually, the colors can be calculated using some algorithm and stored in variable declarations. When one is not satisfied, the calculations can be repeated with different values without changing the used variables.
+* Generating a set of colors is useful in defining several of the properties in css. Instead of coding the colors individually, the colors can be calculated using some algorithm and stored in variable declarations. When one is not satisfied, the calculations can be repeated with different values without changing the used variables.
 
 See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#html4)
-* [ ] Attributes for the color calculations
-  * [ ] Input color.
-    * [ ] base-rgb; '#xxx[,op]', '#xxxxxx[,op]' or 'd,d,d[,op]' where x=0..ff and d=0..255 or percententage. op (opacity) is a Num 0..1 or percentage and is optional
-    * [ ] base-hsl; 'hue,saturation,lightness[,op]' as an angle,percentage,percentage and op or opacity is optional.
-  * [ ] Type of calculation
-  * [ ] Output variables
+* Attributes for the color calculations
+  * Input color.
+    * [x] base-rgb; '#xxx[,op]', '#xxxxxx[,op]' or 'd,d,d[,op]' where x=0..ff and d=0..255 or percententage. op (opacity) is a Num 0..1 or percentage and is optional
+    * [x] base-hsl; 'hue,saturation,lightness[,op]' as an angle,percentage,percentage and op or opacity is optional.
+  * [x] Type of calculation
+  * [x] Output variables
+
+  * Calculation of color ranges
+    * [x] Blending
+    * [x] Single color range
+    * [ ] Primary and secondary color ranges
+    * [ ] Ternary ranges
 
 ### Other ideas
 * [ ] Handle and generate ebooks
 
-* [ ] Supporting perl6 module testing to generate reports
+* Supporting perl6 module testing to generate reports
   * [x] **SxmlLib::Testing::Test**
   * [x] **SxmlLib::Testing::Summary**
   * [ ] Make benchmark reports using `Bench`
@@ -459,6 +474,7 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
 * [ ] Generating tables
 * [ ] Generating graphics, statistics, etc using javascript libraries
 * [ ] Scalable Vector Graphics or SVG, see spec at [w3c][svg].
+
 * [ ] Make use of XPointer, see spec at [w3c][xpoint].
 * [ ] XLink, see spec at [w3c][xlink].
 * [ ] XInclude, see spec at [w3c][xincl].
@@ -466,9 +482,11 @@ See also [w3c color model](https://www.w3.org/TR/2011/REC-css3-color-20110607/#h
 * [ ] Fragments. W3C has closed their specification of XML Fragments but is used by this module as a leading specification, see spec at [w3c][frag].
 * [ ] XML Stylesheets (xsl), see spec at [w3c][xstyle].
 * [ ] XML Schema (xsd), see spec at [w3c][xschema].
+* [ ] XPath grammar for the search engine.
+* [ ] XSL and XSLT
 
-* [ ] Syntax highlighter for atom editor.
-* [ ] Syntax checker using one of the parsers shown [here][jsparse].
+* [x] Syntax highlighter for atom editor. Its called language-sxml in a separate repository at MARTIMM's.
+* [ ] Syntax checker using one of the parsers shown [here][jsparse]. Choose a parser which is written for javascript. Then it can be used in the atom editor.
 * [ ] Execution and display result in atom like Markdown-preview-enhance.
 
 ## And …
