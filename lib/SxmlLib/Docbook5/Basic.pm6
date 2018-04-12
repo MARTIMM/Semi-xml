@@ -52,18 +52,21 @@ class Docbook5::Basic:ver<0.3.2> {
   #   firstname, surname, email,
   #   addr-city, addr-country,
   #   copy-year, copy-holder
+  #   title
   # Content
   #   $para [] blocks used to describe abstract
   #
   method info ( SemiXML::Element $m ) {
 
-    my $firstname = $m.attributes<firstname>.Str;
-    my $surname = $m.attributes<surname>.Str;
-    my $email = $m.attributes<email>.Str;
-
     my SemiXML::Element $info .= new(:name<info>);
     $m.before($info);
 
+    my $title = $m.attributes<title>.Str;
+    $info.append( 'title', :text($title)) if ?$title;
+
+    my $firstname = $m.attributes<firstname>.Str;
+    my $surname = $m.attributes<surname>.Str;
+    my $email = $m.attributes<email>.Str;
     if ?$firstname or ?$surname or ?$email {
       my SemiXML::Element $author = $info.append('author');
 
