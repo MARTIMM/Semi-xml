@@ -4,14 +4,15 @@ $!db5.article [
   $!db5.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
               city=Haarlem country=Netherlands
               copy-year='2015, * + 1 ... Inf'
-              copy-holder='Marcel Timmerman' [
-              title="Package &pack; to describe and use semi XML"
+              copy-holder='Marcel Timmerman'
+              title="Package &pack; to describe and use semi XML" [
     $para [
-      This manual explains the use of a set of classes to convert &lang; text into $emphasis[XML] typed languages. A description of the syntax is given and the configuration controlling this process. Furthermore, the dynamic aspects of this language is explained as well as how to extend this language with your own classes.
+      This manual explains the use of a set of classes to convert $emphasis[&lang;] text into $emphasis[XML] typed languages. A description of the syntax is given and the configuration controlling this process. Furthermore, the dynamic aspects of this language is explained as well as how to extend this language with your own classes.
     ]
 
     $para [
       The manual will also explain how the programs work which are installed with this package.
+    ]
 
     $para [
       The latest version of this document is generated on date $!SxmlCore.date.
@@ -22,12 +23,15 @@ $!db5.article [
   $sect1 xml:id=Introduction [
     $title [ Introduction of package &pack; ]
     $para [
-      Welcome to the $emphasis[&pack;] package. The &pack; package comprises of a set of Perl 6 modules to convert a text written in a language coined &lang; into one of the $emphasis[XML] family of languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[SVG]. There are dynamic ways to generate elements by calling methods in external modules. This is also the way to extend the language by creating your own methods.
+      Welcome to the $emphasis[$emphasis[&pack;]] package. The $emphasis[&pack;] package comprises of a set of Perl 6 modules to convert a text written in a language coined $emphasis[&lang;] into one of the $emphasis[XML] family of languages such as $emphasis[HTML], $emphasis[SOAP], $emphasis[Docbook] or $emphasis[SVG]. There are dynamic ways to generate elements by calling methods in external modules. This is also the way to extend the language by creating your own methods.
     ]
 
     $para [
-      In the package there is also a program called &prog1; which uses &mainmod; in the package &pack; to transform &lang; text from a given file into XML after which it can be written to another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
-      There is a second program &prog2; in the making. It is used to reverse engineer XML into sxml. The methods used to do this can also insert xml into the tree directly as a 'literal' element node or convert it completely to the internal node tree representation.
+      In the package there is also a program called $emphasis[&prog1;] which uses $emphasis[&mainmod;] in the package $emphasis[&pack;] to transform $emphasis[&lang;] text from a given file into XML after which it can be written to another file. The generated XML can also be send to any program for conversion to other formats or for checking. Examples are $emphasis[xsltproc], $emphasis[xmllint], $emphasis[rnv], $emphasis[wkhtmltopdf], $emphasis[xep] etcetera.
+    ]
+
+    $para [
+      There is a second program $emphasis[&prog2;] in the making. It is used to reverse engineer XML into sxml. The methods used to do this can also insert xml into the tree directly as a 'literal' element node or convert it completely to the internal node tree representation.
     ]
 
     $para [
@@ -54,7 +58,7 @@ $!db5.article [
           ]
         ]
 
-$SxmlCore.drop {
+$!SxmlCore.drop {
         $listitem [
           $para [
 
@@ -100,7 +104,7 @@ $SxmlCore.drop {
         Finally an example will speak for itself when Sxml input is compared with the generated HTML. The generated html shown here is pretty printed but would normally be as compact as possible.
 
         $example [
-          $title [ Input &lang; text ]
+          $title [ Input $emphasis[&lang;] text ]
           $programlisting language=sxml {
             $html [
               $head [
@@ -152,7 +156,7 @@ $SxmlCore.drop {
 
         $listitem [
           $para [
-            $emphasis[The language]. Here the &lang; language is explained,
+            $emphasis[The language]. Here the $emphasis[&lang;] language is explained,
             the terminology of parts in the document and the used syntax.
           ]
         ]
@@ -171,7 +175,7 @@ $SxmlCore.drop {
 
         $listitem [
           $para [
-            $emphasis[The programs]. The program &prog1; is used to read &lang; from a file and saved or send away. Explanation of arguments and prelude options can be found here. While not available yet &prog2; is used to transform $emphasis[XML] to &lang;
+            $emphasis[The programs]. The program $emphasis[&prog1;] is used to read $emphasis[&lang;] from a file and saved or send away. Explanation of arguments and prelude options can be found here. While not available yet $emphasis[&prog2;] is used to transform $emphasis[XML] to $emphasis[&lang;]
           ]
         ]
 
@@ -258,7 +262,7 @@ $!SxmlCore.drop {
     $sect2 [
       $title [Parsing and translation]
       $para [
-        Parsing is the the process of taking the text and checking it for the &lang; language. Together with this process translation of the text takes place. How this translation takes place is depending on the way parsing is done. Roughly it starts with the top level element and arriving at the first bracket '\[' it may see a mix of text and new elements before the closing bracket '\]'. The new elements content (between the elements brackets) is looked into in turn. So the translation of the deepest level must be done first before the second deepest etc. up to the top level. This knowledge is not important when using the simple element form and the predefined methods. However, when designing your own methods your method will get the processed XML of the content between its brackets.
+      Parsing is the the process of taking the text and checking it for the $emphasis[&lang;] language. Together with this process translation of the text takes place. How this translation takes place is depending on the way parsing is done. Roughly it starts with the top level element and arriving at the first bracket '&b1b;' it may see a mix of text and new elements before the closing bracket '&b1e;'. The new elements content (between the elements brackets) is looked into in turn. So the translation of the deepest level must be done first before the second deepest etc. up to the top level. This knowledge is not important when using the simple element form and the predefined methods. However, when designing your own methods your method will get the processed XML of the content between its brackets.
       ]
     ]
 
@@ -311,7 +315,7 @@ $!SxmlCore.drop {
       ]
 
       $para [
-        The example shows how nesting is done using brackets ('\[' and '\]') and
+        The example shows how nesting is done using brackets ('&b1b;' and '&b1e;') and
         that between brackets there can be a mix of text and other elements.
         What we learn from this example is:
         $itemizedlist [
@@ -375,7 +379,7 @@ $!SxmlCore.drop «
 
 $!SxmlCore.drop «
     $para [
-      The result after running through &prog1; is shown below. Importend to
+      The result after running through $emphasis[&prog1;] is shown below. Importend to
       note that this text is nicely formatted for this example and the output
       would be more like a one-liner.
 
@@ -387,12 +391,12 @@ $!SxmlCore.drop «
          fix-indent=2
          callout-prefix=BE-001.b
          callout-rows=0,2,8
-         callout-col=64
+       callout-col=64 []
 
       $calloutlist [
         $callout arearefs=BE-001.b01 [
           $para {
-            Result of '$html \[' starts with <html>.
+            Result of '$html &b1b;' starts with <html>.
           }
         ]
 
@@ -424,11 +428,11 @@ $!SxmlCore.drop «
       $sect3 [
         $title [Escaping characters]
         $para «
-          When you want to use a character which is used as a delimiter ('\[')
+          When you want to use a character which is used as a delimiter ('&b1b;')
           or start of an element ('$') you must escape that character to prevent
           the action that takes place when encountering that character. Writing
           '\\' before that character escapes them from that interpretation.
-          Examples are '\\\[' or '\\\$'.
+          Examples are '\\&b1b;' or '\\\$'.
         »
       ]
 
@@ -606,7 +610,7 @@ $!SxmlCore.drop {
 }
 
       $sect3 [
-        $title [ Options used by the module &mainmod; ]
+        $title [ Options used by the module $emphasis[&mainmod;] ]
 
         $sect4 [
           $title [ module ]
@@ -719,7 +723,7 @@ output/program/pdf:
   ]
 
   $sect1 xml:id=Use-prog [
-    $title [Using program &prog1;]
+    $title [Using program $emphasis[&prog1;]]
     $para [
 
     ]
