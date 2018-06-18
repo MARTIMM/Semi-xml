@@ -1,5 +1,7 @@
 # Changes in SemiXML:: * and sxml2xml
 
+* 0.48.1
+  * Added a test to properly warn user of missing/wrong value of menu script pivot.
 * 0.48.0
   * Add Document module. Move code from Actions to this module. Added methods to convert XML to Sxml object tree.
   * X::SemiXML exception class modified into X::SemiXML::Parse
