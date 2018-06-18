@@ -171,15 +171,22 @@ class Html::Menu {
 
     # run through the page divs again and toggle the first page from
     # display:none to display:block to make the first one visible
-    for $!script.parent.nodes -> $node {
-      if $node ~~ SemiXML::Element and $node.name eq 'div' {
-        if $node.attributes<class>:exists and
-           $node.attributes<class> eq 'menu-page' {
+    if $!script.parent.defined {
+      for $!script.parent.nodes -> $node {
+        if $node ~~ SemiXML::Element and $node.name eq 'div' {
+          if $node.attributes<class>:exists and
+             $node.attributes<class> eq 'menu-page' {
 
-          $node.attributes( {:style('display: block;')}, :modify);
-          last;
+            $node.attributes( {:style('display: block;')}, :modify);
+            last;
+          }
         }
       }
+    }
+
+    else {
+      note "Don't know where to place menu javascript script element";
+      note "Did you forget attribute 'script-pivot-id'";
     }
 
     # remove hook
